@@ -4,9 +4,10 @@ import 'package:provider/provider.dart';
 import '../providers/interview_provider.dart';
 import 'chat_bubble.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/animated_particles.dart';
 
 class InterviewScreen extends StatefulWidget {
-  const InterviewScreen({Key? key}) : super(key: key);
+  const InterviewScreen({super.key});
 
   @override
   State<InterviewScreen> createState() => _InterviewScreenState();
@@ -15,14 +16,25 @@ class InterviewScreen extends StatefulWidget {
 class _InterviewScreenState extends State<InterviewScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+  final FocusNode _inputFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Set focus to the input field after a short delay
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _inputFocusNode.requestFocus();
+    });
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
   }
-  
+
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
@@ -32,7 +44,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
       );
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -43,10 +55,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
           elevation: 0,
           title: const Text(
             "Creating Your Digital Twin",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           actions: [
             Consumer<InterviewProvider>(
@@ -56,24 +65,30 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Restart Interview'),
-                        content: const Text('This will clear all your responses. Are you sure?'),
-                        backgroundColor: AppTheme.deepIndigo,
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
+                      builder:
+                          (context) => AlertDialog(
+                            title: const Text('Restart Interview'),
+                            content: const Text(
+                              'This will clear all your responses. Are you sure?',
+                            ),
+                            backgroundColor: AppTheme.deepIndigo,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  provider.resetInterview();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Restart'),
+                              ),
+                            ],
                           ),
-                          TextButton(
-                            onPressed: () {
-                              provider.resetInterview();
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Restart'),
-                          ),
-                        ],
-                      ),
                     );
                   },
                 );
@@ -82,125 +97,186 @@ class _InterviewScreenState extends State<InterviewScreen> {
           ],
         ),
         body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppTheme.backgroundStart, AppTheme.backgroundEnd],
-            ),
-          ),
-          child: Column(
+          decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
+          child: Stack(
             children: [
-              // Chat messages
-              Expanded(
-                child: Consumer<InterviewProvider>(
-                  builder: (context, provider, _) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-                    
-                    // Check if interview is complete
-                    if (provider.isComplete && provider.characterCardSummary != null) {
-                      // Process complete - navigate back or show completion UI
-                      Future.microtask(() {
-                        Navigator.pop(context, {
-                          'characterCard': provider.characterCardSummary,
-                          'characterName': provider.characterName,
-                        });
-                      });
-                    }
-                    
-                    return ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(8.0),
-                      itemCount: provider.messages.length,
-                      itemBuilder: (context, index) {
-                        return ChatBubble(
-                          message: provider.messages[index],
-                        );
-                      },
-                    );
-                  },
+              // Background particles with reduced opacity
+              const Opacity(
+                opacity: 0.5,
+                child: AnimatedParticles(
+                  particleCount: 30,
+                  particleColor: Colors.white,
+                  minSpeed: 0.01,
+                  maxSpeed: 0.03,
                 ),
               ),
-              
-              // Input area
-              Consumer<InterviewProvider>(
-                builder: (context, provider, _) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    decoration: BoxDecoration(
-                      color: AppTheme.deepIndigo.withOpacity(0.7),
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(0, -1),
-                          blurRadius: 6.0,
-                          spreadRadius: 0.0,
-                          color: Colors.black.withOpacity(0.1),
+
+              Column(
+                children: [
+                  // Chat messages
+                  Expanded(
+                    child: Consumer<InterviewProvider>(
+                      builder: (context, provider, _) {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _scrollToBottom(),
+                        );
+
+                        // Check if interview is complete
+                        if (provider.isComplete &&
+                            provider.characterCardSummary != null) {
+                          // Process complete - navigate back or show completion UI
+                          Future.microtask(() {
+                            Navigator.pop(context, {
+                              'characterCard': provider.characterCardSummary,
+                              'characterName': provider.characterName,
+                            });
+                          });
+                        }
+
+                        return ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(16.0),
+                          itemCount: provider.messages.length,
+                          itemBuilder: (context, index) {
+                            return AnimatedOpacity(
+                              duration: const Duration(milliseconds: 300),
+                              opacity: 1.0,
+                              curve: Curves.easeOutQuad,
+                              child: ChatBubble(
+                                message: provider.messages[index],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Input area
+                  Consumer<InterviewProvider>(
+                    builder: (context, provider, _) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 8.0,
                         ),
-                      ],
-                    ),
-                    child: SafeArea(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _messageController,
-                              decoration: InputDecoration(
-                                hintText: 'Type your response...',
-                                hintStyle: TextStyle(color: Colors.white60),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(25.0),
-                                  borderSide: BorderSide.none,
-                                ),
-                                filled: true,
-                                fillColor: Colors.black26,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 14.0,
+                        decoration: BoxDecoration(
+                          color: AppTheme.deepIndigo.withOpacity(0.7),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: const Offset(0, -1),
+                              blurRadius: 6.0,
+                              spreadRadius: 0.0,
+                              color: Colors.black.withOpacity(0.1),
+                            ),
+                          ],
+                        ),
+                        child: SafeArea(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _messageController,
+                                  focusNode: _inputFocusNode,
+                                  decoration: InputDecoration(
+                                    hintText: 'Type your response...',
+                                    hintStyle: TextStyle(color: Colors.white60),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(25.0),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.black26,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                      vertical: 14.0,
+                                    ),
+                                  ),
+                                  style: const TextStyle(color: Colors.white),
+                                  minLines: 1,
+                                  maxLines: 5,
+                                  onSubmitted:
+                                      provider.isLoading
+                                          ? null
+                                          : (text) {
+                                            if (text.trim().isNotEmpty) {
+                                              provider.sendMessage(text);
+                                              _messageController.clear();
+                                            }
+                                          },
                                 ),
                               ),
-                              style: const TextStyle(color: Colors.white),
-                              minLines: 1,
-                              maxLines: 5,
-                              onSubmitted: provider.isLoading
-                                  ? null
-                                  : (text) {
-                                      if (text.trim().isNotEmpty) {
-                                        provider.sendMessage(text);
-                                        _messageController.clear();
-                                      }
+                              const SizedBox(width: 8.0),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                decoration: BoxDecoration(
+                                  color:
+                                      provider.isLoading
+                                          ? AppTheme.etherealCyan.withOpacity(
+                                            0.3,
+                                          )
+                                          : AppTheme.etherealCyan,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    if (!provider.isLoading)
+                                      BoxShadow(
+                                        color: AppTheme.etherealCyan
+                                            .withOpacity(0.3),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                  ],
+                                ),
+                                child: IconButton(
+                                  icon: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    transitionBuilder: (
+                                      Widget child,
+                                      Animation<double> animation,
+                                    ) {
+                                      return ScaleTransition(
+                                        scale: animation,
+                                        child: child,
+                                      );
                                     },
-                            ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: provider.isLoading
-                                  ? AppTheme.etherealCyan.withOpacity(0.3)
-                                  : AppTheme.etherealCyan,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                provider.isLoading ? Icons.hourglass_top : Icons.send,
-                                color: provider.isLoading
-                                    ? Colors.white60
-                                    : Colors.black87,
+                                    child:
+                                        provider.isLoading
+                                            ? const Icon(
+                                              Icons.hourglass_top,
+                                              key: ValueKey('loading'),
+                                              color: Colors.white60,
+                                            )
+                                            : const Icon(
+                                              Icons.send,
+                                              key: ValueKey('send'),
+                                              color: Colors.black87,
+                                            ),
+                                  ),
+                                  onPressed:
+                                      provider.isLoading
+                                          ? null
+                                          : () {
+                                            if (_messageController.text
+                                                .trim()
+                                                .isNotEmpty) {
+                                              provider.sendMessage(
+                                                _messageController.text,
+                                              );
+                                              _messageController.clear();
+                                            }
+                                          },
+                                ),
                               ),
-                              onPressed: provider.isLoading
-                                  ? null
-                                  : () {
-                                      if (_messageController.text.trim().isNotEmpty) {
-                                        provider.sendMessage(_messageController.text);
-                                        _messageController.clear();
-                                      }
-                                    },
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

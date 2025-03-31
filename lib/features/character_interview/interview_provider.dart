@@ -1,4 +1,3 @@
-// lib/features/providers/interview_provider.dart
 import 'package:flutter/foundation.dart';
 import '../character_interview/message_model.dart';
 import '../character_interview/chat_service.dart';
@@ -10,6 +9,9 @@ class InterviewProvider with ChangeNotifier {
   String? characterCardSummary;
   String? characterName;
   bool isComplete = false;
+
+  // Debug flags
+  bool _debugPrintData = true;
 
   InterviewProvider() {
     _initialize();
@@ -38,6 +40,16 @@ class InterviewProvider with ChangeNotifier {
 
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
+
+    // Check if user already agreed but we need to finalize
+    if (isComplete) {
+      if (_debugPrintData) {
+        print('User already agreed, interview complete');
+        print('Character name: $characterName');
+        print('Character card: $characterCardSummary');
+      }
+      return;
+    }
 
     // Add user message
     final userMessage = Message(text: text, isUser: true);
@@ -76,9 +88,34 @@ class InterviewProvider with ChangeNotifier {
           characterName = nameMatch.group(1);
         }
 
+        if (_debugPrintData) {
+          print('Extracted character card summary markers.');
+          print('Character name: $characterName');
+        }
+
         // Mark as complete if user agrees
         if (text.toLowerCase().trim() == 'agree') {
+          // For the final character card, extract just the summary without the markers
+          final cleanStart = startIndex + '## CHARACTER CARD SUMMARY ##'.length;
+          final cleanEnd = response.indexOf('## END OF CHARACTER CARD ##');
+
+          // The system prompt should be the content between the markers
+          final cleanSystemPrompt =
+              response.substring(cleanStart, cleanEnd).trim();
+
+          // Replace the original with the clean version for actual use
+          characterCardSummary = cleanSystemPrompt;
+
+          // Set completion flag after cleaning
           isComplete = true;
+
+          if (_debugPrintData) {
+            print('User agreed, interview complete!');
+            print('Final character name: $characterName');
+            print('Final system prompt size: ${characterCardSummary?.length}');
+          }
+
+          notifyListeners();
         }
       }
     } catch (e) {
