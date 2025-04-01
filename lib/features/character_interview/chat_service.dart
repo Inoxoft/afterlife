@@ -18,8 +18,7 @@ class ChatService {
 
       // Fallback to default key if not found in .env (only for development)
       if (_apiKey.isEmpty) {
-        _apiKey =
-            "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";
+        _apiKey = "";
         print(
           'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
         );
@@ -29,8 +28,7 @@ class ChatService {
     } catch (e) {
       print('Error initializing chat service: $e');
       // Use default key as last resort
-      _apiKey =
-          "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";
+      _apiKey = "";
     }
   }
 

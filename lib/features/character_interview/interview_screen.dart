@@ -1,7 +1,7 @@
 // lib/features/character_interview/interview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/interview_provider.dart';
+import 'interview_provider.dart';
 import 'chat_bubble.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
@@ -123,8 +123,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
                         // Check if interview is complete
                         if (provider.isComplete &&
-                            provider.characterCardSummary != null) {
-                          // Process complete - navigate back or show completion UI
+                            provider.characterCardSummary != null &&
+                            !provider.isSuccess) {
+                          // Only navigate back if complete but not success state
                           Future.microtask(() {
                             Navigator.pop(context, {
                               'characterCard': provider.characterCardSummary,
@@ -136,15 +137,82 @@ class _InterviewScreenState extends State<InterviewScreen> {
                         return ListView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.all(16.0),
-                          itemCount: provider.messages.length,
+                          itemCount:
+                              provider.messages.length +
+                              (provider.isSuccess ? 1 : 0),
                           itemBuilder: (context, index) {
+                            // Show success message and button at the end if success flag is set
+                            if (provider.isSuccess &&
+                                index == provider.messages.length) {
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                  top: 16,
+                                  bottom: 24,
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.deepIndigo.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: AppTheme.etherealCyan.withOpacity(
+                                      0.3,
+                                    ),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Character card successfully created',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, {
+                                          'characterCard':
+                                              provider.characterCardSummary,
+                                          'characterName':
+                                              provider.characterName,
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppTheme.etherealCyan,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 24,
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Chat with Digital Clone',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            // Regular chat message
+                            final message = provider.messages[index];
                             return AnimatedOpacity(
                               duration: const Duration(milliseconds: 300),
                               opacity: 1.0,
                               curve: Curves.easeOutQuad,
-                              child: ChatBubble(
-                                message: provider.messages[index],
-                              ),
+                              child: ChatBubble(message: message),
                             );
                           },
                         );

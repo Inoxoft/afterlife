@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../character_interview/message_model.dart';
 import '../character_interview/chat_service.dart';
 
@@ -9,6 +10,7 @@ class InterviewProvider with ChangeNotifier {
   String? characterCardSummary;
   String? characterName;
   bool isComplete = false;
+  bool isSuccess = false;
 
   // Debug flags
   bool _debugPrintData = true;
@@ -20,7 +22,7 @@ class InterviewProvider with ChangeNotifier {
   Future<void> _initialize() async {
     await _chatService.initialize();
     // Start the interview with an intro message
-    _addAIMessage(
+    addAIMessage(
       "Hello! I'm here to help create your digital twin. I'll ask you questions about yourself to understand who you are. Let's start with your name - what would you like me to call you?",
     );
     notifyListeners();
@@ -69,7 +71,7 @@ class InterviewProvider with ChangeNotifier {
       _removeLoadingMessage();
 
       // Add AI response
-      _addAIMessage(response);
+      addAIMessage(response);
 
       // Check if response contains character card summary
       if (response.contains('## CHARACTER CARD SUMMARY ##') &&
@@ -92,22 +94,38 @@ class InterviewProvider with ChangeNotifier {
           print('Extracted character card summary markers.');
           print('Character name: $characterName');
         }
+      }
 
-        // Mark as complete if user agrees
-        if (text.toLowerCase().trim() == 'agree') {
-          // For the final character card, extract just the summary without the markers
+      // Handle agree separately - this needs to happen after processing any card summary
+      if (text.toLowerCase().trim() == 'agree') {
+        if (characterCardSummary != null &&
+            characterCardSummary!.contains('## CHARACTER CARD SUMMARY ##')) {
+          // Extract clean system prompt
+          final startIndex = characterCardSummary!.indexOf(
+            '## CHARACTER CARD SUMMARY ##',
+          );
           final cleanStart = startIndex + '## CHARACTER CARD SUMMARY ##'.length;
-          final cleanEnd = response.indexOf('## END OF CHARACTER CARD ##');
+          final cleanEnd = characterCardSummary!.indexOf(
+            '## END OF CHARACTER CARD ##',
+          );
 
           // The system prompt should be the content between the markers
           final cleanSystemPrompt =
-              response.substring(cleanStart, cleanEnd).trim();
+              characterCardSummary!.substring(cleanStart, cleanEnd).trim();
 
           // Replace the original with the clean version for actual use
           characterCardSummary = cleanSystemPrompt;
 
-          // Set completion flag after cleaning
+          // Store the system prompt in local storage
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(
+            'system_prompt_${characterName ?? 'unnamed'}',
+            cleanSystemPrompt,
+          );
+
+          // Set completion flags - this will trigger showing the success UI
           isComplete = true;
+          isSuccess = true;
 
           if (_debugPrintData) {
             print('User agreed, interview complete!');
@@ -115,7 +133,9 @@ class InterviewProvider with ChangeNotifier {
             print('Final system prompt size: ${characterCardSummary?.length}');
           }
 
+          // Notify listeners and return early to prevent adding AI response
           notifyListeners();
+          return;
         }
       }
     } catch (e) {
@@ -123,14 +143,14 @@ class InterviewProvider with ChangeNotifier {
       _removeLoadingMessage();
 
       // Add error message
-      _addAIMessage(
+      addAIMessage(
         "I'm having trouble connecting. Please try again in a moment.",
       );
       print("Error in chat: $e");
     }
   }
 
-  void _addAIMessage(String text) {
+  void addAIMessage(String text) {
     messages.add(Message(text: text, isUser: false));
     notifyListeners();
   }
@@ -152,6 +172,7 @@ class InterviewProvider with ChangeNotifier {
     characterCardSummary = null;
     characterName = null;
     isComplete = false;
+    isSuccess = false;
     _chatService.clearHistory();
     _initialize();
   }
