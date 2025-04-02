@@ -4,7 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
-import '../providers/chat_service.dart';
+import 'chat_service.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -251,9 +251,9 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
         child: Stack(
           children: [
-            // Background particles
+            // Background particles with reduced opacity
             const Opacity(
-              opacity: 0.4,
+              opacity: 0.5,
               child: AnimatedParticles(
                 particleCount: 30,
                 particleColor: Colors.white,
@@ -266,52 +266,17 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
               children: [
                 // Chat messages
                 Expanded(
-                  child: Consumer<CharactersProvider>(
-                    builder: (context, provider, _) {
-                      final character = provider.selectedCharacter;
-
-                      if (character == null) {
-                        return const Center(child: Text('Character not found'));
-                      }
-
-                      if (character.chatHistory.isEmpty) {
-                        return _buildWelcomeMessage();
-                      }
-
-                      return ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16.0),
-                        itemCount:
-                            character.chatHistory.length + (_isLoading ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == character.chatHistory.length) {
-                            // Show loading indicator at the end
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppTheme.etherealCyan,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-
-                          return AnimatedOpacity(
-                            duration: const Duration(milliseconds: 300),
-                            opacity: 1.0,
-                            curve: Curves.easeOutQuad,
-                            child: _buildMessageBubble(
-                              character.chatHistory[index],
-                            ),
-                          );
-                        },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: _character!.chatHistory.length,
+                    itemBuilder: (context, index) {
+                      final message = _character!.chatHistory[index];
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: 1.0,
+                        curve: Curves.easeOutQuad,
+                        child: _buildMessageBubble(message),
                       );
                     },
                   ),
@@ -344,18 +309,16 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
                           child: TextField(
                             controller: _messageController,
                             focusNode: _inputFocusNode,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Type your message...',
                               hintStyle: TextStyle(color: Colors.white60),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(25.0),
-                                ),
+                                borderRadius: BorderRadius.circular(25.0),
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
                               fillColor: Colors.black26,
-                              contentPadding: EdgeInsets.symmetric(
+                              contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16.0,
                                 vertical: 14.0,
                               ),
@@ -363,12 +326,14 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
                             style: const TextStyle(color: Colors.white),
                             minLines: 1,
                             maxLines: 5,
-                            onSubmitted: (_) {
-                              if (!_isLoading &&
-                                  _messageController.text.trim().isNotEmpty) {
-                                _sendMessage();
-                              }
-                            },
+                            onSubmitted:
+                                _isLoading
+                                    ? null
+                                    : (text) {
+                                      if (text.trim().isNotEmpty) {
+                                        _sendMessage();
+                                      }
+                                    },
                           ),
                         ),
                         const SizedBox(width: 8.0),
@@ -434,45 +399,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildWelcomeMessage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.chat_bubble_outline,
-              size: 64,
-              color: AppTheme.etherealCyan.withOpacity(0.8),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Start chatting with ${_character?.name}',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Send a message to begin your conversation.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
       ),
     );
   }
