@@ -18,7 +18,7 @@ class ChatService {
 
       // Fallback to default key if not found in .env (only for development)
       if (_apiKey.isEmpty) {
-        _apiKey = "";
+        _apiKey = ""; //for debuging
         print(
           'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
         );
@@ -28,7 +28,7 @@ class ChatService {
     } catch (e) {
       print('Error initializing chat service: $e');
       // Use default key as last resort
-      _apiKey = "";
+      _apiKey = ""; //for debuging
     }
   }
 
