@@ -148,6 +148,7 @@ class _LandingScreenState extends State<LandingScreen>
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: AppTheme.backgroundStart, // Fallback background color
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),

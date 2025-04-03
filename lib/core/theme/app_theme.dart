@@ -49,57 +49,71 @@ class AppTheme {
     ],
   );
 
-  static ThemeData get darkTheme {
-    return ThemeData.dark().copyWith(
-      scaffoldBackgroundColor: backgroundStart,
-      primaryColor: etherealCyan,
-      colorScheme: const ColorScheme.dark(
-        primary: etherealCyan,
-        secondary: softLavender,
-        tertiary: accentPurple,
-        surface: deepIndigo,
-        background: backgroundStart,
-      ),
-      textTheme: GoogleFonts.spaceGroteskTextTheme(
-        ThemeData.dark().textTheme.copyWith(
-          displayLarge: GoogleFonts.spaceGrotesk(
-            fontSize: 32,
-            fontWeight: FontWeight.w300,
-            letterSpacing: 2.5,
-            color: Colors.white,
-          ),
-          displayMedium: GoogleFonts.spaceGrotesk(
-            fontSize: 24,
-            fontWeight: FontWeight.w300,
-            letterSpacing: 1.5,
-            color: Colors.white,
-          ),
-          bodyLarge: GoogleFonts.inter(fontSize: 16, color: Colors.white70),
-          bodyMedium: GoogleFonts.inter(fontSize: 14, color: Colors.white60),
+  // Main theme
+  static final ThemeData darkTheme = ThemeData.dark().copyWith(
+    scaffoldBackgroundColor: backgroundStart,
+    primaryColor: etherealCyan,
+    colorScheme: const ColorScheme.dark(
+      primary: etherealCyan,
+      secondary: softLavender,
+      tertiary: accentPurple,
+      surface: deepIndigo,
+      background: backgroundStart,
+    ),
+    textTheme: GoogleFonts.spaceGroteskTextTheme(
+      ThemeData.dark().textTheme.copyWith(
+        displayLarge: GoogleFonts.spaceGrotesk(
+          fontSize: 32,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 2.5,
+          color: Colors.white,
         ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: etherealCyan,
-          foregroundColor: Colors.black87,
-          shape: const CircleBorder(),
-          padding: const EdgeInsets.all(16),
-          elevation: 4,
+        displayMedium: GoogleFonts.spaceGrotesk(
+          fontSize: 24,
+          fontWeight: FontWeight.w300,
+          letterSpacing: 1.5,
+          color: Colors.white,
         ),
+        bodyLarge: GoogleFonts.inter(fontSize: 16, color: Colors.white70),
+        bodyMedium: GoogleFonts.inter(fontSize: 14, color: Colors.white60),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
-          borderSide: BorderSide.none,
-        ),
-        filled: true,
-        fillColor: Colors.black26,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 14.0,
-        ),
-        hintStyle: TextStyle(color: Colors.white60),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: etherealCyan,
+        foregroundColor: Colors.black87,
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(16),
+        elevation: 4,
       ),
-    );
-  }
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(25.0),
+        borderSide: BorderSide.none,
+      ),
+      filled: true,
+      fillColor: Colors.black26,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 14.0,
+      ),
+      hintStyle: TextStyle(color: Colors.white60),
+    ),
+  );
+
+  // ColorScheme for the app
+  static final ColorScheme colorScheme = ColorScheme.dark(
+    primary: etherealCyan,
+    secondary: accentPurple,
+    background: backgroundStart,
+    surface: deepIndigo,
+    error: Colors.red.shade300,
+    onPrimary: Colors.black,
+    onSecondary: Colors.white,
+    onBackground: Colors.white,
+    onSurface: Colors.white,
+    onError: Colors.white,
+    brightness: Brightness.dark,
+  );
 }

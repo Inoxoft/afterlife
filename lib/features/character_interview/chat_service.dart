@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatService {
-  final String _openRouterUrl = 'https://openrouter.ai/api/v1/chat/completions';
-  final List<Map<String, dynamic>> _messageHistory = [];
-  late String _apiKey;
-  bool _isInitialized = false;
+  static final String _openRouterUrl =
+      'https://openrouter.ai/api/v1/chat/completions';
+  static late String _apiKey;
+  static bool _isInitialized = false;
 
-  Future<void> initialize() async {
+  static Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
@@ -18,7 +18,7 @@ class ChatService {
 
       // Fallback to default key if not found in .env (only for development)
       if (_apiKey.isEmpty) {
-        _apiKey = ""; //for debuging
+        _apiKey = "";
         print(
           'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
         );
@@ -28,28 +28,34 @@ class ChatService {
     } catch (e) {
       print('Error initializing chat service: $e');
       // Use default key as last resort
-      _apiKey = ""; //for debuging
+      _apiKey = "";
     }
   }
 
-  Future<String> sendMessage(String userMessage, {String? systemPrompt}) async {
+  static Future<String> sendMessage({
+    required List<Map<String, dynamic>> messages,
+    String? systemPrompt,
+  }) async {
     // Ensure service is initialized
     if (!_isInitialized) {
       await initialize();
     }
 
-    // Add user message to history
-    _messageHistory.add({'role': 'user', 'content': userMessage});
+    // Prepare message list
+    final List<Map<String, dynamic>> messagesList = [];
+
+    // Add system message if provided
+    if (systemPrompt != null && systemPrompt.isNotEmpty) {
+      messagesList.add({'role': 'system', 'content': systemPrompt});
+    }
+
+    // Add conversation messages
+    messagesList.addAll(messages);
 
     // Prepare request body
     final body = jsonEncode({
-      'model':
-          'google/gemini-2.0-flash-001', // Or any model available on OpenRouter
-      'messages': [
-        if (systemPrompt != null && systemPrompt.isNotEmpty)
-          {'role': 'system', 'content': systemPrompt},
-        ..._messageHistory,
-      ],
+      'model': 'google/gemini-2.0-flash-001',
+      'messages': messagesList,
       'temperature': 0.7,
       'max_tokens': 1000,
     });
@@ -61,9 +67,8 @@ class ChatService {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_apiKey',
-          'HTTP-Referer':
-              'https://afterlife.app', // Replace with your app's URL
-          'X-Title': 'Afterlife AI', // Your app name
+          'HTTP-Referer': 'https://afterlife.app',
+          'X-Title': 'Afterlife AI',
         },
         body: body,
       );
@@ -75,25 +80,13 @@ class ChatService {
 
       // Parse response
       final data = jsonDecode(response.body);
-      final assistantMessage =
-          data['choices'][0]['message']['content'] as String;
-
-      // Add assistant response to history
-      _messageHistory.add({'role': 'assistant', 'content': assistantMessage});
-
-      return assistantMessage;
+      return data['choices'][0]['message']['content'] as String;
     } catch (e) {
-      // Add better error handling
       print('Error in chat service: $e');
-      // Add error message to history for continuity
-      final errorMessage =
-          'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
-      _messageHistory.add({'role': 'assistant', 'content': errorMessage});
-      return errorMessage;
+      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
-
-  void clearHistory() {
-    _messageHistory.clear();
-  }
 }
+
+// Helper function to avoid importing dart:math
+int min(int a, int b) => a < b ? a : b;

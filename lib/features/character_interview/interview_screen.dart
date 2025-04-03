@@ -1,13 +1,21 @@
 // lib/features/character_interview/interview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'interview_provider.dart';
-import 'chat_bubble.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../models/character_model.dart';
+import 'interview_provider.dart';
+import 'chat_bubble.dart';
 
 class InterviewScreen extends StatefulWidget {
-  const InterviewScreen({super.key});
+  final bool editMode;
+  final CharacterModel? existingCharacter;
+
+  const InterviewScreen({
+    Key? key,
+    this.editMode = false,
+    this.existingCharacter,
+  }) : super(key: key);
 
   @override
   State<InterviewScreen> createState() => _InterviewScreenState();
@@ -17,14 +25,28 @@ class _InterviewScreenState extends State<InterviewScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
+  late InterviewProvider _interviewProvider;
 
   @override
   void initState() {
     super.initState();
+    _initializeProvider();
     // Set focus to the input field after a short delay
     Future.delayed(const Duration(milliseconds: 300), () {
       _inputFocusNode.requestFocus();
     });
+  }
+
+  void _initializeProvider() {
+    _interviewProvider = InterviewProvider();
+
+    // If editing an existing character, initialize with their data
+    if (widget.editMode && widget.existingCharacter != null) {
+      _interviewProvider.setEditMode(
+        existingName: widget.existingCharacter!.name,
+        existingSystemPrompt: widget.existingCharacter!.systemPrompt,
+      );
+    }
   }
 
   @override
@@ -48,14 +70,16 @@ class _InterviewScreenState extends State<InterviewScreen> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => InterviewProvider(),
+      create: (_) => _interviewProvider,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: AppTheme.backgroundStart,
           elevation: 0,
-          title: const Text(
-            "Creating Your Digital Twin",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          title: Text(
+            widget.editMode
+                ? "Editing ${widget.existingCharacter?.name ?? 'Character'}"
+                : "Creating Your Digital Twin",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           actions: [
             Consumer<InterviewProvider>(
@@ -117,23 +141,6 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   Expanded(
                     child: Consumer<InterviewProvider>(
                       builder: (context, provider, _) {
-                        WidgetsBinding.instance.addPostFrameCallback(
-                          (_) => _scrollToBottom(),
-                        );
-
-                        // Check if interview is complete
-                        if (provider.isComplete &&
-                            provider.characterCardSummary != null &&
-                            !provider.isSuccess) {
-                          // Only navigate back if complete but not success state
-                          Future.microtask(() {
-                            Navigator.pop(context, {
-                              'characterCard': provider.characterCardSummary,
-                              'characterName': provider.characterName,
-                            });
-                          });
-                        }
-
                         return ListView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.all(16.0),
@@ -141,78 +148,72 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               provider.messages.length +
                               (provider.isSuccess ? 1 : 0),
                           itemBuilder: (context, index) {
-                            // Show success message and button at the end if success flag is set
+                            // If this is the success message, show it with the chat button
                             if (provider.isSuccess &&
                                 index == provider.messages.length) {
                               return Container(
-                                margin: const EdgeInsets.only(
-                                  top: 16,
-                                  bottom: 24,
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.deepIndigo.withOpacity(0.6),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: AppTheme.etherealCyan.withOpacity(
-                                      0.3,
-                                    ),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Character card successfully created',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, {
-                                          'characterCard':
-                                              provider.characterCardSummary,
-                                          'characterName':
-                                              provider.characterName,
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppTheme.etherealCyan,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 24,
-                                          vertical: 14,
+                                padding: const EdgeInsets.all(20),
+                                child: Center(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        provider.isEditMode
+                                            ? 'Character card successfully updated'
+                                            : 'Character card successfully created',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18,
                                         ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          // Ensure we're passing back clean system prompt
+                                          final cleanPrompt =
+                                              provider.characterCardSummary;
+
+                                          Navigator.pop(context, {
+                                            'characterCard': cleanPrompt,
+                                            'characterName':
+                                                provider.characterName,
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              AppTheme.etherealCyan,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 14,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          provider.isEditMode
+                                              ? 'Update Character'
+                                              : 'Chat with Digital Clone',
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
                                           ),
                                         ),
                                       ),
-                                      child: const Text(
-                                        'Chat with Digital Clone',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               );
                             }
 
-                            // Regular chat message
                             final message = provider.messages[index];
-                            return AnimatedOpacity(
-                              duration: const Duration(milliseconds: 300),
-                              opacity: 1.0,
-                              curve: Curves.easeOutQuad,
-                              child: ChatBubble(message: message),
+                            return ChatBubble(
+                              message: message.text,
+                              isUser: message.isUser,
+                              isLoading: message.isLoading,
                             );
                           },
                         );

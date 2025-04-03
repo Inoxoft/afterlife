@@ -9,6 +9,7 @@ import 'package:afterlife/features/providers/characters_provider.dart';
 import 'package:afterlife/features/character_gallery/character_gallery_screen.dart';
 import 'package:afterlife/features/character_interview/interview_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/app_router.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -121,10 +122,74 @@ class MyApp extends StatelessWidget {
     // No need to call any initialization method explicitly
 
     return MaterialApp(
-      title: 'Afterlife',
-      theme: AppTheme.darkTheme,
-      home: const LandingScreen(),
+      title: 'Afterlife AI',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        // Colors
+        colorScheme: AppTheme.colorScheme,
+
+        // App bar theme
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppTheme.backgroundStart,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+
+        // Button themes
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.etherealCyan,
+            foregroundColor: Colors.black87,
+            textStyle: const TextStyle(fontWeight: FontWeight.w500),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+
+        // Text themes
+        fontFamily: 'Roboto',
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+          displayMedium: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+          bodyLarge: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: Colors.white,
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Colors.white,
+          ),
+        ),
+
+        // Input decoration
+        inputDecorationTheme: InputDecorationTheme(
+          fillColor: Colors.white.withOpacity(0.1),
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+        ),
+      ),
+      onGenerateRoute: AppRouter.onGenerateRoute,
+      initialRoute: AppRouter.landing,
     );
   }
 }

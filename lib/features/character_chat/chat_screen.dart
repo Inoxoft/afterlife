@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
+import '../character_profile/character_profile_screen.dart';
 import 'chat_service.dart';
 
 class CharacterChatScreen extends StatefulWidget {
@@ -224,26 +225,27 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
           ],
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              if (value == 'clear') {
-                _showClearChatDialog();
-              }
+          // Profile button
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          CharacterProfileScreen(characterId: _character!.id),
+                ),
+              ).then((_) {
+                // Reload character data when returning from profile
+                _loadCharacter();
+              });
             },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'clear',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete_outline, size: 20),
-                        SizedBox(width: 8),
-                        Text('Clear Chat'),
-                      ],
-                    ),
-                  ),
-                ],
+          ),
+          // Clear chat button
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _showClearChatDialog,
           ),
         ],
       ),
