@@ -12,11 +12,10 @@ class ChatService {
   // Get API key from environment variables or use fallback
   static String? get _openRouterApiKey {
     try {
-      return dotenv.env['OPENROUTER_API_KEY'] ??
-          "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";
+      return dotenv.env['OPENROUTER_API_KEY'] ?? "";
     } catch (e) {
       debugPrint('Error loading OpenRouter API key from .env: $e');
-      return "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";
+      return "";
     }
   }
 

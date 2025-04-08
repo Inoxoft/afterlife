@@ -1,11 +1,13 @@
 // lib/features/character_interview/interview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:file_selector/file_selector.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
 import 'interview_provider.dart';
 import 'chat_bubble.dart';
+import 'file_processor_service.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
@@ -26,6 +28,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   late InterviewProvider _interviewProvider;
+  bool _isProcessingFile = false;
 
   @override
   void initState() {
@@ -67,6 +70,61 @@ class _InterviewScreenState extends State<InterviewScreen> {
     }
   }
 
+  Future<void> _handleFileUpload() async {
+    setState(() => _isProcessingFile = true);
+
+    try {
+      final file = await FileProcessorService.pickFile();
+      if (file == null) {
+        setState(() => _isProcessingFile = false);
+        return;
+      }
+
+      // Show processing message
+      _interviewProvider.addAIMessage("Processing your file...");
+
+      // Process the file
+      final content = await FileProcessorService.processFile(file);
+
+      // Generate character card
+      final characterCard = await FileProcessorService.generateCharacterCard(
+        content,
+      );
+
+      // Add the generated card to the chat
+      _interviewProvider.addAIMessage(characterCard);
+
+      // Store the character card summary in the provider
+      if (characterCard.contains('## CHARACTER CARD SUMMARY ##') &&
+          characterCard.contains('## END OF CHARACTER CARD ##')) {
+        _interviewProvider.characterCardSummary = characterCard;
+
+        // Try to extract character name
+        if (characterCard.contains('## CHARACTER NAME:')) {
+          final startName =
+              characterCard.indexOf('## CHARACTER NAME:') +
+              '## CHARACTER NAME:'.length;
+          final endLine = characterCard.indexOf('\n', startName);
+          if (endLine > startName) {
+            final name = characterCard.substring(startName, endLine).trim();
+            _interviewProvider.characterName = name.replaceAll('##', '').trim();
+          }
+        }
+      }
+
+      // Ask for confirmation
+      _interviewProvider.addAIMessage(
+        "I've created a character card based on your file. Please review it and type 'agree' if you'd like to use it, or let me know what changes you'd like to make.",
+      );
+    } catch (e) {
+      _interviewProvider.addAIMessage(
+        "I'm sorry, but I encountered an error processing your file: ${e.toString()}",
+      );
+    } finally {
+      setState(() => _isProcessingFile = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -82,6 +140,12 @@ class _InterviewScreenState extends State<InterviewScreen> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           actions: [
+            if (!widget.editMode)
+              IconButton(
+                icon: const Icon(Icons.upload_file),
+                onPressed: _isProcessingFile ? null : _handleFileUpload,
+                tooltip: 'Upload Character File',
+              ),
             Consumer<InterviewProvider>(
               builder: (context, provider, _) {
                 return IconButton(
@@ -250,94 +314,43 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 child: TextField(
                                   controller: _messageController,
                                   focusNode: _inputFocusNode,
+                                  style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
-                                    hintText: 'Type your response...',
-                                    hintStyle: TextStyle(color: Colors.white60),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(25.0),
-                                      borderSide: BorderSide.none,
+                                    hintText:
+                                        _isProcessingFile
+                                            ? 'Processing file...'
+                                            : 'Type your message...',
+                                    hintStyle: TextStyle(
+                                      color: Colors.white.withOpacity(0.5),
                                     ),
-                                    filled: true,
-                                    fillColor: Colors.black26,
+                                    border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0,
-                                      vertical: 14.0,
+                                      horizontal: 16,
+                                      vertical: 12,
                                     ),
                                   ),
-                                  style: const TextStyle(color: Colors.white),
-                                  minLines: 1,
-                                  maxLines: 5,
-                                  onSubmitted:
-                                      provider.isLoading
-                                          ? null
-                                          : (text) {
-                                            if (text.trim().isNotEmpty) {
-                                              provider.sendMessage(text);
-                                              _messageController.clear();
-                                            }
-                                          },
+                                  onSubmitted: (text) {
+                                    if (!_isProcessingFile &&
+                                        text.trim().isNotEmpty) {
+                                      provider.sendMessage(text);
+                                      _messageController.clear();
+                                    }
+                                  },
                                 ),
                               ),
-                              const SizedBox(width: 8.0),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                decoration: BoxDecoration(
-                                  color:
-                                      provider.isLoading
-                                          ? AppTheme.etherealCyan.withOpacity(
-                                            0.3,
-                                          )
-                                          : AppTheme.etherealCyan,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    if (!provider.isLoading)
-                                      BoxShadow(
-                                        color: AppTheme.etherealCyan
-                                            .withOpacity(0.3),
-                                        blurRadius: 8,
-                                        spreadRadius: 1,
-                                      ),
-                                  ],
-                                ),
-                                child: IconButton(
-                                  icon: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    transitionBuilder: (
-                                      Widget child,
-                                      Animation<double> animation,
-                                    ) {
-                                      return ScaleTransition(
-                                        scale: animation,
-                                        child: child,
-                                      );
-                                    },
-                                    child:
-                                        provider.isLoading
-                                            ? const Icon(
-                                              Icons.hourglass_top,
-                                              key: ValueKey('loading'),
-                                              color: Colors.white60,
-                                            )
-                                            : const Icon(
-                                              Icons.send,
-                                              key: ValueKey('send'),
-                                              color: Colors.black87,
-                                            ),
-                                  ),
-                                  onPressed:
-                                      provider.isLoading
-                                          ? null
-                                          : () {
-                                            if (_messageController.text
-                                                .trim()
-                                                .isNotEmpty) {
-                                              provider.sendMessage(
-                                                _messageController.text,
-                                              );
-                                              _messageController.clear();
-                                            }
-                                          },
-                                ),
+                              IconButton(
+                                icon: const Icon(Icons.send),
+                                color: Colors.white,
+                                onPressed:
+                                    _isProcessingFile
+                                        ? null
+                                        : () {
+                                          final text = _messageController.text;
+                                          if (text.trim().isNotEmpty) {
+                                            provider.sendMessage(text);
+                                            _messageController.clear();
+                                          }
+                                        },
                               ),
                             ],
                           ),

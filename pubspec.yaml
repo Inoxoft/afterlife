@@ -39,6 +39,10 @@ dependencies:
   provider: ^6.0.5
   flutter_dotenv: ^5.1.0
   shared_preferences: ^2.5.3
+  file_selector: ^1.0.0
+  path: ^1.8.3
+  path_provider: ^2.1.2
+  syncfusion_flutter_pdf: ^24.1.41
 
 dev_dependencies:
   flutter_test:

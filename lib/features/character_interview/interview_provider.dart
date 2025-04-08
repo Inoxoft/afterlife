@@ -34,9 +34,11 @@ class InterviewProvider with ChangeNotifier {
 
   Future<void> _addInitialMessage() async {
     if (!isEditMode) {
-      // Start the interview with an intro message for new character creation
       addAIMessage(
-        "Hello! I'm ready to create a detailed character card for you. This will involve a series of questions to understand your personality, values, experiences, and communication style. The goal is to build a profile that could be used for AI impersonation, so the more detail you provide, the better. Are you ready to begin? We can take breaks if you need them",
+        "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
+        "1. Answer my questions about your personality and experiences\n"
+        "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
+        "Which would you prefer?",
       );
     }
   }
@@ -151,22 +153,51 @@ AI: "That's bold! Do you often take risks, or was this an exception? How do you 
   }
 
   Future<void> sendMessage(String text) async {
-    if (text.trim().isEmpty) return;
-
-    // Check if user already agreed but we need to finalize
-    if (isComplete) return;
+    if (text.trim().isEmpty) {
+      _messages.add(
+        Message(text: "Please type a message before sending.", isUser: false),
+      );
+      notifyListeners();
+      return;
+    }
 
     // Add user message
     final userMessage = Message(text: text, isUser: true);
     _messages.add(userMessage);
+    notifyListeners();
 
     // Set loading state
     _addLoadingMessage();
 
     try {
       // Handle agree separately - this needs to happen after processing any card summary
-      if (text.toLowerCase().trim() == 'agree') {
-        // Find the last message containing a character card summary
+      if (text.toLowerCase().trim() == 'agree' && !isComplete) {
+        // First try to use the stored character card summary
+        if (characterCardSummary != null) {
+          // Extract the clean system prompt
+          final startIndex = characterCardSummary!.indexOf(
+            '## CHARACTER CARD SUMMARY ##',
+          );
+          final cleanStart = startIndex + '## CHARACTER CARD SUMMARY ##'.length;
+          final cleanEnd = characterCardSummary!.indexOf(
+            '## END OF CHARACTER CARD ##',
+          );
+
+          if (cleanStart >= 0 && cleanEnd > cleanStart) {
+            final cleanSystemPrompt =
+                characterCardSummary!.substring(cleanStart, cleanEnd).trim();
+            characterCardSummary = _prepareSystemPromptForCharacter(
+              cleanSystemPrompt,
+            );
+            isSuccess = true;
+            isComplete = true;
+            _removeLoadingMessage();
+            notifyListeners();
+            return;
+          }
+        }
+
+        // If no stored summary, look in messages
         String? foundCardSummary;
         for (int i = _messages.length - 1; i >= 0; i--) {
           final msg = _messages[i];
@@ -180,7 +211,7 @@ AI: "That's bold! Do you often take risks, or was this an exception? How do you 
 
         // If we have a card summary from any message, process it
         if (foundCardSummary != null) {
-          // Extract the clean system prompt - this is what we need to save
+          // Extract the clean system prompt
           final startIndex = foundCardSummary.indexOf(
             '## CHARACTER CARD SUMMARY ##',
           );
@@ -189,186 +220,57 @@ AI: "That's bold! Do you often take risks, or was this an exception? How do you 
             '## END OF CHARACTER CARD ##',
           );
 
-          // The system prompt should be the content between the markers
           if (cleanStart >= 0 && cleanEnd > cleanStart) {
             final cleanSystemPrompt =
                 foundCardSummary.substring(cleanStart, cleanEnd).trim();
-
-            // Format the system prompt for use with the character model
             characterCardSummary = _prepareSystemPromptForCharacter(
               cleanSystemPrompt,
             );
-
-            // Try to extract character name if not already set
-            if (characterName == null) {
-              final nameMarker = '## CHARACTER NAME:';
-              if (foundCardSummary.contains(nameMarker)) {
-                final startName =
-                    foundCardSummary.indexOf(nameMarker) + nameMarker.length;
-                final endLine = foundCardSummary.indexOf('\n', startName);
-                if (endLine > startName) {
-                  characterName =
-                      foundCardSummary.substring(startName, endLine).trim();
-                  // Remove any '##' if present
-                  characterName = characterName?.replaceAll('##', '').trim();
-                }
-              }
-
-              // If no character name found with the marker, try to find in the system prompt
-              if (characterName == null || characterName!.isEmpty) {
-                // Look for "You are [Name]" pattern in the system prompt
-                final lines = cleanSystemPrompt.split('\n');
-                for (final line in lines) {
-                  if (line.contains('You are') && line.contains(',')) {
-                    final startName =
-                        line.indexOf('You are') + 'You are'.length;
-                    final endName = line.indexOf(',', startName);
-                    if (endName > startName) {
-                      characterName = line.substring(startName, endName).trim();
-                      break;
-                    }
-                  }
-                }
-              }
-            }
-
-            // Set completion flags - this will trigger showing the success UI
-            isComplete = true;
             isSuccess = true;
+            isComplete = true;
             _removeLoadingMessage();
-
-            // Add a confirmation message
-            addAIMessage(
-              'Character card finalized! You can now chat with your digital twin.',
-            );
-
-            // Fallback name if still none found
-            if (characterName == null || characterName!.isEmpty) {
-              characterName = "Character";
-            }
-
-            // Notify listeners and return early
             notifyListeners();
             return;
-          } else {
-            // Invalid markers found, continue with regular processing
-            _removeLoadingMessage();
-            addAIMessage(
-              'I couldn\'t find a valid character card. Please ask me to generate a character summary.',
-            );
-            return;
-          }
-        } else {
-          _removeLoadingMessage();
-          addAIMessage(
-            'Please ask me to generate a character summary first before agreeing.',
-          );
-          return;
-        }
-      }
-
-      // For editing mode, try to extract character name if not present
-      if (isEditMode &&
-          characterName == null &&
-          text.toLowerCase().contains('name is')) {
-        final nameParts = text.split('name is');
-        if (nameParts.length > 1) {
-          final potentialName = nameParts[1]
-              .trim()
-              .split(' ')[0]
-              .replaceAll(RegExp(r'[^\w\s]'), '');
-          if (potentialName.isNotEmpty) {
-            characterName = potentialName;
           }
         }
-      }
 
-      // Convert messages to format expected by API
-      final apiMessages =
-          _messages
-              .map(
-                (msg) => {
-                  'role': msg.isUser ? 'user' : 'assistant',
-                  'content': msg.text,
-                },
-              )
-              .toList();
-
-      try {
-        // Get the system prompt to send to the API
-        final systemPromptToUse = _getSystemPrompt();
-
-        // For all other user inputs, send to API to get AI response
-        final response = await ChatService.sendMessage(
-          messages: apiMessages,
-          systemPrompt: systemPromptToUse,
-        );
-
-        // Remove loading message
+        // If we get here, we couldn't find a valid character card
         _removeLoadingMessage();
+        addAIMessage(
+          "I couldn't find a valid character card to process. Please try again.",
+        );
+        return;
+      }
 
-        // Check if the response contains a character card summary
-        if (response.contains('## CHARACTER CARD SUMMARY ##') &&
-            response.contains('## END OF CHARACTER CARD ##')) {
-          // Extract the clean system prompt
-          final startIndex = response.indexOf('## CHARACTER CARD SUMMARY ##');
-          final cleanStart = startIndex + '## CHARACTER CARD SUMMARY ##'.length;
-          final cleanEnd = response.indexOf('## END OF CHARACTER CARD ##');
-
-          if (cleanStart >= 0 && cleanEnd > cleanStart) {
-            // The clean system prompt is the content between the markers
-            final cleanSystemPrompt =
-                response.substring(cleanStart, cleanEnd).trim();
-
-            // Store the full response for display purposes
-            characterCardSummary = response;
-
-            // Try to extract character name if not already set
-            if (characterName == null) {
-              final nameMarker = '## CHARACTER NAME:';
-              if (response.contains(nameMarker)) {
-                final startName =
-                    response.indexOf(nameMarker) + nameMarker.length;
-                final endLine = response.indexOf('\n', startName);
-                if (endLine > startName) {
-                  characterName = response.substring(startName, endLine).trim();
-                  // Remove any '##' if present
-                  characterName = characterName?.replaceAll('##', '').trim();
-                }
-              }
-
-              // If still no name, try other methods
-              if (characterName == null || characterName!.isEmpty) {
-                // Look for "You are [Name]" pattern in the clean system prompt
-                final lines = cleanSystemPrompt.split('\n');
-                for (final line in lines) {
-                  if (line.contains('You are') && line.contains(',')) {
-                    final startName =
-                        line.indexOf('You are') + 'You are'.length;
-                    final endName = line.indexOf(',', startName);
-                    if (endName > startName) {
-                      characterName = line.substring(startName, endName).trim();
-                      break;
-                    }
-                  }
-                }
-              }
-
-              // Fallback name if still none found
-              if (characterName == null || characterName!.isEmpty) {
-                characterName = "Character";
-              }
-            }
-          }
+      // Regular message handling
+      if (isComplete && isSuccess) {
+        // We're in chat mode with the character
+        final response = await ChatService.sendMessage(
+          messages: [
+            {"role": "user", "content": text},
+          ],
+          systemPrompt: characterCardSummary ?? "",
+        );
+        _removeLoadingMessage();
+        if (response != null) {
+          addAIMessage(response);
         }
-
-        // Add the AI response to chat
-        addAIMessage(response);
-      } catch (e) {
-        _handleErrorState("Error sending message: $e");
+      } else {
+        // We're still in interview mode
+        final systemPrompt = _getSystemPrompt();
+        final response = await ChatService.sendMessage(
+          messages: [
+            {"role": "user", "content": text},
+          ],
+          systemPrompt: systemPrompt,
+        );
+        _removeLoadingMessage();
+        if (response != null) {
+          addAIMessage(response);
+        }
       }
     } catch (e) {
-      _handleErrorState("Error processing message: $e");
+      _handleErrorState("Error sending message: $e");
     }
   }
 

@@ -11,36 +11,68 @@ class AppRouter {
 
   // Handle route generation
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case landing:
-        return MaterialPageRoute(builder: (_) => const LandingScreen());
+    try {
+      switch (settings.name) {
+        case landing:
+          return _buildRoute(const LandingScreen());
 
-      case gallery:
-        return MaterialPageRoute(
-          builder: (_) => const CharacterGalleryScreen(),
-        );
+        case gallery:
+          return _buildRoute(const CharacterGalleryScreen());
 
-      case interview:
-        Map<String, dynamic>? args;
-        if (settings.arguments != null) {
-          args = settings.arguments as Map<String, dynamic>;
-        }
+        case interview:
+          final args = settings.arguments as Map<String, dynamic>?;
+          return _buildRoute(
+            InterviewScreen(
+              editMode: args?['editMode'] ?? false,
+              existingCharacter: args?['existingCharacter'],
+            ),
+          );
 
-        // Check if we're editing an existing character
-        final editMode = args?['editMode'] ?? false;
-        final existingCharacter = args?['existingCharacter'];
-
-        return MaterialPageRoute(
-          builder:
-              (_) => InterviewScreen(
-                editMode: editMode,
-                existingCharacter: existingCharacter,
-              ),
-        );
-
-      default:
-        // If route not found, go to landing
-        return MaterialPageRoute(builder: (_) => const LandingScreen());
+        default:
+          return _buildRoute(const LandingScreen());
+      }
+    } catch (e) {
+      // Handle any errors during route generation
+      return _buildErrorRoute(e);
     }
+  }
+
+  static MaterialPageRoute<T> _buildRoute<T>(Widget page) {
+    return MaterialPageRoute<T>(
+      builder: (context) => page,
+      settings: RouteSettings(name: page.toString()),
+    );
+  }
+
+  static MaterialPageRoute<T> _buildErrorRoute<T>(Object error) {
+    return MaterialPageRoute<T>(
+      builder:
+          (context) => Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Navigation Error',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Go Back'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
   }
 }

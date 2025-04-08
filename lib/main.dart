@@ -11,15 +11,22 @@ import 'package:afterlife/features/character_interview/interview_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/app_router.dart';
 
-void main() async {
+class AppInitializationError extends Error {
+  final String message;
+  AppInitializationError(this.message);
+}
+
+Future<void> _initializeApp() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load(fileName: ".env").catchError((e) {
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
     print("Warning: Failed to load .env file: $e");
     // Continue anyway, we have fallback in ChatService
-  });
+  }
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
@@ -27,7 +34,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set system UI overlay style (status bar, navigation bar)
+  // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -36,18 +43,18 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
+}
 
-  // Run app wrapped in error handler
+void main() {
   runZonedGuarded(
     () async {
       try {
-        // Run the app with providers initialized
+        await _initializeApp();
+
         runApp(
           MultiProvider(
             providers: [
-              // Character storage provider - will auto-load characters in constructor
               ChangeNotifierProvider(create: (_) => CharactersProvider()),
-              // Interview provider
               ChangeNotifierProvider(create: (_) => InterviewProvider()),
             ],
             child: const MyApp(),
@@ -56,59 +63,13 @@ void main() async {
       } catch (e, stackTrace) {
         print('Error during app initialization: $e');
         print(stackTrace);
-        // Run a minimal app that displays the error
-        runApp(
-          MaterialApp(
-            title: 'Afterlife Error',
-            theme: ThemeData.dark(),
-            home: Scaffold(
-              backgroundColor: AppTheme.backgroundStart,
-              body: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 60,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Initialization Error',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Error: ${e.toString()}',
-                        style: const TextStyle(color: Colors.white70),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Try to restart the app
-                          SystemNavigator.pop();
-                        },
-                        child: const Text('Restart App'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+        runApp(const ErrorApp(error: 'Initialization Error'));
       }
     },
     (error, stackTrace) {
       print('Uncaught error: $error');
       print(stackTrace);
+      runApp(ErrorApp(error: error.toString()));
     },
   );
 }
@@ -118,115 +79,114 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // CharactersProvider is already initialized in its constructor
-    // No need to call any initialization method explicitly
-
     return MaterialApp(
       title: 'Afterlife AI',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        // Colors
-        colorScheme: AppTheme.colorScheme,
-
-        // App bar theme
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppTheme.backgroundStart,
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-
-        // Button themes
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.etherealCyan,
-            foregroundColor: Colors.black87,
-            textStyle: const TextStyle(fontWeight: FontWeight.w500),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
-
-        // Text themes
-        fontFamily: 'Roboto',
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-          displayMedium: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          ),
-        ),
-
-        // Input decoration
-        inputDecorationTheme: InputDecorationTheme(
-          fillColor: Colors.white.withOpacity(0.1),
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-        ),
-      ),
+      theme: _buildTheme(),
       onGenerateRoute: AppRouter.onGenerateRoute,
       initialRoute: AppRouter.landing,
     );
   }
+
+  ThemeData _buildTheme() {
+    return ThemeData(
+      colorScheme: AppTheme.colorScheme,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppTheme.backgroundStart,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.etherealCyan,
+          foregroundColor: Colors.black87,
+          textStyle: const TextStyle(fontWeight: FontWeight.w500),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+      fontFamily: 'Roboto',
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+        displayMedium: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: Colors.white,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: Colors.white,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: Colors.white.withOpacity(0.1),
+        filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+      ),
+    );
+  }
 }
 
-// A minimal fallback app to show if something goes wrong during initialization
-class FallbackApp extends StatelessWidget {
-  const FallbackApp({super.key});
+class ErrorApp extends StatelessWidget {
+  final String error;
+
+  const ErrorApp({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Afterlife',
+      title: 'Afterlife Error',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: Scaffold(
-        body: Container(
-          color: const Color(0xFF121212),
-          child: const Center(
+        backgroundColor: AppTheme.backgroundStart,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'AFTERLIFE',
+                const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const SizedBox(height: 16),
+                const Text(
+                  'Initialization Error',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: 2.0,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Text(
-                  'App initialization error',
-                  style: TextStyle(color: Colors.white70),
+                  error,
+                  style: const TextStyle(color: Colors.white70),
+                  textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 24),
-                CircularProgressIndicator(),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => SystemNavigator.pop(),
+                  child: const Text('Restart App'),
+                ),
               ],
             ),
           ),

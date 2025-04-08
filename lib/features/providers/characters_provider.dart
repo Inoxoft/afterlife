@@ -4,12 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/character_model.dart';
 
 class CharactersProvider with ChangeNotifier {
+  static const String _storageKey = 'characters';
+
   List<CharacterModel> _characters = [];
   bool _isLoading = false;
   String? _selectedCharacterId;
+  String? _lastError;
 
-  List<CharacterModel> get characters => _characters;
+  List<CharacterModel> get characters => List.unmodifiable(_characters);
   bool get isLoading => _isLoading;
+  String? get lastError => _lastError;
+  bool get hasError => _lastError != null;
 
   CharacterModel? get selectedCharacter {
     if (_selectedCharacterId == null) {
@@ -29,30 +34,38 @@ class CharactersProvider with ChangeNotifier {
 
   Future<void> _loadCharacters() async {
     _isLoading = true;
+    _lastError = null;
     notifyListeners();
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final charactersJson = prefs.getStringList('characters') ?? [];
+      final charactersJson = prefs.getStringList(_storageKey) ?? [];
 
       _characters =
           charactersJson
               .map((json) => CharacterModel.fromJson(jsonDecode(json)))
               .toList();
 
-      // Sort by most recently created
-      _characters.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-      // Select first character if available and none selected
-      if (_characters.isNotEmpty && _selectedCharacterId == null) {
-        _selectedCharacterId = _characters.first.id;
-      }
+      _sortCharacters();
+      _updateSelectedCharacter();
     } catch (e) {
-      print('Error loading characters: $e');
+      _lastError = 'Error loading characters: $e';
       _characters = [];
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  void _sortCharacters() {
+    _characters.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  void _updateSelectedCharacter() {
+    if (_characters.isNotEmpty && _selectedCharacterId == null) {
+      _selectedCharacterId = _characters.first.id;
+    } else if (_characters.isEmpty) {
+      _selectedCharacterId = null;
     }
   }
 
@@ -62,48 +75,60 @@ class CharactersProvider with ChangeNotifier {
       final charactersJson =
           _characters.map((char) => jsonEncode(char.toJson())).toList();
 
-      await prefs.setStringList('characters', charactersJson);
+      await prefs.setStringList(_storageKey, charactersJson);
+      _lastError = null;
     } catch (e) {
-      print('Error saving characters: $e');
+      _lastError = 'Error saving characters: $e';
+      rethrow;
     }
   }
 
   Future<void> addCharacter(CharacterModel character) async {
-    _characters.add(character);
-    _selectedCharacterId = character.id;
-    notifyListeners();
-    await _saveCharacters();
+    try {
+      _characters.add(character);
+      _selectedCharacterId = character.id;
+      await _saveCharacters();
+      notifyListeners();
+    } catch (e) {
+      _lastError = 'Error adding character: $e';
+      rethrow;
+    }
   }
 
   Future<void> updateCharacter(CharacterModel updatedCharacter) async {
-    final index = _characters.indexWhere(
-      (char) => char.id == updatedCharacter.id,
-    );
+    try {
+      final index = _characters.indexWhere(
+        (char) => char.id == updatedCharacter.id,
+      );
 
-    if (index >= 0) {
-      _characters[index] = updatedCharacter;
-      notifyListeners();
-      await _saveCharacters();
+      if (index >= 0) {
+        _characters[index] = updatedCharacter;
+        await _saveCharacters();
+        notifyListeners();
+      }
+    } catch (e) {
+      _lastError = 'Error updating character: $e';
+      rethrow;
     }
   }
 
   Future<void> deleteCharacter(String id) async {
-    _characters.removeWhere((char) => char.id == id);
-
-    // If we deleted the selected character, select the first one
-    if (_selectedCharacterId == id && _characters.isNotEmpty) {
-      _selectedCharacterId = _characters.first.id;
-    } else if (_characters.isEmpty) {
-      _selectedCharacterId = null;
+    try {
+      _characters.removeWhere((char) => char.id == id);
+      _updateSelectedCharacter();
+      await _saveCharacters();
+      notifyListeners();
+    } catch (e) {
+      _lastError = 'Error deleting character: $e';
+      rethrow;
     }
-
-    notifyListeners();
-    await _saveCharacters();
   }
 
   void selectCharacter(String id) {
-    _selectedCharacterId = id;
-    notifyListeners();
+    if (_characters.any((char) => char.id == id)) {
+      _selectedCharacterId = id;
+      notifyListeners();
+    }
   }
 
   Future<void> addMessageToSelectedCharacter({
@@ -112,11 +137,21 @@ class CharactersProvider with ChangeNotifier {
   }) async {
     if (selectedCharacter == null) return;
 
-    final updatedCharacter = selectedCharacter!.addMessage(
-      text: text,
-      isUser: isUser,
-    );
+    try {
+      final updatedCharacter = selectedCharacter!.addMessage(
+        text: text,
+        isUser: isUser,
+      );
 
-    await updateCharacter(updatedCharacter);
+      await updateCharacter(updatedCharacter);
+    } catch (e) {
+      _lastError = 'Error adding message: $e';
+      rethrow;
+    }
+  }
+
+  void clearError() {
+    _lastError = null;
+    notifyListeners();
   }
 }

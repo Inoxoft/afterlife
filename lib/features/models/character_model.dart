@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CharacterModel {
+  static const String _defaultAccentColor = '0xFF4ECDC4';
+  static const String _characterIdPrefix = 'char_';
+
   final String id;
   final String name;
   final String systemPrompt;
@@ -16,10 +19,14 @@ class CharacterModel {
     required this.systemPrompt,
     this.imageUrl,
     required this.createdAt,
-    this.accentColor = const Color(0xFF4ECDC4),
+    Color? accentColor,
     List<Map<String, dynamic>>? chatHistory,
     this.additionalInfo,
-  }) : chatHistory = chatHistory ?? [];
+  }) : accentColor = accentColor ?? Color(int.parse(_defaultAccentColor)),
+       chatHistory = chatHistory ?? [],
+       assert(id.isNotEmpty, 'Character ID cannot be empty'),
+       assert(name.isNotEmpty, 'Character name cannot be empty'),
+       assert(systemPrompt.isNotEmpty, 'System prompt cannot be empty');
 
   // Create a character from the interview data
   factory CharacterModel.fromInterviewData({
@@ -27,11 +34,8 @@ class CharacterModel {
     required String cardContent,
     String? imageUrl,
   }) {
-    // Generate a unique ID based on timestamp
-    final id = 'char_${DateTime.now().millisecondsSinceEpoch}';
+    final id = '${_characterIdPrefix}${DateTime.now().millisecondsSinceEpoch}';
     final createdAt = DateTime.now();
-
-    // Ensure the system prompt is cleaned from any markdown markers
     final cleanSystemPrompt = _cleanSystemPrompt(cardContent, name);
 
     return CharacterModel(
@@ -45,10 +49,9 @@ class CharacterModel {
 
   // Helper method to clean system prompts
   static String _cleanSystemPrompt(String prompt, String characterName) {
-    // Remove any ## markers if they somehow got included
     String cleanedPrompt = prompt;
 
-    // Check if the prompt still contains markdown markers
+    // Remove markdown markers if present
     if (prompt.contains('## CHARACTER CARD SUMMARY ##') &&
         prompt.contains('## END OF CHARACTER CARD ##')) {
       final startMarker = '## CHARACTER CARD SUMMARY ##';
@@ -66,13 +69,13 @@ class CharacterModel {
     // Remove any remaining markdown markers
     cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
+    // Ensure proper instruction format
     if (!cleanedPrompt.contains("You are")) {
       cleanedPrompt =
           "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
     }
 
-    // Add clear instructions to stay in character if not already present
+    // Add character persistence instruction if not present
     if (!cleanedPrompt.contains("stay in character") &&
         !cleanedPrompt.contains("never break character")) {
       cleanedPrompt +=
@@ -98,20 +101,28 @@ class CharacterModel {
 
   // Create from JSON data
   factory CharacterModel.fromJson(Map<String, dynamic> json) {
-    return CharacterModel(
-      id: json['id'],
-      name: json['name'],
-      systemPrompt: json['systemPrompt'],
-      imageUrl: json['imageUrl'],
-      createdAt: DateTime.parse(json['createdAt']),
-      accentColor: Color(json['accentColor']),
-      chatHistory: List<Map<String, dynamic>>.from(json['chatHistory'] ?? []),
-      additionalInfo: json['additionalInfo'],
-    );
+    try {
+      return CharacterModel(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        systemPrompt: json['systemPrompt'] as String,
+        imageUrl: json['imageUrl'] as String?,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        accentColor: Color(json['accentColor'] as int),
+        chatHistory: List<Map<String, dynamic>>.from(json['chatHistory'] ?? []),
+        additionalInfo: json['additionalInfo'] as String?,
+      );
+    } catch (e) {
+      throw FormatException('Invalid character data: $e');
+    }
   }
 
   // Add a message to chat history
   CharacterModel addMessage({required String text, required bool isUser}) {
+    if (text.isEmpty) {
+      throw ArgumentError('Message text cannot be empty');
+    }
+
     final newChatHistory = List<Map<String, dynamic>>.from(chatHistory)..add({
       'content': text,
       'isUser': isUser,
@@ -129,4 +140,29 @@ class CharacterModel {
       additionalInfo: additionalInfo,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CharacterModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          systemPrompt == other.systemPrompt &&
+          imageUrl == other.imageUrl &&
+          createdAt == other.createdAt &&
+          accentColor == other.accentColor &&
+          chatHistory.length == other.chatHistory.length &&
+          additionalInfo == other.additionalInfo;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      systemPrompt.hashCode ^
+      imageUrl.hashCode ^
+      createdAt.hashCode ^
+      accentColor.hashCode ^
+      chatHistory.length.hashCode ^
+      additionalInfo.hashCode;
 }

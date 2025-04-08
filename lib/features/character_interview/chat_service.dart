@@ -4,22 +4,27 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatService {
-  static final String _openRouterUrl =
+  static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
+  static const Duration _requestTimeout = Duration(seconds: 30);
+  static const String _defaultModel = 'google/gemini-2.0-flash-001';
+  static const double _defaultTemperature = 0.7;
+  static const int _defaultMaxTokens = 1000;
+
   static late String _apiKey;
   static bool _isInitialized = false;
+  static bool _isUsingDefaultKey = false;
 
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      // Get API key from .env file
+      await dotenv.load();
       _apiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
 
-      // Fallback to default key if not found in .env (only for development)
       if (_apiKey.isEmpty) {
-        _apiKey =
-            "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";
+        _apiKey = "";
+        _isUsingDefaultKey = true;
         print(
           'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
         );
@@ -28,66 +33,86 @@ class ChatService {
       _isInitialized = true;
     } catch (e) {
       print('Error initializing chat service: $e');
-      // Use default key as last resort
-      _apiKey =
-          "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";
+      _apiKey = "";
+      _isUsingDefaultKey = true;
+      _isInitialized =
+          true; // Still mark as initialized to prevent repeated attempts
     }
   }
 
   static Future<String> sendMessage({
     required List<Map<String, dynamic>> messages,
     String? systemPrompt,
+    String? model,
+    double? temperature,
+    int? maxTokens,
   }) async {
-    // Ensure service is initialized
     if (!_isInitialized) {
       await initialize();
     }
 
-    // Prepare message list
-    final List<Map<String, dynamic>> messagesList = [];
-
-    // Add system message if provided
-    if (systemPrompt != null && systemPrompt.isNotEmpty) {
-      messagesList.add({'role': 'system', 'content': systemPrompt});
+    if (_isUsingDefaultKey) {
+      print(
+        'Warning: Using default API key - this is not recommended for production',
+      );
     }
 
-    // Add conversation messages
+    final messagesList = <Map<String, dynamic>>[];
+
+    if (systemPrompt?.isNotEmpty ?? false) {
+      messagesList.add({'role': 'system', 'content': systemPrompt});
+    }
     messagesList.addAll(messages);
 
-    // Prepare request body
     final body = jsonEncode({
-      'model': 'google/gemini-2.0-flash-001',
+      'model': model ?? _defaultModel,
       'messages': messagesList,
-      'temperature': 0.7,
-      'max_tokens': 1000,
+      'temperature': temperature ?? _defaultTemperature,
+      'max_tokens': maxTokens ?? _defaultMaxTokens,
     });
 
     try {
-      // Send request
-      final response = await http.post(
-        Uri.parse(_openRouterUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-          'HTTP-Referer': 'https://afterlife.app',
-          'X-Title': 'Afterlife AI',
-        },
-        body: body,
-      );
+      final response = await http
+          .post(
+            Uri.parse(_openRouterUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+              'HTTP-Referer': 'https://afterlife.app',
+              'X-Title': 'Afterlife AI',
+            },
+            body: body,
+          )
+          .timeout(_requestTimeout);
 
       if (response.statusCode != 200) {
-        print('API error: ${response.body}');
-        throw Exception('Failed to get response: ${response.body}');
+        final errorMessage =
+            'API error (${response.statusCode}): ${response.body}';
+        print(errorMessage);
+        throw ChatServiceException(errorMessage);
       }
 
-      // Parse response
       final data = jsonDecode(response.body);
       return data['choices'][0]['message']['content'] as String;
+    } on http.ClientException catch (e) {
+      print('Network error in chat service: $e');
+      throw ChatServiceException('Network error: ${e.message}');
+    } on FormatException catch (e) {
+      print('Invalid response format: $e');
+      throw ChatServiceException('Invalid response format');
     } catch (e) {
-      print('Error in chat service: $e');
-      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
+      print('Unexpected error in chat service: $e');
+      throw ChatServiceException('Unexpected error occurred');
     }
   }
+}
+
+class ChatServiceException implements Exception {
+  final String message;
+  ChatServiceException(this.message);
+
+  @override
+  String toString() => 'ChatServiceException: $message';
 }
 
 // Helper function to avoid importing dart:math
