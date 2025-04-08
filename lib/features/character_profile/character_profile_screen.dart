@@ -198,7 +198,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundStart,
-        title: const Text('Character Profile'),
+        title: Text('${_character!.name}\'s Profile'),
         actions: [
           if (_isEditing)
             IconButton(icon: const Icon(Icons.save), onPressed: _saveChanges)
@@ -216,33 +216,90 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Character Avatar
+              // Character Avatar with improved styling
               Center(
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: _character!.accentColor.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _character!.accentColor.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _character!.name.isNotEmpty
-                          ? _character!.name[0].toUpperCase()
-                          : '?',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: _character!.accentColor,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer glow effect
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _character!.accentColor.withOpacity(0.4),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
                       ),
+                    ),
+                    // Character avatar
+                    Container(
+                      width: 130,
+                      height: 130,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _character!.accentColor.withOpacity(0.7),
+                            _character!.accentColor.withOpacity(0.3),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.6),
+                          width: 3,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _character!.name.isNotEmpty
+                              ? _character!.name[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 4,
+                                color: Colors.black26,
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Character name display (when not editing)
+              if (!_isEditing)
+                Center(
+                  child: Text(
+                    _character!.name,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 3,
+                          color: Colors.black45,
+                          offset: Offset(1, 1),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
               const SizedBox(height: 24),
 
               // Basic Information
@@ -250,11 +307,36 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 title: 'Basic Information',
                 child: Column(
                   children: [
-                    _buildTextField(
-                      label: 'Name',
-                      controller: _nameController,
-                      enabled: _isEditing,
-                    ),
+                    if (_isEditing)
+                      _buildTextField(
+                        label: 'Name',
+                        controller: _nameController,
+                        enabled: true,
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Name:',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              _nameController.text,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: 16),
                     _buildInfoRow(
                       label: 'Created',
@@ -267,40 +349,127 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Re-Interview Button
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                child: ElevatedButton.icon(
-                  onPressed: _startReinterview,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Re-Interview Character'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.etherealCyan,
-                    foregroundColor: Colors.black87,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.etherealCyan.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    child: ElevatedButton.icon(
+                      onPressed: _startReinterview,
+                      icon: const Icon(Icons.refresh, size: 22),
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'Re-Interview Character',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.etherealCyan,
+                        foregroundColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 4,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // System Prompt
               _buildSection(
                 title: 'System Prompt',
-                child: _buildTextField(
-                  label: 'System Prompt',
-                  controller: _systemPromptController,
-                  enabled: _isEditing,
-                  maxLines: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_isEditing)
+                      _buildTextField(
+                        label: 'System Prompt',
+                        controller: _systemPromptController,
+                        enabled: true,
+                        maxLines: 15,
+                      )
+                    else
+                      Container(
+                        height: 300,
+                        decoration: BoxDecoration(
+                          color: Colors.black26,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.2),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Styled text for system prompt
+                                Text(
+                                  _systemPromptController.text,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    if (!_isEditing)
+                      Center(
+                        child: Text(
+                          '↑ Scroll to view full prompt ↑',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
+
+              // Add some spacing at the bottom for better scrolling experience
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -309,20 +478,57 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildSection({required String title, required Widget child}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: Colors.black12,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  title == 'Basic Information'
+                      ? Icons.person
+                      : Icons.text_fields,
+                  color: _character!.accentColor,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 2,
+                        color: Colors.black.withOpacity(0.3),
+                        offset: const Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Divider(color: Colors.white24, thickness: 1, height: 24),
+            child,
+          ],
         ),
-        const SizedBox(height: 12),
-        child,
-      ],
+      ),
     );
   }
 
@@ -336,36 +542,69 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       controller: controller,
       enabled: enabled,
       maxLines: maxLines,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        labelStyle: TextStyle(
+          color: Colors.white.withOpacity(0.8),
+          fontWeight: FontWeight.w500,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: _character!.accentColor),
+          borderSide: BorderSide(color: _character!.accentColor, width: 2),
         ),
         filled: true,
         fillColor: Colors.black26,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
       ),
     );
   }
 
   Widget _buildInfoRow({required String label, required String value}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.black12,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white10, width: 1),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.white.withOpacity(0.7))),
           Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
               fontWeight: FontWeight.w500,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: _character!.accentColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _character!.accentColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              value,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ],

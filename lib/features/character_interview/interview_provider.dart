@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'message_model.dart';
 import 'chat_service.dart';
 
@@ -21,7 +20,6 @@ class InterviewProvider with ChangeNotifier {
   bool isSuccess = false;
   bool isEditMode = false;
   bool isAiThinking = false;
-  Message? existingCharacter;
 
   List<Message> get messages => _messages;
 
@@ -84,15 +82,16 @@ Please acknowledge that you've received this information, and help me edit this 
         systemPrompt: systemPrompt,
       );
 
-      if (response != null) {
-        // Remove loading message
-        _removeLoadingMessage();
+      // Remove loading message
+      _removeLoadingMessage();
 
-        // Use the actual AI response
+      // Add the AI response to chat
+      if (response != null) {
         addAIMessage(response);
       } else {
-        // Handle null response case
-        _handleErrorState("Failed to get response from AI");
+        addAIMessage(
+          "I couldn't load your character information. Please try again.",
+        );
       }
     } catch (e) {
       _handleErrorState("Error sending initial edit message: $e");
@@ -105,7 +104,7 @@ Please acknowledge that you've received this information, and help me edit this 
 
 The user has shared their character's current system prompt, and you're helping them make specific improvements.
 
-Your goal is to enhance the existing character prompt based on the user's feedback, NOT to create an entirely new character.
+Your goal is to enhance the existing character card based on the user's feedback, NOT to create an entirely new character.
 
 Here's how to approach this:
 1. First, acknowledge that you have received the existing character information and can see its details.
@@ -366,16 +365,10 @@ AI: "That's bold! Do you often take risks, or was this an exception? How do you 
         // Add the AI response to chat
         addAIMessage(response);
       } catch (e) {
-        _removeLoadingMessage();
-        addAIMessage(
-          'I\'m having trouble connecting to my AI service. Please check your internet connection and try again.',
-        );
+        _handleErrorState("Error sending message: $e");
       }
     } catch (e) {
-      _removeLoadingMessage();
-      addAIMessage(
-        'Sorry, there was an error processing your message. Please try again.',
-      );
+      _handleErrorState("Error processing message: $e");
     }
   }
 
@@ -404,9 +397,6 @@ AI: "That's bold! Do you often take risks, or was this an exception? How do you 
     isSuccess = false;
     _initialize();
   }
-
-  // Helper function to avoid importing dart:math
-  int min(int a, int b) => a < b ? a : b;
 
   String _prepareSystemPromptForCharacter(String prompt) {
     // Remove any ## markers that might confuse the AI
