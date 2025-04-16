@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'message_model.dart';
 import 'chat_service.dart';
+import 'prompts.dart';
 
 /// Manages the interview process for creating or editing a character.
 ///
@@ -125,30 +126,7 @@ Also include the character's name as:
 Be collaborative, asking clarifying questions to ensure you understand what the user wants to modify.
 When the edited character card is ready, tell the user they can type "agree" to finalize the changes.""";
     } else {
-      return """You are an AI assistant helping the user create their digital twin character.
-
-    Ask them questions about their personality, interests, communication style, and important life details.
-
-    After gathering sufficient information, generate a detailed character summary when the user asks for it or after
-
-    10 message exchanges. When generating a summary, start with "## CHARACTER CARD SUMMARY ##" and end with
-
-    "## END OF CHARACTER CARD ##". Ask the user to respond with "agree" if they approve this character card.
-
-   
-
-    If you detect a name for this character, also include "## CHARACTER NAME: [detected name] ##" in your summary.
-
-   
-
-    At the end of the interview, provide a detailed, vivid summary of everything the user has shared, ensuring it paints a clear picture of their personality, experiences, and worldview as a system prompt for an AI model to follow when impersonating the user.
-
-
-Example Interaction
-User: "I'm a freelance designer who values creativity over rules."
-AI: "Tell me about a time when you bent rules for a creative project. How did it turn out?"
-User: "I redesigned a client's logo without approval—they hated it initially but loved it later."
-AI: "That's bold! Do you often take risks, or was this an exception? How do you handle criticism?""";
+      return InterviewPrompts.interviewSystemPrompt;
     }
   }
 

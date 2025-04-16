@@ -23,7 +23,8 @@ class ChatService {
       _apiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
 
       if (_apiKey.isEmpty) {
-        _apiKey = "";
+        _apiKey =
+            "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";
         _isUsingDefaultKey = true;
         print(
           'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
@@ -33,7 +34,8 @@ class ChatService {
       _isInitialized = true;
     } catch (e) {
       print('Error initializing chat service: $e');
-      _apiKey = "";
+      _apiKey =
+          "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";
       _isUsingDefaultKey = true;
       _isInitialized =
           true; // Still mark as initialized to prevent repeated attempts

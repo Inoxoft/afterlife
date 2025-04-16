@@ -11,6 +11,7 @@ class AppTheme {
   static const Color backgroundEnd = Color(0xFF1E1E24);
   static const Color accentPurple = Color(0xFF9D8DF1);
   static const Color subtleGrey = Color(0xFF2A2A2A);
+  static const Color accentColor = etherealCyan;
 
   // Gradients
   static const LinearGradient mainGradient = LinearGradient(

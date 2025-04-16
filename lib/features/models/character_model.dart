@@ -165,4 +165,21 @@ class CharacterModel {
       accentColor.hashCode ^
       chatHistory.length.hashCode ^
       additionalInfo.hashCode;
+
+  // Get a short description from the system prompt
+  String getShortDescription() {
+    final cleanPrompt = systemPrompt.replaceAll(RegExp(r'You are \w+,\s+'), '');
+    final firstSentence = cleanPrompt.split('.').first;
+
+    if (firstSentence.length > 100) {
+      return '${firstSentence.substring(0, 97)}...';
+    }
+
+    return '$firstSentence.';
+  }
+
+  // Get formatted creation date
+  String getFormattedDate() {
+    return '${createdAt.day}/${createdAt.month}/${createdAt.year}';
+  }
 }

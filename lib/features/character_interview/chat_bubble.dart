@@ -4,15 +4,15 @@ import '../../core/theme/app_theme.dart';
 import 'message_model.dart';
 
 class ChatBubble extends StatelessWidget {
-  final String message;
-  final bool isUser;
-  final bool isLoading;
+  final Message message;
+  final bool showAvatar;
+  final String avatarText;
 
   const ChatBubble({
     Key? key,
     required this.message,
-    required this.isUser,
-    this.isLoading = false,
+    this.showAvatar = false,
+    this.avatarText = '',
   }) : super(key: key);
 
   @override
@@ -25,47 +25,84 @@ class ChatBubble extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          constraints: BoxConstraints(maxWidth: bubbleWidth),
-          decoration: BoxDecoration(
-            color:
-                isUser
-                    ? const Color(0xFF8B5EF0).withOpacity(0.6)
-                    : (hasCharacterCard()
-                        ? AppTheme.deepIndigo.withOpacity(0.7)
-                        : Colors.black.withOpacity(0.4)),
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(16),
-              topRight: const Radius.circular(16),
-              bottomLeft:
-                  isUser ? const Radius.circular(16) : const Radius.circular(4),
-              bottomRight:
-                  isUser ? const Radius.circular(4) : const Radius.circular(16),
-            ),
-            border: Border.all(
-              color:
-                  isUser
-                      ? const Color(0xFF8B5EF0).withOpacity(0.7)
-                      : (hasCharacterCard()
-                          ? AppTheme.etherealCyan.withOpacity(0.5)
-                          : Colors.white.withOpacity(0.1)),
-              width: hasCharacterCard() ? 1.5 : 1,
+      child: Row(
+        mainAxisAlignment:
+            message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!message.isUser && showAvatar) _buildAvatar(),
+          if (!message.isUser && showAvatar) const SizedBox(width: 8),
+          Flexible(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: bubbleWidth),
+              decoration: BoxDecoration(
+                color:
+                    message.isUser
+                        ? const Color(0xFF8B5EF0).withOpacity(0.6)
+                        : (hasCharacterCard()
+                            ? AppTheme.deepIndigo.withOpacity(0.7)
+                            : Colors.black.withOpacity(0.4)),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft:
+                      message.isUser
+                          ? const Radius.circular(16)
+                          : const Radius.circular(4),
+                  bottomRight:
+                      message.isUser
+                          ? const Radius.circular(4)
+                          : const Radius.circular(16),
+                ),
+                border: Border.all(
+                  color:
+                      message.isUser
+                          ? const Color(0xFF8B5EF0).withOpacity(0.7)
+                          : (hasCharacterCard()
+                              ? AppTheme.etherealCyan.withOpacity(0.5)
+                              : Colors.white.withOpacity(0.1)),
+                  width: hasCharacterCard() ? 1.5 : 1,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
+              child:
+                  message.isLoading
+                      ? _buildLoadingIndicator()
+                      : _buildMessageText(context),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          child:
-              isLoading ? _buildLoadingIndicator() : _buildMessageText(context),
+          if (message.isUser && showAvatar) const SizedBox(width: 8),
+          if (message.isUser && showAvatar) _buildAvatar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar() {
+    return CircleAvatar(
+      radius: 16,
+      backgroundColor:
+          message.isUser
+              ? const Color(0xFF8B5EF0).withOpacity(0.8)
+              : AppTheme.etherealCyan.withOpacity(0.8),
+      child: Text(
+        avatarText.isNotEmpty ? avatarText : (message.isUser ? 'U' : 'A'),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
       ),
     );
   }
 
   bool hasCharacterCard() {
-    return !isUser &&
-        message.contains('## CHARACTER CARD SUMMARY ##') &&
-        message.contains('## END OF CHARACTER CARD ##');
+    return !message.isUser &&
+        message.text.contains('## CHARACTER CARD SUMMARY ##') &&
+        message.text.contains('## END OF CHARACTER CARD ##');
   }
 
   Widget _buildLoadingIndicator() {
@@ -88,11 +125,11 @@ class ChatBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Regular text before character card
-          if (message.indexOf('## CHARACTER CARD SUMMARY ##') > 0)
+          if (message.text.indexOf('## CHARACTER CARD SUMMARY ##') > 0)
             Text(
-              message.substring(
+              message.text.substring(
                 0,
-                message.indexOf('## CHARACTER CARD SUMMARY ##'),
+                message.text.indexOf('## CHARACTER CARD SUMMARY ##'),
               ),
               style: const TextStyle(color: Colors.white, fontSize: 15),
             ),
@@ -179,7 +216,7 @@ class ChatBubble extends StatelessWidget {
     }
 
     return Text(
-      message,
+      message.text,
       style: const TextStyle(color: Colors.white, fontSize: 15),
     );
   }
@@ -188,13 +225,13 @@ class ChatBubble extends StatelessWidget {
     final startMarker = '## CHARACTER CARD SUMMARY ##';
     final endMarker = '## END OF CHARACTER CARD ##';
 
-    final startIndex = message.indexOf(startMarker) + startMarker.length;
-    final endIndex = message.indexOf(endMarker);
+    final startIndex = message.text.indexOf(startMarker) + startMarker.length;
+    final endIndex = message.text.indexOf(endMarker);
 
     if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex) {
-      return message; // Fallback if markers aren't found properly
+      return message.text; // Fallback if markers aren't found properly
     }
 
-    return message.substring(startIndex, endIndex).trim();
+    return message.text.substring(startIndex, endIndex).trim();
   }
 }

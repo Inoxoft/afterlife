@@ -275,9 +275,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
                             final message = provider.messages[index];
                             return ChatBubble(
-                              message: message.text,
-                              isUser: message.isUser,
-                              isLoading: message.isLoading,
+                              message: message,
+                              showAvatar: !message.isUser,
+                              avatarText: message.isUser ? "You" : "AI",
                             );
                           },
                         );
