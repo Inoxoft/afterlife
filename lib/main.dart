@@ -4,11 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:afterlife/core/theme/app_theme.dart';
-import 'package:afterlife/features/welcome/welcome_screen.dart';
+import 'package:afterlife/features/character_gallery/character_gallery_screen.dart';
 import 'package:afterlife/features/providers/characters_provider.dart';
 import 'package:afterlife/features/character_interview/interview_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'core/app_router.dart';
 
 class AppInitializationError extends Error {
   final String message;
@@ -82,7 +80,7 @@ class MyApp extends StatelessWidget {
       title: 'Afterlife AI',
       debugShowCheckedModeBanner: false,
       theme: _buildTheme(),
-      home: const WelcomeScreen(),
+      home: const CharacterGalleryScreen(),
     );
   }
 

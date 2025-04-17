@@ -148,20 +148,64 @@ When the edited character card is ready, tell the user they can type "agree" to 
     _addLoadingMessage();
 
     try {
-      // Handle agree separately - this needs to happen after processing any card summary
+      // Handle 'agree' command - this completes the character creation
       if (text.toLowerCase().trim() == 'agree' && !isComplete) {
-        // First try to use the stored character card summary
-        if (characterCardSummary != null) {
-          // Extract the clean system prompt
-          final startIndex = characterCardSummary!.indexOf(
-            '## CHARACTER CARD SUMMARY ##',
-          );
-          final cleanStart = startIndex + '## CHARACTER CARD SUMMARY ##'.length;
-          final cleanEnd = characterCardSummary!.indexOf(
-            '## END OF CHARACTER CARD ##',
-          );
+        // Always look for character name in messages if not already found
+        if (characterName == null) {
+          // Extract character name from any recent AI message
+          for (int i = _messages.length - 1; i >= 0; i--) {
+            final msg = _messages[i];
+            if (!msg.isUser) {
+              // Check for character name marker
+              final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
+              final nameMatch = namePattern.firstMatch(msg.text);
+              if (nameMatch != null && nameMatch.group(1) != null) {
+                characterName = nameMatch.group(1)!.trim();
+                print('Found character name: $characterName');
+                break;
+              }
+            }
+          }
 
-          if (cleanStart >= 0 && cleanEnd > cleanStart) {
+          // If still no name found, use a default name
+          if (characterName == null) {
+            characterName = "Character";
+            print('Using default character name: $characterName');
+          }
+        }
+
+        // Look for a character card in any message if not already stored
+        if (characterCardSummary == null) {
+          for (int i = _messages.length - 1; i >= 0; i--) {
+            final msg = _messages[i];
+            if (!msg.isUser &&
+                msg.text.contains('## CHARACTER CARD SUMMARY ##') &&
+                msg.text.contains('## END OF CHARACTER CARD ##')) {
+              characterCardSummary = msg.text;
+              print('Found character card summary in messages');
+              break;
+            }
+          }
+        }
+
+        // Process the character card if found
+        if (characterCardSummary != null) {
+          print(
+            'Processing character card summary: ${characterCardSummary!.substring(0, min(100, characterCardSummary!.length))}...',
+          );
+          // Extract the clean system prompt
+          final startMarker = '## CHARACTER CARD SUMMARY ##';
+          final endMarker = '## END OF CHARACTER CARD ##';
+
+          final startIndex = characterCardSummary!.indexOf(startMarker);
+          final cleanStart =
+              startIndex != -1 ? startIndex + startMarker.length : 0;
+
+          final endIndex = characterCardSummary!.indexOf(endMarker);
+          final cleanEnd =
+              endIndex != -1 ? endIndex : characterCardSummary!.length;
+
+          if (startIndex != -1 && endIndex != -1 && cleanStart < cleanEnd) {
             final cleanSystemPrompt =
                 characterCardSummary!.substring(cleanStart, cleanEnd).trim();
             characterCardSummary = _prepareSystemPromptForCharacter(
@@ -172,37 +216,11 @@ When the edited character card is ready, tell the user they can type "agree" to 
             _removeLoadingMessage();
             notifyListeners();
             return;
-          }
-        }
-
-        // If no stored summary, look in messages
-        String? foundCardSummary;
-        for (int i = _messages.length - 1; i >= 0; i--) {
-          final msg = _messages[i];
-          if (!msg.isUser &&
-              msg.text.contains('## CHARACTER CARD SUMMARY ##') &&
-              msg.text.contains('## END OF CHARACTER CARD ##')) {
-            foundCardSummary = msg.text;
-            break;
-          }
-        }
-
-        // If we have a card summary from any message, process it
-        if (foundCardSummary != null) {
-          // Extract the clean system prompt
-          final startIndex = foundCardSummary.indexOf(
-            '## CHARACTER CARD SUMMARY ##',
-          );
-          final cleanStart = startIndex + '## CHARACTER CARD SUMMARY ##'.length;
-          final cleanEnd = foundCardSummary.indexOf(
-            '## END OF CHARACTER CARD ##',
-          );
-
-          if (cleanStart >= 0 && cleanEnd > cleanStart) {
-            final cleanSystemPrompt =
-                foundCardSummary.substring(cleanStart, cleanEnd).trim();
+          } else {
+            print('Failed to extract proper character summary from markers');
+            // Even if we couldn't find the markers, we'll use the whole content as fallback
             characterCardSummary = _prepareSystemPromptForCharacter(
-              cleanSystemPrompt,
+              characterCardSummary!,
             );
             isSuccess = true;
             isComplete = true;
@@ -210,12 +228,27 @@ When the edited character card is ready, tell the user they can type "agree" to 
             notifyListeners();
             return;
           }
+        } else {
+          // If we get here but don't have a card summary, try to use the last AI message as the card
+          for (int i = _messages.length - 1; i >= 0; i--) {
+            final msg = _messages[i];
+            if (!msg.isUser && !msg.isLoading && msg.text.length > 50) {
+              // Use the last substantial AI message as the character card
+              characterCardSummary = _prepareSystemPromptForCharacter(msg.text);
+              isSuccess = true;
+              isComplete = true;
+              _removeLoadingMessage();
+              notifyListeners();
+              print('Using last AI message as character card fallback');
+              return;
+            }
+          }
         }
 
-        // If we get here, we couldn't find a valid character card
+        // If we still couldn't find a valid character card
         _removeLoadingMessage();
         addAIMessage(
-          "I couldn't find a valid character card to process. Please try again.",
+          "I couldn't find a valid character card to process. Please try again or continue your conversation so I can create one for you.",
         );
         return;
       }
@@ -237,20 +270,45 @@ When the edited character card is ready, tell the user they can type "agree" to 
         // We're still in interview mode
         final systemPrompt = _getSystemPrompt();
         final response = await ChatService.sendMessage(
-          messages: [
-            {"role": "user", "content": text},
-          ],
+          messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
         );
         _removeLoadingMessage();
         if (response != null) {
           addAIMessage(response);
+
+          // Check if this message contains a character card
+          if (response.contains('## CHARACTER CARD SUMMARY ##') &&
+              response.contains('## END OF CHARACTER CARD ##')) {
+            characterCardSummary = response;
+
+            // Try to extract character name if present
+            final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
+            final nameMatch = namePattern.firstMatch(response);
+            if (nameMatch != null && nameMatch.group(1) != null) {
+              characterName = nameMatch.group(1)!.trim();
+              print('Extracted character name: $characterName');
+            }
+          }
         }
       }
     } catch (e) {
       _handleErrorState("Error sending message: $e");
     }
   }
+
+  // Helper function to convert local messages to API format
+  List<Map<String, dynamic>> _convertMessagesToAPI() {
+    return _messages
+        .where((m) => !m.isLoading) // Skip loading messages
+        .map(
+          (m) => {"role": m.isUser ? "user" : "assistant", "content": m.text},
+        )
+        .toList();
+  }
+
+  // Helper to get min value
+  int min(int a, int b) => a < b ? a : b;
 
   void addAIMessage(String text) {
     _messages.add(Message(text: text, isUser: false));

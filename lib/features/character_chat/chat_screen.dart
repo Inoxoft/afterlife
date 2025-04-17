@@ -17,17 +17,39 @@ class CharacterChatScreen extends StatefulWidget {
   State<CharacterChatScreen> createState() => _CharacterChatScreenState();
 }
 
-class _CharacterChatScreenState extends State<CharacterChatScreen> {
+class _CharacterChatScreenState extends State<CharacterChatScreen>
+    with AutomaticKeepAliveClientMixin {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   bool _isLoading = false;
   CharacterModel? _character;
+  String? _loadError;
+
+  // Cached widgets and values for performance
+  late final Widget _particleBackground = const Opacity(
+    opacity: 0.5,
+    child: AnimatedParticles(
+      particleCount: 20, // Reduced for better performance
+      particleColor: Colors.white,
+      minSpeed: 0.01,
+      maxSpeed: 0.03,
+    ),
+  );
+
+  // Keep this screen alive in navigation stack for better performance
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    _loadCharacter();
+    _isLoading = false;
+
+    // Load the character on the next frame for better UI responsiveness
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCharacter();
+    });
   }
 
   @override
@@ -38,50 +60,75 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
     super.dispose();
   }
 
-  void _loadCharacter() {
-    final charactersProvider = Provider.of<CharactersProvider>(
-      context,
-      listen: false,
-    );
+  void _loadCharacter() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
-      // Find the character by ID
-      final character = charactersProvider.characters.firstWhere(
-        (c) => c.id == widget.characterId,
-        orElse: () => throw Exception('Character not found'),
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
       );
 
-      setState(() {
-        _character = character;
-      });
+      // Use the provider to load the character
+      final character = await charactersProvider.loadCharacterById(
+        widget.characterId,
+      );
 
-      // Select this character in the provider
-      charactersProvider.selectCharacter(widget.characterId);
+      if (character != null && mounted) {
+        setState(() {
+          _character = character;
+          _isLoading = false;
+          _loadError = null;
+        });
 
-      print('Loaded character: ${character.name}');
-      print('Chat history length: ${character.chatHistory.length}');
-    } catch (e) {
-      print('Error loading character: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: Could not load character'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Select this character in the provider
+        charactersProvider.selectCharacter(widget.characterId);
+      } else if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _loadError = 'Character not found';
+        });
       }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _loadError = 'Could not load character - $e';
+        });
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Show error here instead of in initState
+    if (_loadError != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $_loadError'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
     }
   }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      });
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -104,12 +151,16 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
       isUser: true,
     );
 
-    // Set loading state
-    setState(() {
-      _isLoading = true;
-    });
+    // Update state
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        // Update character reference to reflect new message
+        _character = charactersProvider.selectedCharacter;
+      });
+    }
 
-    // Scroll to the bottom
+    // Scroll to the bottom after state update
     _scrollToBottom();
 
     try {
@@ -119,9 +170,14 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
         throw Exception('Character not selected');
       }
 
-      // Prepare the chat history for the API
+      // Prepare the chat history for the API - limit to last 10 messages for performance
+      final recentMessages =
+          character.chatHistory.length > 10
+              ? character.chatHistory.sublist(character.chatHistory.length - 10)
+              : character.chatHistory;
+
       final apiChatHistory =
-          character.chatHistory
+          recentMessages
               .map(
                 (msg) => {
                   'role': msg['isUser'] == true ? 'user' : 'assistant',
@@ -144,9 +200,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
         isUser: false,
       );
     } catch (e) {
-      print('Error sending message: $e');
-
-      // Show error message to user
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
@@ -157,10 +210,13 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+          // Refresh character data
+          _character =
+              Provider.of<CharactersProvider>(
+                context,
+                listen: false,
+              ).selectedCharacter;
         });
-
-        // Update character reference
-        _loadCharacter();
 
         // Scroll to bottom to show new messages
         _scrollToBottom();
@@ -170,233 +226,38 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
     if (_character == null) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Chat'),
           backgroundColor: AppTheme.backgroundStart,
         ),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       );
     }
 
     // We have a character, render the chat UI
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppTheme.backgroundStart,
-        elevation: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: _character!.accentColor.withOpacity(0.2),
-              child: Text(
-                _character!.name.isNotEmpty
-                    ? _character!.name[0].toUpperCase()
-                    : '?',
-                style: TextStyle(
-                  color: _character!.accentColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _character!.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'Your Digital Twin',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white60,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          // Profile button
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) =>
-                          CharacterProfileScreen(characterId: _character!.id),
-                ),
-              ).then((_) {
-                // Reload character data when returning from profile
-                _loadCharacter();
-              });
-            },
-          ),
-          // Clear chat button
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: _showClearChatDialog,
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
         child: Stack(
           children: [
             // Background particles with reduced opacity
-            const Opacity(
-              opacity: 0.5,
-              child: AnimatedParticles(
-                particleCount: 30,
-                particleColor: Colors.white,
-                minSpeed: 0.01,
-                maxSpeed: 0.03,
-              ),
-            ),
+            _particleBackground,
 
             Column(
               children: [
                 // Chat messages
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: _character!.chatHistory.length,
-                    itemBuilder: (context, index) {
-                      final message = _character!.chatHistory[index];
-                      return AnimatedOpacity(
-                        duration: const Duration(milliseconds: 300),
-                        opacity: 1.0,
-                        curve: Curves.easeOutQuad,
-                        child: _buildMessageBubble(message),
-                      );
-                    },
-                  ),
-                ),
+                Expanded(child: _buildChatList()),
 
                 // Input area
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12.0,
-                    vertical: 8.0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.deepIndigo.withOpacity(0.7),
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        offset: const Offset(0, -1),
-                        blurRadius: 6.0,
-                        spreadRadius: 0.0,
-                        color: Colors.black.withOpacity(0.1),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _messageController,
-                            focusNode: _inputFocusNode,
-                            decoration: InputDecoration(
-                              hintText: 'Type your message...',
-                              hintStyle: TextStyle(color: Colors.white60),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 14.0,
-                              ),
-                            ),
-                            style: const TextStyle(color: Colors.white),
-                            minLines: 1,
-                            maxLines: 5,
-                            onSubmitted:
-                                _isLoading
-                                    ? null
-                                    : (text) {
-                                      if (text.trim().isNotEmpty) {
-                                        _sendMessage();
-                                      }
-                                    },
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            color:
-                                _isLoading
-                                    ? AppTheme.etherealCyan.withOpacity(0.3)
-                                    : AppTheme.etherealCyan,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              if (!_isLoading)
-                                BoxShadow(
-                                  color: AppTheme.etherealCyan.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
-                            ],
-                          ),
-                          child: IconButton(
-                            icon: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (
-                                Widget child,
-                                Animation<double> animation,
-                              ) {
-                                return ScaleTransition(
-                                  scale: animation,
-                                  child: child,
-                                );
-                              },
-                              child:
-                                  _isLoading
-                                      ? const Icon(
-                                        Icons.hourglass_top,
-                                        key: ValueKey('loading'),
-                                        color: Colors.white60,
-                                      )
-                                      : const Icon(
-                                        Icons.send,
-                                        key: ValueKey('send'),
-                                        color: Colors.black87,
-                                      ),
-                            ),
-                            onPressed:
-                                _isLoading
-                                    ? null
-                                    : () {
-                                      if (_messageController.text
-                                          .trim()
-                                          .isNotEmpty) {
-                                        _sendMessage();
-                                      }
-                                    },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                _buildInputArea(),
               ],
             ),
           ],
@@ -405,29 +266,179 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> message) {
-    final isUser = message['isUser'] as bool;
-    final bubbleColor =
-        isUser
-            ? AppTheme.accentPurple.withOpacity(0.5)
-            : Colors.black.withOpacity(0.3);
-    final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
+  // Extract app bar to a separate method for readability and performance
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppTheme.backgroundStart,
+      elevation: 0,
+      title: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: _character!.accentColor.withOpacity(0.2),
+            child: Text(
+              _character!.name.isNotEmpty
+                  ? _character!.name[0].toUpperCase()
+                  : '?',
+              style: TextStyle(
+                color: _character!.accentColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _character!.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Your Digital Twin',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        // Profile button
+        IconButton(
+          icon: const Icon(Icons.person_outline),
+          onPressed: () => _navigateToProfile(),
+        ),
+        // Clear chat button
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: _showClearChatDialog,
+        ),
+      ],
+    );
+  }
 
-    return Align(
-      alignment: alignment,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
+  // Extract chat list to a separate method for readability and performance
+  Widget _buildChatList() {
+    // If no messages, show a welcome message
+    if (_character!.chatHistory.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.chat_bubble_outline,
+                size: 48,
+                color: Colors.white54,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Start chatting with ${_character!.name}',
+                style: const TextStyle(fontSize: 18, color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Send a message below to begin the conversation',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white.withOpacity(0.5),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: bubbleColor,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          message['content'] as String,
-          style: const TextStyle(color: Colors.white),
+      );
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(16.0),
+      itemCount: _character!.chatHistory.length,
+      itemBuilder: (context, index) {
+        final message = _character!.chatHistory[index];
+        return _MessageBubble(
+          key: ValueKey('msg_${index}_${message['isUser']}'),
+          message: message['content'] as String,
+          isUser: message['isUser'] as bool,
+        );
+      },
+    );
+  }
+
+  // Extract input area to a separate method for readability and performance
+  Widget _buildInputArea() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: AppTheme.deepIndigo.withOpacity(0.7),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            offset: const Offset(0, -1),
+            blurRadius: 6.0,
+            spreadRadius: 0.0,
+            color: Colors.black.withOpacity(0.1),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _messageController,
+                focusNode: _inputFocusNode,
+                decoration: InputDecoration(
+                  hintText: 'Type your message...',
+                  hintStyle: const TextStyle(color: Colors.white60),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.black26,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 14.0,
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+                minLines: 1,
+                maxLines: 5,
+                onSubmitted:
+                    _isLoading
+                        ? null
+                        : (text) {
+                          if (text.trim().isNotEmpty) {
+                            _sendMessage();
+                          }
+                        },
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            _SendButton(
+              isLoading: _isLoading,
+              onPressed:
+                  _isLoading
+                      ? null
+                      : () {
+                        if (_messageController.text.trim().isNotEmpty) {
+                          _sendMessage();
+                        }
+                      },
+            ),
+          ],
         ),
       ),
     );
@@ -454,39 +465,155 @@ class _CharacterChatScreenState extends State<CharacterChatScreen> {
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () {
-                  // Clear chat history
-                  final charactersProvider = Provider.of<CharactersProvider>(
-                    context,
-                    listen: false,
-                  );
-
-                  // Create a new character with empty chat history
-                  final updatedCharacter = CharacterModel(
-                    id: _character!.id,
-                    name: _character!.name,
-                    systemPrompt: _character!.systemPrompt,
-                    imageUrl: _character!.imageUrl,
-                    createdAt: _character!.createdAt,
-                    accentColor: _character!.accentColor,
-                    chatHistory: [],
-                  );
-
-                  // Update the character
-                  charactersProvider.updateCharacter(updatedCharacter);
-
-                  // Close the dialog
-                  Navigator.pop(context);
-
-                  // Show a confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Chat history cleared')),
-                  );
-                },
+                onPressed: () => _clearChatHistory(context),
                 child: const Text('Clear'),
               ),
             ],
           ),
+    );
+  }
+
+  void _clearChatHistory(BuildContext context) {
+    // Clear chat history
+    final charactersProvider = Provider.of<CharactersProvider>(
+      context,
+      listen: false,
+    );
+
+    // Create a new character with empty chat history
+    final updatedCharacter = CharacterModel(
+      id: _character!.id,
+      name: _character!.name,
+      systemPrompt: _character!.systemPrompt,
+      imageUrl: _character!.imageUrl,
+      createdAt: _character!.createdAt,
+      accentColor: _character!.accentColor,
+      chatHistory: [],
+    );
+
+    // Update the character
+    charactersProvider.updateCharacter(updatedCharacter);
+
+    // Close the dialog
+    Navigator.pop(context);
+
+    // Update local state
+    setState(() {
+      _character = updatedCharacter;
+    });
+
+    // Show a confirmation
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
+  }
+
+  void _navigateToProfile() {
+    if (_character == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: Could not load character profile'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => CharacterProfileScreen(characterId: _character!.id),
+      ),
+    ).then((_) {
+      // Reload character data when returning from profile
+      _loadCharacter();
+    });
+  }
+}
+
+// Extracted as a separate stateless widget for better performance
+class _MessageBubble extends StatelessWidget {
+  final String message;
+  final bool isUser;
+
+  const _MessageBubble({Key? key, required this.message, required this.isUser})
+    : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bubbleColor =
+        isUser
+            ? AppTheme.accentPurple.withOpacity(0.5)
+            : Colors.black.withOpacity(0.3);
+    final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
+
+    return Align(
+      alignment: alignment,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: bubbleColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(message, style: const TextStyle(color: Colors.white)),
+      ),
+    );
+  }
+}
+
+// Extracted as a separate stateless widget for better performance
+class _SendButton extends StatelessWidget {
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  const _SendButton({Key? key, required this.isLoading, this.onPressed})
+    : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color:
+            isLoading
+                ? AppTheme.etherealCyan.withOpacity(0.3)
+                : AppTheme.etherealCyan,
+        shape: BoxShape.circle,
+        boxShadow: [
+          if (!isLoading)
+            BoxShadow(
+              color: AppTheme.etherealCyan.withOpacity(0.3),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+        ],
+      ),
+      child: IconButton(
+        icon: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return ScaleTransition(scale: animation, child: child);
+          },
+          child:
+              isLoading
+                  ? const Icon(
+                    Icons.hourglass_top,
+                    key: ValueKey('loading'),
+                    color: Colors.white60,
+                  )
+                  : const Icon(
+                    Icons.send,
+                    key: ValueKey('send'),
+                    color: Colors.black87,
+                  ),
+        ),
+        onPressed: onPressed,
+      ),
     );
   }
 }

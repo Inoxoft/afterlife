@@ -1,10 +1,11 @@
 // lib/features/character_interview/interview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:file_selector/file_selector.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
+import '../providers/characters_provider.dart';
+import '../character_gallery/character_gallery_screen.dart';
 import 'interview_provider.dart';
 import 'chat_bubble.dart';
 import 'file_processor_service.dart';
@@ -58,16 +59,6 @@ class _InterviewScreenState extends State<InterviewScreen> {
     _scrollController.dispose();
     _inputFocusNode.dispose();
     super.dispose();
-  }
-
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
   }
 
   Future<void> _handleFileUpload() async {
@@ -232,16 +223,98 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       ),
                                       const SizedBox(height: 20),
                                       ElevatedButton(
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // Ensure we're passing back clean system prompt
                                           final cleanPrompt =
                                               provider.characterCardSummary;
+                                          final characterName =
+                                              provider.characterName ??
+                                              "Character";
 
-                                          Navigator.pop(context, {
-                                            'characterCard': cleanPrompt,
-                                            'characterName':
-                                                provider.characterName,
-                                          });
+                                          if (cleanPrompt == null) {
+                                            print(
+                                              'Error: Character prompt is null',
+                                            );
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Error: Character information is incomplete. Please try again.',
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          // Ensure we have a non-empty character name
+                                          final finalCharacterName =
+                                              characterName.trim().isEmpty
+                                                  ? "Character"
+                                                  : characterName;
+
+                                          print(
+                                            'Character creation successful:',
+                                          );
+                                          print('Name: $finalCharacterName');
+                                          print(
+                                            'System prompt length: ${cleanPrompt.length}',
+                                          );
+
+                                          try {
+                                            // Create the character directly here
+                                            final charactersProvider =
+                                                Provider.of<CharactersProvider>(
+                                                  context,
+                                                  listen: false,
+                                                );
+
+                                            // Create new character
+                                            final newCharacter =
+                                                CharacterModel.fromInterviewData(
+                                                  name: finalCharacterName,
+                                                  cardContent: cleanPrompt,
+                                                );
+
+                                            print(
+                                              'Character created with ID: ${newCharacter.id}',
+                                            );
+
+                                            // Add character to provider
+                                            await charactersProvider
+                                                .addCharacter(newCharacter);
+                                            print(
+                                              'Character saved successfully',
+                                            );
+
+                                            // Navigate directly to "Your Twins" gallery screen
+                                            if (context.mounted) {
+                                              print(
+                                                'Navigating to Your Twins gallery screen',
+                                              );
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) =>
+                                                          const CharacterGalleryScreen(),
+                                                ),
+                                              );
+                                            }
+                                          } catch (e) {
+                                            print(
+                                              'Error creating character: $e',
+                                            );
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Error: $e'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:

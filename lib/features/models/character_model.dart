@@ -102,14 +102,49 @@ class CharacterModel {
   // Create from JSON data
   factory CharacterModel.fromJson(Map<String, dynamic> json) {
     try {
+      // Ensure required fields are present
+      if (json['id'] == null ||
+          json['name'] == null ||
+          json['systemPrompt'] == null) {
+        throw FormatException('Missing required fields in character data');
+      }
+
+      // Parse the createdAt date safely
+      DateTime createdAt;
+      try {
+        createdAt = DateTime.parse(json['createdAt'] as String);
+      } catch (e) {
+        print('Error parsing date, using current time: $e');
+        createdAt = DateTime.now();
+      }
+
+      // Parse the accent color safely
+      Color accentColor;
+      try {
+        accentColor = Color(json['accentColor'] as int);
+      } catch (e) {
+        print('Error parsing accent color, using default: $e');
+        accentColor = Color(int.parse(_defaultAccentColor));
+      }
+
+      // Parse chat history safely
+      List<Map<String, dynamic>> chatHistory = [];
+      try {
+        if (json['chatHistory'] != null) {
+          chatHistory = List<Map<String, dynamic>>.from(json['chatHistory']);
+        }
+      } catch (e) {
+        print('Error parsing chat history, using empty list: $e');
+      }
+
       return CharacterModel(
         id: json['id'] as String,
         name: json['name'] as String,
         systemPrompt: json['systemPrompt'] as String,
         imageUrl: json['imageUrl'] as String?,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        accentColor: Color(json['accentColor'] as int),
-        chatHistory: List<Map<String, dynamic>>.from(json['chatHistory'] ?? []),
+        createdAt: createdAt,
+        accentColor: accentColor,
+        chatHistory: chatHistory,
         additionalInfo: json['additionalInfo'] as String?,
       );
     } catch (e) {

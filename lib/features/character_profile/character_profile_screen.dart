@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../models/character_model.dart';
@@ -400,6 +401,166 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Character Card Actions
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Character Card Options',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _character!.accentColor.withOpacity(
+                                    0.3,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: _showCharacterCardInfo,
+                              icon: const Icon(Icons.visibility, size: 20),
+                              label: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
+                                child: Text(
+                                  'View Card Info',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _character!.accentColor
+                                    .withOpacity(0.8),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _character!.accentColor.withOpacity(
+                                    0.3,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: _showFormattedCard,
+                              icon: const Icon(Icons.description, size: 20),
+                              label: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
+                                child: Text(
+                                  'View Card',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple.withOpacity(0.8),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _character!.accentColor.withOpacity(
+                                    0.3,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: _copyFullCharacterCard,
+                              icon: const Icon(Icons.content_copy, size: 20),
+                              label: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
+                                child: Text(
+                                  'Copy Card',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueGrey.withOpacity(
+                                  0.8,
+                                ),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // System Prompt
               _buildSection(
                 title: 'System Prompt',
@@ -431,25 +592,64 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Styled text for system prompt
-                                Text(
-                                  _systemPromptController.text,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    height: 1.5,
-                                  ),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Styled text for system prompt
+                                    Text(
+                                      _systemPromptController.text,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                    // Add extra padding at the bottom to avoid text being hidden by copy button
+                                    const SizedBox(height: 40),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
+                            // Copy button overlay
+                            Positioned(
+                              right: 8,
+                              bottom: 8,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.content_copy,
+                                    color: Colors.white70,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    Clipboard.setData(
+                                      ClipboardData(
+                                        text: _systemPromptController.text,
+                                      ),
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Prompt copied to clipboard',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  tooltip: 'Copy prompt',
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     const SizedBox(height: 8),
@@ -664,5 +864,358 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     }
 
     return cleanedPrompt;
+  }
+
+  // Show character card info dialog
+  void _showCharacterCardInfo() {
+    if (_character == null) {
+      print('Error: Character is null when trying to show character card info');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: Could not load character information'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    print('Showing character card info for: ${_character!.name}');
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: _character!.accentColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            title: Text(
+              'Character Card',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Container(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Character Name',
+                      style: TextStyle(
+                        color: _character!.accentColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white24, width: 1),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: SelectableText(
+                              _character!.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.content_copy,
+                              size: 20,
+                              color: Colors.white70,
+                            ),
+                            onPressed: () {
+                              Clipboard.setData(
+                                ClipboardData(text: _character!.name),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Name copied to clipboard'),
+                                ),
+                              );
+                            },
+                            tooltip: 'Copy name',
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Character Prompt',
+                      style: TextStyle(
+                        color: _character!.accentColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white24, width: 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SelectableText(
+                            _character!.systemPrompt,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.content_copy,
+                                size: 20,
+                                color: Colors.white70,
+                              ),
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: _character!.systemPrompt),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Prompt copied to clipboard'),
+                                  ),
+                                );
+                              },
+                              tooltip: 'Copy prompt',
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_character!.imageUrl != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Image URL',
+                        style: TextStyle(
+                          color: _character!.accentColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black26,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white24, width: 1),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: SelectableText(
+                                _character!.imageUrl!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.content_copy,
+                                size: 20,
+                                color: Colors.white70,
+                              ),
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: _character!.imageUrl!),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Image URL copied to clipboard',
+                                    ),
+                                  ),
+                                );
+                              },
+                              tooltip: 'Copy URL',
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _showFormattedCard();
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'View Formatted Card',
+                  style: TextStyle(color: _character!.accentColor),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  _copyFullCharacterCard();
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Copy Full Card',
+                  style: TextStyle(color: _character!.accentColor),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  // Copy full character card to clipboard
+  void _copyFullCharacterCard() {
+    Clipboard.setData(ClipboardData(text: _formatCharacterCard()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Full character card copied to clipboard')),
+    );
+  }
+
+  // Format character card for display or export
+  String _formatCharacterCard() {
+    final sb = StringBuffer();
+    sb.writeln('## CHARACTER CARD ##');
+    sb.writeln('Name: ${_character!.name}');
+    sb.writeln('Created: ${_formatDate(_character!.createdAt)}');
+    if (_character!.imageUrl != null) {
+      sb.writeln('Image URL: ${_character!.imageUrl}');
+    }
+    sb.writeln('\n## CHARACTER PROMPT ##');
+    sb.writeln(_character!.systemPrompt);
+    sb.writeln('\n## END OF CHARACTER CARD ##');
+
+    return sb.toString();
+  }
+
+  // Show the full formatted character card
+  void _showFormattedCard() {
+    if (_character == null) {
+      print('Error: Character is null when trying to show formatted card');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: Could not load character information'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    print('Showing formatted card for: ${_character!.name}');
+    final formattedCard = _formatCharacterCard();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: _character!.accentColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Formatted Character Card',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.content_copy,
+                    size: 20,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () {
+                    _copyFullCharacterCard();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Full character card copied to clipboard',
+                        ),
+                      ),
+                    );
+                  },
+                  tooltip: 'Copy full card',
+                ),
+              ],
+            ),
+            content: Container(
+              width: double.maxFinite,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: SingleChildScrollView(
+                child: SelectableText(
+                  formattedCard,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            ],
+          ),
+    );
   }
 }

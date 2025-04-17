@@ -5,7 +5,7 @@ import 'package:afterlife/core/theme/app_theme.dart';
 import 'package:afterlife/core/widgets/animated_particles.dart';
 import '../character_interview/interview_screen.dart';
 import '../providers/characters_provider.dart';
-import '../models/character_model.dart';
+import '../character_chat/chat_screen.dart';
 import '../character_gallery/character_gallery_screen.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -54,6 +54,7 @@ class _LandingScreenState extends State<LandingScreen>
 
   Future<void> _onCreateButtonPressed() async {
     try {
+      print('Starting character creation flow');
       final result = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const InterviewScreen()),
@@ -61,52 +62,56 @@ class _LandingScreenState extends State<LandingScreen>
 
       if (result != null && mounted) {
         // Process the returned character data
-        final characterCard = result['characterCard'];
-        final characterName = result['characterName'];
+        final characterId = result['characterId'] as String?;
+        final success = result['success'] as bool? ?? false;
 
-        if (characterCard != null && characterName != null) {
-          print('Character data received - Name: $characterName');
-          print('Card content length: ${characterCard.length}');
+        print('Result received from interview screen:');
+        print('- Success: $success');
+        print('- Character ID: $characterId');
 
-          try {
-            // Create new character
-            final charactersProvider = Provider.of<CharactersProvider>(
-              context,
-              listen: false,
-            );
+        if (characterId != null && success) {
+          print('Valid character data received - ID: $characterId');
 
-            final newCharacter = CharacterModel.fromInterviewData(
-              name: characterName,
-              cardContent: characterCard,
-            );
+          // Force a reload of the character provider to ensure UI updates
+          final charactersProvider = Provider.of<CharactersProvider>(
+            context,
+            listen: false,
+          );
+          charactersProvider.reloadCharacters();
 
-            print('Character created with ID: ${newCharacter.id}');
-
-            await charactersProvider.addCharacter(newCharacter);
-            print('Character added to provider');
-
-            // Navigate directly to the character gallery screen
-            // instead of using named route to avoid any navigation issues
-            if (mounted) {
+          // Navigate directly to chat with the character
+          if (mounted) {
+            print('Navigating to chat screen with character ID: $characterId');
+            try {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const CharacterGalleryScreen(),
+                  builder:
+                      (context) =>
+                          CharacterChatScreen(characterId: characterId),
                 ),
               );
+            } catch (e) {
+              print('Error navigating to chat: $e');
+              _showError(
+                'Error opening chat. Please try from your character list.',
+              );
             }
-          } catch (e) {
-            print('Error creating character: $e');
-            _showError('Error creating character: $e');
           }
+        } else if (!success) {
+          // User likely canceled, no need to show error
+          print('Character creation was not successful or was canceled');
         } else {
-          print('Invalid character data received');
-          _showError('Invalid character data received');
+          _showError('Character creation failed - incomplete data returned');
         }
+      } else {
+        print(
+          'No result returned from interview screen or context not mounted',
+        );
       }
     } catch (e) {
-      print("Error navigating to interview screen: $e");
-      _showError('Could not open interview screen');
+      print("Error in character creation process: $e");
+      _showError('Error creating character: $e');
     }
   }
 
