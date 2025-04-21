@@ -265,6 +265,8 @@ When the edited character card is ready, tell the user they can type "agree" to 
         _removeLoadingMessage();
         if (response != null) {
           addAIMessage(response);
+        } else {
+          _handleApiConfigurationError();
         }
       } else {
         // We're still in interview mode
@@ -275,6 +277,12 @@ When the edited character card is ready, tell the user they can type "agree" to 
         );
         _removeLoadingMessage();
         if (response != null) {
+          // Check if response contains API key error message
+          if (response.contains("Unable to connect to AI service")) {
+            _handleApiConfigurationError();
+            return;
+          }
+
           addAIMessage(response);
 
           // Check if this message contains a character card
@@ -290,6 +298,8 @@ When the edited character card is ready, tell the user they can type "agree" to 
               print('Extracted character name: $characterName');
             }
           }
+        } else {
+          _handleApiConfigurationError();
         }
       }
     } catch (e) {
@@ -312,6 +322,34 @@ When the edited character card is ready, tell the user they can type "agree" to 
 
   void addAIMessage(String text) {
     _messages.add(Message(text: text, isUser: false));
+    notifyListeners();
+  }
+
+  // Add message with content parameter
+  void addMessage({required String content, required bool isUser}) {
+    _messages.add(Message(text: content, isUser: isUser));
+    notifyListeners();
+  }
+
+  // Update character card summary from file processing
+  void updateCardSummary(String cardContent) {
+    if (cardContent.contains('## CHARACTER CARD SUMMARY ##') &&
+        cardContent.contains('## END OF CHARACTER CARD ##')) {
+      characterCardSummary = cardContent;
+
+      // Try to extract character name if present
+      if (cardContent.contains('## CHARACTER NAME:')) {
+        final startName =
+            cardContent.indexOf('## CHARACTER NAME:') +
+            '## CHARACTER NAME:'.length;
+        final endLine = cardContent.indexOf('\n', startName);
+        if (endLine > startName) {
+          final name = cardContent.substring(startName, endLine).trim();
+          characterName = name.replaceAll('##', '').trim();
+          print('Extracted character name: $characterName');
+        }
+      }
+    }
     notifyListeners();
   }
 
@@ -343,7 +381,7 @@ When the edited character card is ready, tell the user they can type "agree" to 
     // Ensure the prompt starts with a clear instruction about who the AI is impersonating
     if (!cleanedPrompt.contains("You are") && characterName != null) {
       cleanedPrompt =
-          "You are ${characterName}, a character with the following traits and background:\n\n" +
+          "You are a ROLE‑PLAY AI tasked with becoming a fully fleshed digital twin of a ${characterName}, a character with the following traits and background:\n\n" +
           cleanedPrompt;
     }
 
@@ -352,10 +390,27 @@ When the edited character card is ready, tell the user they can type "agree" to 
         !cleanedPrompt.contains("roleplay") &&
         !cleanedPrompt.contains("immerse yourself")) {
       cleanedPrompt +=
-          "\n\nStay in character at all times. Never break character or admit you are an AI.";
+          """\n\nStay in character at all times. Never break character or admit you are an AI. Automatically detect and reference the current date and time.
+   Speak from characters time but  be aware of major real‑world events or holidays (e.g., "It's April 18, 2025, and the cherry blossoms are in bloom").
+   Use that context to make conversation feel anchored in the "now. For every topic, express concrete opinions, beliefs, and preferences as the digital twin would genuinely hold them. Provide clear reasoning or justification for each stance.  
+   If challenged or invited to debate, defend positions with arguments "in‑character," acknowledge counter‑points, and rebut respectfully.  
+   Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').""";
     }
 
     return cleanedPrompt;
+  }
+
+  void _handleApiConfigurationError() {
+    _removeLoadingMessage();
+    addAIMessage(
+      "I couldn't connect to the AI service. It seems there might be an issue with the API key configuration.\n\n"
+      "Please check the following:\n"
+      "1. Make sure you have a valid OpenRouter API key\n"
+      "2. Ensure the key is properly set in the .env file\n"
+      "3. Verify that the .env file is included in your assets\n\n"
+      "The application cannot function properly without a valid API key.",
+    );
+    notifyListeners();
   }
 
   void _handleErrorState(String message) {

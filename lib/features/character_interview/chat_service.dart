@@ -1,17 +1,18 @@
 // lib/features/character_interview/chat_service.dart
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../core/utils/env_config.dart';
 
 class ChatService {
   static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
-  static const Duration _requestTimeout = Duration(seconds: 30);
+  static const Duration _requestTimeout = Duration(seconds: 120);
   static const String _defaultModel = 'google/gemini-2.0-flash-001';
   static const double _defaultTemperature = 0.7;
-  static const int _defaultMaxTokens = 1000;
+  static const int _defaultMaxTokens = 25000;
 
-  static late String _apiKey;
+  static String? _apiKey;
   static bool _isInitialized = false;
   static bool _isUsingDefaultKey = false;
 
@@ -19,28 +20,31 @@ class ChatService {
     if (_isInitialized) return;
 
     try {
-      await dotenv.load();
-      _apiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
+      // Initialize and load environment config
+      await EnvConfig.initialize();
 
-      if (_apiKey.isEmpty) {
-        _apiKey = "";
+      // Get API key from environment
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
         _isUsingDefaultKey = true;
         print(
-          'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
+          'WARNING: No OpenRouter API key found. The application will not function properly.',
         );
+        print('Please set OPENROUTER_API_KEY in your .env file.');
+      } else {
+        print('API key loaded successfully');
       }
 
       _isInitialized = true;
     } catch (e) {
       print('Error initializing chat service: $e');
-      _apiKey = "";
-      _isUsingDefaultKey = true;
       _isInitialized =
           true; // Still mark as initialized to prevent repeated attempts
     }
   }
 
-  static Future<String> sendMessage({
+  static Future<String?> sendMessage({
     required List<Map<String, dynamic>> messages,
     String? systemPrompt,
     String? model,
@@ -51,10 +55,10 @@ class ChatService {
       await initialize();
     }
 
-    if (_isUsingDefaultKey) {
-      print(
-        'Warning: Using default API key - this is not recommended for production',
-      );
+    // Validate API key exists
+    if (_apiKey == null || _apiKey!.isEmpty) {
+      print('Error: API key is missing. Cannot send message.');
+      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
     }
 
     final messagesList = <Map<String, dynamic>>[];
@@ -102,8 +106,19 @@ class ChatService {
       throw ChatServiceException('Invalid response format');
     } catch (e) {
       print('Unexpected error in chat service: $e');
-      throw ChatServiceException('Unexpected error occurred');
+      throw ChatServiceException('Unexpected error occurred: $e');
     }
+  }
+
+  // Method for logging diagnostic info
+  static void logDiagnostics() {
+    print('=== ChatService Diagnostics ===');
+    print('Is initialized: $_isInitialized');
+    print('Is using default key: $_isUsingDefaultKey');
+    print(
+      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(8, _apiKey!.length))}...)")}',
+    );
+    print('=============================');
   }
 }
 

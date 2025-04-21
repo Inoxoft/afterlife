@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:afterlife/core/theme/app_theme.dart';
+import 'package:afterlife/core/utils/env_config.dart';
+import 'package:afterlife/core/widgets/api_key_input_dialog.dart';
 import 'package:afterlife/core/widgets/animated_particles.dart';
 import '../character_interview/interview_screen.dart';
 import '../providers/characters_provider.dart';
@@ -41,8 +43,32 @@ class _LandingScreenState extends State<LandingScreen>
         setState(() {
           _isLoading = false;
         });
+
+        // Check API key after UI is loaded
+        _checkApiKey();
       }
     });
+  }
+
+  Future<void> _checkApiKey() async {
+    // Check if API key is configured
+    if (!EnvConfig.hasValue('OPENROUTER_API_KEY')) {
+      // Show API key input dialog
+      await ApiKeyInputDialog.show(
+        context,
+        onKeyUpdated: () {
+          // Reload necessary services after key update
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('API key saved successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        },
+      );
+    }
   }
 
   @override

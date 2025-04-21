@@ -194,17 +194,33 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         chatHistory: apiChatHistory,
       );
 
-      // Add AI response to chat history
-      await charactersProvider.addMessageToSelectedCharacter(
-        text: response,
-        isUser: false,
-      );
+      // Add AI response to chat history if not null
+      if (response != null) {
+        await charactersProvider.addMessageToSelectedCharacter(
+          text: response,
+          isUser: false,
+        );
+      } else {
+        // Handle null response by showing a fallback message
+        await charactersProvider.addMessageToSelectedCharacter(
+          text:
+              "I'm sorry, I couldn't process your message at this time. Please try again later.",
+          isUser: false,
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
+
+      // Add error message to chat history
+      await charactersProvider.addMessageToSelectedCharacter(
+        text:
+            "I'm sorry, there was an error processing your message. Please try again.",
+        isUser: false,
+      );
     } finally {
       // Update UI
       if (mounted) {
@@ -548,20 +564,54 @@ class _MessageBubble extends StatelessWidget {
             : Colors.black.withOpacity(0.3);
     final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
 
+    // Check if message is very long (over 1000 characters)
+    final bool isVeryLong = message.length > 1000;
+
     return Align(
       alignment: alignment,
       child: Container(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
+          // For very long messages, limit height and enable scrolling
+          maxHeight:
+              isVeryLong
+                  ? MediaQuery.of(context).size.height * 0.4
+                  : double.infinity,
         ),
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: bubbleColor,
           borderRadius: BorderRadius.circular(16),
+          // Add subtle shadow for depth
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
-        child: Text(message, style: const TextStyle(color: Colors.white)),
+        // Use SingleChildScrollView for very long messages
+        child:
+            isVeryLong
+                ? SingleChildScrollView(child: _buildMessageText())
+                : _buildMessageText(),
       ),
+    );
+  }
+
+  // Extracted method to build the message text with proper styling
+  Widget _buildMessageText() {
+    return Text(
+      message,
+      style: const TextStyle(
+        color: Colors.white,
+        height: 1.4, // Improve line spacing
+      ),
+      softWrap: true, // Ensure text wraps properly
+      textWidthBasis:
+          TextWidthBasis.longestLine, // Better handling of long content
     );
   }
 }

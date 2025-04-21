@@ -1,30 +1,63 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../core/utils/env_config.dart';
 
 class ChatService {
   static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
   static const String _openAiUrl = 'https://api.openai.com/v1/chat/completions';
   static const String _defaultModel = 'google/gemini-2.0-flash-001';
+  static const Duration _requestTimeout = Duration(
+    seconds: 120,
+  ); // 2 minutes timeout
+  static bool _isInitialized = false;
+  static String? _apiKey;
 
-  // Get API key from environment variables or use fallback
-  static String? get _openRouterApiKey {
+  // Initialize the service
+  static Future<void> initialize() async {
+    if (_isInitialized) return;
+
     try {
-      return dotenv.env['OPENROUTER_API_KEY'] ?? "";
+      // Initialize environment configuration
+      await EnvConfig.initialize();
+
+      // Get API key from environment
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        debugPrint(
+          'Warning: No OpenRouter API key found. The application will not function properly.',
+        );
+        debugPrint('Please set OPENROUTER_API_KEY in your .env file.');
+      } else {
+        debugPrint('API key loaded successfully for provider chat service');
+      }
+
+      _isInitialized = true;
     } catch (e) {
-      debugPrint('Error loading OpenRouter API key from .env: $e');
-      return "";
+      debugPrint('Error initializing chat service: $e');
+      _isInitialized = true; // Mark as initialized to prevent repeated attempts
     }
   }
 
   // Send a message to the chat API using OpenRouter
-  static Future<String> sendMessage({
+  static Future<String?> sendMessage({
     required String message,
     required List<Map<String, String>> history,
     String? systemPrompt,
   }) async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    // Validate API key
+    if (_apiKey == null || _apiKey!.isEmpty) {
+      debugPrint('Error: API key is missing. Cannot send message.');
+      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
+    }
+
     try {
       // Prepare the request payload
       final List<Map<String, String>> messages = [];
@@ -47,20 +80,22 @@ class ChatService {
         'model': _defaultModel,
         'messages': messages,
         'temperature': 0.7,
-        'max_tokens': 1000,
+        'max_tokens': 25000,
       };
 
       // Send the request
-      final response = await http.post(
-        Uri.parse(_openRouterUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${_openRouterApiKey}',
-          'HTTP-Referer': 'https://afterlife.app',
-          'X-Title': 'Afterlife AI',
-        },
-        body: jsonEncode(body),
-      );
+      final response = await http
+          .post(
+            Uri.parse(_openRouterUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+              'HTTP-Referer': 'https://afterlife.app',
+              'X-Title': 'Afterlife AI',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_requestTimeout);
 
       // Check if the request was successful
       if (response.statusCode == 200) {
@@ -71,14 +106,19 @@ class ChatService {
         debugPrint('API Error: ${response.statusCode}: ${response.body}');
         throw Exception('Failed to get response: ${response.reasonPhrase}');
       }
+    } on TimeoutException catch (e) {
+      debugPrint(
+        'Request timed out after ${_requestTimeout.inSeconds} seconds: $e',
+      );
+      return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
     } catch (e) {
       debugPrint('Error sending message: $e');
-      throw Exception('Failed to communicate with the AI service: $e');
+      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
 
   // Send a message to a specific character
-  static Future<String> sendMessageToCharacter({
+  static Future<String?> sendMessageToCharacter({
     required String characterId,
     required String message,
     required String systemPrompt,
@@ -93,7 +133,17 @@ class ChatService {
       );
     } catch (e) {
       debugPrint('Error sending message to character: $e');
-      throw Exception('Failed to communicate with the character: $e');
+      return 'Failed to communicate with the character';
     }
+  }
+
+  // For diagnostics
+  static void logDiagnostics() {
+    debugPrint('=== Provider ChatService Diagnostics ===');
+    debugPrint('Is initialized: $_isInitialized');
+    debugPrint(
+      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, _apiKey!.length > 8 ? 8 : _apiKey!.length)}...)")}',
+    );
+    debugPrint('=======================================');
   }
 }

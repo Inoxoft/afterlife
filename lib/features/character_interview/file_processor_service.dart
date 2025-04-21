@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:file_selector/file_selector.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:afterlife/features/character_interview/chat_service.dart';
+import 'chat_service.dart' as interview_chat;
 import 'prompts.dart';
 
 class FileProcessorService {
@@ -57,7 +57,7 @@ class FileProcessorService {
 
   static Future<String> generateCharacterCard(String content) async {
     try {
-      final response = await ChatService.sendMessage(
+      final response = await interview_chat.ChatService.sendMessage(
         messages: [
           {
             "role": "user",
@@ -67,23 +67,42 @@ class FileProcessorService {
         systemPrompt: InterviewPrompts.fileProcessingSystemPrompt,
       );
 
+      if (response == null) {
+        throw Exception(
+          'Failed to generate character card: No response from AI service',
+        );
+      }
+
       return response;
     } catch (e) {
       throw Exception('Error generating character card: $e');
     }
   }
 
-  static Future<File?> pickFile() async {
+  static Future<List<File>?> pickFile() async {
     final typeGroup = XTypeGroup(
       label: 'Documents',
       extensions: ['txt', 'pdf', 'doc', 'docx', 'eml'],
     );
 
-    final XFile? result = await openFile(acceptedTypeGroups: [typeGroup]);
+    try {
+      final List<XFile> results = await openFiles(
+        acceptedTypeGroups: [typeGroup],
+      );
 
-    if (result != null) {
-      return File(result.path);
+      if (results.isEmpty) {
+        return null;
+      }
+
+      final limitedResults =
+          results.length > 5 ? results.sublist(0, 5) : results;
+
+      final files = limitedResults.map((xfile) => File(xfile.path)).toList();
+
+      return files;
+    } catch (e) {
+      print('Error picking files: $e');
+      return null;
     }
-    return null;
   }
 }

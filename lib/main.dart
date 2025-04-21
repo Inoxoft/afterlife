@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:afterlife/core/theme/app_theme.dart';
-import 'package:afterlife/features/character_gallery/character_gallery_screen.dart';
-import 'package:afterlife/features/providers/characters_provider.dart';
-import 'package:afterlife/features/character_interview/interview_provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/utils/env_config.dart';
+import 'features/character_gallery/character_gallery_screen.dart';
+import 'features/providers/characters_provider.dart';
+import 'features/character_interview/interview_provider.dart';
+import 'features/splash/splash_screen.dart';
+import 'features/character_interview/chat_service.dart' as interview_chat;
+import 'features/providers/chat_service.dart' as providers_chat;
 
 class AppInitializationError extends Error {
   final String message;
@@ -17,12 +20,12 @@ Future<void> _initializeApp() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
+  // Initialize environment configuration
   try {
-    await dotenv.load(fileName: ".env");
+    await EnvConfig.initialize();
+    print("Environment configuration initialized successfully");
   } catch (e) {
-    print("Warning: Failed to load .env file: $e");
-    // Continue anyway, we have fallback in ChatService
+    print("Error initializing environment configuration: $e");
   }
 
   // Set preferred orientations
@@ -40,13 +43,49 @@ Future<void> _initializeApp() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
+
+  // Initialize services
+  try {
+    // Initialize character interview chat service
+    await interview_chat.ChatService.initialize();
+    interview_chat.ChatService.logDiagnostics();
+
+    // Initialize providers chat service (if available)
+    if (const bool.fromEnvironment(
+      'USE_PROVIDER_CHAT_SERVICE',
+      defaultValue: false,
+    )) {
+      await providers_chat.ChatService.initialize();
+      providers_chat.ChatService.logDiagnostics();
+    }
+  } catch (e) {
+    print("Error initializing chat services: $e");
+  }
 }
 
-void main() {
+Future<void> main() async {
   runZonedGuarded(
     () async {
       try {
-        await _initializeApp();
+        // We only need to ensure Flutter is initialized here
+        // Other initialization happens in the splash screen
+        WidgetsFlutterBinding.ensureInitialized();
+
+        // Set system UI overlay style for consistency
+        SystemChrome.setSystemUIOverlayStyle(
+          const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor: AppTheme.backgroundEnd,
+            systemNavigationBarIconBrightness: Brightness.light,
+          ),
+        );
+
+        // Set preferred orientations
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
 
         runApp(
           MultiProvider(
@@ -77,68 +116,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Afterlife AI',
+      title: 'Afterlife',
       debugShowCheckedModeBanner: false,
-      theme: _buildTheme(),
-      home: const CharacterGalleryScreen(),
-    );
-  }
-
-  ThemeData _buildTheme() {
-    return ThemeData(
-      colorScheme: AppTheme.colorScheme,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppTheme.backgroundStart,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.etherealCyan,
-          foregroundColor: Colors.black87,
-          textStyle: const TextStyle(fontWeight: FontWeight.w500),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      theme: ThemeData(
+        useMaterial3: true,
+        primaryColor: AppTheme.etherealCyan,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppTheme.etherealCyan,
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: AppTheme.backgroundStart,
+        dialogTheme: DialogTheme(
+          backgroundColor: AppTheme.deepIndigo,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
-      ),
-      fontFamily: 'Roboto',
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: Colors.white,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: Colors.white,
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: AppTheme.deepIndigo,
+          contentTextStyle: const TextStyle(color: Colors.white),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        fillColor: Colors.white.withOpacity(0.1),
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-      ),
+      home: const SplashScreen(), // Use the splash screen as the home screen
     );
   }
 }

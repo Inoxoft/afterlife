@@ -1,37 +1,44 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../core/utils/env_config.dart';
 
 class ChatService {
   static final String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
-  static late String _apiKey;
+  static const Duration _requestTimeout = Duration(
+    seconds: 120,
+  ); // 2 minutes timeout
+  static String? _apiKey;
   static bool _isInitialized = false;
 
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      // Get API key from .env file
-      _apiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
+      // Initialize environment configuration
+      await EnvConfig.initialize();
 
-      // Fallback to default key if not found in .env (only for development)
-      if (_apiKey.isEmpty) {
-        _apiKey = "";
+      // Get API key from environment
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
         print(
-          'Warning: Using default API key. Set OPENROUTER_API_KEY in .env file for production.',
+          'Warning: No OpenRouter API key found. The application will not function properly.',
         );
+        print('Please set OPENROUTER_API_KEY in your .env file.');
+      } else {
+        print('API key loaded successfully for character chat service');
       }
 
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing chat service: $e');
-      // Use default key as last resort
-      _apiKey = "";
+      print('Error initializing character chat service: $e');
+      _isInitialized = true; // Mark as initialized to prevent repeated attempts
     }
   }
 
-  static Future<String> sendMessageToCharacter({
+  static Future<String?> sendMessageToCharacter({
     required String characterId,
     required String message,
     required String systemPrompt,
@@ -40,6 +47,12 @@ class ChatService {
     // Ensure service is initialized
     if (!_isInitialized) {
       await initialize();
+    }
+
+    // Validate API key exists
+    if (_apiKey == null || _apiKey!.isEmpty) {
+      print('Error: API key is missing. Cannot send message.');
+      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
     }
 
     // Prepare request body
@@ -51,21 +64,23 @@ class ChatService {
         {'role': 'user', 'content': message},
       ],
       'temperature': 0.7,
-      'max_tokens': 1000,
+      'max_tokens': 25000,
     });
 
     try {
       // Send request
-      final response = await http.post(
-        Uri.parse(_openRouterUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-          'HTTP-Referer': 'https://afterlife.app',
-          'X-Title': 'Afterlife AI',
-        },
-        body: body,
-      );
+      final response = await http
+          .post(
+            Uri.parse(_openRouterUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+              'HTTP-Referer': 'https://afterlife.app',
+              'X-Title': 'Afterlife AI',
+            },
+            body: body,
+          )
+          .timeout(_requestTimeout);
 
       if (response.statusCode != 200) {
         print('API error: ${response.body}');
@@ -75,9 +90,22 @@ class ChatService {
       // Parse response
       final data = jsonDecode(response.body);
       return data['choices'][0]['message']['content'] as String;
+    } on TimeoutException catch (e) {
+      print('Request timed out after ${_requestTimeout.inSeconds} seconds: $e');
+      return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
     } catch (e) {
       print('Error in chat service: $e');
       return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
+  }
+
+  // Method for logging diagnostic info
+  static void logDiagnostics() {
+    print('=== Character Chat Service Diagnostics ===');
+    print('Is initialized: $_isInitialized');
+    print(
+      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, _apiKey!.length > 8 ? 8 : _apiKey!.length)}...)")}',
+    );
+    print('==========================================');
   }
 }

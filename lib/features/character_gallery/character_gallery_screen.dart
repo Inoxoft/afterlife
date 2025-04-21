@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' show Random, sin, cos, pi;
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/texture_image.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_chat/chat_screen.dart';
 import '../character_interview/interview_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CharacterGalleryScreen extends StatefulWidget {
   const CharacterGalleryScreen({Key? key}) : super(key: key);
@@ -16,38 +19,45 @@ class CharacterGalleryScreen extends StatefulWidget {
 class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   // Cache text styles for better performance
-  late final TextStyle _titleStyle = const TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    letterSpacing: 2,
-    color: Colors.white,
-  );
+  late final TextStyle _titleStyle = AppTheme.titleStyle;
 
-  late final TextStyle _subtitleStyle = TextStyle(
-    fontSize: 14,
-    letterSpacing: 1.5,
-    color: Colors.white.withOpacity(0.8),
-  );
+  late final TextStyle _subtitleStyle = AppTheme.subtitleStyle;
 
-  late final TextStyle _captionStyle = TextStyle(
-    fontSize: 12,
-    color: Colors.white.withOpacity(0.6),
-  );
+  late final TextStyle _captionStyle = AppTheme.captionStyle;
 
   // Cached bottom navigation items for better performance
   final List<BottomNavigationBarItem> _navigationItems = const [
-    BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
     BottomNavigationBarItem(
-      icon: Icon(Icons.person_outline),
+      icon: Icon(Icons.explore, size: 24),
+      label: 'Explore',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person_outline, size: 24),
       label: 'Your Twins',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.add_circle_outline),
+      icon: Icon(Icons.add_circle_outline, size: 24),
       label: 'Create',
     ),
-    BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.settings, size: 24),
+      label: 'Settings',
+    ),
   ];
 
   // Sample famous people for the Explore tab - using const for better performance
@@ -56,84 +66,173 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       'name': 'Albert Einstein',
       'years': '1879-1955',
       'profession': 'PHYSICIST',
-      'imageUrl': null,
+      'imageUrl': 'assets/images/einstein.png',
     },
     {
       'name': 'Ronald Reagan',
       'years': '1911-2004',
       'profession': 'PRESIDENT, ACTOR',
-      'imageUrl': null,
+      'imageUrl': 'assets/images/reagan.png',
     },
     {
       'name': 'Alan Turing',
       'years': '1912-1954',
       'profession': 'COMPUTER SCIENTIST',
-      'imageUrl': null,
+      'imageUrl': 'assets/images/turing.png',
     },
     {
       'name': 'Marilyn Monroe',
       'years': '1926-1962',
       'profession': 'ACTRESS, MODEL & SINGER',
-      'imageUrl': null,
+      'imageUrl': 'assets/images/monroe.png',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header - using cached widgets for better performance
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('AFTERLIFE', style: _titleStyle),
-                    const SizedBox(height: 8),
-                    Text(
-                      _selectedIndex == 0
-                          ? 'EXPLORE DIGITAL TWINS'
-                          : 'YOUR DIGITAL TWINS',
-                      style: _subtitleStyle,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Interact with preserved consciousness',
-                      style: _captionStyle,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Content based on selected tab
-              Expanded(
-                child: IndexedStack(
-                  index: _selectedIndex < 2 ? _selectedIndex : 0,
-                  children: [_buildExploreTab(), _buildYourTwinsTab()],
-                ),
-              ),
-            ],
+      body: Stack(
+        children: [
+          // Background with gradient
+          Container(
+            decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
           ),
-        ),
+
+          // Stars effect with reduced opacity
+          CustomPaint(
+            painter: StarfieldPainter(starCount: 150),
+            size: Size.infinite,
+          ),
+
+          // Subtle texture overlay - using our TextureWidget
+          const TextureWidget(opacity: 0.05),
+
+          // Main content
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header section with enhanced styling
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Main title with elegant styling
+                      Text('AFTERLIFE', style: _titleStyle),
+
+                      // Animated divider with gradient effect
+                      const SizedBox(height: 16),
+                      Container(
+                        width: 120,
+                        height: 2,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppTheme.warmGold,
+                              AppTheme.warmGold.withOpacity(0.1),
+                              Colors.transparent,
+                            ],
+                            stops: const [0.0, 0.7, 1.0],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.warmGold.withOpacity(0.4),
+                              blurRadius: 6,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Subtitle with section indicator
+                      Text(
+                        _selectedIndex == 0
+                            ? 'EXPLORE DIGITAL TWINS'
+                            : 'YOUR DIGITAL TWINS',
+                        style: _subtitleStyle,
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Caption text
+                      Text(
+                        'Interact with preserved consciousness',
+                        style: _captionStyle,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Content based on selected tab
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                    children: [_buildExploreTab(), _buildYourTwinsTab()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
-        backgroundColor: AppTheme.backgroundEnd,
-        type: BottomNavigationBarType.fixed,
-        unselectedItemColor: Colors.white.withOpacity(0.5),
-        selectedItemColor: AppTheme.etherealCyan,
-        items: _navigationItems,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.cosmicBlack.withOpacity(0.7),
+          border: Border(
+            top: BorderSide(
+              color: AppTheme.warmGold.withOpacity(0.3),
+              width: 1.0,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: 0,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onTabTapped,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: GoogleFonts.lato(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+          unselectedLabelStyle: GoogleFonts.lato(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+          ),
+          unselectedItemColor: AppTheme.silverMist.withOpacity(0.5),
+          selectedItemColor: AppTheme.warmGold,
+          items: _navigationItems,
+        ),
       ),
     );
   }
 
   void _onTabTapped(int index) {
+    // Animate to the selected page
+    if (index < 2) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+
     setState(() {
       _selectedIndex = index;
     });
@@ -144,39 +243,65 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     }
   }
 
-  // Explore tab with famous people
+  // Explore tab with famous digital twins
   Widget _buildExploreTab() {
-    return GridView.builder(
-      key: const PageStorageKey('exploreTab'),
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GridView.builder(
+        key: const PageStorageKey('exploreTab'),
+        padding: const EdgeInsets.only(top: 12, bottom: 24),
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.7,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+        ),
+        itemCount: _famousPeople.length,
+        itemBuilder: (context, index) {
+          final person = _famousPeople[index];
+          return _FamousPersonCard(
+            key: ValueKey('famous_person_${person['name']}'),
+            name: person['name'] as String,
+            years: person['years'] as String,
+            profession: person['profession'] as String,
+            imageUrl: person['imageUrl'] as String?,
+          );
+        },
       ),
-      itemCount: _famousPeople.length,
-      itemBuilder: (context, index) {
-        final person = _famousPeople[index];
-        return _FamousPersonCard(
-          key: ValueKey('famous_person_${person['name']}'),
-          name: person['name'] as String,
-          years: person['years'] as String,
-          profession: person['profession'] as String,
-          imageUrl: person['imageUrl'] as String?,
-        );
-      },
     );
   }
 
-  // Your Twins tab with user's characters
+  // Your Twins tab with user's digital twins
   Widget _buildYourTwinsTab() {
     return Consumer<CharactersProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.etherealCyan),
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppTheme.etherealCyan,
+                    ),
+                    strokeWidth: 2,
+                    backgroundColor: AppTheme.deepSpaceNavy,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'ACCESSING DATA STORAGE',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 14,
+                    color: AppTheme.etherealCyan,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -187,25 +312,50 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           return _buildEmptyState(context);
         }
 
-        // Grid of character cards
-        return GridView.builder(
-          key: const PageStorageKey('yourTwinsTab'),
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.7,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+        // Grid of user-created character cards
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GridView.builder(
+            key: const PageStorageKey('yourTwinsTab'),
+            padding: const EdgeInsets.only(top: 12, bottom: 24),
+            physics: const BouncingScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+            ),
+            itemCount: characters.length,
+            itemBuilder: (context, index) {
+              final character = characters[index];
+              return FutureBuilder<Widget>(
+                // Using a slight delay for staggered animation
+                future: Future.delayed(
+                  Duration(milliseconds: 100 * index),
+                  () => _CharacterCard(
+                    key: ValueKey('character_${character.id}'),
+                    character: character,
+                    onTap: () => _onCharacterSelected(context, character),
+                  ),
+                ),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.deepSpaceNavy.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    );
+                  }
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 500),
+                    opacity: snapshot.hasData ? 1.0 : 0.0,
+                    child: snapshot.data!,
+                  );
+                },
+              );
+            },
           ),
-          itemCount: characters.length,
-          itemBuilder: (context, index) {
-            final character = characters[index];
-            return _CharacterCard(
-              key: ValueKey('character_${character.id}'),
-              character: character,
-              onTap: () => _onCharacterSelected(context, character),
-            );
-          },
         );
       },
     );
@@ -218,48 +368,108 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.person_off_outlined,
-              size: 72,
-              color: Colors.white.withOpacity(0.3),
+            // Empty state icon with glow effect
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.deepSpaceNavy.withOpacity(0.3),
+                border: Border.all(
+                  color: AppTheme.etherealCyan.withOpacity(0.3),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.etherealCyan.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.person_outline,
+                size: 50,
+                color: AppTheme.etherealCyan.withOpacity(0.7),
+              ),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 24),
+
+            // Empty state title
             Text(
-              'No digital twins available',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white.withOpacity(0.8),
+              'NO DIGITAL TWINS DETECTED',
+              style: GoogleFonts.orbitron(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withOpacity(0.9),
+                letterSpacing: 1.5,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+
+            const SizedBox(height: 16),
+
+            // Empty state description
             Text(
               'Create a new digital twin to begin interacting with your preserved consciousness',
-              style: _captionStyle,
+              style: AppTheme.captionStyle,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => _onAddCharacter(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.etherealCyan,
-                foregroundColor: Colors.black87,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+
+            const SizedBox(height: 32),
+
+            // Create button with energy field styling
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => _onAddCharacter(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.etherealCyan.withOpacity(0.8),
+                        AppTheme.cyberPurple.withOpacity(0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.etherealCyan.withOpacity(0.3),
+                        blurRadius: 10,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.add,
+                        size: 20,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'CREATE NEW TWIN',
+                        style: GoogleFonts.orbitron(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add),
-                  SizedBox(width: 8),
-                  Text('CREATE NEW TWIN'),
-                ],
               ),
             ),
           ],
@@ -302,8 +512,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   }
 }
 
-// Extracted as a separate stateless widget for better performance through memoization
-class _FamousPersonCard extends StatelessWidget {
+// Extracted as a separate stateful widget for better performance through memoization
+class _FamousPersonCard extends StatefulWidget {
   final String name;
   final String years;
   final String profession;
@@ -318,119 +528,377 @@ class _FamousPersonCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<_FamousPersonCard> createState() => _FamousPersonCardState();
+}
+
+class _FamousPersonCardState extends State<_FamousPersonCard>
+    with SingleTickerProviderStateMixin {
+  // Animation controller for hover effects
+  late AnimationController _controller;
+  late Animation<double> _glowAnimation;
+  late Animation<double> _scaleAnimation;
+  bool _isHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _glowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.03,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuad));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.backgroundEnd.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.etherealCyan.withOpacity(0.15),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-        border: Border.all(
-          color: AppTheme.etherealCyan.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Character image or placeholder
-          Expanded(
-            flex: 3,
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovering = true);
+        _controller.forward();
+      },
+      onExit: (_) {
+        setState(() => _isHovering = false);
+        _controller.reverse();
+      },
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
             child: Container(
               decoration: BoxDecoration(
-                color: AppTheme.backgroundStart.withOpacity(0.7),
-                image:
-                    imageUrl != null
-                        ? DecorationImage(
-                          image: NetworkImage(imageUrl!),
-                          fit: BoxFit.cover,
-                        )
-                        : null,
-              ),
-              child:
-                  imageUrl == null
-                      ? Center(
-                        child: Icon(
-                          Icons.person_outline,
-                          size: 60,
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                      )
-                      : null,
-            ),
-          ),
-
-          // Info
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Name and years
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.deepIndigo.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '• $years',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withOpacity(0.7),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        profession,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppTheme.etherealCyan,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.warmGold.withOpacity(
+                      0.1 + _glowAnimation.value * 0.2,
+                    ),
+                    blurRadius: 15 + _glowAnimation.value * 10,
+                    spreadRadius: _glowAnimation.value * 2,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Stack(
+                  children: [
+                    // Main background - darkened image
+                    if (widget.imageUrl != null)
+                      Positioned.fill(
+                        child: Image.asset(widget.imageUrl!, fit: BoxFit.cover),
+                      ),
+
+                    // Gradient overlay for better text contrast
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppTheme.midnightPurple.withOpacity(0.4),
+                              AppTheme.cosmicBlack.withOpacity(0.85),
+                            ],
+                            stops: const [0.5, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Subtle film grain texture
+                    Positioned.fill(
+                      child: Opacity(
+                        opacity: 0.12,
+                        child: CustomPaint(
+                          painter: FilmGrainPainter(density: 0.3, opacity: 0.2),
+                        ),
+                      ),
+                    ),
+
+                    // Ethereal particle effects
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: EtherealParticlePainter(
+                          particleCount: 25,
+                          color: AppTheme.warmGold,
+                          pulsePhase: _controller.value,
+                          opacity: 0.05 + _glowAnimation.value * 0.05,
+                        ),
+                      ),
+                    ),
+
+                    // Info section with digital twin details
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              AppTheme.cosmicBlack.withOpacity(0.6),
+                            ],
+                            stops: const [0.0, 0.7],
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Digital twin name
+                            Text(
+                              widget.name,
+                              style: AppTheme.twinNameStyle.copyWith(
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.7),
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // Years
+                            Row(
+                              children: [
+                                // Pulsing indicator
+                                _buildPulsingDot(),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.years,
+                                  style: AppTheme.metadataStyle.copyWith(
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.7),
+                                        blurRadius: 3,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            // Profession label with elegant styling
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [
+                                    AppTheme.warmGold.withOpacity(
+                                      0.2 + _glowAnimation.value * 0.1,
+                                    ),
+                                    AppTheme.gentlePurple.withOpacity(
+                                      0.2 + _glowAnimation.value * 0.1,
+                                    ),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppTheme.warmGold.withOpacity(0.3),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Text(
+                                widget.profession,
+                                style: AppTheme.labelStyle,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Hover indicator
+                    if (_isHovering)
+                      Positioned(
+                        right: 16,
+                        top: 16,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.warmGold,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.warmGold.withOpacity(0.6),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+
+  // Creates a pulsing dot indicator
+  Widget _buildPulsingDot() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.5, end: 1.0),
+      duration: const Duration(seconds: 2),
+      curve: Curves.easeInOut,
+      builder: (context, value, child) {
+        return Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppTheme.warmGold,
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.warmGold.withOpacity(0.4 * value),
+                blurRadius: 6 * value,
+                spreadRadius: 1 * value,
+              ),
+            ],
+          ),
+        );
+      },
+      onEnd: () => setState(() {}),
     );
   }
 }
 
-// Extracted as a separate stateless widget for better performance through memoization
-class _CharacterCard extends StatelessWidget {
+// Custom painter for ethereal particle effect with subtle movement
+class EtherealParticlePainter extends CustomPainter {
+  final int particleCount;
+  final Color color;
+  final double pulsePhase;
+  final double opacity;
+
+  EtherealParticlePainter({
+    required this.particleCount,
+    required this.color,
+    this.pulsePhase = 0.0,
+    this.opacity = 0.1,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(42); // Fixed seed for deterministic pattern
+    final width = size.width;
+    final height = size.height;
+
+    for (int i = 0; i < particleCount; i++) {
+      final x = random.nextDouble() * width;
+      final y = random.nextDouble() * height;
+      final baseSize = 0.5 + random.nextDouble() * 1.5;
+      final particlePulse = (sin((pulsePhase * pi * 2) + (i * 0.2)) + 1) / 2;
+      final particleSize = baseSize * (0.5 + (particlePulse * 0.5));
+
+      // Vary opacity based on pulse
+      final particleOpacity = opacity * (0.5 + particlePulse * 0.5);
+
+      final paint =
+          Paint()
+            ..color = color.withOpacity(particleOpacity)
+            ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x, y), particleSize, paint);
+
+      // Add subtle glow
+      final glowPaint =
+          Paint()
+            ..color = color.withOpacity(particleOpacity * 0.5)
+            ..style = PaintingStyle.fill
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+
+      canvas.drawCircle(Offset(x, y), particleSize * 2, glowPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(EtherealParticlePainter oldDelegate) {
+    return oldDelegate.particleCount != particleCount ||
+        oldDelegate.color != color ||
+        oldDelegate.pulsePhase != pulsePhase ||
+        oldDelegate.opacity != opacity;
+  }
+}
+
+// Custom painter for film grain texture
+class FilmGrainPainter extends CustomPainter {
+  final double density;
+  final double opacity;
+  final Random random = Random(42);
+
+  FilmGrainPainter({this.density = 0.5, this.opacity = 0.1});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = Colors.white.withOpacity(opacity)
+          ..style = PaintingStyle.fill;
+
+    final numPoints = (size.width * size.height * density / 30).round();
+
+    for (int i = 0; i < numPoints; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final pointSize = random.nextDouble() * 1.0;
+
+      canvas.drawCircle(Offset(x, y), pointSize, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(FilmGrainPainter oldDelegate) {
+    return oldDelegate.density != density || oldDelegate.opacity != opacity;
+  }
+}
+
+// Extracted as a separate stateful widget for better performance through memoization
+class _CharacterCard extends StatefulWidget {
   final CharacterModel character;
   final VoidCallback onTap;
 
@@ -438,127 +906,330 @@ class _CharacterCard extends StatelessWidget {
     : super(key: key);
 
   @override
+  State<_CharacterCard> createState() => _CharacterCardState();
+}
+
+class _CharacterCardState extends State<_CharacterCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _glowAnimation;
+  late Animation<double> _scaleAnimation;
+  bool _isHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _glowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.03,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuad));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.backgroundEnd.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.etherealCyan.withOpacity(0.15),
-              spreadRadius: 1,
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-          border: Border.all(
-            color: AppTheme.etherealCyan.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Character image or placeholder
-            Expanded(
-              flex: 3,
+    // Create a custom accent color based on the character's own color
+    // but make sure it harmonizes with our new color palette
+    final Color accentColor =
+        Color.lerp(widget.character.accentColor, AppTheme.warmGold, 0.3) ??
+        AppTheme.warmGold;
+
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovering = true);
+        _controller.forward();
+      },
+      onExit: (_) {
+        setState(() => _isHovering = false);
+        _controller.reverse();
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.backgroundStart,
-                  image:
-                      character.imageUrl != null &&
-                              character.imageUrl!.isNotEmpty
-                          ? DecorationImage(
-                            image: NetworkImage(character.imageUrl!),
-                            fit: BoxFit.cover,
-                          )
-                          : null,
-                ),
-                child:
-                    character.imageUrl == null || character.imageUrl!.isEmpty
-                        ? Center(
-                          child: Icon(
-                            Icons.person_outline,
-                            size: 60,
-                            color: Colors.white.withOpacity(0.5),
-                          ),
-                        )
-                        : null,
-              ),
-            ),
-
-            // Character info
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Name and date
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          character.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Created ${_formatDate(character.createdAt)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withOpacity(
+                        0.1 + _glowAnimation.value * 0.2,
+                      ),
+                      blurRadius: 15 + _glowAnimation.value * 10,
+                      spreadRadius: _glowAnimation.value * 2,
+                      offset: const Offset(0, 4),
                     ),
-
-                    // Chat button
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.etherealCyan.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.chat_bubble_outline,
-                            size: 14,
-                            color: AppTheme.etherealCyan,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'CHAT',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.etherealCyan,
-                            ),
-                          ),
-                        ],
-                      ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Stack(
+                    children: [
+                      // Background image if available
+                      if (widget.character.imageUrl != null &&
+                          widget.character.imageUrl!.isNotEmpty)
+                        Positioned.fill(
+                          child: Image.asset(
+                            widget.character.imageUrl!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      // If no image, use gradient background
+                      else
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppTheme.deepNavy,
+                                  AppTheme.midnightPurple,
+                                ],
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.person_outline,
+                                size: 80,
+                                color: accentColor.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Gradient overlay for better text contrast
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                AppTheme.deepNavy.withOpacity(0.3),
+                                AppTheme.cosmicBlack.withOpacity(0.85),
+                              ],
+                              stops: const [0.5, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Subtle film grain texture
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: 0.12,
+                          child: CustomPaint(
+                            painter: FilmGrainPainter(
+                              density: 0.3,
+                              opacity: 0.2,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Ethereal particle effects
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: EtherealParticlePainter(
+                            particleCount: 25,
+                            color: accentColor,
+                            pulsePhase: _controller.value,
+                            opacity: 0.05 + _glowAnimation.value * 0.05,
+                          ),
+                        ),
+                      ),
+
+                      // Character info section
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                AppTheme.cosmicBlack.withOpacity(0.6),
+                              ],
+                              stops: const [0.0, 0.6],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Character name
+                              Text(
+                                widget.character.name,
+                                style: AppTheme.twinNameStyle.copyWith(
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.7),
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              // Creation date with icon
+                              Row(
+                                children: [
+                                  TweenAnimationBuilder<double>(
+                                    tween: Tween<double>(begin: 0.5, end: 1.0),
+                                    duration: const Duration(seconds: 2),
+                                    curve: Curves.easeInOut,
+                                    builder: (context, value, child) {
+                                      return Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: accentColor,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: accentColor.withOpacity(
+                                                0.4 * value,
+                                              ),
+                                              blurRadius: 6 * value,
+                                              spreadRadius: 1 * value,
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    onEnd: () => setState(() {}),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Created ${_formatDate(widget.character.createdAt)}',
+                                    style: AppTheme.metadataStyle.copyWith(
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.7),
+                                          blurRadius: 3,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              // Chat button with elegant styling
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: [
+                                      accentColor.withOpacity(
+                                        0.2 + _glowAnimation.value * 0.1,
+                                      ),
+                                      AppTheme.gentlePurple.withOpacity(
+                                        0.2 + _glowAnimation.value * 0.1,
+                                      ),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: accentColor.withOpacity(0.3),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.chat_bubble_outline,
+                                      size: 16,
+                                      color: accentColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'CHAT',
+                                      style: GoogleFonts.cinzel(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: accentColor,
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Hover indicator
+                      if (_isHovering)
+                        Positioned(
+                          right: 16,
+                          top: 16,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: accentColor,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accentColor.withOpacity(0.6),
+                                  blurRadius: 8,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -662,4 +1333,329 @@ class DottedBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for bubble effect
+class BubblePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Base bubble paint
+    final bubblePaint =
+        Paint()
+          ..color = Colors.white.withOpacity(0.25)
+          ..style = PaintingStyle.fill;
+
+    // Highlight paint for bubble shine
+    final highlightPaint =
+        Paint()
+          ..color = Colors.white.withOpacity(0.6)
+          ..style = PaintingStyle.fill;
+
+    // Draw different sized bubbles in a natural pattern
+    final random = DateTime.now().millisecondsSinceEpoch;
+    final bubblePositions = [
+      // Left side bubbles
+      Offset(size.width * 0.15, size.height * 0.25),
+      Offset(size.width * 0.10, size.height * 0.45),
+      Offset(size.width * 0.12, size.height * 0.65),
+      Offset(size.width * 0.20, size.height * 0.80),
+      // Middle bubbles
+      Offset(size.width * 0.35, size.height * 0.35),
+      Offset(size.width * 0.40, size.height * 0.15),
+      Offset(size.width * 0.45, size.height * 0.70),
+      // Right side bubbles
+      Offset(size.width * 0.70, size.height * 0.25),
+      Offset(size.width * 0.75, size.height * 0.50),
+      Offset(size.width * 0.65, size.height * 0.80),
+    ];
+
+    // Bubble sizes
+    final bubbleSizes = [2.5, 3.0, 2.0, 3.5, 2.0, 3.0, 2.5, 2.0, 3.5, 3.0];
+
+    // Draw each bubble
+    for (int i = 0; i < bubblePositions.length; i++) {
+      final position = bubblePositions[i];
+      final radius = bubbleSizes[i];
+
+      // Draw bubble
+      canvas.drawCircle(position, radius, bubblePaint);
+
+      // Draw highlight in top-left of bubble
+      canvas.drawCircle(
+        Offset(position.dx - radius * 0.3, position.dy - radius * 0.3),
+        radius * 0.3,
+        highlightPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Cyberpunk grid overlay painter
+class GridOverlayPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = Colors.cyanAccent.withOpacity(0.15)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.5;
+
+    // Horizontal lines
+    const double gridSpacing = 35.0;
+    for (double y = 0; y <= size.height; y += gridSpacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+
+    // Vertical lines
+    for (double x = 0; x <= size.width; x += gridSpacing) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for hexagonal grid effect
+class HexGridPainter extends CustomPainter {
+  final Color color;
+  final double lineWidth;
+  final double opacity;
+
+  HexGridPainter({
+    required this.color,
+    this.lineWidth = 0.5,
+    this.opacity = 0.2,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = color.withOpacity(opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = lineWidth;
+
+    final hexSize = size.width / 12; // Size of each hexagon
+    final height = size.height;
+    final width = size.width;
+    final sqrt3 = 1.732; // sqrt(3)
+
+    // Horizontal distance between hex centers
+    final hStep = hexSize * 2;
+    // Vertical distance between hex centers
+    final vStep = hexSize * sqrt3;
+
+    // Calculate offset to center the grid
+    final rows = (height / vStep).ceil() + 1;
+    final cols = (width / hStep).ceil() + 1;
+
+    // Draw hexagonal grid
+    for (int r = -1; r < rows; r++) {
+      for (int c = -1; c < cols; c++) {
+        // Stagger odd rows
+        final xOffset = c * hStep + (r % 2 == 0 ? 0 : hexSize);
+        final yOffset = r * vStep;
+
+        _drawHexagon(canvas, paint, xOffset, yOffset, hexSize);
+      }
+    }
+  }
+
+  void _drawHexagon(
+    Canvas canvas,
+    Paint paint,
+    double xCenter,
+    double yCenter,
+    double size,
+  ) {
+    final path = Path();
+    const double rotationOffset = 30 * (3.14159 / 180); // 30 degrees in radians
+
+    for (int i = 0; i < 6; i++) {
+      final angle =
+          rotationOffset + (i * 60) * (3.14159 / 180); // Convert to radians
+      final x = xCenter + size * cos(angle);
+      final y = yCenter + size * sin(angle);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(HexGridPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.lineWidth != lineWidth ||
+        oldDelegate.opacity != opacity;
+  }
+}
+
+// Custom painter for energy particles
+class EnergyParticlePainter extends CustomPainter {
+  final int particleCount;
+  final Color color;
+  final double pulsePhase;
+  final double particleScale;
+
+  EnergyParticlePainter({
+    required this.particleCount,
+    required this.color,
+    this.pulsePhase = 0.0,
+    this.particleScale = 1.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(42); // Fixed seed for deterministic pattern
+    final width = size.width;
+    final height = size.height;
+
+    // Generate particles
+    for (int i = 0; i < particleCount; i++) {
+      final x = random.nextDouble() * width;
+      final y = random.nextDouble() * height;
+      final baseSize = 1.0 + random.nextDouble() * 2.0;
+      final particlePulse =
+          (sin((pulsePhase * 3.14159 * 2) + (i * 0.2)) + 1) / 2;
+      final particleSize =
+          baseSize * particleScale * (0.5 + (particlePulse * 0.5));
+
+      // Vary opacity based on particle size and position
+      final opacity = 0.2 + (particlePulse * 0.6);
+
+      final paint =
+          Paint()
+            ..color = color.withOpacity(opacity)
+            ..style = PaintingStyle.fill;
+
+      // Draw the particle
+      canvas.drawCircle(Offset(x, y), particleSize, paint);
+
+      // Add a glow effect
+      final glowPaint =
+          Paint()
+            ..color = color.withOpacity(opacity * 0.3)
+            ..style = PaintingStyle.fill
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+
+      canvas.drawCircle(Offset(x, y), particleSize * 1.8, glowPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(EnergyParticlePainter oldDelegate) {
+    return oldDelegate.particleCount != particleCount ||
+        oldDelegate.color != color ||
+        oldDelegate.pulsePhase != pulsePhase ||
+        oldDelegate.particleScale != particleScale;
+  }
+}
+
+// Custom painter for CRT/digital scan lines
+class ScanLinePainter extends CustomPainter {
+  final double lineSpacing;
+  final double lineOpacity;
+
+  ScanLinePainter({this.lineSpacing = 4.0, this.lineOpacity = 0.1});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = Colors.black.withOpacity(lineOpacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0;
+
+    // Draw horizontal scan lines
+    for (double y = 0; y < size.height; y += lineSpacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+
+    // Add some faint vertical distortion lines occasionally
+    final distortionPaint =
+        Paint()
+          ..color = Colors.white.withOpacity(lineOpacity * 0.5)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.5;
+
+    final random = Random(12345); // Fixed seed for deterministic pattern
+
+    for (int i = 0; i < 5; i++) {
+      final x = random.nextDouble() * size.width;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), distortionPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(ScanLinePainter oldDelegate) {
+    return oldDelegate.lineSpacing != lineSpacing ||
+        oldDelegate.lineOpacity != lineOpacity;
+  }
+}
+
+// Custom painter for the starfield background effect
+class StarfieldPainter extends CustomPainter {
+  final int starCount;
+
+  StarfieldPainter({this.starCount = 100});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(12);
+
+    // Different star types - tiny, small, medium, large
+    final starSizes = [0.5, 1.0, 1.5, 2.0, 3.0];
+    final starColors = [
+      Colors.white.withOpacity(0.4),
+      Colors.white.withOpacity(0.6),
+      Colors.white.withOpacity(0.8),
+      AppTheme.etherealCyan.withOpacity(0.6),
+      AppTheme.starlight.withOpacity(0.7),
+    ];
+
+    // Draw stars
+    for (int i = 0; i < starCount; i++) {
+      // Random position
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+
+      // Random star properties
+      final sizeIndex = random.nextInt(starSizes.length);
+      final radius = starSizes[sizeIndex];
+      final color = starColors[sizeIndex];
+
+      // Draw the star
+      final paint =
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.fill;
+
+      // For the larger stars, add a glow effect
+      if (radius > 1.0) {
+        final glowPaint =
+            Paint()
+              ..color = color.withOpacity(0.3)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
+
+        canvas.drawCircle(Offset(x, y), radius * 2, glowPaint);
+      }
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(StarfieldPainter oldDelegate) {
+    return oldDelegate.starCount != starCount;
+  }
 }

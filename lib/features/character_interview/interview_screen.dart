@@ -9,6 +9,7 @@ import '../character_gallery/character_gallery_screen.dart';
 import 'interview_provider.dart';
 import 'chat_bubble.dart';
 import 'file_processor_service.dart';
+import 'package:path/path.dart' as path;
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
@@ -62,24 +63,54 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   Future<void> _handleFileUpload() async {
-    setState(() => _isProcessingFile = true);
-
     try {
-      final file = await FileProcessorService.pickFile();
-      if (file == null) {
-        setState(() => _isProcessingFile = false);
+      setState(() {
+        _interviewProvider.addAIMessage("Processing your file(s)...");
+        _isProcessingFile = true;
+      });
+
+      final files = await FileProcessorService.pickFile();
+
+      if (files == null || files.isEmpty) {
+        setState(() {
+          _interviewProvider.addAIMessage("No files selected.");
+          _isProcessingFile = false;
+        });
         return;
       }
 
-      // Show processing message
-      _interviewProvider.addAIMessage("Processing your file...");
+      // Processing status message
+      _interviewProvider.addAIMessage(
+        "Processing ${files.length} ${files.length == 1 ? 'file' : 'files'} to create your character...",
+      );
 
-      // Process the file
-      final content = await FileProcessorService.processFile(file);
+      // Combine content from all files
+      final StringBuffer contentBuffer = StringBuffer();
+      for (int i = 0; i < files.length; i++) {
+        final file = files[i];
+        final fileName = path.basename(file.path);
 
-      // Generate character card
+        // Add file separator if not the first file
+        if (i > 0) {
+          contentBuffer.writeln("\n\n--- Content from file: $fileName ---\n");
+        } else {
+          contentBuffer.writeln("--- Content from file: $fileName ---\n");
+        }
+
+        // Process the file and add its content
+        final fileContent = await FileProcessorService.processFile(file);
+        contentBuffer.writeln(fileContent);
+
+        // Update progress
+        _interviewProvider.addAIMessage(
+          "Processed file ${i + 1}/${files.length}: $fileName",
+        );
+      }
+
+      // Generate a single character card from all combined content
+      final combinedContent = contentBuffer.toString();
       final characterCard = await FileProcessorService.generateCharacterCard(
-        content,
+        combinedContent,
       );
 
       // Add the generated card to the chat
@@ -105,11 +136,12 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
       // Ask for confirmation
       _interviewProvider.addAIMessage(
-        "I've created a character card based on your file. Please review it and type 'agree' if you'd like to use it, or let me know what changes you'd like to make.",
+        "I've created a character card based on your ${files.length > 1 ? 'files' : 'file'}. "
+        "Please review it and type 'agree' if you'd like to use it, or let me know what changes you'd like to make.",
       );
     } catch (e) {
       _interviewProvider.addAIMessage(
-        "I'm sorry, but I encountered an error processing your file: ${e.toString()}",
+        "I'm sorry, but I encountered an error processing your file(s): ${e.toString()}",
       );
     } finally {
       setState(() => _isProcessingFile = false);
