@@ -286,18 +286,18 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                   height: 40,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      AppTheme.etherealCyan,
+                      AppTheme.warmGold,
                     ),
                     strokeWidth: 2,
-                    backgroundColor: AppTheme.deepSpaceNavy,
+                    backgroundColor: AppTheme.deepNavy,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'ACCESSING DATA STORAGE',
-                  style: GoogleFonts.orbitron(
+                  style: GoogleFonts.cinzel(
                     fontSize: 14,
-                    color: AppTheme.etherealCyan,
+                    color: AppTheme.warmGold,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -376,12 +376,12 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                 shape: BoxShape.circle,
                 color: AppTheme.deepSpaceNavy.withOpacity(0.3),
                 border: Border.all(
-                  color: AppTheme.etherealCyan.withOpacity(0.3),
+                  color: AppTheme.warmGold.withOpacity(0.3),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.etherealCyan.withOpacity(0.1),
+                    color: AppTheme.warmGold.withOpacity(0.1),
                     blurRadius: 10,
                     spreadRadius: 1,
                   ),
@@ -390,7 +390,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               child: Icon(
                 Icons.person_outline,
                 size: 50,
-                color: AppTheme.etherealCyan.withOpacity(0.7),
+                color: AppTheme.warmGold.withOpacity(0.7),
               ),
             ),
 
@@ -399,7 +399,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             // Empty state title
             Text(
               'NO DIGITAL TWINS DETECTED',
-              style: GoogleFonts.orbitron(
+              style: GoogleFonts.cinzel(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Colors.white.withOpacity(0.9),
@@ -432,14 +432,14 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppTheme.etherealCyan.withOpacity(0.8),
-                        AppTheme.cyberPurple.withOpacity(0.8),
+                        AppTheme.warmGold.withOpacity(0.8),
+                        AppTheme.gentlePurple.withOpacity(0.8),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.etherealCyan.withOpacity(0.3),
+                        color: AppTheme.warmGold.withOpacity(0.3),
                         blurRadius: 10,
                         spreadRadius: 0,
                       ),
@@ -460,7 +460,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                       const SizedBox(width: 10),
                       Text(
                         'CREATE NEW TWIN',
-                        style: GoogleFonts.orbitron(
+                        style: GoogleFonts.cinzel(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
