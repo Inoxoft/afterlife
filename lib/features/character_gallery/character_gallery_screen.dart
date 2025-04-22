@@ -1152,51 +1152,79 @@ class _CharacterCardState extends State<_CharacterCard>
 
                               const SizedBox(height: 10),
 
-                              // Chat button with elegant styling
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                    colors: [
-                                      accentColor.withOpacity(
-                                        0.2 + _glowAnimation.value * 0.1,
-                                      ),
-                                      AppTheme.gentlePurple.withOpacity(
-                                        0.2 + _glowAnimation.value * 0.1,
-                                      ),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: accentColor.withOpacity(0.3),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.chat_bubble_outline,
-                                      size: 16,
-                                      color: accentColor,
+                              // Action buttons row
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // Chat button
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'CHAT',
-                                      style: GoogleFonts.cinzel(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: accentColor,
-                                        letterSpacing: 0.8,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                        colors: [
+                                          accentColor.withOpacity(
+                                            0.2 + _glowAnimation.value * 0.1,
+                                          ),
+                                          AppTheme.gentlePurple.withOpacity(
+                                            0.2 + _glowAnimation.value * 0.1,
+                                          ),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: accentColor.withOpacity(0.3),
+                                        width: 0.5,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.chat_bubble_outline,
+                                          size: 16,
+                                          color: accentColor,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'CHAT',
+                                          style: GoogleFonts.cinzel(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: accentColor,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Delete button
+                                  GestureDetector(
+                                    onTap: () => _confirmDelete(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: Colors.red.withOpacity(0.3),
+                                          width: 0.5,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.delete_outline,
+                                        size: 16,
+                                        color: Colors.red.withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1233,6 +1261,100 @@ class _CharacterCardState extends State<_CharacterCard>
         ),
       ),
     );
+  }
+
+  // Add method to confirm deletion
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.deepIndigo,
+            title: Text(
+              'Delete Digital Twin',
+              style: GoogleFonts.cinzel(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Are you sure you want to delete ${widget.character.name}?',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'This action cannot be undone.',
+                  style: TextStyle(
+                    color: Colors.red.withOpacity(0.7),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _deleteCharacter(context);
+                },
+                child: Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red.withOpacity(0.8)),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  // Add method to perform the deletion
+  void _deleteCharacter(BuildContext context) async {
+    try {
+      // Get the provider
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      // Delete the character
+      await charactersProvider.deleteCharacter(widget.character.id);
+
+      // Show a success message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.character.name} has been deleted'),
+            backgroundColor: Colors.green.withOpacity(0.8),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Show an error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting digital twin: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   String _formatDate(DateTime dateTime) {
