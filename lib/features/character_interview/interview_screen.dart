@@ -164,44 +164,59 @@ class _InterviewScreenState extends State<InterviewScreen> {
           ),
           actions: [
             if (!widget.editMode)
-              IconButton(
-                icon: const Icon(Icons.upload_file),
-                onPressed: _isProcessingFile ? null : _handleFileUpload,
-                tooltip: 'Upload Character File',
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.upload_file, color: Colors.white70),
+                  onPressed: _isProcessingFile ? null : _handleFileUpload,
+                  tooltip: 'Upload Character File',
+                ),
               ),
             Consumer<InterviewProvider>(
               builder: (context, provider, _) {
-                return IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            title: const Text('Restart Interview'),
-                            content: const Text(
-                              'This will clear all your responses. Are you sure?',
-                            ),
-                            backgroundColor: AppTheme.deepIndigo,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
+                return Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white70),
+                    tooltip: 'Restart Interview',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text('Restart Interview'),
+                              content: const Text(
+                                'This will clear all your responses. Are you sure?',
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  provider.resetInterview();
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Restart'),
+                              backgroundColor: AppTheme.deepIndigo,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
-                            ],
-                          ),
-                    );
-                  },
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    provider.resetInterview();
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Restart'),
+                                ),
+                              ],
+                            ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -240,135 +255,203 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 index == provider.messages.length) {
                               return Container(
                                 padding: const EdgeInsets.all(20),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.4),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: AppTheme.etherealCyan.withOpacity(
+                                      0.3,
+                                    ),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.etherealCyan.withOpacity(
+                                        0.1,
+                                      ),
+                                      blurRadius: 15,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
                                 child: Center(
                                   child: Column(
                                     children: [
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        color: AppTheme.etherealCyan,
+                                        size: 48,
+                                      ),
+                                      const SizedBox(height: 16),
                                       Text(
                                         provider.isEditMode
                                             ? 'Character card successfully updated'
                                             : 'Character card successfully created',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 18,
                                         ),
                                       ),
-                                      const SizedBox(height: 20),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          // Ensure we're passing back clean system prompt
-                                          final cleanPrompt =
-                                              provider.characterCardSummary;
-                                          final characterName =
-                                              provider.characterName ??
-                                              "Character";
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        provider.isEditMode
+                                            ? 'Your digital twin has been updated with the new information'
+                                            : 'Your digital twin is ready to chat with you',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 24),
+                                      AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.etherealCyan,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppTheme.etherealCyan
+                                                  .withOpacity(0.3),
+                                              blurRadius: 8,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            // Ensure we're passing back clean system prompt
+                                            final cleanPrompt =
+                                                provider.characterCardSummary;
+                                            final characterName =
+                                                provider.characterName ??
+                                                "Character";
 
-                                          if (cleanPrompt == null) {
-                                            print(
-                                              'Error: Character prompt is null',
-                                            );
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Error: Character information is incomplete. Please try again.',
-                                                ),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                            return;
-                                          }
-
-                                          // Ensure we have a non-empty character name
-                                          final finalCharacterName =
-                                              characterName.trim().isEmpty
-                                                  ? "Character"
-                                                  : characterName;
-
-                                          print(
-                                            'Character creation successful:',
-                                          );
-                                          print('Name: $finalCharacterName');
-                                          print(
-                                            'System prompt length: ${cleanPrompt.length}',
-                                          );
-
-                                          try {
-                                            // Create the character directly here
-                                            final charactersProvider =
-                                                Provider.of<CharactersProvider>(
-                                                  context,
-                                                  listen: false,
-                                                );
-
-                                            // Create new character
-                                            final newCharacter =
-                                                CharacterModel.fromInterviewData(
-                                                  name: finalCharacterName,
-                                                  cardContent: cleanPrompt,
-                                                );
-
-                                            print(
-                                              'Character created with ID: ${newCharacter.id}',
-                                            );
-
-                                            // Add character to provider
-                                            await charactersProvider
-                                                .addCharacter(newCharacter);
-                                            print(
-                                              'Character saved successfully',
-                                            );
-
-                                            // Navigate directly to "Your Twins" gallery screen
-                                            if (context.mounted) {
+                                            if (cleanPrompt == null) {
                                               print(
-                                                'Navigating to Your Twins gallery screen',
+                                                'Error: Character prompt is null',
                                               );
-                                              Navigator.pushReplacement(
+                                              ScaffoldMessenger.of(
                                                 context,
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (context) =>
-                                                          const CharacterGalleryScreen(),
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Error: Character information is incomplete. Please try again.',
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            // Ensure we have a non-empty character name
+                                            final finalCharacterName =
+                                                characterName.trim().isEmpty
+                                                    ? "Character"
+                                                    : characterName;
+
+                                            print(
+                                              'Character creation successful:',
+                                            );
+                                            print('Name: $finalCharacterName');
+                                            print(
+                                              'System prompt length: ${cleanPrompt.length}',
+                                            );
+
+                                            try {
+                                              // Create the character directly here
+                                              final charactersProvider =
+                                                  Provider.of<
+                                                    CharactersProvider
+                                                  >(context, listen: false);
+
+                                              // Create new character
+                                              final newCharacter =
+                                                  CharacterModel.fromInterviewData(
+                                                    name: finalCharacterName,
+                                                    cardContent: cleanPrompt,
+                                                  );
+
+                                              print(
+                                                'Character created with ID: ${newCharacter.id}',
+                                              );
+
+                                              // Add character to provider
+                                              await charactersProvider
+                                                  .addCharacter(newCharacter);
+                                              print(
+                                                'Character saved successfully',
+                                              );
+
+                                              // Navigate directly to "Your Twins" gallery screen
+                                              if (context.mounted) {
+                                                print(
+                                                  'Navigating to Your Twins gallery screen',
+                                                );
+                                                Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            const CharacterGalleryScreen(),
+                                                  ),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              print(
+                                                'Error creating character: $e',
+                                              );
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text('Error: $e'),
+                                                  backgroundColor: Colors.red,
                                                 ),
                                               );
                                             }
-                                          } catch (e) {
-                                            print(
-                                              'Error creating character: $e',
-                                            );
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text('Error: $e'),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              AppTheme.etherealCyan,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            elevation: 0,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 32,
+                                              vertical: 16,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                           ),
-                                        ),
-                                        child: Text(
-                                          provider.isEditMode
-                                              ? 'Update Character'
-                                              : 'Chat with Digital Clone',
-                                          style: const TextStyle(
-                                            color: Colors.black87,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                provider.isEditMode
+                                                    ? 'Update Character'
+                                                    : 'Continue to Gallery',
+                                                style: const TextStyle(
+                                                  color: Colors.black87,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Icon(
+                                                Icons.arrow_forward,
+                                                color: Colors.black87,
+                                                size: 18,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -381,7 +464,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                             final message = provider.messages[index];
                             return ChatBubble(
                               message: message,
-                              showAvatar: !message.isUser,
+                              showAvatar: true,
                               avatarText: message.isUser ? "You" : "AI",
                             );
                           },
@@ -416,46 +499,85 @@ class _InterviewScreenState extends State<InterviewScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: TextField(
-                                  controller: _messageController,
-                                  focusNode: _inputFocusNode,
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: InputDecoration(
-                                    hintText:
-                                        _isProcessingFile
-                                            ? 'Processing file...'
-                                            : 'Type your message...',
-                                    hintStyle: TextStyle(
-                                      color: Colors.white.withOpacity(0.5),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black26,
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    border: Border.all(
+                                      color: Colors.white10,
+                                      width: 1,
                                     ),
                                   ),
-                                  onSubmitted: (text) {
-                                    if (!_isProcessingFile &&
-                                        text.trim().isNotEmpty) {
-                                      provider.sendMessage(text);
-                                      _messageController.clear();
-                                    }
-                                  },
+                                  child: TextField(
+                                    controller: _messageController,
+                                    focusNode: _inputFocusNode,
+                                    style: const TextStyle(color: Colors.white),
+                                    decoration: InputDecoration(
+                                      hintText:
+                                          _isProcessingFile
+                                              ? 'Processing file...'
+                                              : 'Type your message...',
+                                      hintStyle: TextStyle(
+                                        color: Colors.white.withOpacity(0.5),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          25.0,
+                                        ),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                      prefixIcon: Icon(
+                                        Icons.chat_bubble_outline,
+                                        color: AppTheme.etherealCyan
+                                            .withOpacity(0.5),
+                                        size: 18,
+                                      ),
+                                    ),
+                                    onSubmitted: (text) {
+                                      if (!_isProcessingFile &&
+                                          text.trim().isNotEmpty) {
+                                        provider.sendMessage(text);
+                                        _messageController.clear();
+                                      }
+                                    },
+                                  ),
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.send),
-                                color: Colors.white,
-                                onPressed:
-                                    _isProcessingFile
-                                        ? null
-                                        : () {
-                                          final text = _messageController.text;
-                                          if (text.trim().isNotEmpty) {
-                                            provider.sendMessage(text);
-                                            _messageController.clear();
-                                          }
-                                        },
+                              const SizedBox(width: 12.0),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: AppTheme.etherealCyan,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.etherealCyan.withOpacity(
+                                        0.3,
+                                      ),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.send),
+                                  color: Colors.black87,
+                                  onPressed:
+                                      _isProcessingFile
+                                          ? null
+                                          : () {
+                                            final text =
+                                                _messageController.text;
+                                            if (text.trim().isNotEmpty) {
+                                              provider.sendMessage(text);
+                                              _messageController.clear();
+                                            }
+                                          },
+                                ),
                               ),
                             ],
                           ),

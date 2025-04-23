@@ -8,6 +8,33 @@ import '../providers/characters_provider.dart';
 import '../character_chat/chat_screen.dart';
 import '../character_interview/interview_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../character_prompts/famous_character_profile_screen.dart';
+
+class PulseRingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  PulseRingPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint =
+        Paint()
+          ..color = color.withOpacity(0.3 * (1 - progress))
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0 * (1 + progress);
+
+    final double radius = size.width / 2 * (0.8 + progress * 0.2);
+    final Offset center = Offset(size.width / 2, size.height / 2);
+
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(PulseRingPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
 
 class CharacterGalleryScreen extends StatefulWidget {
   const CharacterGalleryScreen({Key? key}) : super(key: key);
@@ -566,117 +593,163 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) {
-        setState(() => _isHovering = true);
-        _controller.forward();
-      },
-      onExit: (_) {
-        setState(() => _isHovering = false);
-        _controller.reverse();
-      },
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.warmGold.withOpacity(
-                      0.1 + _glowAnimation.value * 0.2,
+    // Create a custom accent color for the card
+    final Color accentColor = AppTheme.warmGold;
+
+    return GestureDetector(
+      onTap: () => _navigateToProfile(context),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovering = true),
+        onExit: (_) => setState(() => _isHovering = false),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _isHovering ? _scaleAnimation.value : 1.0,
+              child: Stack(
+                children: [
+                  // Main card with glowing effect
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppTheme.deepNavy, AppTheme.deepIndigo],
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              _isHovering
+                                  ? accentColor.withOpacity(0.6)
+                                  : AppTheme.deepIndigo.withOpacity(0.3),
+                          blurRadius: _isHovering ? 15 : 8,
+                          spreadRadius: _isHovering ? 2 : 0,
+                          offset: Offset(0, 5 * _glowAnimation.value),
+                        ),
+                      ],
+                      border: Border.all(
+                        color:
+                            _isHovering
+                                ? accentColor.withOpacity(0.7)
+                                : AppTheme.accentPurple.withOpacity(0.3),
+                        width: 1.5,
+                      ),
                     ),
-                    blurRadius: 15 + _glowAnimation.value * 10,
-                    spreadRadius: _glowAnimation.value * 2,
-                    offset: const Offset(0, 4),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: child,
+                    ),
                   ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 6),
-                  ),
+
+                  // Pulse ring animation when hovering
+                  if (_isHovering)
+                    AnimatedBuilder(
+                      animation: _glowAnimation,
+                      builder: (context, _) {
+                        return Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: CustomPaint(
+                              painter: PulseRingPainter(
+                                progress: _glowAnimation.value,
+                                color: accentColor,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Stack(
-                  children: [
-                    // Main background - darkened image
-                    if (widget.imageUrl != null)
-                      Positioned.fill(
-                        child: Image.asset(widget.imageUrl!, fit: BoxFit.cover),
+            );
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(
+              children: [
+                // Background image if available
+                if (widget.imageUrl != null)
+                  Positioned.fill(
+                    child: Image.asset(widget.imageUrl!, fit: BoxFit.cover),
+                  )
+                // If no image, use gradient background
+                else
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppTheme.deepNavy, AppTheme.midnightPurple],
+                        ),
                       ),
+                      child: Center(
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 80,
+                          color: accentColor.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ),
 
-                    // Gradient overlay for better text contrast
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              AppTheme.midnightPurple.withOpacity(0.4),
-                              AppTheme.cosmicBlack.withOpacity(0.85),
+                // Gradient overlay for better text contrast
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                          Colors.black.withOpacity(0.9),
+                        ],
+                        stops: const [0.6, 0.85, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Card content
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Digital twin name
+                        Text(
+                          widget.name,
+                          style: AppTheme.twinNameStyle.copyWith(
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.7),
+                                blurRadius: 3,
+                                offset: const Offset(0, 1),
+                              ),
                             ],
-                            stops: const [0.5, 1.0],
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ),
 
-                    // Subtle film grain texture
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: 0.12,
-                        child: CustomPaint(
-                          painter: FilmGrainPainter(density: 0.3, opacity: 0.2),
-                        ),
-                      ),
-                    ),
+                        const SizedBox(height: 6),
 
-                    // Ethereal particle effects
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: EtherealParticlePainter(
-                          particleCount: 25,
-                          color: AppTheme.warmGold,
-                          pulsePhase: _controller.value,
-                          opacity: 0.05 + _glowAnimation.value * 0.05,
-                        ),
-                      ),
-                    ),
-
-                    // Info section with digital twin details
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              AppTheme.cosmicBlack.withOpacity(0.6),
-                            ],
-                            stops: const [0.0, 0.7],
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        // Years
+                        Row(
                           children: [
-                            // Digital twin name
+                            // Pulsing indicator
+                            _buildPulsingDot(),
+                            const SizedBox(width: 8),
                             Text(
-                              widget.name,
-                              style: AppTheme.twinNameStyle.copyWith(
+                              widget.years,
+                              style: AppTheme.metadataStyle.copyWith(
                                 shadows: [
                                   Shadow(
                                     color: Colors.black.withOpacity(0.7),
@@ -685,108 +758,96 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                                   ),
                                 ],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            // Years
-                            Row(
-                              children: [
-                                // Pulsing indicator
-                                _buildPulsingDot(),
-                                const SizedBox(width: 8),
-                                Text(
-                                  widget.years,
-                                  style: AppTheme.metadataStyle.copyWith(
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.7),
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            // Profession label with elegant styling
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [
-                                    AppTheme.warmGold.withOpacity(
-                                      0.2 + _glowAnimation.value * 0.1,
-                                    ),
-                                    AppTheme.gentlePurple.withOpacity(
-                                      0.2 + _glowAnimation.value * 0.1,
-                                    ),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppTheme.warmGold.withOpacity(0.3),
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Text(
-                                widget.profession,
-                                style: AppTheme.labelStyle,
-                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
 
-                    // Hover indicator
-                    if (_isHovering)
-                      Positioned(
-                        right: 16,
-                        top: 16,
-                        child: Container(
-                          width: 8,
-                          height: 8,
+                        const SizedBox(height: 10),
+
+                        // Profession label with elegant styling
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppTheme.warmGold,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.warmGold.withOpacity(0.6),
-                                blurRadius: 8,
-                                spreadRadius: 1,
-                              ),
-                            ],
+                            color: accentColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: accentColor.withOpacity(0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            widget.profession,
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+
+                // Add a subtle "Coming Soon" overlay for unreleased characters
+                // Only shown if the _isReleased flag is specifically set to false
+                if (_isHovering)
+                  Positioned(
+                    right: 16,
+                    top: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.etherealCyan.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.arrow_forward,
+                            color: Colors.black.withOpacity(0.7),
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'View',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  // Creates a pulsing dot indicator
   Widget _buildPulsingDot() {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0.5, end: 1.0),
-      duration: const Duration(seconds: 2),
-      curve: Curves.easeInOut,
-      builder: (context, value, child) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
         return Container(
           width: 6,
           height: 6,
@@ -795,15 +856,31 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
             color: AppTheme.warmGold,
             boxShadow: [
               BoxShadow(
-                color: AppTheme.warmGold.withOpacity(0.4 * value),
-                blurRadius: 6 * value,
-                spreadRadius: 1 * value,
+                color: AppTheme.warmGold.withOpacity(
+                  0.5 * _glowAnimation.value,
+                ),
+                blurRadius: 4 * _glowAnimation.value,
+                spreadRadius: 1 * _glowAnimation.value,
               ),
             ],
           ),
         );
       },
-      onEnd: () => setState(() {}),
+    );
+  }
+
+  void _navigateToProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => FamousCharacterProfileScreen(
+              name: widget.name,
+              years: widget.years,
+              profession: widget.profession,
+              imageUrl: widget.imageUrl,
+            ),
+      ),
     );
   }
 }

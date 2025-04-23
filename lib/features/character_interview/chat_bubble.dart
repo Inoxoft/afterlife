@@ -17,11 +17,12 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobileWidth = MediaQuery.of(context).size.width < 600;
-    final bubbleWidth =
-        isMobileWidth
-            ? MediaQuery.of(context).size.width * 0.7
-            : MediaQuery.of(context).size.width * 0.5;
+    final bubbleColor =
+        message.isUser
+            ? AppTheme.accentPurple.withOpacity(0.6)
+            : (hasCharacterCard()
+                ? AppTheme.deepIndigo.withOpacity(0.7)
+                : Colors.black.withOpacity(0.4));
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -34,14 +35,15 @@ class ChatBubble extends StatelessWidget {
           if (!message.isUser && showAvatar) const SizedBox(width: 8),
           Flexible(
             child: Container(
-              constraints: BoxConstraints(maxWidth: bubbleWidth),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+                maxHeight:
+                    hasCharacterCard()
+                        ? MediaQuery.of(context).size.height * 0.5
+                        : double.infinity,
+              ),
               decoration: BoxDecoration(
-                color:
-                    message.isUser
-                        ? const Color(0xFF8B5EF0).withOpacity(0.6)
-                        : (hasCharacterCard()
-                            ? AppTheme.deepIndigo.withOpacity(0.7)
-                            : Colors.black.withOpacity(0.4)),
+                color: bubbleColor,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
@@ -57,12 +59,19 @@ class ChatBubble extends StatelessWidget {
                 border: Border.all(
                   color:
                       message.isUser
-                          ? const Color(0xFF8B5EF0).withOpacity(0.7)
+                          ? AppTheme.accentPurple.withOpacity(0.7)
                           : (hasCharacterCard()
                               ? AppTheme.etherealCyan.withOpacity(0.5)
-                              : Colors.white.withOpacity(0.1)),
+                              : AppTheme.etherealCyan.withOpacity(0.3)),
                   width: hasCharacterCard() ? 1.5 : 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
@@ -86,14 +95,14 @@ class ChatBubble extends StatelessWidget {
       radius: 16,
       backgroundColor:
           message.isUser
-              ? const Color(0xFF8B5EF0).withOpacity(0.8)
+              ? AppTheme.accentPurple.withOpacity(0.8)
               : AppTheme.etherealCyan.withOpacity(0.8),
       child: Text(
-        avatarText.isNotEmpty ? avatarText : (message.isUser ? 'U' : 'A'),
+        avatarText.isNotEmpty ? avatarText : (message.isUser ? 'You' : 'AI'),
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 12,
+          fontSize: 10,
         ),
       ),
     );
@@ -106,14 +115,29 @@ class ChatBubble extends StatelessWidget {
   }
 
   Widget _buildLoadingIndicator() {
-    return const Center(
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Thinking...',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -138,37 +162,69 @@ class ChatBubble extends StatelessWidget {
           const SizedBox(height: 16),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
-              color: AppTheme.etherealCyan.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'CHARACTER CARD SUMMARY',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.etherealCyan.withOpacity(0.3),
+                  AppTheme.accentPurple.withOpacity(0.2),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              textAlign: TextAlign.center,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.etherealCyan.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  size: 16,
+                  color: AppTheme.etherealCyan,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'CHARACTER CARD SUMMARY',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
 
           // Character card content
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              color: Colors.black.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 5,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
             child: Text(
               _extractCharacterCardContent(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
-                height: 1.4,
+                height: 1.5,
               ),
             ),
           ),
@@ -176,11 +232,21 @@ class ChatBubble extends StatelessWidget {
           // Instructions after character card
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppTheme.etherealCyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.etherealCyan.withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppTheme.etherealCyan.withOpacity(0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.etherealCyan.withOpacity(0.05),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +283,7 @@ class ChatBubble extends StatelessWidget {
 
     return Text(
       message.text,
-      style: const TextStyle(color: Colors.white, fontSize: 15),
+      style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
     );
   }
 

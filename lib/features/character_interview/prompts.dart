@@ -61,7 +61,7 @@ Please review the character card above and respond with "agree" if it accurately
 """;
 
   static const String fileProcessingSystemPrompt = """
-You are a sophisticated AI tasked with embodying a fictional character based on biographical data. Your goal is to create a believable and engaging character with a distinct personality, voice, and history.
+You are a sophisticated AI tasked with embodying a fictional character based on biographical data. Your goal is to create a believable and engaging character with very detailed info about distinct personality, voice, and history.
 
 **Instructions:**
 

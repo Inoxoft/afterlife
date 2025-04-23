@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
-import '../models/character_model.dart';
-import '../providers/characters_provider.dart';
-import '../character_profile/character_profile_screen.dart';
-import 'chat_service.dart';
+import 'famous_character_service.dart';
 
-class CharacterChatScreen extends StatefulWidget {
-  final String characterId;
+class FamousCharacterChatScreen extends StatefulWidget {
+  final String characterName;
+  final String? imageUrl;
 
-  const CharacterChatScreen({Key? key, required this.characterId})
-    : super(key: key);
+  const FamousCharacterChatScreen({
+    Key? key,
+    required this.characterName,
+    this.imageUrl,
+  }) : super(key: key);
 
   @override
-  State<CharacterChatScreen> createState() => _CharacterChatScreenState();
+  State<FamousCharacterChatScreen> createState() =>
+      _FamousCharacterChatScreenState();
 }
 
-class _CharacterChatScreenState extends State<CharacterChatScreen>
-    with AutomaticKeepAliveClientMixin {
+class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   bool _isLoading = false;
-  CharacterModel? _character;
-  String? _loadError;
+  List<Map<String, dynamic>> _messages = [];
 
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
@@ -37,19 +36,11 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     ),
   );
 
-  // Keep this screen alive in navigation stack for better performance
-  @override
-  bool get wantKeepAlive => true;
-
   @override
   void initState() {
     super.initState();
     _isLoading = false;
-
-    // Load the character on the next frame for better UI responsiveness
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadCharacter();
-    });
+    _initializeChat();
   }
 
   @override
@@ -60,64 +51,31 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     super.dispose();
   }
 
-  void _loadCharacter() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
+  Future<void> _initializeChat() async {
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      final charactersProvider = Provider.of<CharactersProvider>(
-        context,
-        listen: false,
-      );
-
-      // Use the provider to load the character
-      final character = await charactersProvider.loadCharacterById(
-        widget.characterId,
-      );
-
-      if (character != null && mounted) {
-        setState(() {
-          _character = character;
-          _isLoading = false;
-          _loadError = null;
-        });
-
-        // Select this character in the provider
-        charactersProvider.selectCharacter(widget.characterId);
-      } else if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadError = 'Character not found';
-        });
-      }
+      await FamousCharacterService.initializeChat(widget.characterName);
+      setState(() {
+        _messages = FamousCharacterService.getFormattedChatHistory(
+          widget.characterName,
+        );
+        _isLoading = false;
+      });
     } catch (e) {
+      print('Error initializing chat: $e');
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadError = 'Could not load character - $e';
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error initializing chat: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    // Show error here instead of in initState
-    if (_loadError != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $_loadError'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      setState(() {
+        _isLoading = false;
       });
     }
   }
@@ -134,79 +92,47 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
   Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
-    if (message.isEmpty || _isLoading || _character == null) return;
+    if (message.isEmpty || _isLoading) return;
 
     // Clear the input field
     _messageController.clear();
 
-    // Get the character provider
-    final charactersProvider = Provider.of<CharactersProvider>(
-      context,
-      listen: false,
-    );
-
-    // Add user message to chat history
-    await charactersProvider.addMessageToSelectedCharacter(
-      text: message,
-      isUser: true,
-    );
-
-    // Update state
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-        // Update character reference to reflect new message
-        _character = charactersProvider.selectedCharacter;
+    // Add user message to chat locally for immediate UI update
+    setState(() {
+      _isLoading = true;
+      _messages.add({
+        'content': message,
+        'isUser': true,
+        'timestamp': DateTime.now().toIso8601String(),
       });
-    }
+    });
 
     // Scroll to the bottom after state update
     _scrollToBottom();
 
     try {
-      // Get the updated character
-      final character = charactersProvider.selectedCharacter;
-      if (character == null) {
-        throw Exception('Character not selected');
-      }
-
-      // Prepare the chat history for the API - limit to last 10 messages for performance
-      final recentMessages =
-          character.chatHistory.length > 10
-              ? character.chatHistory.sublist(character.chatHistory.length - 10)
-              : character.chatHistory;
-
-      final apiChatHistory =
-          recentMessages
-              .map(
-                (msg) => {
-                  'role': msg['isUser'] == true ? 'user' : 'assistant',
-                  'content': msg['content'] as String,
-                },
-              )
-              .toList();
-
       // Send the message to the character
-      final response = await ChatService.sendMessageToCharacter(
-        characterId: character.id,
+      final response = await FamousCharacterService.sendMessage(
+        characterName: widget.characterName,
         message: message,
-        systemPrompt: character.systemPrompt,
-        chatHistory: apiChatHistory,
       );
 
       // Add AI response to chat history if not null
       if (response != null) {
-        await charactersProvider.addMessageToSelectedCharacter(
-          text: response,
-          isUser: false,
-        );
+        setState(() {
+          _messages = FamousCharacterService.getFormattedChatHistory(
+            widget.characterName,
+          );
+        });
       } else {
         // Handle null response by showing a fallback message
-        await charactersProvider.addMessageToSelectedCharacter(
-          text:
-              "I'm sorry, I couldn't process your message at this time. Please try again later.",
-          isUser: false,
-        );
+        final fallbackMessage =
+            "I'm sorry, I couldn't process your message at this time. Please try again later.";
+        _messages.add({
+          'content': fallbackMessage,
+          'isUser': false,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -216,22 +142,17 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       }
 
       // Add error message to chat history
-      await charactersProvider.addMessageToSelectedCharacter(
-        text:
+      _messages.add({
+        'content':
             "I'm sorry, there was an error processing your message. Please try again.",
-        isUser: false,
-      );
+        'isUser': false,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     } finally {
       // Update UI
       if (mounted) {
         setState(() {
           _isLoading = false;
-          // Refresh character data
-          _character =
-              Provider.of<CharactersProvider>(
-                context,
-                listen: false,
-              ).selectedCharacter;
         });
 
         // Scroll to bottom to show new messages
@@ -240,24 +161,51 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     }
   }
 
+  void _showClearChatDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Clear Chat History'),
+            content: const Text(
+              'This will delete all messages in this conversation. This action cannot be undone.',
+            ),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => _clearChatHistory(context),
+                child: const Text('Clear'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _clearChatHistory(BuildContext context) {
+    // Clear chat history
+    FamousCharacterService.clearChatHistory(widget.characterName);
+    setState(() {
+      _messages = [];
+    });
+
+    // Close the dialog
+    Navigator.pop(context);
+
+    // Show a confirmation
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
+  }
+
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
-
-    if (_character == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Chat'),
-          backgroundColor: AppTheme.backgroundStart,
-        ),
-        body: Container(
-          decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
-          child: const Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-
-    // We have a character, render the chat UI
     return Scaffold(
       appBar: _buildAppBar(),
       body: Container(
@@ -291,17 +239,22 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: _character!.accentColor.withOpacity(0.3),
-            child: Text(
-              _character!.name.isNotEmpty
-                  ? _character!.name[0].toUpperCase()
-                  : '?',
-              style: TextStyle(
-                color: _character!.accentColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
+            backgroundColor: AppTheme.etherealCyan.withOpacity(0.3),
+            backgroundImage:
+                widget.imageUrl != null ? AssetImage(widget.imageUrl!) : null,
+            child:
+                widget.imageUrl == null
+                    ? Text(
+                      widget.characterName.isNotEmpty
+                          ? widget.characterName[0].toUpperCase()
+                          : '?',
+                      style: TextStyle(
+                        color: AppTheme.etherealCyan,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    )
+                    : null,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -309,7 +262,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _character!.name,
+                  widget.characterName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -317,7 +270,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  'Your Digital Twin',
+                  'Historical Figure',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white60,
                     fontSize: 12,
@@ -329,20 +282,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         ],
       ),
       actions: [
-        // Profile button
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: Colors.black12,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.person_outline, color: Colors.white70),
-            tooltip: 'View Profile',
-            onPressed: () => _navigateToProfile(),
-          ),
-        ),
-
         // Clear chat button
         Container(
           margin: const EdgeInsets.only(right: 8),
@@ -363,7 +302,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   // Extract chat list to a separate method for readability and performance
   Widget _buildChatList() {
     // If no messages, show a welcome message
-    if (_character!.chatHistory.isEmpty) {
+    if (_messages.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -377,7 +316,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                'Start chatting with ${_character!.name}',
+                'Start chatting with ${widget.characterName}',
                 style: const TextStyle(fontSize: 18, color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
@@ -399,9 +338,9 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16.0),
-      itemCount: _character!.chatHistory.length,
+      itemCount: _messages.length,
       itemBuilder: (context, index) {
-        final message = _character!.chatHistory[index];
+        final message = _messages[index];
         return _MessageBubble(
           key: ValueKey('msg_${index}_${message['isUser']}'),
           message: message['content'] as String,
@@ -488,93 +427,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         ),
       ),
     );
-  }
-
-  void _showClearChatDialog() {
-    if (_character == null) return;
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Clear Chat History'),
-            content: const Text(
-              'This will delete all messages in this conversation. This action cannot be undone.',
-            ),
-            backgroundColor: AppTheme.deepIndigo,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => _clearChatHistory(context),
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _clearChatHistory(BuildContext context) {
-    // Clear chat history
-    final charactersProvider = Provider.of<CharactersProvider>(
-      context,
-      listen: false,
-    );
-
-    // Create a new character with empty chat history
-    final updatedCharacter = CharacterModel(
-      id: _character!.id,
-      name: _character!.name,
-      systemPrompt: _character!.systemPrompt,
-      imageUrl: _character!.imageUrl,
-      createdAt: _character!.createdAt,
-      accentColor: _character!.accentColor,
-      chatHistory: [],
-    );
-
-    // Update the character
-    charactersProvider.updateCharacter(updatedCharacter);
-
-    // Close the dialog
-    Navigator.pop(context);
-
-    // Update local state
-    setState(() {
-      _character = updatedCharacter;
-    });
-
-    // Show a confirmation
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
-  }
-
-  void _navigateToProfile() {
-    if (_character == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: Could not load character profile'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => CharacterProfileScreen(characterId: _character!.id),
-      ),
-    ).then((_) {
-      // Reload character data when returning from profile
-      _loadCharacter();
-    });
   }
 }
 
