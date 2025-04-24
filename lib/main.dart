@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/env_config.dart';
-import 'features/character_gallery/character_gallery_screen.dart';
+import 'core/utils/app_optimizer.dart';
 import 'features/providers/characters_provider.dart';
 import 'features/character_interview/interview_provider.dart';
 import 'features/splash/splash_screen.dart';
@@ -17,8 +17,8 @@ class AppInitializationError extends Error {
 }
 
 Future<void> _initializeApp() async {
-  // Ensure Flutter is initialized
-  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize all app optimizations
+  await AppOptimizer.initializeApp();
 
   // Initialize environment configuration
   try {
@@ -27,22 +27,6 @@ Future<void> _initializeApp() async {
   } catch (e) {
     print("Error initializing environment configuration: $e");
   }
-
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  // Set system UI overlay style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: AppTheme.backgroundEnd,
-      systemNavigationBarIconBrightness: Brightness.light,
-    ),
-  );
 
   // Initialize services
   try {
@@ -59,7 +43,7 @@ Future<void> _initializeApp() async {
       providers_chat.ChatService.logDiagnostics();
     }
   } catch (e) {
-    print("Error initializing chat services: $e");
+    print("Error initializing services: $e");
   }
 }
 
@@ -67,25 +51,8 @@ Future<void> main() async {
   runZonedGuarded(
     () async {
       try {
-        // We only need to ensure Flutter is initialized here
-        // Other initialization happens in the splash screen
-        WidgetsFlutterBinding.ensureInitialized();
-
-        // Set system UI overlay style for consistency
-        SystemChrome.setSystemUIOverlayStyle(
-          const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.light,
-            systemNavigationBarColor: AppTheme.backgroundEnd,
-            systemNavigationBarIconBrightness: Brightness.light,
-          ),
-        );
-
-        // Set preferred orientations
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.portraitDown,
-        ]);
+        // We only need to initialize the app once
+        await _initializeApp();
 
         runApp(
           MultiProvider(

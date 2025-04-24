@@ -4,6 +4,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import '../../core/utils/env_config.dart';
+import '../../core/utils/image_optimizer.dart';
+import '../../core/utils/performance_optimizer.dart';
 import '../character_interview/chat_service.dart' as interview_chat;
 import '../../core/widgets/api_key_input_dialog.dart';
 
@@ -21,6 +23,19 @@ class _SplashScreenState extends State<SplashScreen>
   double _loadingProgress = 0.0;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // Cache widgets for performance
+  late final Widget _backgroundParticles = const RepaintBoundary(
+    child: Opacity(
+      opacity: 0.5,
+      child: AnimatedParticles(
+        particleCount: 20, // Reduced count for performance
+        particleColor: Colors.white,
+        minSpeed: 0.01,
+        maxSpeed: 0.05,
+      ),
+    ),
+  );
 
   @override
   void initState() {
@@ -73,11 +88,19 @@ class _SplashScreenState extends State<SplashScreen>
       setState(() => _statusMessage = 'ESTABLISHING NEURAL CONNECTIONS');
       await interview_chat.ChatService.initialize();
 
-      // Step 3: Check for API key
+      // Step 3: Optimize performance
+      setState(() => _statusMessage = 'OPTIMIZING NEURAL PATHWAYS');
+      await PerformanceOptimizer.initialize();
+
+      // Step 4: Preload critical images
+      setState(() => _statusMessage = 'LOADING MEMORY FRAGMENTS');
+      await ImageOptimizer.preloadAppImages();
+
+      // Step 5: Check for API key
       setState(() => _statusMessage = 'VERIFYING ACCESS CREDENTIALS');
       final hasApiKey = EnvConfig.hasValue('OPENROUTER_API_KEY');
 
-      // Step 4: Complete initialization
+      // Step 6: Complete initialization
       setState(() {
         _statusMessage = 'PRESERVATION SYSTEMS ONLINE';
         _isInitialized = true;
@@ -170,15 +193,7 @@ class _SplashScreenState extends State<SplashScreen>
             CustomPaint(painter: GridPainter(), size: Size.infinite),
 
             // Background particles
-            const Opacity(
-              opacity: 0.6,
-              child: AnimatedParticles(
-                particleCount: 30,
-                particleColor: Colors.white,
-                minSpeed: 0.01,
-                maxSpeed: 0.05,
-              ),
-            ),
+            _backgroundParticles,
 
             // Main content
             Center(

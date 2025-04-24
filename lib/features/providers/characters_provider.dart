@@ -296,4 +296,24 @@ class CharactersProvider with ChangeNotifier {
     await _saveCharacters();
     notifyListeners();
   }
+
+  // Clear all characters and data
+  Future<void> clearAll() async {
+    try {
+      // Clear in-memory data
+      _characters.clear();
+      _characterCache.clear();
+      _selectedCharacterId = null;
+
+      // Clear stored data
+      final prefs = await _getPrefs();
+      await prefs.remove(_storageKey);
+
+      _lastError = null;
+      notifyListeners();
+    } catch (e) {
+      _lastError = 'Error clearing all data: $e';
+      rethrow;
+    }
+  }
 }

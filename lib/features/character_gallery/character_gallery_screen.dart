@@ -9,6 +9,7 @@ import '../character_chat/chat_screen.dart';
 import '../character_interview/interview_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../character_prompts/famous_character_profile_screen.dart';
+import '../settings/settings_screen.dart';
 
 class PulseRingPainter extends CustomPainter {
   final double progress;
@@ -125,14 +126,16 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
           ),
 
-          // Stars effect with reduced opacity
-          CustomPaint(
-            painter: StarfieldPainter(starCount: 150),
-            size: Size.infinite,
+          // Stars effect with reduced opacity - wrapped in RepaintBoundary for performance
+          RepaintBoundary(
+            child: CustomPaint(
+              painter: StarfieldPainter(starCount: 80), // Reduced count
+              size: Size.infinite,
+            ),
           ),
 
-          // Subtle texture overlay - using our TextureWidget
-          const TextureWidget(opacity: 0.05),
+          // Subtle texture overlay - using our TextureWidget with RepaintBoundary
+          const RepaintBoundary(child: TextureWidget(opacity: 0.05)),
 
           // Main content
           SafeArea(
@@ -267,6 +270,18 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     // Handle "Create" tab action
     if (index == 2) {
       _onAddCharacter(context);
+    }
+    // Handle "Settings" tab action
+    else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      ).then((_) {
+        // Reset selected index to previous tab when returning from settings
+        setState(() {
+          _selectedIndex = _selectedIndex < 2 ? _selectedIndex : 1;
+        });
+      });
     }
   }
 
@@ -990,26 +1005,54 @@ class _CharacterCardState extends State<_CharacterCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
-  late Animation<double> _scaleAnimation;
-  bool _isHovering = false;
+
+  // Cache image widget for performance
+  late final ImageProvider _characterImageProvider =
+      widget.character.imageUrl != null
+          ? ResizeImage.resizeIfNeeded(
+            500,
+            null,
+            NetworkImage(widget.character.imageUrl!),
+          )
+          : const AssetImage('assets/images/einstein.png');
+
+  // Pre-calculate accent color
+  late final Color _accentColor = _getAccentColor();
 
   @override
   void initState() {
     super.initState();
+
+    // Set up subtle pulsing animation for the card
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
       vsync: this,
-    );
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
 
     _glowAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.03,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuad));
+  Color _getAccentColor() {
+    // Choose accent color based on character name's first letter
+    final letter =
+        widget.character.name.isNotEmpty
+            ? widget.character.name[0].toLowerCase()
+            : 'a';
+
+    if ('abcde'.contains(letter)) {
+      return AppTheme.etherealCyan;
+    } else if ('fghij'.contains(letter)) {
+      return AppTheme.accentPurple;
+    } else if ('klmno'.contains(letter)) {
+      return AppTheme.starlight;
+    } else if ('pqrst'.contains(letter)) {
+      return AppTheme.accentPurple;
+    } else {
+      return AppTheme.warmGold;
+    }
   }
 
   @override
@@ -1020,428 +1063,103 @@ class _CharacterCardState extends State<_CharacterCard>
 
   @override
   Widget build(BuildContext context) {
-    // Create a custom accent color based on the character's own color
-    // but make sure it harmonizes with our new color palette
-    final Color accentColor =
-        Color.lerp(widget.character.accentColor, AppTheme.warmGold, 0.3) ??
-        AppTheme.warmGold;
-
-    return MouseRegion(
-      onEnter: (_) {
-        setState(() => _isHovering = true);
-        _controller.forward();
-      },
-      onExit: (_) {
-        setState(() => _isHovering = false);
-        _controller.reverse();
-      },
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withOpacity(
-                        0.1 + _glowAnimation.value * 0.2,
-                      ),
-                      blurRadius: 15 + _glowAnimation.value * 10,
-                      spreadRadius: _glowAnimation.value * 2,
-                      offset: const Offset(0, 4),
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _glowAnimation,
+        builder: (context, child) {
+          return GestureDetector(
+            onTap: widget.onTap,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              height: 160,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: _accentColor.withOpacity(
+                      0.2 + _glowAnimation.value * 0.1,
                     ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 6),
+                    blurRadius: 8 + _glowAnimation.value * 4,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  children: [
+                    // Character image or placeholder
+                    Positioned.fill(
+                      child:
+                          widget.character.imageUrl != null
+                              ? Image(
+                                image: _characterImageProvider,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: AppTheme.deepIndigo,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.broken_image_outlined,
+                                        color: Colors.white54,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                              : Container(color: AppTheme.deepIndigo),
+                    ),
+
+                    // Gradient overlay
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppTheme.deepNavy.withOpacity(0.3),
+                              AppTheme.cosmicBlack.withOpacity(0.85),
+                            ],
+                            stops: const [0.5, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Character info content
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Character name
+                            Text(
+                              widget.character.name,
+                              style: GoogleFonts.spaceMono(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
-                    children: [
-                      // Background image if available
-                      if (widget.character.imageUrl != null &&
-                          widget.character.imageUrl!.isNotEmpty)
-                        Positioned.fill(
-                          child: Image.asset(
-                            widget.character.imageUrl!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      // If no image, use gradient background
-                      else
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppTheme.deepNavy,
-                                  AppTheme.midnightPurple,
-                                ],
-                              ),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.person_outline,
-                                size: 80,
-                                color: accentColor.withOpacity(0.5),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      // Gradient overlay for better text contrast
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                AppTheme.deepNavy.withOpacity(0.3),
-                                AppTheme.cosmicBlack.withOpacity(0.85),
-                              ],
-                              stops: const [0.5, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Subtle film grain texture
-                      Positioned.fill(
-                        child: Opacity(
-                          opacity: 0.12,
-                          child: CustomPaint(
-                            painter: FilmGrainPainter(
-                              density: 0.3,
-                              opacity: 0.2,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Ethereal particle effects
-                      Positioned.fill(
-                        child: CustomPaint(
-                          painter: EtherealParticlePainter(
-                            particleCount: 25,
-                            color: accentColor,
-                            pulsePhase: _controller.value,
-                            opacity: 0.05 + _glowAnimation.value * 0.05,
-                          ),
-                        ),
-                      ),
-
-                      // Character info section
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 20,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                AppTheme.cosmicBlack.withOpacity(0.6),
-                              ],
-                              stops: const [0.0, 0.6],
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Character name
-                              Text(
-                                widget.character.name,
-                                style: AppTheme.twinNameStyle.copyWith(
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withOpacity(0.7),
-                                      blurRadius: 3,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              const SizedBox(height: 6),
-
-                              // Creation date with icon
-                              Row(
-                                children: [
-                                  TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(begin: 0.5, end: 1.0),
-                                    duration: const Duration(seconds: 2),
-                                    curve: Curves.easeInOut,
-                                    builder: (context, value, child) {
-                                      return Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: accentColor,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: accentColor.withOpacity(
-                                                0.4 * value,
-                                              ),
-                                              blurRadius: 6 * value,
-                                              spreadRadius: 1 * value,
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    onEnd: () => setState(() {}),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Created ${_formatDate(widget.character.createdAt)}',
-                                    style: AppTheme.metadataStyle.copyWith(
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black.withOpacity(0.7),
-                                          blurRadius: 3,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // Action buttons row
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Chat button
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
-                                        colors: [
-                                          accentColor.withOpacity(
-                                            0.2 + _glowAnimation.value * 0.1,
-                                          ),
-                                          AppTheme.gentlePurple.withOpacity(
-                                            0.2 + _glowAnimation.value * 0.1,
-                                          ),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: accentColor.withOpacity(0.3),
-                                        width: 0.5,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.chat_bubble_outline,
-                                          size: 16,
-                                          color: accentColor,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'CHAT',
-                                          style: GoogleFonts.cinzel(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: accentColor,
-                                            letterSpacing: 0.8,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Delete button
-                                  GestureDetector(
-                                    onTap: () => _confirmDelete(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: Colors.red.withOpacity(0.3),
-                                          width: 0.5,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.delete_outline,
-                                        size: 16,
-                                        color: Colors.red.withOpacity(0.8),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Hover indicator
-                      if (_isHovering)
-                        Positioned(
-                          right: 16,
-                          top: 16,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: accentColor,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: accentColor.withOpacity(0.6),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
-  }
-
-  // Add method to confirm deletion
-  void _confirmDelete(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppTheme.deepIndigo,
-            title: Text(
-              'Delete Digital Twin',
-              style: GoogleFonts.cinzel(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Are you sure you want to delete ${widget.character.name}?',
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'This action cannot be undone.',
-                  style: TextStyle(
-                    color: Colors.red.withOpacity(0.7),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _deleteCharacter(context);
-                },
-                child: Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red.withOpacity(0.8)),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // Add method to perform the deletion
-  void _deleteCharacter(BuildContext context) async {
-    try {
-      // Get the provider
-      final charactersProvider = Provider.of<CharactersProvider>(
-        context,
-        listen: false,
-      );
-
-      // Delete the character
-      await charactersProvider.deleteCharacter(widget.character.id);
-
-      // Show a success message
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${widget.character.name} has been deleted'),
-            backgroundColor: Colors.green.withOpacity(0.8),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      // Show an error message
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting digital twin: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
-  String _formatDate(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays == 0) return 'today';
-    if (difference.inDays == 1) return 'yesterday';
-    if (difference.inDays < 7) return '${difference.inDays} days ago';
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }
 
@@ -1805,56 +1523,54 @@ class ScanLinePainter extends CustomPainter {
 // Custom painter for the starfield background effect
 class StarfieldPainter extends CustomPainter {
   final int starCount;
+  final List<_Star> _stars = [];
+  final Paint _starPaint = Paint()..color = Colors.white;
 
-  StarfieldPainter({this.starCount = 100});
+  // Fixed random for consistent rendering
+  final Random _random = Random(42);
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(12);
+  StarfieldPainter({this.starCount = 100}) {
+    // Pre-generate stars only once for performance
+    _generateStars();
+  }
 
-    // Different star types - tiny, small, medium, large
-    final starSizes = [0.5, 1.0, 1.5, 2.0, 3.0];
-    final starColors = [
-      Colors.white.withOpacity(0.4),
-      Colors.white.withOpacity(0.6),
-      Colors.white.withOpacity(0.8),
-      AppTheme.etherealCyan.withOpacity(0.6),
-      AppTheme.starlight.withOpacity(0.7),
-    ];
-
-    // Draw stars
+  void _generateStars() {
     for (int i = 0; i < starCount; i++) {
-      // Random position
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-
-      // Random star properties
-      final sizeIndex = random.nextInt(starSizes.length);
-      final radius = starSizes[sizeIndex];
-      final color = starColors[sizeIndex];
-
-      // Draw the star
-      final paint =
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.fill;
-
-      // For the larger stars, add a glow effect
-      if (radius > 1.0) {
-        final glowPaint =
-            Paint()
-              ..color = color.withOpacity(0.3)
-              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
-
-        canvas.drawCircle(Offset(x, y), radius * 2, glowPaint);
-      }
-
-      canvas.drawCircle(Offset(x, y), radius, paint);
+      _stars.add(
+        _Star(
+          x: _random.nextDouble(),
+          y: _random.nextDouble(),
+          size: _random.nextDouble() * 2 + 0.5,
+          opacity: _random.nextDouble() * 0.7 + 0.3,
+        ),
+      );
     }
   }
 
   @override
-  bool shouldRepaint(StarfieldPainter oldDelegate) {
-    return oldDelegate.starCount != starCount;
+  void paint(Canvas canvas, Size size) {
+    for (final star in _stars) {
+      final x = star.x * size.width;
+      final y = star.y * size.height;
+      _starPaint.color = Colors.white.withOpacity(star.opacity);
+      canvas.drawCircle(Offset(x, y), star.size, _starPaint);
+    }
   }
+
+  @override
+  bool shouldRepaint(StarfieldPainter oldDelegate) => false; // Never repaint
+}
+
+class _Star {
+  final double x;
+  final double y;
+  final double size;
+  final double opacity;
+
+  _Star({
+    required this.x,
+    required this.y,
+    required this.size,
+    required this.opacity,
+  });
 }

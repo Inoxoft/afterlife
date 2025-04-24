@@ -21,7 +21,7 @@ class ChatBubble extends StatelessWidget {
         message.isUser
             ? AppTheme.accentPurple.withOpacity(0.6)
             : (hasCharacterCard()
-                ? AppTheme.deepIndigo.withOpacity(0.7)
+                ? AppTheme.deepIndigo.withOpacity(0.8)
                 : Colors.black.withOpacity(0.4));
 
     return Padding(
@@ -37,10 +37,7 @@ class ChatBubble extends StatelessWidget {
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.75,
-                maxHeight:
-                    hasCharacterCard()
-                        ? MediaQuery.of(context).size.height * 0.5
-                        : double.infinity,
+                // Don't limit height by default to avoid overflow issues
               ),
               decoration: BoxDecoration(
                 color: bubbleColor,
@@ -61,14 +58,25 @@ class ChatBubble extends StatelessWidget {
                       message.isUser
                           ? AppTheme.accentPurple.withOpacity(0.7)
                           : (hasCharacterCard()
-                              ? AppTheme.etherealCyan.withOpacity(0.5)
+                              ? AppTheme.warmGold.withOpacity(
+                                0.7,
+                              ) // Gold border for character cards
                               : AppTheme.etherealCyan.withOpacity(0.3)),
-                  width: hasCharacterCard() ? 1.5 : 1,
+                  width:
+                      hasCharacterCard()
+                          ? 2.0
+                          : 1, // Thicker border for character cards
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 3,
+                    color:
+                        hasCharacterCard()
+                            ? AppTheme.warmGold.withOpacity(
+                              0.2,
+                            ) // Gold glow for character cards
+                            : Colors.black.withOpacity(0.1),
+                    blurRadius: hasCharacterCard() ? 8 : 3,
+                    spreadRadius: hasCharacterCard() ? 2 : 0,
                     offset: const Offset(0, 1),
                   ),
                 ],
@@ -114,6 +122,22 @@ class ChatBubble extends StatelessWidget {
         message.text.contains('## END OF CHARACTER CARD ##');
   }
 
+  // Extract character name from the card if available
+  String _extractCharacterName() {
+    final nameMarker = '## CHARACTER NAME:';
+    if (message.text.contains(nameMarker)) {
+      final startIndex = message.text.indexOf(nameMarker) + nameMarker.length;
+      final endIndex = message.text.indexOf('\n', startIndex);
+      if (endIndex > startIndex) {
+        return message.text
+            .substring(startIndex, endIndex)
+            .trim()
+            .replaceAll('##', '');
+      }
+    }
+    return "";
+  }
+
   Widget _buildLoadingIndicator() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -144,143 +168,188 @@ class ChatBubble extends StatelessWidget {
 
   Widget _buildMessageText(BuildContext context) {
     if (hasCharacterCard()) {
+      // Use a fixed max height for character cards with ScrollView to handle overflow
+      final cardMaxHeight = MediaQuery.of(context).size.height * 0.6;
+      final characterName = _extractCharacterName();
+
       // Format the character card with sections
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Regular text before character card
-          if (message.text.indexOf('## CHARACTER CARD SUMMARY ##') > 0)
-            Text(
-              message.text.substring(
-                0,
-                message.text.indexOf('## CHARACTER CARD SUMMARY ##'),
-              ),
-              style: const TextStyle(color: Colors.white, fontSize: 15),
-            ),
-
-          // Character card header
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.etherealCyan.withOpacity(0.3),
-                  AppTheme.accentPurple.withOpacity(0.2),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppTheme.etherealCyan.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.person_outline,
-                  size: 16,
-                  color: AppTheme.etherealCyan,
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'CHARACTER CARD SUMMARY',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: cardMaxHeight),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Regular text before character card
+              if (message.text.indexOf('## CHARACTER CARD SUMMARY ##') > 0)
+                Text(
+                  message.text.substring(
+                    0,
+                    message.text.indexOf('## CHARACTER CARD SUMMARY ##'),
                   ),
-                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 15),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
 
-          // Character card content
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 5,
-                  spreadRadius: 0,
+              // Character card header with name if available
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
                 ),
-              ],
-            ),
-            child: Text(
-              _extractCharacterCardContent(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-          ),
-
-          // Instructions after character card
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.etherealCyan.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.etherealCyan.withOpacity(0.3),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.etherealCyan.withOpacity(0.05),
-                  blurRadius: 8,
-                  spreadRadius: 0,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.warmGold.withOpacity(0.4),
+                      AppTheme.accentPurple.withOpacity(0.3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.5),
+                    width: 1.5,
+                  ),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+                child: Column(
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: AppTheme.etherealCyan,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.person_outline,
+                          size: 18,
+                          color: AppTheme.warmGold,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'CHARACTER CARD',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Instructions',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    if (characterName.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black26,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppTheme.warmGold.withOpacity(0.4),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          characterName,
+                          style: TextStyle(
+                            color: AppTheme.warmGold,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            letterSpacing: 0.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Character card content with scrolling capability
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 5,
+                      spreadRadius: 0,
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Type "agree" to confirm this character card or continue the conversation to make changes.',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
+                child: Text(
+                  _extractCharacterCardContent(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
                 ),
-              ],
-            ),
+              ),
+
+              // Instructions after character card
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.etherealCyan.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.etherealCyan.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.etherealCyan.withOpacity(0.05),
+                      blurRadius: 8,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: AppTheme.etherealCyan,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Instructions',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Type "agree" to confirm this character card or continue the conversation to make changes.',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       );
     }
 
+    // Regular text messages
     return Text(
       message.text,
       style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
