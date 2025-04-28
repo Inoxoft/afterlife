@@ -150,13 +150,61 @@ When the edited character card is ready, tell the user they can type "agree" to 
     try {
       // Handle 'agree' command - this completes the character creation
       if (text.toLowerCase().trim() == 'agree' && !isComplete) {
-        // Always look for character name in messages if not already found
+        bool foundValidCard = false;
+
+        // First, try to find a character card with proper markers
+        for (int i = _messages.length - 1; i >= 0; i--) {
+          final msg = _messages[i];
+          if (!msg.isUser &&
+              msg.text.contains('## CHARACTER CARD SUMMARY ##') &&
+              msg.text.contains('## END OF CHARACTER CARD ##')) {
+            // Extract the clean system prompt
+            final startMarker = '## CHARACTER CARD SUMMARY ##';
+            final endMarker = '## END OF CHARACTER CARD ##';
+
+            final startIndex = msg.text.indexOf(startMarker);
+            final cleanStart =
+                startIndex != -1 ? startIndex + startMarker.length : 0;
+
+            final endIndex = msg.text.indexOf(endMarker);
+            final cleanEnd = endIndex != -1 ? endIndex : msg.text.length;
+
+            if (startIndex != -1 && endIndex != -1 && cleanStart < cleanEnd) {
+              characterCardSummary = _prepareSystemPromptForCharacter(
+                msg.text.substring(cleanStart, cleanEnd).trim(),
+              );
+              foundValidCard = true;
+              break;
+            }
+          }
+        }
+
+        // If no valid card found, try to use the last substantial AI message
+        if (!foundValidCard) {
+          for (int i = _messages.length - 1; i >= 0; i--) {
+            final msg = _messages[i];
+            if (!msg.isUser && !msg.isLoading && msg.text.length > 50) {
+              characterCardSummary = _prepareSystemPromptForCharacter(msg.text);
+              foundValidCard = true;
+              break;
+            }
+          }
+        }
+
+        // If still no valid card found, show error message
+        if (!foundValidCard) {
+          _removeLoadingMessage();
+          addAIMessage(
+            "I couldn't find a valid character card to process. Please try again or continue your conversation so I can create one for you.",
+          );
+          return;
+        }
+
+        // Extract character name if not already found
         if (characterName == null) {
-          // Extract character name from any recent AI message
           for (int i = _messages.length - 1; i >= 0; i--) {
             final msg = _messages[i];
             if (!msg.isUser) {
-              // Check for character name marker
               final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
               final nameMatch = namePattern.firstMatch(msg.text);
               if (nameMatch != null && nameMatch.group(1) != null) {
@@ -174,82 +222,11 @@ When the edited character card is ready, tell the user they can type "agree" to 
           }
         }
 
-        // Look for a character card in any message if not already stored
-        if (characterCardSummary == null) {
-          for (int i = _messages.length - 1; i >= 0; i--) {
-            final msg = _messages[i];
-            if (!msg.isUser &&
-                msg.text.contains('## CHARACTER CARD SUMMARY ##') &&
-                msg.text.contains('## END OF CHARACTER CARD ##')) {
-              characterCardSummary = msg.text;
-              print('Found character card summary in messages');
-              break;
-            }
-          }
-        }
-
-        // Process the character card if found
-        if (characterCardSummary != null) {
-          print(
-            'Processing character card summary: ${characterCardSummary!.substring(0, min(100, characterCardSummary!.length))}...',
-          );
-          // Extract the clean system prompt
-          final startMarker = '## CHARACTER CARD SUMMARY ##';
-          final endMarker = '## END OF CHARACTER CARD ##';
-
-          final startIndex = characterCardSummary!.indexOf(startMarker);
-          final cleanStart =
-              startIndex != -1 ? startIndex + startMarker.length : 0;
-
-          final endIndex = characterCardSummary!.indexOf(endMarker);
-          final cleanEnd =
-              endIndex != -1 ? endIndex : characterCardSummary!.length;
-
-          if (startIndex != -1 && endIndex != -1 && cleanStart < cleanEnd) {
-            final cleanSystemPrompt =
-                characterCardSummary!.substring(cleanStart, cleanEnd).trim();
-            characterCardSummary = _prepareSystemPromptForCharacter(
-              cleanSystemPrompt,
-            );
-            isSuccess = true;
-            isComplete = true;
-            _removeLoadingMessage();
-            notifyListeners();
-            return;
-          } else {
-            print('Failed to extract proper character summary from markers');
-            // Even if we couldn't find the markers, we'll use the whole content as fallback
-            characterCardSummary = _prepareSystemPromptForCharacter(
-              characterCardSummary!,
-            );
-            isSuccess = true;
-            isComplete = true;
-            _removeLoadingMessage();
-            notifyListeners();
-            return;
-          }
-        } else {
-          // If we get here but don't have a card summary, try to use the last AI message as the card
-          for (int i = _messages.length - 1; i >= 0; i--) {
-            final msg = _messages[i];
-            if (!msg.isUser && !msg.isLoading && msg.text.length > 50) {
-              // Use the last substantial AI message as the character card
-              characterCardSummary = _prepareSystemPromptForCharacter(msg.text);
-              isSuccess = true;
-              isComplete = true;
-              _removeLoadingMessage();
-              notifyListeners();
-              print('Using last AI message as character card fallback');
-              return;
-            }
-          }
-        }
-
-        // If we still couldn't find a valid character card
+        // Set completion state
+        isSuccess = true;
+        isComplete = true;
         _removeLoadingMessage();
-        addAIMessage(
-          "I couldn't find a valid character card to process. Please try again or continue your conversation so I can create one for you.",
-        );
+        notifyListeners();
         return;
       }
 

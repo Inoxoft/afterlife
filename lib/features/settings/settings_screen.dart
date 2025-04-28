@@ -128,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingCard(
                       title: 'Dark Mode',
                       subtitle:
-                          'Enhance your viewing experience in low light conditions',
+                          'Enhance your viewing experience in low light conditions(soon)',
                       icon: Icons.dark_mode,
                       trailing: Switch(
                         value: _isDarkModeEnabled,

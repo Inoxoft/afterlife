@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internet permission required for API calls -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    
     <application
-        android:label="afterlife"
+        android:label="Afterlife"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
