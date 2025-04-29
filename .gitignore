@@ -43,7 +43,6 @@ app.*.map.json
 /android/app/release
 
 # Web related
-/lib/generated_plugin_registrant.dart
 
 # Environment variables & sensitive data
 .env
