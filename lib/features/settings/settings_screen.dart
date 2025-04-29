@@ -5,6 +5,11 @@ import '../../core/theme/app_theme.dart';
 import '../providers/characters_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'themed_icon.dart';
+import '../../core/widgets/api_key_input_dialog.dart';
+import '../../core/utils/env_config.dart';
+import '../providers/chat_service.dart';
+import '../character_chat/chat_service.dart' as character_chat;
+import '../character_interview/chat_service.dart' as character_interview;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -266,6 +271,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       },
                     ),
+
+                    const SizedBox(height: 16),
+
+                    // API & Connectivity section
+                    _buildSectionHeader('API & Connectivity'),
+                    _buildSettingCard(
+                      title: 'OpenRouter API Key',
+                      subtitle:
+                          'Set or update your API key for AI functionality',
+                      icon: Icons.vpn_key,
+                      onTap: () => _showApiKeyDialog(context),
+                    ),
                   ],
                 ),
               ),
@@ -470,5 +487,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
     );
+  }
+
+  void _showApiKeyDialog(BuildContext context) async {
+    // Add diagnostic logging to see what's happening with the API key
+    final currentKey = EnvConfig.get('OPENROUTER_API_KEY');
+    final hasUserKey = await EnvConfig.hasUserApiKey();
+
+    print('==================== API KEY DIAGNOSTICS ====================');
+    print(
+      'Current API Key: ${currentKey != null ? (currentKey.isEmpty ? "EMPTY" : "${currentKey.substring(0, 4)}...") : "NULL"}',
+    );
+    print('Has User-Set API Key: $hasUserKey');
+
+    // Print diagnostic information from each service
+    try {
+      await EnvConfig.forceReload();
+      print(
+        'API Key after reload: ${EnvConfig.get('OPENROUTER_API_KEY') ?? "NULL"}',
+      );
+
+      // Log from character interview service
+      character_interview.ChatService.logDiagnostics();
+
+      // Character chat service doesn't have logDiagnostics
+
+      // Provider chat service doesn't have logDiagnostics
+    } catch (e) {
+      print('Error during diagnostics: $e');
+    }
+    print('===========================================================');
+
+    bool apiKeyUpdated = await ApiKeyInputDialog.show(
+      context,
+      isFromSettings: true,
+      onKeyUpdated: () {
+        // Re-initialize env config and all services that use the API key
+        print('API key updated, reinitializing services...');
+        EnvConfig.forceReload().then((_) {
+          // Reinitialize all chat services
+          ChatService.initialize();
+          character_chat.ChatService.initialize();
+          character_interview.ChatService.initialize();
+          print('All chat services reinitialized with new API key');
+
+          // Log the new key for debugging
+          final newKey = EnvConfig.get('OPENROUTER_API_KEY');
+          print(
+            'New API Key: ${newKey != null ? (newKey.isEmpty ? "EMPTY" : "${newKey.substring(0, 4)}...") : "NULL"}',
+          );
+        });
+      },
+    );
+
+    if (apiKeyUpdated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('API key updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 }

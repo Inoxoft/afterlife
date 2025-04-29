@@ -104,8 +104,11 @@ class ChatService {
     print('=== Character Chat Service Diagnostics ===');
     print('Is initialized: $_isInitialized');
     print(
-      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, _apiKey!.length > 8 ? 8 : _apiKey!.length)}...)")}',
+      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
     );
-    print('==========================================');
+    print('=============================');
   }
+
+  // Helper function to avoid importing dart:math
+  static int min(int a, int b) => a < b ? a : b;
 }

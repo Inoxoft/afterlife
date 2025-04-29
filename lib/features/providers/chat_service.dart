@@ -137,13 +137,16 @@ class ChatService {
     }
   }
 
-  // For diagnostics
+  // Method for logging diagnostic info
   static void logDiagnostics() {
-    debugPrint('=== Provider ChatService Diagnostics ===');
+    debugPrint('=== Provider Chat Service Diagnostics ===');
     debugPrint('Is initialized: $_isInitialized');
     debugPrint(
-      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, _apiKey!.length > 8 ? 8 : _apiKey!.length)}...)")}',
+      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
     );
-    debugPrint('=======================================');
+    debugPrint('=============================');
   }
+
+  // Helper function to avoid importing dart:math
+  static int min(int a, int b) => a < b ? a : b;
 }
