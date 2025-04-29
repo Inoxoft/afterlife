@@ -28,7 +28,14 @@ class EnvConfig {
 
       if (userApiKey != null && userApiKey.isNotEmpty) {
         _envVars['OPENROUTER_API_KEY'] = userApiKey;
-        print('Using API key from user preferences');
+        _cachedUserApiKey = userApiKey;
+        print('Using API key from user preferences - STRICTLY USER KEY ONLY');
+
+        // When using a user-specified key, we don't even check the .env file
+        // This ensures we use ONLY the key provided by the user
+        _isInitialized = true;
+        _logLoadedVars();
+        return;
       } else {
         // Otherwise try to load from .env file or assets
         await _loadFromDotEnv();
@@ -74,6 +81,21 @@ class EnvConfig {
     if (!_isInitialized) {
       print('Warning: EnvConfig not initialized before access');
     }
+
+    // Special case for API key - always check SharedPreferences first
+    if (key == 'OPENROUTER_API_KEY') {
+      try {
+        // This is synchronous but we're in a sync method, so we use a different approach
+        final cachedUserKey = _getCachedUserApiKey();
+        if (cachedUserKey != null) {
+          print('Returning user-specified API key from memory cache');
+          return cachedUserKey;
+        }
+      } catch (e) {
+        print('Error checking for cached user API key: $e');
+      }
+    }
+
     return _envVars[key];
   }
 
@@ -81,6 +103,14 @@ class EnvConfig {
   static bool hasValue(String key) {
     final value = get(key);
     return value != null && value.isNotEmpty;
+  }
+
+  /// Cache for the user API key to avoid sync/async issues
+  static String? _cachedUserApiKey;
+
+  // Get cached user API key (sync version)
+  static String? _getCachedUserApiKey() {
+    return _cachedUserApiKey;
   }
 
   /// Set an API key that overrides the one in the .env file
@@ -91,9 +121,11 @@ class EnvConfig {
       // Empty string means remove it
       if (apiKey.isEmpty) {
         await prefs.remove(_openRouterApiKeyPref);
+        _cachedUserApiKey = null;
         print('Removed user API key from preferences');
       } else {
         await prefs.setString(_openRouterApiKeyPref, apiKey);
+        _cachedUserApiKey = apiKey;
         print('Saved user API key to preferences');
       }
 
@@ -241,4 +273,27 @@ OPENROUTER_API_KEY=your_api_key_here
 
     print('Environment configuration reloaded forcibly');
   }
+
+  /// Dump diagnostic information about the API key source
+  static Future<void> dumpApiKeyInfo() async {
+    final currentKey = get('OPENROUTER_API_KEY');
+    final hasUserKey = await hasUserApiKey();
+
+    print('=========== API KEY SOURCE DIAGNOSTICS ===========');
+    print('Has User API Key in Preferences: $hasUserKey');
+    print(
+      'Current Key from get(): ${currentKey != null ? (currentKey.isEmpty ? "EMPTY" : "${currentKey.substring(0, min(4, currentKey.length))}...") : "NULL"}',
+    );
+    print(
+      'Cached User Key: ${_cachedUserApiKey != null ? ((_cachedUserApiKey!.isEmpty) ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...") : "NULL"}',
+    );
+    print(
+      'In-Memory Map Key: ${_envVars['OPENROUTER_API_KEY'] != null ? (_envVars['OPENROUTER_API_KEY']!.isEmpty ? "EMPTY" : "${_envVars['OPENROUTER_API_KEY']!.substring(0, min(4, _envVars['OPENROUTER_API_KEY']!.length))}...") : "NULL"}',
+    );
+    print('=== SERVICES WILL USE THIS KEY MOVING FORWARD ===');
+    print('==================================================');
+  }
+
+  // Helper function to avoid importing dart:math
+  static int min(int a, int b) => a < b ? a : b;
 }

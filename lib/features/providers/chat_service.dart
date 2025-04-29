@@ -26,19 +26,55 @@ class ChatService {
       // Get API key from environment
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
 
+      // Check the source of the API key
+      final hasUserKey = await EnvConfig.hasUserApiKey();
+
       if (_apiKey == null || _apiKey!.isEmpty) {
         debugPrint(
           'Warning: No OpenRouter API key found. The application will not function properly.',
         );
         debugPrint('Please set OPENROUTER_API_KEY in your .env file.');
+      } else if (hasUserKey) {
+        debugPrint(
+          'Provider Chat Service: Using user-specified API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
+        );
       } else {
-        debugPrint('API key loaded successfully for provider chat service');
+        debugPrint(
+          'Provider Chat Service: Using .env file API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
+        );
       }
 
       _isInitialized = true;
     } catch (e) {
       debugPrint('Error initializing chat service: $e');
       _isInitialized = true; // Mark as initialized to prevent repeated attempts
+    }
+  }
+
+  // Method to refresh API key from the latest source
+  static Future<void> refreshApiKey() async {
+    try {
+      debugPrint('Provider Chat Service: Refreshing API key...');
+
+      // Get the latest key directly
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      // Check the source of the API key
+      final hasUserKey = await EnvConfig.hasUserApiKey();
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        debugPrint('Warning: No API key found after refresh');
+      } else if (hasUserKey) {
+        debugPrint(
+          'Provider Chat Service: Now using user-specified API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
+        );
+      } else {
+        debugPrint(
+          'Provider Chat Service: Now using .env file API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error refreshing API key: $e');
     }
   }
 
@@ -51,6 +87,9 @@ class ChatService {
     if (!_isInitialized) {
       await initialize();
     }
+
+    // Always refresh the API key before sending a message
+    await refreshApiKey();
 
     // Validate API key
     if (_apiKey == null || _apiKey!.isEmpty) {

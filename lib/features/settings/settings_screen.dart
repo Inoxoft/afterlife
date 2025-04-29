@@ -491,32 +491,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showApiKeyDialog(BuildContext context) async {
     // Add diagnostic logging to see what's happening with the API key
-    final currentKey = EnvConfig.get('OPENROUTER_API_KEY');
-    final hasUserKey = await EnvConfig.hasUserApiKey();
-
-    print('==================== API KEY DIAGNOSTICS ====================');
-    print(
-      'Current API Key: ${currentKey != null ? (currentKey.isEmpty ? "EMPTY" : "${currentKey.substring(0, 4)}...") : "NULL"}',
-    );
-    print('Has User-Set API Key: $hasUserKey');
-
-    // Print diagnostic information from each service
-    try {
-      await EnvConfig.forceReload();
-      print(
-        'API Key after reload: ${EnvConfig.get('OPENROUTER_API_KEY') ?? "NULL"}',
-      );
-
-      // Log from character interview service
-      character_interview.ChatService.logDiagnostics();
-
-      // Character chat service doesn't have logDiagnostics
-
-      // Provider chat service doesn't have logDiagnostics
-    } catch (e) {
-      print('Error during diagnostics: $e');
-    }
-    print('===========================================================');
+    await EnvConfig.dumpApiKeyInfo();
 
     bool apiKeyUpdated = await ApiKeyInputDialog.show(
       context,
@@ -531,11 +506,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           character_interview.ChatService.initialize();
           print('All chat services reinitialized with new API key');
 
-          // Log the new key for debugging
-          final newKey = EnvConfig.get('OPENROUTER_API_KEY');
-          print(
-            'New API Key: ${newKey != null ? (newKey.isEmpty ? "EMPTY" : "${newKey.substring(0, 4)}...") : "NULL"}',
-          );
+          // Dump diagnostics after updating
+          EnvConfig.dumpApiKeyInfo();
         });
       },
     );
