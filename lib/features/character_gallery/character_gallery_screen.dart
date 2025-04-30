@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'dart:math' show Random, sin, cos, pi;
-import '../../core/theme/app_theme.dart';
-import '../../core/utils/texture_image.dart';
+import 'dart:math';
+
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
+import '../../core/theme/app_theme.dart';
+import '../character_profile/character_profile_screen.dart';
+import '../settings/settings_screen.dart';
 import '../character_chat/chat_screen.dart';
 import '../character_interview/interview_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../character_prompts/famous_character_profile_screen.dart';
-import '../settings/settings_screen.dart';
 
 class PulseRingPainter extends CustomPainter {
   final double progress;
@@ -133,9 +134,6 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               size: Size.infinite,
             ),
           ),
-
-          // Subtle texture overlay - using our TextureWidget with RepaintBoundary
-          const RepaintBoundary(child: TextureWidget(opacity: 0.05)),
 
           // Main content
           SafeArea(
@@ -1007,14 +1005,14 @@ class _CharacterCardState extends State<_CharacterCard>
   late Animation<double> _glowAnimation;
 
   // Cache image widget for performance
-  late final ImageProvider _characterImageProvider =
+  late final ImageProvider? _characterImageProvider =
       widget.character.imageUrl != null
           ? ResizeImage.resizeIfNeeded(
             500,
             null,
             NetworkImage(widget.character.imageUrl!),
           )
-          : const AssetImage('assets/images/einstein.png');
+          : null;
 
   // Pre-calculate accent color
   late final Color _accentColor = _getAccentColor();
@@ -1061,6 +1059,53 @@ class _CharacterCardState extends State<_CharacterCard>
     super.dispose();
   }
 
+  void _deleteCharacter() {
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: _accentColor.withOpacity(0.3), width: 1),
+            ),
+            title: Text(
+              'Delete Character',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+              'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Delete the character
+                  final provider = Provider.of<CharactersProvider>(
+                    context,
+                    listen: false,
+                  );
+                  provider.deleteCharacter(widget.character.id);
+                },
+                child: Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -1088,27 +1133,18 @@ class _CharacterCardState extends State<_CharacterCard>
                 borderRadius: BorderRadius.circular(16),
                 child: Stack(
                   children: [
-                    // Character image or placeholder
+                    // Character image or background pattern
                     Positioned.fill(
                       child:
                           widget.character.imageUrl != null
                               ? Image(
-                                image: _characterImageProvider,
+                                image: _characterImageProvider!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: AppTheme.deepIndigo,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.broken_image_outlined,
-                                        color: Colors.white54,
-                                        size: 40,
-                                      ),
-                                    ),
-                                  );
+                                  return _buildBackgroundPattern();
                                 },
                               )
-                              : Container(color: AppTheme.deepIndigo),
+                              : _buildBackgroundPattern(),
                     ),
 
                     // Gradient overlay
@@ -1123,6 +1159,27 @@ class _CharacterCardState extends State<_CharacterCard>
                               AppTheme.cosmicBlack.withOpacity(0.85),
                             ],
                             stops: const [0.5, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Delete button
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: _deleteCharacter,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.delete_outline,
+                            color: Colors.white70,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -1161,6 +1218,392 @@ class _CharacterCardState extends State<_CharacterCard>
       ),
     );
   }
+
+  // Build a background pattern based on character properties
+  Widget _buildBackgroundPattern() {
+    // Get a consistent background based on the character's name or ID
+    final hashValue = widget.character.id.hashCode;
+    final patternIndex = hashValue % 6; // 6 different patterns
+
+    // Background pattern options
+    switch (patternIndex) {
+      case 0:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [_accentColor.withOpacity(0.3), AppTheme.deepSpaceNavy],
+            ),
+          ),
+          child: CustomPaint(
+            painter: GeometricBackgroundPainter(color: _accentColor),
+          ),
+        );
+      case 1:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppTheme.deepNavy, AppTheme.cosmicBlack],
+            ),
+          ),
+          child: CustomPaint(
+            painter: CosmicBackgroundPainter(starColor: AppTheme.warmGold),
+          ),
+        );
+      case 2:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                AppTheme.deepSpaceNavy,
+                AppTheme.deepNavy.withOpacity(0.7),
+              ],
+            ),
+          ),
+          child: CustomPaint(
+            painter: NeuralBackgroundPainter(lineColor: _accentColor),
+          ),
+        );
+      case 3:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.deepIndigo.withOpacity(0.8),
+                AppTheme.cosmicBlack,
+              ],
+            ),
+          ),
+          child: CustomPaint(
+            painter: WaveBackgroundPainter(
+              waveColor: _accentColor.withOpacity(0.5),
+            ),
+          ),
+        );
+      case 4:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [AppTheme.cosmicBlack, AppTheme.deepSpaceNavy],
+            ),
+          ),
+          child: CustomPaint(
+            painter: DigitalBackgroundPainter(lineColor: _accentColor),
+          ),
+        );
+      default:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppTheme.deepSpaceNavy, AppTheme.deepIndigo],
+            ),
+          ),
+          child: CustomPaint(
+            painter: LightBackgroundPainter(lightColor: _accentColor),
+          ),
+        );
+    }
+  }
+}
+
+// Background painter classes
+class GeometricBackgroundPainter extends CustomPainter {
+  final Color color;
+
+  GeometricBackgroundPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = color.withOpacity(0.15)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
+
+    final random = Random(42); // Fixed seed for consistent pattern
+
+    // Draw some triangles and circles
+    for (int i = 0; i < 15; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = 10 + random.nextDouble() * 30;
+
+      if (i % 2 == 0) {
+        // Draw triangles
+        final path = Path();
+        path.moveTo(x, y - radius);
+        path.lineTo(x + radius, y + radius);
+        path.lineTo(x - radius, y + radius);
+        path.close();
+        canvas.drawPath(path, paint);
+      } else {
+        // Draw circles
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class CosmicBackgroundPainter extends CustomPainter {
+  final Color starColor;
+
+  CosmicBackgroundPainter({required this.starColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(100); // Fixed seed for consistent stars
+
+    // Draw stars
+    for (int i = 0; i < 100; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = 0.5 + random.nextDouble() * 1.5;
+      final opacity = 0.3 + random.nextDouble() * 0.7;
+
+      final paint =
+          Paint()
+            ..color = starColor.withOpacity(opacity)
+            ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+
+    // Draw a few larger glowing stars
+    for (int i = 0; i < 5; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = 1.5 + random.nextDouble() * 2.0;
+
+      final paint =
+          Paint()
+            ..color = starColor.withOpacity(0.8)
+            ..style = PaintingStyle.fill;
+
+      // Inner glow
+      final glowPaint =
+          Paint()
+            ..color = starColor.withOpacity(0.2)
+            ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(x, y), radius * 3, glowPaint);
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class NeuralBackgroundPainter extends CustomPainter {
+  final Color lineColor;
+
+  NeuralBackgroundPainter({required this.lineColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(25); // Fixed seed for consistency
+    final paint =
+        Paint()
+          ..color = lineColor.withOpacity(0.2)
+          ..strokeWidth = 0.8
+          ..style = PaintingStyle.stroke;
+
+    final nodePaint =
+        Paint()
+          ..color = lineColor.withOpacity(0.3)
+          ..style = PaintingStyle.fill;
+
+    // Create a network of nodes and connections
+    final nodes = <Offset>[];
+
+    // Generate node positions
+    for (int i = 0; i < 12; i++) {
+      nodes.add(
+        Offset(
+          random.nextDouble() * size.width,
+          random.nextDouble() * size.height,
+        ),
+      );
+    }
+
+    // Draw connections between some nodes
+    for (int i = 0; i < nodes.length; i++) {
+      for (int j = i + 1; j < nodes.length; j++) {
+        if (random.nextDouble() < 0.3) {
+          canvas.drawLine(nodes[i], nodes[j], paint);
+        }
+      }
+    }
+
+    // Draw nodes
+    for (final node in nodes) {
+      canvas.drawCircle(node, 2.5, nodePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class WaveBackgroundPainter extends CustomPainter {
+  final Color waveColor;
+
+  WaveBackgroundPainter({required this.waveColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = waveColor.withOpacity(0.2)
+          ..strokeWidth = 1.2
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
+    // Draw several wave patterns
+    for (int w = 0; w < 5; w++) {
+      final path = Path();
+      final amplitude = 5.0 + (w * 3);
+      final frequency = 0.02 + (w * 0.005);
+      final verticalShift = (w * 30) + (size.height * 0.2);
+
+      path.moveTo(0, size.height / 2);
+
+      for (double x = 0; x <= size.width; x += 1) {
+        double y = sin(x * frequency) * amplitude + verticalShift;
+        path.lineTo(x, y);
+      }
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class DigitalBackgroundPainter extends CustomPainter {
+  final Color lineColor;
+
+  DigitalBackgroundPainter({required this.lineColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = lineColor.withOpacity(0.25)
+          ..strokeWidth = 1.0
+          ..style = PaintingStyle.stroke;
+
+    final random = Random(55);
+
+    // Draw digital circuit-like patterns
+    for (int i = 0; i < 8; i++) {
+      final startX = random.nextDouble() * size.width * 0.2;
+      final startY = (i * size.height / 8) + random.nextDouble() * 20;
+
+      final path = Path();
+      path.moveTo(startX, startY);
+
+      double currentX = startX;
+      double currentY = startY;
+
+      // Create a path with horizontal and vertical lines only
+      for (int j = 0; j < 5; j++) {
+        // Horizontal line
+        final horizontalLength = 20 + random.nextDouble() * (size.width / 3);
+        currentX += horizontalLength;
+        path.lineTo(currentX, currentY);
+
+        // Sometimes add a vertical segment
+        if (random.nextDouble() > 0.3) {
+          final verticalLength = (random.nextDouble() - 0.5) * 40;
+          currentY += verticalLength;
+          path.lineTo(currentX, currentY);
+        }
+      }
+
+      canvas.drawPath(path, paint);
+
+      // Add some circuit nodes/connection points
+      final nodePaint =
+          Paint()
+            ..color = lineColor.withOpacity(0.4)
+            ..style = PaintingStyle.fill;
+
+      currentX = startX;
+      currentY = startY;
+      canvas.drawCircle(Offset(currentX, currentY), 2, nodePaint);
+
+      for (int j = 0; j < 3; j++) {
+        currentX += 40 + random.nextDouble() * 60;
+        canvas.drawCircle(Offset(currentX, currentY), 2, nodePaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class LightBackgroundPainter extends CustomPainter {
+  final Color lightColor;
+
+  LightBackgroundPainter({required this.lightColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(42);
+
+    // Draw light rays or beams
+    for (int i = 0; i < 15; i++) {
+      final startX = random.nextDouble() * size.width;
+      final startY = random.nextDouble() * size.height;
+      final angle = random.nextDouble() * pi * 2;
+      final length = 30 + random.nextDouble() * 100;
+      final opacity = 0.1 + random.nextDouble() * 0.15;
+
+      final paint =
+          Paint()
+            ..color = lightColor.withOpacity(opacity)
+            ..strokeWidth = 1 + random.nextDouble() * 3
+            ..strokeCap = StrokeCap.round
+            ..style = PaintingStyle.stroke;
+
+      final endX = startX + cos(angle) * length;
+      final endY = startY + sin(angle) * length;
+
+      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
+
+      // Add a subtle glow at the start point
+      final glowPaint =
+          Paint()
+            ..color = lightColor.withOpacity(opacity * 0.8)
+            ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(
+        Offset(startX, startY),
+        3 + random.nextDouble() * 2,
+        glowPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 // Custom widget for dotted border

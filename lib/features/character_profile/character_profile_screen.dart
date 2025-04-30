@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_interview/interview_screen.dart';
+
+// Helper class to store parsed prompt sections
+class _PromptSection {
+  final String title;
+  final String content;
+
+  _PromptSection({required this.title, required this.content});
+}
 
 class CharacterProfileScreen extends StatefulWidget {
   final String characterId;
@@ -377,14 +386,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     ),
                     child: ElevatedButton.icon(
                       onPressed: _startReinterview,
-                      icon: const Icon(Icons.refresh, size: 22),
+                      icon: const Icon(Icons.edit, size: 22),
                       label: const Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 12,
                         ),
                         child: Text(
-                          'Re-Interview Character',
+                          'Edit Character through chat',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -435,18 +444,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             onPressed: _showCharacterCardInfo,
                             backgroundColor: _character!.accentColor
                                 .withOpacity(0.8),
-                          ),
-                          _buildCardOptionButton(
-                            icon: Icons.description,
-                            label: 'View Card',
-                            onPressed: _showFormattedCard,
-                            backgroundColor: Colors.purple.withOpacity(0.8),
-                          ),
-                          _buildCardOptionButton(
-                            icon: Icons.content_copy,
-                            label: 'Copy Card',
-                            onPressed: _copyFullCharacterCard,
-                            backgroundColor: Colors.blueGrey.withOpacity(0.8),
                           ),
                         ],
                       ),
@@ -707,16 +704,19 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     );
   }
 
+  // Format date for display
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
 
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
+    if (difference.inDays < 1) {
+      if (difference.inHours < 1) {
+        return 'Just now';
+      } else {
+        return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+      }
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
+      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
@@ -761,7 +761,178 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return cleanedPrompt;
   }
 
-  // Show character card info dialog
+  // Parse system prompt to detect sections
+  List<_PromptSection> _parseSystemPromptSections(String systemPrompt) {
+    final sections = <_PromptSection>[];
+
+    // Clean the prompt by removing separator lines and problematic characters
+    final cleanedPrompt = _cleanPromptText(systemPrompt);
+
+    // Regular expressions for different heading formats
+    final headingPatterns = [
+      RegExp(r'#{1,3}\s+([^#\n]+)'), // Markdown headings
+      RegExp(r'([A-Z][A-Z\s]+):'), // ALL CAPS headings with colon
+      RegExp(r'\*\*([^*]+)\*\*'), // Bold text as headings
+      RegExp(r'<([^>]+)>:?'), // Text in angle brackets
+      RegExp(
+        r'If\s+Given\s+Immortality[^:]*:?',
+      ), // Fix for "If Given Immortality" pattern
+    ];
+
+    // Special sections that should always be titled "AI Instructions" if found
+    final aiInstructionPatterns = [
+      RegExp(r'If\s+Given\s+Immortality', caseSensitive: false),
+      RegExp(r'stay\s+in\s+character', caseSensitive: false),
+      RegExp(r'never\s+break\s+character', caseSensitive: false),
+      RegExp(
+        r'do\s+not\s+(admit|acknowledge)\s+you\s+are\s+an\s+AI',
+        caseSensitive: false,
+      ),
+    ];
+
+    // First, try to find sections based on common heading patterns
+    final lines = cleanedPrompt.split('\n');
+    String? currentHeading;
+    StringBuffer currentContent = StringBuffer();
+    bool isAiInstructionSection = false;
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      bool isHeading = false;
+      String? headingText;
+
+      // Check if this line is a heading
+      for (final pattern in headingPatterns) {
+        final match = pattern.firstMatch(line);
+        if (match != null) {
+          if (pattern.pattern.contains('If\\s+Given\\s+Immortality')) {
+            headingText = 'AI Instructions';
+            isAiInstructionSection = true;
+          } else {
+            headingText = match.group(1)?.trim() ?? match.group(0)?.trim();
+          }
+
+          if (headingText != null && headingText.isNotEmpty) {
+            isHeading = true;
+            break;
+          }
+        }
+      }
+
+      // If this is a heading, save the previous section and start a new one
+      if (isHeading && headingText != null) {
+        // Save previous section if exists and not empty
+        final contentStr = currentContent.toString().trim();
+        if (currentHeading != null && contentStr.isNotEmpty) {
+          sections.add(
+            _PromptSection(title: currentHeading, content: contentStr),
+          );
+          currentContent.clear();
+        }
+
+        currentHeading = headingText;
+        isAiInstructionSection = currentHeading == 'AI Instructions';
+      } else {
+        // Check if this line contains AI instruction patterns
+        if (!isAiInstructionSection && currentHeading == null) {
+          for (final pattern in aiInstructionPatterns) {
+            if (pattern.hasMatch(line)) {
+              // If we find AI instructions but we're not in an AI section,
+              // create a new AI Instructions section
+              if (currentContent.isNotEmpty) {
+                // Save previous content to a generic section
+                sections.add(
+                  _PromptSection(
+                    title: 'Character Description',
+                    content: currentContent.toString().trim(),
+                  ),
+                );
+                currentContent.clear();
+              }
+              currentHeading = 'AI Instructions';
+              isAiInstructionSection = true;
+              break;
+            }
+          }
+        }
+
+        // This is content - add to current section
+        if (currentHeading != null) {
+          currentContent.writeln(line);
+        } else if (line.trim().isNotEmpty) {
+          // If no heading yet but we have content, buffer it
+          currentContent.writeln(line);
+        }
+      }
+    }
+
+    // Add the last section if not empty
+    final finalContent = currentContent.toString().trim();
+    if (currentHeading != null && finalContent.isNotEmpty) {
+      sections.add(
+        _PromptSection(title: currentHeading, content: finalContent),
+      );
+    } else if (finalContent.isNotEmpty) {
+      // If there's content without a heading, add as character description
+      sections.add(
+        _PromptSection(title: 'Character Description', content: finalContent),
+      );
+    }
+
+    // If no sections were detected, create a default section
+    if (sections.isEmpty) {
+      sections.add(
+        _PromptSection(
+          title: 'Character Description',
+          content: cleanedPrompt.trim(),
+        ),
+      );
+    }
+
+    return sections;
+  }
+
+  // Helper to clean prompt text of separators and problematic characters
+  String _cleanPromptText(String text) {
+    // First remove separator lines
+    String cleaned = _removeAllSeparatorLines(text);
+
+    // Remove non-standard characters and Unicode control chars
+    cleaned = cleaned.replaceAll(
+      RegExp(r'[\u0080-\u009F\u200B-\u200F\u2028-\u202F\uFEFF]'),
+      '',
+    );
+
+    // Replace "ã" characters often seen in "Immortalityã" with nothing
+    cleaned = cleaned.replaceAll('ã', '');
+
+    // Replace common malformed patterns
+    cleaned = cleaned.replaceAll(
+      'If Given Immortalityï¿½:',
+      'AI Instructions:',
+    );
+    cleaned = cleaned.replaceAll('If Given Immortality:', 'AI Instructions:');
+
+    return cleaned;
+  }
+
+  // Helper to remove all separator lines from a string
+  String _removeAllSeparatorLines(String text) {
+    // Define a pattern for separator lines
+    final separatorPattern = RegExp(r'^[-_*=]{3,}$');
+
+    // Split the text into lines, filter out the separators, and join back
+    final lines = text.split('\n');
+    final filteredLines =
+        lines.where((line) {
+          final trimmed = line.trim();
+          return trimmed.isEmpty || !separatorPattern.hasMatch(trimmed);
+        }).toList();
+
+    return filteredLines.join('\n');
+  }
+
+  // Show character card info dialog with AI-structured information
   void _showCharacterCardInfo() {
     if (_character == null) {
       print('Error: Character is null when trying to show character card info');
@@ -776,270 +947,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
     print('Showing character card info for: ${_character!.name}');
 
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppTheme.backgroundStart,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: _character!.accentColor.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            title: Text(
-              'Character Card',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Container(
-              width: double.maxFinite,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Character Name',
-                      style: TextStyle(
-                        color: _character!.accentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black26,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white24, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: SelectableText(
-                              _character!.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.content_copy,
-                              size: 20,
-                              color: Colors.white70,
-                            ),
-                            onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: _character!.name),
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Name copied to clipboard'),
-                                ),
-                              );
-                            },
-                            tooltip: 'Copy name',
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Character Prompt',
-                      style: TextStyle(
-                        color: _character!.accentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black26,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white24, width: 1),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SelectableText(
-                            _character!.systemPrompt,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.content_copy,
-                                size: 20,
-                                color: Colors.white70,
-                              ),
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: _character!.systemPrompt),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Prompt copied to clipboard'),
-                                  ),
-                                );
-                              },
-                              tooltip: 'Copy prompt',
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (_character!.imageUrl != null) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        'Image URL',
-                        style: TextStyle(
-                          color: _character!.accentColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black26,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white24, width: 1),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: SelectableText(
-                                _character!.imageUrl!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.content_copy,
-                                size: 20,
-                                color: Colors.white70,
-                              ),
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: _character!.imageUrl!),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Image URL copied to clipboard',
-                                    ),
-                                  ),
-                                );
-                              },
-                              tooltip: 'Copy URL',
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _showFormattedCard();
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'View Formatted Card',
-                  style: TextStyle(color: _character!.accentColor),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  _copyFullCharacterCard();
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'Copy Full Card',
-                  style: TextStyle(color: _character!.accentColor),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // Copy full character card to clipboard
-  void _copyFullCharacterCard() {
-    Clipboard.setData(ClipboardData(text: _formatCharacterCard()));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Full character card copied to clipboard')),
-    );
-  }
-
-  // Format character card for display or export
-  String _formatCharacterCard() {
-    final sb = StringBuffer();
-    sb.writeln('## CHARACTER CARD ##');
-    sb.writeln('Name: ${_character!.name}');
-    sb.writeln('Created: ${_formatDate(_character!.createdAt)}');
-    if (_character!.imageUrl != null) {
-      sb.writeln('Image URL: ${_character!.imageUrl}');
-    }
-    sb.writeln('\n## CHARACTER PROMPT ##');
-    sb.writeln(_character!.systemPrompt);
-    sb.writeln('\n## END OF CHARACTER CARD ##');
-
-    return sb.toString();
-  }
-
-  // Show the full formatted character card
-  void _showFormattedCard() {
-    if (_character == null) {
-      print('Error: Character is null when trying to show formatted card');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: Could not load character information'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    print('Showing formatted card for: ${_character!.name}');
-    final formattedCard = _formatCharacterCard();
+    // Parse the system prompt to detect headings and sections
+    final parsedSections = _parseSystemPromptSections(_character!.systemPrompt);
 
     showDialog(
       context: context,
@@ -1057,7 +966,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Formatted Character Card',
+                    'Character Card: ${_character!.name}',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -1087,17 +996,55 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             content: Container(
               width: double.maxFinite,
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
+                maxHeight: MediaQuery.of(context).size.height * 0.7,
               ),
               child: SingleChildScrollView(
-                child: SelectableText(
-                  formattedCard,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontFamily: 'monospace',
-                    height: 1.5,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Basic information section
+                    _buildInfoSection(
+                      title: 'Basic Information',
+                      content: [
+                        _buildInfoItem(label: 'Name', value: _character!.name),
+                        _buildInfoItem(
+                          label: 'Created',
+                          value: _formatDate(_character!.createdAt),
+                        ),
+                        if (_character!.imageUrl != null &&
+                            _character!.imageUrl!.isNotEmpty)
+                          _buildInfoItem(
+                            label: 'Image URL',
+                            value: _character!.imageUrl!,
+                          ),
+                      ],
+                    ),
+
+                    // Divider
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Container(
+                        height: 1,
+                        color: _character!.accentColor.withOpacity(0.3),
+                      ),
+                    ),
+
+                    // Dynamic sections from system prompt
+                    ...parsedSections
+                        .where((section) => section.content.trim().isNotEmpty)
+                        .map(
+                          (section) => _buildInfoSection(
+                            title: section.title,
+                            content: [
+                              _buildInfoItem(
+                                value: section.content,
+                                isMultiline: true,
+                              ),
+                            ],
+                          ),
+                        ),
+                  ],
                 ),
               ),
             ),
@@ -1112,6 +1059,95 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             ],
           ),
     );
+  }
+
+  // Helper method to build a section with a title and content
+  Widget _buildInfoSection({
+    required String title,
+    required List<Widget> content,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: _character!.accentColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...content,
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // Helper method to build an info item with label and value
+  Widget _buildInfoItem({
+    String? label,
+    required String value,
+    bool isMultiline = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white24, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (label != null) ...[
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
+          SelectableText(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isMultiline ? 14 : 15,
+              height: isMultiline ? 1.5 : 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Copy full character card to clipboard
+  void _copyFullCharacterCard() {
+    Clipboard.setData(ClipboardData(text: _formatCharacterCard()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Full character card copied to clipboard')),
+    );
+  }
+
+  // Format character card for display or export
+  String _formatCharacterCard() {
+    final sb = StringBuffer();
+    sb.writeln('## CHARACTER CARD ##');
+    sb.writeln('Name: ${_character!.name}');
+    sb.writeln('Created: ${_formatDate(_character!.createdAt)}');
+    if (_character!.imageUrl != null) {
+      sb.writeln('Image URL: ${_character!.imageUrl}');
+    }
+    sb.writeln('\n## CHARACTER PROMPT ##');
+    sb.writeln(_character!.systemPrompt);
+    sb.writeln('\n## END OF CHARACTER CARD ##');
+
+    return sb.toString();
   }
 
   // Add the helper method for building card option buttons
