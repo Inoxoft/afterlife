@@ -287,14 +287,7 @@ class ChatBubble extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Text(
-                  _extractCharacterCardContent(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
+                child: _buildFormattedCardContent(),
               ),
 
               // Instructions after character card
@@ -383,6 +376,107 @@ class ChatBubble extends StatelessWidget {
       return message.text; // Fallback if markers aren't found properly
     }
 
-    return message.text.substring(startIndex, endIndex).trim();
+    String content = message.text.substring(startIndex, endIndex).trim();
+
+    // Process the markdown-style formatting to improve readability
+    // but preserve the original formatting for extraction elsewhere
+    return _formatMarkdownContent(content);
+  }
+
+  // Process markdown-style formatting to improve readability
+  String _formatMarkdownContent(String content) {
+    // Format section headers (###)
+    content = content.replaceAllMapped(
+      RegExp(r'###\s+(.*?)(?=\n|$)'),
+      (match) => '\n\n${match.group(1)}\n',
+    );
+
+    // Format subsection titles (**)
+    content = content.replaceAllMapped(
+      RegExp(r'\*\*(.*?)\*\*'),
+      (match) => '${match.group(1)}',
+    );
+
+    // Format lists
+    content = content.replaceAllMapped(
+      RegExp(r'^\s*-\s+(.*?)$', multiLine: true),
+      (match) => '• ${match.group(1)}',
+    );
+
+    // Clean up any unnecessary markdown markers
+    content = content.replaceAll(r'##', '');
+
+    return content;
+  }
+
+  Widget _buildFormattedCardContent() {
+    final content = _extractCharacterCardContent();
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
+        children: _buildFormattedTextSpans(content),
+      ),
+    );
+  }
+
+  List<TextSpan> _buildFormattedTextSpans(String content) {
+    final List<TextSpan> spans = [];
+    final lines = content.split('\n');
+
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+
+      // Handle section headers (###)
+      if (line.trim().startsWith('###')) {
+        final headerText = line.replaceFirst(RegExp(r'###\s+'), '').trim();
+        spans.add(
+          TextSpan(
+            text: headerText + '\n',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              height: 2.0,
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Handle bold text (**)
+      if (line.contains('**')) {
+        List<TextSpan> lineSpans = [];
+        final segments = line.split(RegExp(r'\*\*'));
+
+        for (int j = 0; j < segments.length; j++) {
+          if (j % 2 == 0) {
+            lineSpans.add(TextSpan(text: segments[j]));
+          } else {
+            // This is the text between ** markers
+            lineSpans.add(
+              TextSpan(
+                text: segments[j],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            );
+          }
+        }
+
+        spans.add(TextSpan(children: lineSpans));
+        spans.add(const TextSpan(text: '\n'));
+        continue;
+      }
+
+      // Handle bullet points
+      if (line.trim().startsWith('-')) {
+        final bulletText = line.replaceFirst(RegExp(r'-\s+'), '').trim();
+        spans.add(TextSpan(text: '• ' + bulletText + '\n'));
+        continue;
+      }
+
+      // Regular text
+      spans.add(TextSpan(text: line + '\n'));
+    }
+
+    return spans;
   }
 }
