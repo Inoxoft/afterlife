@@ -173,6 +173,43 @@ class CharactersProvider with ChangeNotifier {
     }
   }
 
+  // Update a specific field of a character by ID
+  Future<void> updateCharacterField({
+    required String characterId,
+    required String field,
+    required dynamic value,
+  }) async {
+    try {
+      final index = _characters.indexWhere((char) => char.id == characterId);
+
+      if (index < 0) {
+        throw Exception('Character not found');
+      }
+
+      // Get a copy of the character to modify
+      final character = _characters[index];
+
+      // Create a new JSON representation
+      final json = character.toJson();
+
+      // Update the specific field
+      json[field] = value;
+
+      // Create an updated character model
+      final updatedCharacter = CharacterModel.fromJson(json);
+
+      // Update the character
+      _characters[index] = updatedCharacter;
+      _characterCache[characterId] = updatedCharacter;
+
+      await _saveCharacters();
+      notifyListeners();
+    } catch (e) {
+      _lastError = 'Error updating character field: $e';
+      rethrow;
+    }
+  }
+
   Future<void> deleteCharacter(String id) async {
     try {
       _characters.removeWhere((char) => char.id == id);

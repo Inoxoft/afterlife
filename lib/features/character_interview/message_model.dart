@@ -5,12 +5,14 @@ class Message {
   final DateTime timestamp;
   final String? imageUrl;
   final bool isLoading;
-  
+  final bool isHidden;
+
   Message({
     required this.text,
     required this.isUser,
     DateTime? timestamp,
     this.imageUrl,
     this.isLoading = false,
+    this.isHidden = false,
   }) : timestamp = timestamp ?? DateTime.now();
 }

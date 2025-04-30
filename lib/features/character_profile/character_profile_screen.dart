@@ -145,16 +145,22 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             listen: false,
           );
 
-          // Create updated character with new system prompt but keep chat history
+          // Update the character in place with new data
+          final originalCharacter = _character!;
+          final cleanedPrompt = _cleanSystemPrompt(
+            characterCard,
+            characterName,
+          );
+
           final updatedCharacter = CharacterModel(
-            id: _character!.id,
+            id: originalCharacter.id,
             name: characterName,
-            systemPrompt: _cleanSystemPrompt(characterCard, characterName),
-            imageUrl: _character!.imageUrl,
-            createdAt: _character!.createdAt,
-            accentColor: _character!.accentColor,
-            chatHistory: _character!.chatHistory,
-            additionalInfo: _character!.additionalInfo,
+            systemPrompt: cleanedPrompt,
+            imageUrl: originalCharacter.imageUrl,
+            createdAt: originalCharacter.createdAt,
+            accentColor: originalCharacter.accentColor,
+            chatHistory: originalCharacter.chatHistory,
+            additionalInfo: originalCharacter.additionalInfo,
           );
 
           // Update the character
@@ -357,6 +363,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
@@ -416,142 +424,29 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _character!.accentColor.withOpacity(
-                                    0.3,
-                                  ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: _showCharacterCardInfo,
-                              icon: const Icon(Icons.visibility, size: 20),
-                              label: const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 10,
-                                ),
-                                child: Text(
-                                  'View Card Info',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _character!.accentColor
-                                    .withOpacity(0.8),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 4,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
+                          _buildCardOptionButton(
+                            icon: Icons.visibility,
+                            label: 'View Card Info',
+                            onPressed: _showCharacterCardInfo,
+                            backgroundColor: _character!.accentColor
+                                .withOpacity(0.8),
                           ),
-                          const SizedBox(width: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _character!.accentColor.withOpacity(
-                                    0.3,
-                                  ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: _showFormattedCard,
-                              icon: const Icon(Icons.description, size: 20),
-                              label: const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 10,
-                                ),
-                                child: Text(
-                                  'View Card',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple.withOpacity(0.8),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 4,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
+                          _buildCardOptionButton(
+                            icon: Icons.description,
+                            label: 'View Card',
+                            onPressed: _showFormattedCard,
+                            backgroundColor: Colors.purple.withOpacity(0.8),
                           ),
-                          const SizedBox(width: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _character!.accentColor.withOpacity(
-                                    0.3,
-                                  ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: _copyFullCharacterCard,
-                              icon: const Icon(Icons.content_copy, size: 20),
-                              label: const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 10,
-                                ),
-                                child: Text(
-                                  'Copy Card',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueGrey.withOpacity(
-                                  0.8,
-                                ),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 4,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
+                          _buildCardOptionButton(
+                            icon: Icons.content_copy,
+                            label: 'Copy Card',
+                            onPressed: _copyFullCharacterCard,
+                            backgroundColor: Colors.blueGrey.withOpacity(0.8),
                           ),
                         ],
                       ),
@@ -1216,6 +1111,50 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               ),
             ],
           ),
+    );
+  }
+
+  // Add the helper method for building card option buttons
+  Widget _buildCardOptionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required Color backgroundColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _character!.accentColor.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        label: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
     );
   }
 }

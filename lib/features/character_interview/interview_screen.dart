@@ -289,7 +289,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       const SizedBox(height: 16),
                                       Text(
                                         provider.isEditMode
-                                            ? 'Character card successfully updated'
+                                            ? 'Character card updated and ready'
                                             : 'Character card successfully created',
                                         style: const TextStyle(
                                           color: Colors.white,
@@ -300,7 +300,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       const SizedBox(height: 8),
                                       Text(
                                         provider.isEditMode
-                                            ? 'Your digital twin has been updated with the new information'
+                                            ? 'Click below to apply these changes to your character'
                                             : 'Your digital twin is ready to chat with you',
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(0.7),
@@ -360,7 +360,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                                     : characterName;
 
                                             print(
-                                              'Character creation successful:',
+                                              'Character ${provider.isEditMode ? "update" : "creation"} successful:',
                                             );
                                             print('Name: $finalCharacterName');
                                             print(
@@ -368,48 +368,60 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                             );
 
                                             try {
-                                              // Create the character directly here
+                                              // Get character provider
                                               final charactersProvider =
                                                   Provider.of<
                                                     CharactersProvider
                                                   >(context, listen: false);
 
-                                              // Create new character
-                                              final newCharacter =
-                                                  CharacterModel.fromInterviewData(
-                                                    name: finalCharacterName,
-                                                    cardContent: cleanPrompt,
-                                                  );
-
-                                              print(
-                                                'Character created with ID: ${newCharacter.id}',
-                                              );
-
-                                              // Add character to provider
-                                              await charactersProvider
-                                                  .addCharacter(newCharacter);
-                                              print(
-                                                'Character saved successfully',
-                                              );
-
-                                              // Navigate directly to "Your Twins" gallery screen
-                                              if (context.mounted) {
+                                              if (provider.isEditMode &&
+                                                  widget.existingCharacter !=
+                                                      null) {
+                                                // In edit mode, return the updated character info to the profile screen
+                                                Navigator.of(context).pop({
+                                                  'characterCard': cleanPrompt,
+                                                  'characterName':
+                                                      finalCharacterName,
+                                                });
                                                 print(
-                                                  'Navigating to Your Twins gallery screen',
+                                                  'Returning to character profile with updated information',
                                                 );
-                                                Navigator.pushReplacement(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder:
-                                                        (context) =>
-                                                            const CharacterGalleryScreen(),
-                                                  ),
+                                              } else {
+                                                // Create new character for non-edit mode
+                                                final newCharacter =
+                                                    CharacterModel.fromInterviewData(
+                                                      name: finalCharacterName,
+                                                      cardContent: cleanPrompt,
+                                                    );
+
+                                                print(
+                                                  'Character created with ID: ${newCharacter.id}',
                                                 );
+
+                                                // Add character to provider
+                                                await charactersProvider
+                                                    .addCharacter(newCharacter);
+                                                print(
+                                                  'Character saved successfully',
+                                                );
+
+                                                // Navigate directly to "Your Twins" gallery screen
+                                                if (context.mounted) {
+                                                  print(
+                                                    'Navigating to Your Twins gallery screen',
+                                                  );
+                                                  Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              const CharacterGalleryScreen(),
+                                                    ),
+                                                  );
+                                                }
                                               }
                                             } catch (e) {
-                                              print(
-                                                'Error creating character: $e',
-                                              );
+                                              print('Error with character: $e');
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(

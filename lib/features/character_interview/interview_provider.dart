@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'message_model.dart';
 import 'chat_service.dart';
 import 'prompts.dart';
@@ -22,7 +23,7 @@ class InterviewProvider with ChangeNotifier {
   bool isEditMode = false;
   bool isAiThinking = false;
 
-  List<Message> get messages => _messages;
+  List<Message> get messages => _messages.where((m) => !m.isHidden).toList();
 
   InterviewProvider() {
     _initialize();
@@ -50,8 +51,21 @@ class InterviewProvider with ChangeNotifier {
   }) {
     isEditMode = true;
     characterName = existingName;
+
     // Store the existing system prompt - vital for continuing the edit flow
     characterCardSummary = existingSystemPrompt;
+
+    // Debug the system prompt to ensure it's being loaded properly
+    print('=== SYSTEM PROMPT DEBUG ===');
+    print('Character name: $existingName');
+    print('System prompt length: ${existingSystemPrompt.length} characters');
+    print(
+      'First 200 chars: ${existingSystemPrompt.substring(0, min(200, existingSystemPrompt.length))}...',
+    );
+    print(
+      'Last 200 chars: ...${existingSystemPrompt.substring(max(0, existingSystemPrompt.length - 200))}',
+    );
+    print('=========================');
 
     // Add loading message to indicate AI is thinking
     _addLoadingMessage();
@@ -65,23 +79,51 @@ class InterviewProvider with ChangeNotifier {
 
     final systemPrompt = _getSystemPrompt();
 
+    print('=== SENDING EDIT MESSAGE ===');
+    print(
+      'Character card summary length: ${characterCardSummary?.length ?? 0}',
+    );
+    if (characterCardSummary != null && characterCardSummary!.isNotEmpty) {
+      print(
+        'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
+      );
+    } else {
+      print('WARNING: Character card summary is empty or null!');
+    }
+    print('===========================');
+
     try {
       // Create a formatted message to send to the AI with the existing character details
       final existingCharacterInfo = """
-I want to edit my existing character.
+I am providing the COMPLETE system prompt for my character. This is what we will be editing:
 
 Character name: $characterName
 
-Current character description:
+===== SYSTEM PROMPT - START =====
 ${characterCardSummary ?? ""}
+===== SYSTEM PROMPT - END =====
 
-Please acknowledge that you've received this information, and help me edit this character. I'll tell you what specific changes I want to make.
+DO NOT ask me to send you the system prompt. I have already provided it above.
+
+In your first response, repeat the COMPLETE system prompt and then ask me what changes I want to make.
+
+I want to make specific edits to this system prompt. I will tell you exactly what changes I want. Please preserve all existing content unless I explicitly ask for something to be changed.
+
+What specific edits would you like me to make?
 """;
 
+      // Add the initial message to our history but hide it from UI
+      _messages.add(
+        Message(text: existingCharacterInfo, isUser: true, isHidden: true),
+      );
+      notifyListeners();
+
+      print(
+        'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
+      );
       final response = await ChatService.sendMessage(
-        messages: [
-          {"role": "user", "content": existingCharacterInfo},
-        ],
+        messages:
+            _convertMessagesToAPI(), // Use all messages including the initial one
         systemPrompt: systemPrompt,
       );
 
@@ -93,7 +135,7 @@ Please acknowledge that you've received this information, and help me edit this 
         addAIMessage(response);
       } else {
         addAIMessage(
-          "I couldn't load your character information. Please try again.",
+          "I couldn't load your character's system prompt. Please try again.",
         );
       }
     } catch (e) {
@@ -103,28 +145,29 @@ Please acknowledge that you've received this information, and help me edit this 
 
   String _getSystemPrompt() {
     if (isEditMode) {
-      return """You are an AI assistant helping to edit and improve an existing character card.
+      return """You are an AI assistant helping to edit a character's system prompt.
 
-The user has shared their character's current system prompt, and you're helping them make specific improvements.
+### CRITICAL INSTRUCTIONS:
+1. The user has ALREADY PROVIDED the character's system prompt in their first message to you.
+2. The prompt is enclosed between the "Current system prompt" and the "==================================================" markers.
+3. DO NOT ask the user to provide the system prompt again - they have already sent it to you.
+4. Your first response MUST acknowledge that you have received the system prompt and ask what specific edits they'd like to make.
 
-Your goal is to enhance the existing character card based on the user's feedback, NOT to create an entirely new character.
 
-Here's how to approach this:
-1. First, acknowledge that you have received the existing character information and can see its details.
-2. Focus on maintaining the character's core identity and essence.
-3. Make targeted improvements to the areas the user specifies.
-4. Keep all useful existing information but refine or augment as needed.
+### Your Task:
+- Help the user edit the system prompt they've already provided
+- Make only the specific changes they request
+- Preserve all content they don't explicitly ask to change
+- When edits are requested, show the full updated system prompt with changes highlighted
 
-When the user is satisfied with the changes, provide the complete updated system prompt formatted between the markers:
+### Formatting Final Result:
+When the user types "agree", format the final prompt as:
+```
+## CHARACTER NAME: [character name] ##
 ## CHARACTER CARD SUMMARY ##
-[complete character description here]
+[FULL UPDATED SYSTEM PROMPT WITH ALL CHANGES]
 ## END OF CHARACTER CARD ##
-
-Also include the character's name as:
-## CHARACTER NAME: [name] ##
-
-Be collaborative, asking clarifying questions to ensure you understand what the user wants to modify.
-When the edited character card is ready, tell the user they can type "agree" to finalize the changes.""";
+```""";
     } else {
       return InterviewPrompts.interviewSystemPrompt;
     }
