@@ -183,9 +183,11 @@ class ChatBubble extends StatelessWidget {
               // Regular text before character card
               if (message.text.indexOf('## CHARACTER CARD SUMMARY ##') > 0)
                 Text(
-                  message.text.substring(
-                    0,
-                    message.text.indexOf('## CHARACTER CARD SUMMARY ##'),
+                  _filterPreCardText(
+                    message.text.substring(
+                      0,
+                      message.text.indexOf('## CHARACTER CARD SUMMARY ##'),
+                    ),
                   ),
                   style: const TextStyle(color: Colors.white, fontSize: 15),
                 ),
@@ -354,6 +356,20 @@ class ChatBubble extends StatelessWidget {
       message.text,
       style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
     );
+  }
+
+  // Filter out CHARACTER NAME line from the text before the card
+  String _filterPreCardText(String text) {
+    final nameMarker = '## CHARACTER NAME:';
+    if (text.contains(nameMarker)) {
+      final startIndex = text.indexOf(nameMarker);
+      final endIndex = text.indexOf('\n', startIndex);
+      if (endIndex > startIndex) {
+        // Remove the CHARACTER NAME line
+        return text.substring(0, startIndex) + text.substring(endIndex + 1);
+      }
+    }
+    return text;
   }
 
   String _extractCharacterCardContent() {
