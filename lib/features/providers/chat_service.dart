@@ -14,6 +14,7 @@ class ChatService {
   ); // 2 minutes timeout
   static bool _isInitialized = false;
   static String? _apiKey;
+  static bool _isUsingDefaultKey = false;
 
   // Initialize the service
   static Future<void> initialize() async {
@@ -26,22 +27,16 @@ class ChatService {
       // Get API key from environment
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
 
-      // Check the source of the API key
-      final hasUserKey = await EnvConfig.hasUserApiKey();
+      // Check if we're using a default key or a user key
+      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
         debugPrint(
           'Warning: No OpenRouter API key found. The application will not function properly.',
         );
-        debugPrint('Please set OPENROUTER_API_KEY in your .env file.');
-      } else if (hasUserKey) {
-        debugPrint(
-          'Provider Chat Service: Using user-specified API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
-        );
+        debugPrint('Please set OPENROUTER_API_KEY in your .env file or in Settings.');
       } else {
-        debugPrint(
-          'Provider Chat Service: Using .env file API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
-        );
+        debugPrint('API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
       }
 
       _isInitialized = true;
@@ -59,19 +54,13 @@ class ChatService {
       // Get the latest key directly
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
 
-      // Check the source of the API key
-      final hasUserKey = await EnvConfig.hasUserApiKey();
+      // Check if we're using a default key or a user key
+      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
         debugPrint('Warning: No API key found after refresh');
-      } else if (hasUserKey) {
-        debugPrint(
-          'Provider Chat Service: Now using user-specified API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
-        );
       } else {
-        debugPrint(
-          'Provider Chat Service: Now using .env file API key ${_apiKey!.substring(0, min(4, _apiKey!.length))}...',
-        );
+        debugPrint('API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
       }
     } catch (e) {
       debugPrint('Error refreshing API key: $e');
@@ -180,6 +169,7 @@ class ChatService {
   static void logDiagnostics() {
     debugPrint('=== Provider Chat Service Diagnostics ===');
     debugPrint('Is initialized: $_isInitialized');
+    debugPrint('Is using default key: $_isUsingDefaultKey');
     debugPrint(
       'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
     );

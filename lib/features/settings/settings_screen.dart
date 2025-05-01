@@ -277,11 +277,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // API & Connectivity section
                     _buildSectionHeader('API & Connectivity'),
                     _buildSettingCard(
-                      title: 'OpenRouter API Key',
+                      title: 'Custom OpenRouter API Key',
                       subtitle:
-                          'Set or update your API key for AI functionality',
+                          'Set or update your personal API key',
                       icon: Icons.vpn_key,
                       onTap: () => _showApiKeyDialog(context),
+                    ),
+                    
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                      child: Text(
+                        'Note: The default API key from .env file will be used as a fallback if no custom key is provided.',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -500,10 +512,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // Re-initialize env config and all services that use the API key
         print('API key updated, reinitializing services...');
         EnvConfig.forceReload().then((_) {
+          // Force refresh all chat services to use the new key
           // Reinitialize all chat services
           ChatService.initialize();
           character_chat.ChatService.initialize();
           character_interview.ChatService.initialize();
+          
+          // Force a refresh of API keys in each service
+          try {
+            ChatService.refreshApiKey();
+            character_chat.ChatService.refreshApiKey();
+            character_interview.ChatService.refreshApiKey();
+          } catch (e) {
+            print('Error refreshing API keys: $e');
+          }
+          
           print('All chat services reinitialized with new API key');
 
           // Dump diagnostics after updating

@@ -191,6 +191,9 @@ When the user types "agree", format the final prompt as:
     _addLoadingMessage();
 
     try {
+      // Debug API key information before sending
+      ChatService.logDiagnostics();
+      
       // Handle 'agree' command - this completes the character creation
       if (text.toLowerCase().trim() == 'agree' && !isComplete) {
         bool foundValidCard = false;
@@ -291,6 +294,10 @@ When the user types "agree", format the final prompt as:
       } else {
         // We're still in interview mode
         final systemPrompt = _getSystemPrompt();
+        
+        print("Interview Provider: Sending message with system prompt length: ${systemPrompt.length}");
+        print("Interview Provider: First 50 chars of system prompt: ${systemPrompt.substring(0, min(50, systemPrompt.length))}...");
+        
         final response = await ChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,

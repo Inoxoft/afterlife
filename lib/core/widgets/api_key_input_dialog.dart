@@ -61,12 +61,17 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
       // Make sure environment is initialized
       await EnvConfig.initialize();
 
-      // Check if there's a user-set API key
-      _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
-
-      // Log whether we're using a user key or not
+      // Check if there's a user-set API key and if not, don't show the default key
       _isUserKey = await EnvConfig.hasUserApiKey();
-      print('Has user-set API key: $_isUserKey');
+      
+      if (_isUserKey) {
+        _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
+        print('Loaded user-set API key');
+      } else {
+        // Don't show the default key from .env in the input field
+        _currentKey = null;
+        print('No user-set API key found');
+      }
 
       // Don't display placeholder as a real key
       if (_currentKey == 'your_api_key_here') {
@@ -333,26 +338,40 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       child: Row(
                         children: [
                           Icon(
-                            _isUserKey
-                                ? Icons.person
-                                : Icons.settings_applications,
+                            Icons.person,
                             size: 14,
-                            color:
-                                _isUserKey
-                                    ? Colors.green.shade300
-                                    : Colors.blue.shade300,
+                            color: Colors.green.shade300,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            _isUserKey
-                                ? 'Using your custom API key'
-                                : 'Using default API key from .env file',
+                            'Using your custom API key',
                             style: TextStyle(
                               fontSize: 12,
-                              color:
-                                  _isUserKey
-                                      ? Colors.green.shade300
-                                      : Colors.blue.shade300,
+                              color: Colors.green.shade300,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                  // Show if a default key exists but we're not using it
+                  if (!_isUserKey && EnvConfig.getDefaultValue('OPENROUTER_API_KEY') != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.settings_applications,
+                            size: 14,
+                            color: Colors.blue.shade300,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Using default API key from .env file',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue.shade300,
                               fontStyle: FontStyle.italic,
                             ),
                           ),

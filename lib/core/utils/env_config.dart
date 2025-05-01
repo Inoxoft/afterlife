@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class EnvConfig {
   static bool _isInitialized = false;
   static final Map<String, String> _envVars = {};
+  static final Map<String, String> _defaultEnvVars = {}; // Store default keys separately
 
   // Keys for SharedPreferences
   static const String _openRouterApiKeyPref = 'user_openrouter_api_key';
@@ -17,6 +18,7 @@ class EnvConfig {
   static Future<void> initialize() async {
     // Clear existing variables to ensure we get fresh data
     _envVars.clear();
+    _defaultEnvVars.clear(); // Clear default vars too
     _isInitialized = false;
 
     try {
@@ -26,19 +28,14 @@ class EnvConfig {
       final prefs = await SharedPreferences.getInstance();
       final userApiKey = prefs.getString(_openRouterApiKeyPref);
 
+      // Always load from .env file for default values
+      await _loadFromDotEnv();
+
+      // If user has set a key, it takes precedence
       if (userApiKey != null && userApiKey.isNotEmpty) {
         _envVars['OPENROUTER_API_KEY'] = userApiKey;
         _cachedUserApiKey = userApiKey;
-        print('Using API key from user preferences - STRICTLY USER KEY ONLY');
-
-        // When using a user-specified key, we don't even check the .env file
-        // This ensures we use ONLY the key provided by the user
-        _isInitialized = true;
-        _logLoadedVars();
-        return;
-      } else {
-        // Otherwise try to load from .env file or assets
-        await _loadFromDotEnv();
+        print('Using API key from user preferences - overriding default');
       }
 
       _isInitialized = true;
@@ -60,18 +57,37 @@ class EnvConfig {
       print('Dotenv loaded successfully');
     } catch (e) {
       print('Error loading .env using dotenv: $e');
+      // Create a default empty .env file if it doesn't exist
+      try {
+        final file = File('.env');
+        if (!await file.exists()) {
+          await file.writeAsString('''
+# Afterlife API Configuration
+# Replace with your actual API key from https://openrouter.ai
+# OPENROUTER_API_KEY=your_api_key_here
+''');
+          print('Created default empty .env file');
+          
+          // Try to load the newly created file
+          await dotenv.load(fileName: '.env');
+          dotenvLoaded = true;
+          print('Loaded newly created .env file');
+        }
+      } catch (err) {
+        print('Failed to create default .env file: $err');
+      }
     }
 
-    // If dotenv loaded successfully, copy values to our map
+    // If dotenv loaded successfully, copy values to our default map
     if (dotenvLoaded) {
       dotenv.env.forEach((key, value) {
-        _envVars[key] = value;
+        _defaultEnvVars[key] = value;
       });
-      print('Copied ${dotenv.env.length} variables from dotenv');
+      print('Copied ${dotenv.env.length} variables from dotenv to defaults');
     }
 
     // If we don't have any env vars yet, try manual file loading
-    if (_envVars.isEmpty) {
+    if (_defaultEnvVars.isEmpty) {
       await _loadEnvManually();
     }
   }
@@ -96,7 +112,16 @@ class EnvConfig {
       }
     }
 
-    return _envVars[key];
+    // First check user vars, then fall back to default vars
+    return _envVars[key] ?? _defaultEnvVars[key];
+  }
+
+  /// Get only the default environment variable (not user-overridden)
+  static String? getDefaultValue(String key) {
+    if (!_isInitialized) {
+      print('Warning: EnvConfig not initialized before access');
+    }
+    return _defaultEnvVars[key];
   }
 
   /// Check if a key exists and has a non-empty value
@@ -186,11 +211,32 @@ OPENROUTER_API_KEY=your_api_key_here
     // Try to load from assets bundle
     try {
       final envString = await rootBundle.loadString('.env');
-      _parseEnvString(envString);
+      _parseEnvString(envString, isDefault: true);
       print('Loaded .env from assets');
       return;
     } catch (e) {
       print('Could not load .env from assets: $e');
+      
+      // Create a default .env in assets directory if possible
+      try {
+        final appDir = await getApplicationDocumentsDirectory();
+        final assetDir = Directory('${appDir.path}/assets');
+        if (!await assetDir.exists()) {
+          await assetDir.create(recursive: true);
+        }
+        
+        final envFile = File('${assetDir.path}/.env');
+        if (!await envFile.exists()) {
+          await envFile.writeAsString('''
+# Afterlife API Configuration
+# Replace with your actual API key from https://openrouter.ai
+# OPENROUTER_API_KEY=your_api_key_here
+''');
+          print('Created default .env in assets directory');
+        }
+      } catch (err) {
+        print('Could not create default .env in assets: $err');
+      }
     }
 
     // Try to load from app documents directory
@@ -201,7 +247,7 @@ OPENROUTER_API_KEY=your_api_key_here
       if (file.existsSync()) {
         final envString = await file.readAsString();
         print('Read .env file content: ${envString.length} characters');
-        _parseEnvString(envString);
+        _parseEnvString(envString, isDefault: true);
         print('Loaded .env from ${file.path}');
         return;
       }
@@ -214,9 +260,11 @@ OPENROUTER_API_KEY=your_api_key_here
   }
 
   /// Parse environment variables from a string
-  static void _parseEnvString(String envString) {
+  static void _parseEnvString(String envString, {bool isDefault = false}) {
     final envLines = envString.split('\n');
     print('Parsing ${envLines.length} lines from env file');
+    
+    final targetMap = isDefault ? _defaultEnvVars : _envVars;
 
     for (final line in envLines) {
       // Skip comments and empty lines
@@ -227,7 +275,7 @@ OPENROUTER_API_KEY=your_api_key_here
       if (parts.length >= 2) {
         final key = parts[0].trim();
         final value = parts.sublist(1).join('=').trim();
-        _envVars[key] = value;
+        targetMap[key] = value;
         print('Parsed variable: $key (${value.length} characters)');
       }
     }
@@ -236,7 +284,24 @@ OPENROUTER_API_KEY=your_api_key_here
   /// Log loaded environment variables (with obfuscation for sensitive data)
   static void _logLoadedVars() {
     print('=== Environment Variables ===');
+    print('== User Variables ==');
     _envVars.forEach((key, value) {
+      if (key.toLowerCase().contains('key') ||
+          key.toLowerCase().contains('secret') ||
+          key.toLowerCase().contains('password')) {
+        // Mask sensitive values
+        final masked =
+            value.length > 8
+                ? '${value.substring(0, 4)}...${value.substring(value.length - 4)}'
+                : '****';
+        print('$key: $masked');
+      } else {
+        print('$key: $value');
+      }
+    });
+    
+    print('== Default Variables ==');
+    _defaultEnvVars.forEach((key, value) {
       if (key.toLowerCase().contains('key') ||
           key.toLowerCase().contains('secret') ||
           key.toLowerCase().contains('password')) {
@@ -259,6 +324,7 @@ OPENROUTER_API_KEY=your_api_key_here
 
     // Clear our internal cache
     _envVars.clear();
+    _defaultEnvVars.clear();
     _isInitialized = false;
 
     // Clear dotenv cache if possible
@@ -277,6 +343,7 @@ OPENROUTER_API_KEY=your_api_key_here
   /// Dump diagnostic information about the API key source
   static Future<void> dumpApiKeyInfo() async {
     final currentKey = get('OPENROUTER_API_KEY');
+    final defaultKey = getDefaultValue('OPENROUTER_API_KEY');
     final hasUserKey = await hasUserApiKey();
 
     print('=========== API KEY SOURCE DIAGNOSTICS ===========');
@@ -285,10 +352,13 @@ OPENROUTER_API_KEY=your_api_key_here
       'Current Key from get(): ${currentKey != null ? (currentKey.isEmpty ? "EMPTY" : "${currentKey.substring(0, min(4, currentKey.length))}...") : "NULL"}',
     );
     print(
+      'Default Key from .env: ${defaultKey != null ? (defaultKey.isEmpty ? "EMPTY" : "${defaultKey.substring(0, min(4, defaultKey.length))}...") : "NULL"}',
+    );
+    print(
       'Cached User Key: ${_cachedUserApiKey != null ? ((_cachedUserApiKey!.isEmpty) ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...") : "NULL"}',
     );
     print(
-      'In-Memory Map Key: ${_envVars['OPENROUTER_API_KEY'] != null ? (_envVars['OPENROUTER_API_KEY']!.isEmpty ? "EMPTY" : "${_envVars['OPENROUTER_API_KEY']!.substring(0, min(4, _envVars['OPENROUTER_API_KEY']!.length))}...") : "NULL"}',
+      'In-Memory User Key: ${_envVars['OPENROUTER_API_KEY'] != null ? (_envVars['OPENROUTER_API_KEY']!.isEmpty ? "EMPTY" : "${_envVars['OPENROUTER_API_KEY']!.substring(0, min(4, _envVars['OPENROUTER_API_KEY']!.length))}...") : "NULL"}',
     );
     print('=== SERVICES WILL USE THIS KEY MOVING FORWARD ===');
     print('==================================================');

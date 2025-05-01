@@ -25,15 +25,17 @@ class ChatService {
 
       // Get API key from environment
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+      
+      // Check if we're using a default key or a user key
+      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        _isUsingDefaultKey = true;
         print(
           'WARNING: No OpenRouter API key found. The application will not function properly.',
         );
-        print('Please set OPENROUTER_API_KEY in your .env file.');
+        print('Please set OPENROUTER_API_KEY in your .env file or in Settings.');
       } else {
-        print('API key loaded successfully');
+        print('API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
       }
 
       _isInitialized = true;
@@ -41,6 +43,27 @@ class ChatService {
       print('Error initializing chat service: $e');
       _isInitialized =
           true; // Still mark as initialized to prevent repeated attempts
+    }
+  }
+
+  // Method to refresh API key from the latest source
+  static Future<void> refreshApiKey() async {
+    try {
+      print('Interview Chat Service: Refreshing API key...');
+
+      // Get the latest key directly
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      // Check if we're using a default key or a user key
+      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        print('Warning: No API key found after refresh');
+      } else {
+        print('API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+      }
+    } catch (e) {
+      print('Error refreshing API key: $e');
     }
   }
 
@@ -54,6 +77,9 @@ class ChatService {
     if (!_isInitialized) {
       await initialize();
     }
+
+    // Always refresh the API key before sending a message
+    await refreshApiKey();
 
     // Validate API key exists
     if (_apiKey == null || _apiKey!.isEmpty) {
@@ -76,6 +102,10 @@ class ChatService {
     });
 
     try {
+      // Log headers and API key for debugging
+      print('Interview Chat Service: Sending request with API key: ${_apiKey!.substring(0, min(4, _apiKey!.length))}...');
+      print('Is using default key: $_isUsingDefaultKey');
+      
       final response = await http
           .post(
             Uri.parse(_openRouterUrl),

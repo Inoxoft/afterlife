@@ -93,7 +93,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: AppTheme.backgroundStart,
-        dialogTheme: DialogTheme(
+        dialogTheme: DialogThemeData(
           backgroundColor: AppTheme.deepIndigo,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
