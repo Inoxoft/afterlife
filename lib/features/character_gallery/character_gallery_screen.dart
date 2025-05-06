@@ -187,7 +187,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
                       // Caption text
                       Text(
-                        'Interact with preserved consciousness',
+                        'Interact with historical figures through their masks',
                         style: _captionStyle,
                       ),
                     ],
@@ -685,7 +685,54 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                 // Background image if available
                 if (widget.imageUrl != null)
                   Positioned.fill(
-                    child: Image.asset(widget.imageUrl!, fit: BoxFit.cover),
+                    child: Stack(
+                      children: [
+                        // Dramatic background for masks
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                AppTheme.midnightPurple,
+                                AppTheme.deepNavy,
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Centered mask image with subtle shadow effect
+                        Center(
+                          child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 5,
+                            ),
+                            child: Image.asset(
+                              widget.imageUrl!,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        // Subtle spotlight effect overlay
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                center: Alignment.center,
+                                radius: 1.2,
+                                colors: [
+                                  Colors.transparent,
+                                  AppTheme.cosmicBlack.withOpacity(0.4),
+                                ],
+                                stops: const [0.6, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 // If no image, use gradient background
                 else

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import 'famous_character_prompts.dart';
 import 'famous_character_chat_screen.dart';
+import '../character_gallery/character_gallery_screen.dart';
+import 'dart:math';
 
-class FamousCharacterProfileScreen extends StatelessWidget {
+class FamousCharacterProfileScreen extends StatefulWidget {
   final String name;
   final String years;
   final String profession;
@@ -18,14 +21,47 @@ class FamousCharacterProfileScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<FamousCharacterProfileScreen> createState() =>
+      _FamousCharacterProfileScreenState();
+}
+
+class _FamousCharacterProfileScreenState
+    extends State<FamousCharacterProfileScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Set up animation for the pulsing effect
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final shortBio =
-        FamousCharacterPrompts.getShortBio(name) ?? 'No biography available.';
+        FamousCharacterPrompts.getShortBio(widget.name) ??
+        'No biography available.';
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundStart,
-        title: Text('${name}\'s Profile'),
+        title: Text('${widget.name}\'s Profile'),
         elevation: 0,
       ),
       body: Container(
@@ -35,67 +71,187 @@ class FamousCharacterProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Character Avatar with improved styling
-              Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Outer glow effect
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.etherealCyan.withOpacity(0.4),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Character avatar
-                    Container(
-                      width: 130,
-                      height: 130,
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.6),
-                          width: 3,
-                        ),
-                        image:
-                            imageUrl != null
-                                ? DecorationImage(
-                                  image: AssetImage(imageUrl!),
-                                  fit: BoxFit.cover,
-                                )
-                                : null,
-                      ),
-                      child:
-                          imageUrl == null
-                              ? Center(
-                                child: Text(
-                                  name.isNotEmpty ? name[0].toUpperCase() : '?',
-                                  style: const TextStyle(
-                                    fontSize: 52,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 4,
-                                        color: Colors.black26,
-                                        offset: Offset(2, 2),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              : null,
+              // Character Performance Stage
+              Container(
+                height: 320,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.cosmicBlack.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
                     ),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Stage backdrop with dramatic gradient
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [AppTheme.deepNavy, AppTheme.cosmicBlack],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Digital circuit pattern background (suggesting AI)
+                      Positioned.fill(
+                        child: Opacity(
+                          opacity: 0.15,
+                          child: CustomPaint(
+                            painter: DigitalBackgroundPainter(
+                              lineColor: AppTheme.warmGold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Spotlight cone effect
+                      Positioned(
+                        top: -40,
+                        child: Container(
+                          width: 260,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.topCenter,
+                              radius: 0.8,
+                              colors: [
+                                AppTheme.warmGold.withOpacity(0.3),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Dramatic mask presentation
+                      Center(
+                        child: Container(
+                          width: 200,
+                          height: 230,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.warmGold.withOpacity(0.2),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child:
+                              widget.imageUrl != null
+                                  ? Center(
+                                    child: Container(
+                                      width: 190,
+                                      height: 220,
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.rectangle,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppTheme.warmGold
+                                                .withOpacity(0.1),
+                                            blurRadius: 10,
+                                            spreadRadius: 2,
+                                          ),
+                                        ],
+                                      ),
+                                      child: Image.asset(
+                                        widget.imageUrl!,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  )
+                                  : Center(
+                                    child: Icon(
+                                      Icons.face,
+                                      color: AppTheme.warmGold.withOpacity(0.5),
+                                      size: 80,
+                                    ),
+                                  ),
+                        ),
+                      ),
+
+                      // Additional spotlight highlight for the mask
+                      Center(
+                        child: Container(
+                          width: 210,
+                          height: 240,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(100),
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.5,
+                              colors: [
+                                AppTheme.warmGold.withOpacity(0.05),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Pulsing energy ring (signifying AI consciousness)
+                      AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return RepaintBoundary(
+                            child: CustomPaint(
+                              size: const Size(280, 280),
+                              painter: PulseRingPainter(
+                                progress: _pulseAnimation.value,
+                                color: AppTheme.warmGold,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      // "Character" label
+                      Positioned(
+                        bottom: 20,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.deepNavy.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppTheme.warmGold.withOpacity(0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            widget.profession,
+                            style: GoogleFonts.cinzel(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.warmGold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -107,25 +263,29 @@ class FamousCharacterProfileScreen extends StatelessWidget {
                   color: Colors.black.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.etherealCyan.withOpacity(0.3),
+                    color: AppTheme.warmGold.withOpacity(0.3),
                     width: 1,
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow(context: context, label: 'Name', value: name),
+                    _buildInfoRow(
+                      context: context,
+                      label: 'Name',
+                      value: widget.name,
+                    ),
                     const SizedBox(height: 12),
                     _buildInfoRow(
                       context: context,
                       label: 'Years',
-                      value: years,
+                      value: widget.years,
                     ),
                     const SizedBox(height: 12),
                     _buildInfoRow(
                       context: context,
                       label: 'Profession',
-                      value: profession,
+                      value: widget.profession,
                     ),
                     const SizedBox(height: 12),
                     const Divider(color: Colors.white24),
@@ -158,11 +318,11 @@ class FamousCharacterProfileScreen extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
-                    color: AppTheme.etherealCyan,
+                    color: AppTheme.warmGold,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.etherealCyan.withOpacity(0.3),
+                        color: AppTheme.warmGold.withOpacity(0.4),
                         blurRadius: 8,
                         spreadRadius: 1,
                       ),
@@ -237,8 +397,8 @@ class FamousCharacterProfileScreen extends StatelessWidget {
       MaterialPageRoute(
         builder:
             (context) => FamousCharacterChatScreen(
-              characterName: name,
-              imageUrl: imageUrl,
+              characterName: widget.name,
+              imageUrl: widget.imageUrl,
             ),
       ),
     );

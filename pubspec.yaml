@@ -51,6 +51,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -65,10 +66,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/einstein.png
-    - assets/images/monroe.png
-    - assets/images/turing.png
-    - assets/images/reagan.png
+    - assets/images/einstein.png   # Einstein mask image
+    - assets/images/monroe.png     # Monroe mask image
+    - assets/images/turing.png     # Turing mask image
+    - assets/images/reagan.png     # Reagan mask image
+    - assets/images/afterlife_icon.png
     # Optional assets - these may not exist during development
     - .env
 
@@ -97,3 +99,20 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Flutter launcher icons configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/afterlife_icon.png"
+  remove_alpha_ios: true  # Remove alpha channel for iOS icons
+  adaptive_icon_background: "#4a3780" # Purple background to match the icon
+  web:
+    generate: true
+    image_path: "assets/images/afterlife_icon.png"
+  windows:
+    generate: true
+    image_path: "assets/images/afterlife_icon.png"
+  macos:
+    generate: true
+    image_path: "assets/images/afterlife_icon.png"
