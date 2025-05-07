@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../character_gallery/character_gallery_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 import '../../core/utils/env_config.dart';
 import '../../core/utils/image_optimizer.dart';
 import '../../core/utils/performance_optimizer.dart';
@@ -173,8 +174,9 @@ class _SplashScreenState extends State<SplashScreen>
       } else {
         timer.cancel();
         if (mounted) {
+          // Navigate to onboarding screen instead of character gallery
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const CharacterGalleryScreen()),
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
           );
         }
       }
