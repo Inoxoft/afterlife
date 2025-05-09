@@ -71,6 +71,8 @@ flutter:
     - assets/images/turing.png     # Turing mask image
     - assets/images/reagan.png     # Reagan mask image
     - assets/images/afterlife_icon.png
+    - assets/images/einstein_mask.png  # Einstein with LLM armor illustration
+    - assets/images/perspective_mask.png
     # Optional assets - these may not exist during development
     - .env
 

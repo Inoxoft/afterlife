@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MaskPage extends StatelessWidget {
   final AnimationController animationController;
@@ -23,7 +24,7 @@ class MaskPage extends StatelessWidget {
     final imageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: animationController,
-        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
+        curve: const Interval(0.1, 0.7, curve: Curves.easeOutCubic),
       ),
     );
 
@@ -39,7 +40,7 @@ class MaskPage extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -51,82 +52,151 @@ class MaskPage extends StatelessWidget {
                   parent: animationController,
                   curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
                 ),
-                child: Text(
-                  'UNDERSTAND MASKS',
-                  style: TextStyle(
-                    color: const Color(0xFFF9E3A3), // Light yellow
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
-                        color: const Color(0xFFF9E3A3).withOpacity(0.5),
-                        offset: const Offset(0, 0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      'UNDERSTAND MASKS',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: AppTheme.silverMist,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 10.0,
+                            color: AppTheme.warmGold.withOpacity(0.8),
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Digital personas with historical essence',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: AppTheme.silverMist.withOpacity(0.9),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            // Subtitle with animation
-            SlideTransition(
-              position: titleAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animationController,
-                  curve: const Interval(0.1, 0.8, curve: Curves.easeOut),
-                ),
-                child: const Text(
-                  'Digital personas with historical essence',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Image with animation
+            const SizedBox(height: 0), // No space between title and image
+            // Einstein mask illustration with animation
             FadeTransition(
               opacity: imageAnimation,
               child: ScaleTransition(
                 scale: imageAnimation,
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E1A47).withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 0,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Mathematical equations background elements
+                    Positioned(
+                      top: 20,
+                      right: 40,
+                      child: Text(
+                        'E=mc²',
+                        style: GoogleFonts.lato(
+                          color: AppTheme.warmGold.withOpacity(0.3),
+                          fontSize: 22,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w200,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Image placeholder\n(Historical figure with mask overlay)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 50,
+                      left: 40,
+                      child: Text(
+                        'π',
+                        style: GoogleFonts.lato(
+                          color: AppTheme.warmGold.withOpacity(0.25),
+                          fontSize: 24,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w200,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 120,
+                      left: 50,
+                      child: Transform.rotate(
+                        angle: -0.2,
+                        child: Text(
+                          'ψ',
+                          style: GoogleFonts.lato(
+                            color: AppTheme.warmGold.withOpacity(0.2),
+                            fontSize: 20,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w200,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Yellow neural connection lines
+                    CustomPaint(
+                      size: const Size(300, 350),
+                      painter: NeuralLinesPainter(),
+                    ),
+
+                    // Einstein image - this would be replaced with the actual asset image
+                    Hero(
+                      tag: 'einstein_mask',
+                      child: Container(
+                        height: 310, // More compact image size
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Image.asset(
+                          'assets/images/einstein_mask.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 280,
+                              decoration: BoxDecoration(
+                                color: AppTheme.midnightPurple.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.person_outline,
+                                      color: AppTheme.warmGold,
+                                      size: 60,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Einstein with mask and LLM armor',
+                                      textAlign: TextAlign.center,
+                                      style: AppTheme.captionStyle,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 40),
-
-            // Content with animation
+            const SizedBox(
+              height: 0,
+            ), // No space between image and explanations
+            // Explanation points with animation and icons
             SlideTransition(
               position: contentAnimation,
               child: FadeTransition(
@@ -134,37 +204,26 @@ class MaskPage extends StatelessWidget {
                   parent: animationController,
                   curve: const Interval(0.3, 1.0),
                 ),
-                child: Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E1A47).withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildExplanationRow(
-                        Icons.psychology,
-                        'Masks are AI personas created from historical data, personal accounts, and detailed character specifications.',
-                      ),
-                      const SizedBox(height: 20),
-                      _buildExplanationRow(
-                        Icons.history_edu,
-                        'Each mask tries to embody the authentic character, personality, and knowledge of its historical figure.',
-                      ),
-                      const SizedBox(height: 20),
-                      _buildExplanationRow(
-                        Icons.emoji_people,
-                        'These digital twins allow you to interact with perspectives from across time and reality.',
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildExplanationWithIcon(
+                      Icons.face_retouching_natural,
+                      'Masks are AI personas created from historical data, personal accounts, and detailed character specifications.',
+                    ),
+                    const SizedBox(height: 10),
+                    _buildExplanationWithIcon(
+                      Icons.psychology,
+                      'Each mask tries to embody the authentic character, personality, and knowledge of its historical figure.',
+                    ),
+                    const SizedBox(height: 10),
+                    _buildExplanationWithIcon(
+                      Icons.people_alt,
+                      'These digital twins allow you to interact with perspectives from across time and reality.',
+                    ),
+                    // Add extra spacing at the bottom to avoid button overlap
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
             ),
@@ -174,30 +233,141 @@ class MaskPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExplanationRow(IconData icon, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF9E3A3).withOpacity(0.15),
-            borderRadius: BorderRadius.circular(10),
+  Widget _buildExplanationWithIcon(IconData iconData, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.cosmicBlack.withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
-          child: Icon(icon, color: const Color(0xFFF9E3A3), size: 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              height: 1.4,
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppTheme.midnightPurple.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.warmGold.withOpacity(0.2),
+                  blurRadius: 5,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Icon(iconData, color: AppTheme.warmGold, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.lato(
+                color: AppTheme.silverMist,
+                fontSize: 14,
+                height: 1.3,
+                letterSpacing: 0.3,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+}
+
+// Custom painter for the neural network-like yellow lines
+class NeuralLinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = AppTheme.warmGold.withOpacity(0.4)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
+    // Draw a few curved lines representing neural connections
+    final path1 =
+        Path()
+          ..moveTo(size.width * 0.65, size.height * 0.35)
+          ..quadraticBezierTo(
+            size.width * 0.8,
+            size.height * 0.4,
+            size.width * 0.7,
+            size.height * 0.5,
+          );
+
+    final path2 =
+        Path()
+          ..moveTo(size.width * 0.7, size.height * 0.3)
+          ..quadraticBezierTo(
+            size.width * 0.85,
+            size.height * 0.35,
+            size.width * 0.75,
+            size.height * 0.45,
+          );
+
+    final path3 =
+        Path()
+          ..moveTo(size.width * 0.72, size.height * 0.32)
+          ..quadraticBezierTo(
+            size.width * 0.9,
+            size.height * 0.38,
+            size.width * 0.8,
+            size.height * 0.48,
+          );
+
+    // Add some small circles at the neural connection endpoints
+    final circlePaint =
+        Paint()
+          ..color = AppTheme.warmGold.withOpacity(0.6)
+          ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(
+      Offset(size.width * 0.65, size.height * 0.35),
+      2,
+      circlePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.7, size.height * 0.5),
+      2,
+      circlePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.7, size.height * 0.3),
+      2,
+      circlePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.75, size.height * 0.45),
+      2,
+      circlePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.72, size.height * 0.32),
+      2,
+      circlePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.8, size.height * 0.48),
+      2,
+      circlePaint,
+    );
+
+    canvas.drawPath(path1, paint);
+    canvas.drawPath(path2, paint);
+    canvas.drawPath(path3, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

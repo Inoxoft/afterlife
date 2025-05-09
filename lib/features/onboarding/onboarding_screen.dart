@@ -5,6 +5,8 @@ import '../character_gallery/character_gallery_screen.dart';
 import 'pages/mask_page.dart';
 import 'pages/llm_page.dart';
 import 'pages/explore_page.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:math';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -79,20 +81,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF2E1A47), // Deep purple
-              const Color(0xFF1F1147), // Dark purple
-            ],
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
         child: Stack(
           children: [
-            // Background grid and particles
-            CustomPaint(painter: GridPainter(), size: Size.infinite),
+            // Background stars and particles
+            RepaintBoundary(
+              child: CustomPaint(
+                painter: StarfieldPainter(starCount: 100),
+                size: Size.infinite,
+              ),
+            ),
             const RepaintBoundary(
               child: Opacity(
                 opacity: 0.5,
@@ -151,9 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         onPressed: _navigateToPreviousPage,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: const Color(
-                            0xFFF9E3A3,
-                          ), // Light yellow
+                          foregroundColor: AppTheme.warmGold,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -161,17 +157,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
-                            side: const BorderSide(
-                              color: Color(0xFFF9E3A3), // Light yellow
+                            side: BorderSide(
+                              color: AppTheme.warmGold,
                               width: 1,
                             ),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           "BACK",
-                          style: TextStyle(
+                          style: GoogleFonts.cinzel(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
+                            letterSpacing: 1.0,
                           ),
                         ),
                       ),
@@ -191,8 +188,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             shape: BoxShape.circle,
                             color:
                                 _currentPage == index
-                                    ? const Color(0xFFF9E3A3) // Light yellow
-                                    : const Color(0xFFF9E3A3).withOpacity(0.3),
+                                    ? AppTheme.warmGold
+                                    : AppTheme.warmGold.withOpacity(0.3),
                           ),
                         ),
                       ),
@@ -204,10 +201,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ElevatedButton(
                       onPressed: _navigateToNextPage,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFF9E3A3,
-                        ), // Light yellow
-                        foregroundColor: const Color(0xFF2E1A47), // Deep purple
+                        backgroundColor: AppTheme.warmGold,
+                        foregroundColor: AppTheme.midnightPurple,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
                           vertical: 12,
@@ -216,13 +211,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           borderRadius: BorderRadius.circular(30),
                         ),
                         elevation: 5,
-                        shadowColor: const Color(0xFFF9E3A3).withOpacity(0.5),
+                        shadowColor: AppTheme.warmGold.withOpacity(0.5),
                       ),
                       child: Text(
                         _currentPage == 2 ? "BEGIN" : "NEXT",
-                        style: const TextStyle(
+                        style: GoogleFonts.cinzel(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 1.0,
                         ),
                       ),
                     ),
@@ -237,28 +233,57 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 }
 
-// Grid background painter with adjusted colors
-class GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = const Color(0xFFF9E3A3).withOpacity(
-            0.05,
-          ) // Light yellow with low opacity
-          ..strokeWidth = 0.5;
+// Star background classes
+class StarfieldPainter extends CustomPainter {
+  final int starCount;
+  final List<_Star> _stars = [];
+  final Paint _starPaint = Paint()..color = Colors.white;
 
-    // Draw vertical lines
-    for (double i = 0; i < size.width; i += 30) {
-      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
-    }
+  // Fixed random for consistent rendering
+  final Random _random = Random(42);
 
-    // Draw horizontal lines
-    for (double i = 0; i < size.height; i += 30) {
-      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
+  StarfieldPainter({this.starCount = 100}) {
+    // Pre-generate stars only once for performance
+    _generateStars();
+  }
+
+  void _generateStars() {
+    for (int i = 0; i < starCount; i++) {
+      _stars.add(
+        _Star(
+          x: _random.nextDouble(),
+          y: _random.nextDouble(),
+          size: _random.nextDouble() * 2 + 0.5,
+          opacity: _random.nextDouble() * 0.7 + 0.3,
+        ),
+      );
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  void paint(Canvas canvas, Size size) {
+    for (final star in _stars) {
+      final x = star.x * size.width;
+      final y = star.y * size.height;
+      _starPaint.color = Colors.white.withOpacity(star.opacity);
+      canvas.drawCircle(Offset(x, y), star.size, _starPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(StarfieldPainter oldDelegate) => false; // Never repaint
+}
+
+class _Star {
+  final double x;
+  final double y;
+  final double size;
+  final double opacity;
+
+  _Star({
+    required this.x,
+    required this.y,
+    required this.size,
+    required this.opacity,
+  });
 }

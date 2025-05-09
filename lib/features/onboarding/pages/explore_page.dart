@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:math' show pi, cos, sin, atan2, sqrt;
 
 class ExplorePage extends StatelessWidget {
   final AnimationController animationController;
@@ -61,50 +63,44 @@ class ExplorePage extends StatelessWidget {
                   parent: animationController,
                   curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
                 ),
-                child: Text(
-                  'READY TO EXPLORE',
-                  style: TextStyle(
-                    color: const Color(0xFFF9E3A3), // Light yellow
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
-                        color: const Color(0xFFF9E3A3).withOpacity(0.5),
-                        offset: const Offset(0, 0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      'DIVERSE PERSPECTIVES',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3.0,
+                        color: AppTheme.silverMist,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 10.0,
+                            color: AppTheme.warmGold.withOpacity(0.8),
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Subtitle with animation
-            SlideTransition(
-              position: titleAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animationController,
-                  curve: const Interval(0.1, 0.8, curve: Curves.easeOut),
-                ),
-                child: const Text(
-                  'Your journey through time and knowledge begins',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w300,
-                  ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'From politics to art, history comes alive',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: AppTheme.silverMist.withOpacity(0.9),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
             const SizedBox(height: 30),
 
-            // Image with animation
+            // Conversation visualization with animation
             FadeTransition(
               opacity: imageAnimation,
               child: ScaleTransition(
@@ -112,23 +108,18 @@ class ExplorePage extends StatelessWidget {
                 child: Container(
                   height: 180,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E1A47).withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Image placeholder\n(Captivating visualization of conversation)',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
+                  child: Image.asset(
+                    'assets/images/perspective_mask.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: AppTheme.silverMist.withOpacity(0.5),
+                          size: 40,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -147,11 +138,11 @@ class ExplorePage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2E1A47).withOpacity(0.4),
+                    color: AppTheme.midnightPurple.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: AppTheme.cosmicBlack.withOpacity(0.3),
                         blurRadius: 8,
                         spreadRadius: 0,
                       ),
@@ -160,8 +151,8 @@ class ExplorePage extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildTipRow(
-                        Icons.explore,
-                        'Explore different perspectives with historical figures who shaped our world.',
+                        Icons.history_edu,
+                        'Engage with diverse figures from politics, science, art, and more who shaped our world.',
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
@@ -194,8 +185,8 @@ class ExplorePage extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFF2E1A47).withOpacity(0.7),
-                        const Color(0xFF3C2264).withOpacity(0.4),
+                        AppTheme.midnightPurple.withOpacity(0.7),
+                        AppTheme.backgroundStart.withOpacity(0.4),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -203,7 +194,7 @@ class ExplorePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF9E3A3).withOpacity(0.1),
+                        color: AppTheme.warmGold.withOpacity(0.1),
                         blurRadius: 15,
                         spreadRadius: 0,
                       ),
@@ -214,11 +205,11 @@ class ExplorePage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2E1A47).withOpacity(0.6),
+                          color: AppTheme.midnightPurple.withOpacity(0.6),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFF9E3A3).withOpacity(0.15),
+                              color: AppTheme.warmGold.withOpacity(0.15),
                               blurRadius: 8,
                               spreadRadius: 0,
                             ),
@@ -226,7 +217,7 @@ class ExplorePage extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.developer_mode,
-                          color: const Color(0xFFF9E3A3),
+                          color: AppTheme.warmGold,
                           size: 24,
                         ),
                       ),
@@ -235,19 +226,19 @@ class ExplorePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Questions about Afterlife?',
-                              style: TextStyle(
-                                color: Colors.white,
+                              style: GoogleFonts.cinzel(
+                                color: AppTheme.silverMist,
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Chat with the developer\'s digital twin to learn more about the app and how it works.',
-                              style: TextStyle(
-                                color: Colors.white70,
+                              style: GoogleFonts.lato(
+                                color: AppTheme.silverMist.withOpacity(0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -263,12 +254,10 @@ class ExplorePage extends StatelessWidget {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2E1A47),
-                                foregroundColor: const Color(0xFFF9E3A3),
+                                backgroundColor: AppTheme.midnightPurple,
+                                foregroundColor: AppTheme.warmGold,
                                 elevation: 5,
-                                shadowColor: const Color(
-                                  0xFFF9E3A3,
-                                ).withOpacity(0.2),
+                                shadowColor: AppTheme.warmGold.withOpacity(0.2),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 8,
@@ -277,7 +266,14 @@ class ExplorePage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: const Text('CHAT WITH DEVELOPER TWIN'),
+                              child: Text(
+                                'CHAT WITH DEVELOPER TWIN',
+                                style: GoogleFonts.cinzel(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -300,17 +296,17 @@ class ExplorePage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9E3A3).withOpacity(0.15),
+            color: AppTheme.warmGold.withOpacity(0.15),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: const Color(0xFFF9E3A3), size: 22),
+          child: Icon(icon, color: AppTheme.warmGold, size: 22),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
+            style: GoogleFonts.lato(
+              color: AppTheme.silverMist,
               fontSize: 14,
               height: 1.4,
             ),
