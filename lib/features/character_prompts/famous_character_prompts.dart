@@ -1,3 +1,5 @@
+import 'text_cleaner.dart';
+
 class FamousCharacterPrompts {
   static final Map<String, Map<String, String>> prompts = {
     'Albert Einstein': {
@@ -754,6 +756,126 @@ Stay in character at all times. Never break character or admit you are an AI.'''
     },
   };
 
+  // Map of AI models for each famous character
+  static final Map<String, List<Map<String, dynamic>>> characterModels = {
+    'Albert Einstein': [
+      {
+        'id': 'openai/gpt-4.5-orion',
+        'name': 'GPT-4.5 (Orion)',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick:free',
+        'name': 'Llama 4 Maverick (Free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Alan Turing': [
+      {
+        'id': 'openai/gpt-4o',
+        'name': 'GPT-4o',
+        'description': 'Multimodal reasoning, coding expertise',
+        'recommended': true,
+      },
+      {
+        'id': 'deepseek/deepseek-r1',
+        'name': 'DeepSeek R1',
+        'description': 'Scientific & mathematical problem-solving',
+        'recommended': false,
+      },
+      {
+        'id': 'cohere/command-r-plus',
+        'name': 'Command R+',
+        'description': 'Retrieval-augmented factual reasoning',
+        'recommended': false,
+      },
+      {
+        'id': 'deepseek/deepseek-r1-zero:free',
+        'name': 'DeepSeek R1 Zero (Free)',
+        'description': 'Structured reasoning, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Marilyn Monroe': [
+      {
+        'id': 'openai/gpt-4.5-orion',
+        'name': 'GPT-4.5 (Orion)',
+        'description': 'Expressive, emotionally rich responses',
+        'recommended': true,
+      },
+      {
+        'id': 'mistralai/mistral-large-2',
+        'name': 'Mistral Large 2',
+        'description': 'Creative generation, reduced hallucinations',
+        'recommended': false,
+      },
+      {
+        'id': 'google/gemini-2.5-pro',
+        'name': 'Gemini 2.5 Pro',
+        'description': 'Persona-driven, high token capacity',
+        'recommended': false,
+      },
+      {
+        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
+        'name': 'Mistral Small 3.1 (Free)',
+        'description':
+            'Lightweight, creative conversation, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Ronald Reagan': [
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Concise rhetoric, safety-aware outputs',
+        'recommended': true,
+      },
+      {
+        'id': 'cohere/command-r-plus',
+        'name': 'Command R+',
+        'description': 'Structured, assertive dialogue',
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-3.5-turbo',
+        'name': 'GPT-3.5 Turbo',
+        'description': 'Charismatic conversational style',
+        'recommended': false,
+      },
+      {
+        'id': 'deepseek/deepseek-chat-v3-0324:free',
+        'name': 'DeepSeek Chat V3 (Free)',
+        'description': 'Friendly, persuasive tone, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+  };
+
+  // Store the currently selected model for each character
+  static final Map<String, String> _selectedModels = {};
+
+  /// Initialize the character prompts and clean up any encoding issues
+  static void initialize() {
+    // Clean all prompts to ensure there are no encoding issues
+    TextCleaner.initializeCleaner();
+    print('FamousCharacterPrompts initialized');
+  }
+
   /// Get a system prompt for a character by name
   static String? getPrompt(String characterName) {
     if (prompts.containsKey(characterName)) {
@@ -768,5 +890,37 @@ Stay in character at all times. Never break character or admit you are an AI.'''
       return prompts[characterName]?['shortBio'];
     }
     return null;
+  }
+
+  /// Get available AI models for a character
+  static List<Map<String, dynamic>> getModelsForCharacter(
+    String characterName,
+  ) {
+    return characterModels[characterName] ?? [];
+  }
+
+  /// Get the currently selected model for a character
+  static String getSelectedModel(String characterName) {
+    // If no model has been selected yet, return the recommended model
+    if (!_selectedModels.containsKey(characterName)) {
+      final models = getModelsForCharacter(characterName);
+      // Find the recommended model
+      final recommendedModel = models.firstWhere(
+        (model) => model['recommended'] == true,
+        orElse:
+            () =>
+                models.isNotEmpty
+                    ? models.first
+                    : {'id': 'google/gemini-2.0-flash-001'},
+      );
+      _selectedModels[characterName] = recommendedModel['id'];
+    }
+    return _selectedModels[characterName]!;
+  }
+
+  /// Set the selected model for a character
+  static void setSelectedModel(String characterName, String modelId) {
+    print('Setting model for $characterName to $modelId');
+    _selectedModels[characterName] = modelId;
   }
 }

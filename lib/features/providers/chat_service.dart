@@ -34,9 +34,13 @@ class ChatService {
         debugPrint(
           'Warning: No OpenRouter API key found. The application will not function properly.',
         );
-        debugPrint('Please set OPENROUTER_API_KEY in your .env file or in Settings.');
+        debugPrint(
+          'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
+        );
       } else {
-        debugPrint('API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+        debugPrint(
+          'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
 
       _isInitialized = true;
@@ -60,7 +64,9 @@ class ChatService {
       if (_apiKey == null || _apiKey!.isEmpty) {
         debugPrint('Warning: No API key found after refresh');
       } else {
-        debugPrint('API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+        debugPrint(
+          'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
     } catch (e) {
       debugPrint('Error refreshing API key: $e');
@@ -72,6 +78,7 @@ class ChatService {
     required String message,
     required List<Map<String, String>> history,
     String? systemPrompt,
+    String? model,
   }) async {
     if (!_isInitialized) {
       await initialize();
@@ -105,7 +112,7 @@ class ChatService {
 
       // Create the request body
       final body = {
-        'model': _defaultModel,
+        'model': model ?? _defaultModel,
         'messages': messages,
         'temperature': 0.7,
         'max_tokens': 25000,
@@ -151,6 +158,7 @@ class ChatService {
     required String message,
     required String systemPrompt,
     required List<Map<String, String>> chatHistory,
+    String? model,
   }) async {
     try {
       // Send the message with the character's system prompt and chat history
@@ -158,6 +166,7 @@ class ChatService {
         message: message,
         history: chatHistory,
         systemPrompt: systemPrompt,
+        model: model,
       );
     } catch (e) {
       debugPrint('Error sending message to character: $e');

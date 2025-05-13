@@ -10,6 +10,7 @@ import 'features/character_interview/interview_provider.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/character_interview/chat_service.dart' as interview_chat;
 import 'features/providers/chat_service.dart' as providers_chat;
+import 'features/character_prompts/famous_character_prompts.dart';
 
 class AppInitializationError extends Error {
   final String message;
@@ -42,6 +43,9 @@ Future<void> _initializeApp() async {
       await providers_chat.ChatService.initialize();
       providers_chat.ChatService.logDiagnostics();
     }
+
+    // Initialize and clean famous character prompts
+    FamousCharacterPrompts.initialize();
   } catch (e) {
     print("Error initializing services: $e");
   }

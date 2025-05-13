@@ -33,6 +33,11 @@ class FamousCharacterService {
         return "Error: Character profile not found.";
       }
 
+      // Get the selected model for this character
+      final selectedModel = FamousCharacterPrompts.getSelectedModel(
+        characterName,
+      );
+
       // Add user message to chat history
       _chatHistories[characterName]!.add({'role': 'user', 'content': message});
 
@@ -52,6 +57,7 @@ class FamousCharacterService {
         message: message,
         systemPrompt: systemPrompt,
         chatHistory: recentMessages,
+        model: selectedModel,
       );
 
       // Add AI response to chat history

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import 'famous_character_service.dart';
+import 'famous_character_prompts.dart';
 
 class FamousCharacterChatScreen extends StatefulWidget {
   final String characterName;
@@ -24,6 +25,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   final FocusNode _inputFocusNode = FocusNode();
   bool _isLoading = false;
   List<Map<String, dynamic>> _messages = [];
+  late String _selectedModel;
 
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
@@ -40,6 +42,9 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   void initState() {
     super.initState();
     _isLoading = false;
+    _selectedModel = FamousCharacterPrompts.getSelectedModel(
+      widget.characterName,
+    );
     _initializeChat();
   }
 
@@ -204,6 +209,21 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
   }
 
+  void _changeModel(String newModel) {
+    setState(() {
+      _selectedModel = newModel;
+      FamousCharacterPrompts.setSelectedModel(widget.characterName, newModel);
+    });
+
+    // Show a confirmation to the user
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('AI model updated for ${widget.characterName}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,6 +252,17 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
 
   // Extract app bar to a separate method for readability and performance
   PreferredSizeWidget _buildAppBar() {
+    // Get available models
+    final models = FamousCharacterPrompts.getModelsForCharacter(
+      widget.characterName,
+    );
+
+    // Find current model details
+    final selectedModel = models.firstWhere(
+      (model) => model['id'] == _selectedModel,
+      orElse: () => {'name': 'Default Model'},
+    );
+
     return AppBar(
       backgroundColor: AppTheme.backgroundStart,
       elevation: 0,
@@ -269,12 +300,81 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  'Historical Figure',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white60,
-                    fontSize: 12,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedModel,
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppTheme.warmGold,
+                            size: 16,
+                          ),
+                          isDense: true,
+                          dropdownColor: AppTheme.deepIndigo,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                          items:
+                              models.map<DropdownMenuItem<String>>((model) {
+                                return DropdownMenuItem<String>(
+                                  value: model['id'] as String,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.memory_rounded,
+                                        color: AppTheme.warmGold,
+                                        size: 12,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        model['name'] as String,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      if (model['recommended'] == true)
+                                        Container(
+                                          margin: const EdgeInsets.only(
+                                            left: 4,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 2,
+                                            vertical: 1,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.warmGold
+                                                .withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'RECOMMENDED',
+                                            style: TextStyle(
+                                              color: AppTheme.warmGold,
+                                              fontSize: 6,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              _changeModel(newValue);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

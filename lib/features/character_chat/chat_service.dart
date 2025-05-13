@@ -30,9 +30,13 @@ class ChatService {
         print(
           'Warning: No OpenRouter API key found. The application will not function properly.',
         );
-        print('Please set OPENROUTER_API_KEY in your .env file or in Settings.');
+        print(
+          'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
+        );
       } else {
-        print('API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+        print(
+          'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
 
       _isInitialized = true;
@@ -56,7 +60,9 @@ class ChatService {
       if (_apiKey == null || _apiKey!.isEmpty) {
         print('Warning: No API key found after refresh');
       } else {
-        print('API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+        print(
+          'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
     } catch (e) {
       print('Error refreshing API key: $e');
@@ -68,6 +74,7 @@ class ChatService {
     required String message,
     required String systemPrompt,
     required List<Map<String, dynamic>> chatHistory,
+    String? model,
   }) async {
     // Ensure service is initialized
     if (!_isInitialized) {
@@ -85,7 +92,7 @@ class ChatService {
 
     // Prepare request body
     final body = jsonEncode({
-      'model': 'google/gemini-2.0-flash-001',
+      'model': model ?? 'google/gemini-2.0-flash-001',
       'messages': [
         {'role': 'system', 'content': systemPrompt},
         ...chatHistory,

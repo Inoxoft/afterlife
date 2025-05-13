@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class CharacterModel {
   static const String _defaultAccentColor = '0xFF4ECDC4';
   static const String _characterIdPrefix = 'char_';
+  static const String _defaultModel = 'google/gemini-2.0-flash-001';
 
   final String id;
   final String name;
@@ -12,6 +13,7 @@ class CharacterModel {
   final Color accentColor;
   final List<Map<String, dynamic>> chatHistory;
   final String? additionalInfo;
+  final String model;
 
   CharacterModel({
     required this.id,
@@ -22,8 +24,10 @@ class CharacterModel {
     Color? accentColor,
     List<Map<String, dynamic>>? chatHistory,
     this.additionalInfo,
+    String? model,
   }) : accentColor = accentColor ?? Color(int.parse(_defaultAccentColor)),
        chatHistory = chatHistory ?? [],
+       model = model ?? _defaultModel,
        assert(id.isNotEmpty, 'Character ID cannot be empty'),
        assert(name.isNotEmpty, 'Character name cannot be empty'),
        assert(systemPrompt.isNotEmpty, 'System prompt cannot be empty');
@@ -33,6 +37,7 @@ class CharacterModel {
     required String name,
     required String cardContent,
     String? imageUrl,
+    String? model,
   }) {
     final id = '${_characterIdPrefix}${DateTime.now().millisecondsSinceEpoch}';
     final createdAt = DateTime.now();
@@ -44,6 +49,7 @@ class CharacterModel {
       systemPrompt: cleanSystemPrompt,
       imageUrl: imageUrl,
       createdAt: createdAt,
+      model: model,
     );
   }
 
@@ -96,6 +102,7 @@ class CharacterModel {
       'accentColor': accentColor.value,
       'chatHistory': chatHistory,
       'additionalInfo': additionalInfo,
+      'model': model,
     };
   }
 
@@ -146,6 +153,7 @@ class CharacterModel {
         accentColor: accentColor,
         chatHistory: chatHistory,
         additionalInfo: json['additionalInfo'] as String?,
+        model: json['model'] as String?,
       );
     } catch (e) {
       throw FormatException('Invalid character data: $e');
@@ -173,6 +181,7 @@ class CharacterModel {
       accentColor: accentColor,
       chatHistory: newChatHistory,
       additionalInfo: additionalInfo,
+      model: model,
     );
   }
 
@@ -188,7 +197,8 @@ class CharacterModel {
           createdAt == other.createdAt &&
           accentColor == other.accentColor &&
           chatHistory.length == other.chatHistory.length &&
-          additionalInfo == other.additionalInfo;
+          additionalInfo == other.additionalInfo &&
+          model == other.model;
 
   @override
   int get hashCode =>
@@ -199,7 +209,8 @@ class CharacterModel {
       createdAt.hashCode ^
       accentColor.hashCode ^
       chatHistory.length.hashCode ^
-      additionalInfo.hashCode;
+      additionalInfo.hashCode ^
+      model.hashCode;
 
   // Get a short description from the system prompt
   String getShortDescription() {

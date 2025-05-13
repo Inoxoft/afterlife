@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_interview/interview_screen.dart';
+import '../../core/widgets/model_selection_dialog.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -13,6 +14,14 @@ class _PromptSection {
   final String content;
 
   _PromptSection({required this.title, required this.content});
+}
+
+// Extension method to capitalize strings
+extension StringExtension on String {
+  String capitalize() {
+    if (this.isEmpty) return this;
+    return this[0].toUpperCase() + this.substring(1);
+  }
 }
 
 class CharacterProfileScreen extends StatefulWidget {
@@ -101,6 +110,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         accentColor: _character!.accentColor,
         chatHistory: _character!.chatHistory,
         additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
       );
 
       // Update in provider
@@ -170,6 +180,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             accentColor: originalCharacter.accentColor,
             chatHistory: originalCharacter.chatHistory,
             additionalInfo: originalCharacter.additionalInfo,
+            model: originalCharacter.model,
           );
 
           // Update the character
@@ -367,6 +378,111 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               ),
               const SizedBox(height: 16),
 
+              // AI Model section styled like Biography
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.deepIndigo.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AI MODEL',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                        color: AppTheme.warmGold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Model info with dropdown-like appearance
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white24, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.psychology_outlined,
+                            size: 20,
+                            color: AppTheme.warmGold,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _getModelDisplayName(_character!.model),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  _getModelDescription(_character!.model),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          InkWell(
+                            onTap: _showModelSelectionDialog,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.warmGold.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'CHANGE',
+                                    style: TextStyle(
+                                      color: AppTheme.warmGold,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.arrow_drop_down,
+                                    color: AppTheme.warmGold,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Re-Interview Button
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -444,6 +560,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             onPressed: _showCharacterCardInfo,
                             backgroundColor: _character!.accentColor
                                 .withOpacity(0.8),
+                          ),
+                          _buildCardOptionButton(
+                            icon: Icons.psychology,
+                            label: 'Change AI Model',
+                            onPressed: _showModelSelectionDialog,
+                            backgroundColor: AppTheme.etherealCyan.withOpacity(
+                              0.8,
+                            ),
                           ),
                         ],
                       ),
@@ -661,24 +785,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildInfoRow({required String label, required String value}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.black12,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white10, width: 1),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(label, style: TextStyle(color: Colors.white70, fontSize: 16)),
+          const SizedBox(width: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
@@ -1012,14 +1124,86 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                           label: 'Created',
                           value: _formatDate(_character!.createdAt),
                         ),
-                        if (_character!.imageUrl != null &&
-                            _character!.imageUrl!.isNotEmpty)
-                          _buildInfoItem(
-                            label: 'Image URL',
-                            value: _character!.imageUrl!,
-                          ),
                       ],
                     ),
+
+                    // Divider
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Container(
+                        height: 1,
+                        color: _character!.accentColor.withOpacity(0.3),
+                      ),
+                    ),
+
+                    // AI Model section styled like Biography
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'AI MODEL',
+                          style: GoogleFonts.cinzel(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2.0,
+                            color: AppTheme.warmGold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white24, width: 1),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.psychology_outlined,
+                                size: 20,
+                                color: AppTheme.warmGold,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _getModelDisplayName(_character!.model),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      _getModelDescription(_character!.model),
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+
+                    if (_character!.imageUrl != null &&
+                        _character!.imageUrl!.isNotEmpty)
+                      _buildInfoItem(
+                        label: 'Image URL',
+                        value: _character!.imageUrl!,
+                      ),
 
                     // Divider
                     Padding(
@@ -1089,6 +1273,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     String? label,
     required String value,
     bool isMultiline = false,
+    bool isModelInfo = false,
+    Color? accentColor,
   }) {
     return Container(
       width: double.infinity,
@@ -1113,14 +1299,36 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             ),
             const SizedBox(height: 6),
           ],
-          SelectableText(
-            value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: isMultiline ? 14 : 15,
-              height: isMultiline ? 1.5 : 1.2,
+          if (isModelInfo && accentColor != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: accentColor.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            )
+          else
+            SelectableText(
+              value,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: isMultiline ? 14 : 15,
+                height: isMultiline ? 1.5 : 1.2,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1192,5 +1400,121 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         ),
       ),
     );
+  }
+
+  // Show model selection dialog and update if changed
+  Future<void> _showModelSelectionDialog() async {
+    if (_character == null) return;
+
+    final selectedModel = await ModelSelectionDialog.show(
+      context,
+      currentModel: _character!.model,
+    );
+
+    if (selectedModel != null && selectedModel != _character!.model) {
+      try {
+        final charactersProvider = Provider.of<CharactersProvider>(
+          context,
+          listen: false,
+        );
+
+        // Create updated character with new model
+        final updatedCharacter = CharacterModel(
+          id: _character!.id,
+          name: _character!.name,
+          systemPrompt: _character!.systemPrompt,
+          imageUrl: _character!.imageUrl,
+          createdAt: _character!.createdAt,
+          accentColor: _character!.accentColor,
+          chatHistory: _character!.chatHistory,
+          additionalInfo: _character!.additionalInfo,
+          model: selectedModel,
+        );
+
+        // Update in provider
+        await charactersProvider.updateCharacter(updatedCharacter);
+
+        setState(() {
+          _character = updatedCharacter;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('AI model updated successfully')),
+          );
+        }
+      } catch (e) {
+        print('Error updating model: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error updating model: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  // Get a user-friendly name for the model
+  String _getModelDisplayName(String modelId) {
+    // Look up model information from a map similar to the one in ModelSelectionDialog
+    final Map<String, Map<String, String>> modelInfo = {
+      'google/gemini-2.0-flash-001': {
+        'name': 'Gemini 2.0 Flash',
+        'provider': 'Google',
+      },
+      'anthropic/claude-3-5-sonnet': {
+        'name': 'Claude 3.5 Sonnet',
+        'provider': 'Anthropic',
+      },
+      'google/gemini-2.0-pro-001': {
+        'name': 'Gemini 2.0 Pro',
+        'provider': 'Google',
+      },
+      'anthropic/claude-3-opus': {
+        'name': 'Claude 3 Opus',
+        'provider': 'Anthropic',
+      },
+      'meta-llama/llama-3-70b-instruct': {
+        'name': 'Llama 3 70B',
+        'provider': 'Meta',
+      },
+      'openai/gpt-4o': {'name': 'GPT-4o', 'provider': 'OpenAI'},
+    };
+
+    // If we have info for this model, return formatted name
+    if (modelInfo.containsKey(modelId)) {
+      final info = modelInfo[modelId]!;
+      return '${info['name']} by ${info['provider']}';
+    }
+
+    // Fallback to the previous parsing method if model not in our map
+    final parts = modelId.split('/');
+    if (parts.length < 2) return modelId;
+
+    // Get provider and model parts
+    final provider = parts[0].capitalize();
+    final model = parts[1].replaceAll('-', ' ').capitalize();
+
+    return '$model by $provider';
+  }
+
+  // Get a description for the AI model
+  String _getModelDescription(String modelId) {
+    final Map<String, String> modelDescriptions = {
+      'google/gemini-2.0-flash-001': 'Fast responses with good quality',
+      'anthropic/claude-3-5-sonnet':
+          'High quality responses with strong reasoning',
+      'google/gemini-2.0-pro-001': 'Higher quality responses than Flash',
+      'anthropic/claude-3-opus':
+          'Top-tier intelligence, slower and more expensive',
+      'meta-llama/llama-3-70b-instruct':
+          'Open-source model with good capabilities',
+      'openai/gpt-4o': 'Powerful model with excellent language understanding',
+    };
+
+    return modelDescriptions[modelId] ?? 'Advanced language model';
   }
 }

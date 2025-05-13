@@ -30,10 +30,14 @@ class _FamousCharacterProfileScreenState
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;
+  late String _selectedModel;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize the selected model
+    _selectedModel = FamousCharacterPrompts.getSelectedModel(widget.name);
 
     // Set up animation for the pulsing effect
     _animationController = AnimationController(
@@ -287,24 +291,141 @@ class _FamousCharacterProfileScreenState
                       label: 'Profession',
                       value: widget.profession,
                     ),
-                    const SizedBox(height: 12),
-                    const Divider(color: Colors.white24),
-                    const SizedBox(height: 12),
-                    const Text(
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Biography
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       'Biography',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.cinzel(
+                        textStyle: TextStyle(
+                          color: AppTheme.warmGold,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       shortBio,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 15,
                         height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // AI Model section styled like Biography
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AI MODEL',
+                      style: GoogleFonts.cinzel(
+                        textStyle: TextStyle(
+                          color: AppTheme.warmGold,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildModelDropdown(),
+
+                    // View all models option
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: () {
+                        // This will be implemented later
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'This feature will be available soon',
+                            ),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black12,
+                          border: Border(
+                            top: BorderSide(
+                              color: AppTheme.warmGold.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'View all available models',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  'Explore more AI options',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              color: AppTheme.warmGold,
+                              size: 16,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -355,6 +476,7 @@ class _FamousCharacterProfileScreenState
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -400,6 +522,151 @@ class _FamousCharacterProfileScreenState
               characterName: widget.name,
               imageUrl: widget.imageUrl,
             ),
+      ),
+    );
+  }
+
+  Widget _buildModelDropdown() {
+    // Get available models for this character
+    final models = FamousCharacterPrompts.getModelsForCharacter(widget.name);
+
+    return Column(
+      children: [
+        ...models
+            .map(
+              (model) => _buildModelOption(
+                id: model['id'] as String,
+                name: model['name'] as String,
+                description: model['description'] as String,
+                isRecommended: model['recommended'] == true,
+                isSelected: _selectedModel == model['id'],
+              ),
+            )
+            .toList(),
+      ],
+    );
+  }
+
+  Widget _buildModelOption({
+    required String id,
+    required String name,
+    required String description,
+    required bool isRecommended,
+    required bool isSelected,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color:
+            isSelected ? AppTheme.deepIndigo.withOpacity(0.7) : Colors.black12,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color:
+              isSelected
+                  ? AppTheme.warmGold.withOpacity(0.7)
+                  : AppTheme.warmGold.withOpacity(0.2),
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedModel = id;
+              FamousCharacterPrompts.setSelectedModel(widget.name, id);
+            });
+            // Show a confirmation to the user
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('AI model updated for ${widget.name}'),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        isSelected
+                            ? AppTheme.warmGold.withOpacity(0.2)
+                            : Colors.black26,
+                    border: Border.all(
+                      color:
+                          isSelected
+                              ? AppTheme.warmGold
+                              : AppTheme.warmGold.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    isSelected ? Icons.check : Icons.psychology_outlined,
+                    color: AppTheme.warmGold,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (isRecommended)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.warmGold.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'RECOMMENDED',
+                                style: TextStyle(
+                                  color: AppTheme.warmGold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.radio_button_checked,
+                  color: isSelected ? AppTheme.warmGold : Colors.transparent,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
