@@ -10,6 +10,7 @@ import 'interview_provider.dart';
 import 'chat_bubble.dart';
 import 'file_processor_service.dart';
 import 'package:path/path.dart' as path;
+import 'package:google_fonts/google_fonts.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
@@ -196,21 +197,33 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               content: const Text(
                                 'This will clear all your responses. Are you sure?',
                               ),
-                              backgroundColor: AppTheme.deepIndigo,
+                              backgroundColor: AppTheme.midnightPurple,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(
+                                  color: AppTheme.warmGold.withOpacity(0.3),
+                                  width: 1,
+                                ),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel'),
+                                  child: Text(
+                                    'Cancel',
+                                    style: TextStyle(
+                                      color: AppTheme.silverMist,
+                                    ),
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed: () {
                                     provider.resetInterview();
                                     Navigator.pop(context);
                                   },
-                                  child: const Text('Restart'),
+                                  child: Text(
+                                    'Restart',
+                                    style: TextStyle(color: AppTheme.warmGold),
+                                  ),
                                 ),
                               ],
                             ),
@@ -260,19 +273,17 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   horizontal: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.4),
+                                  color: AppTheme.midnightPurple.withOpacity(
+                                    0.6,
+                                  ),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: AppTheme.etherealCyan.withOpacity(
-                                      0.3,
-                                    ),
+                                    color: AppTheme.warmGold.withOpacity(0.3),
                                     width: 1.5,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppTheme.etherealCyan.withOpacity(
-                                        0.1,
-                                      ),
+                                      color: AppTheme.warmGold.withOpacity(0.1),
                                       blurRadius: 15,
                                       spreadRadius: 1,
                                     ),
@@ -283,7 +294,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                     children: [
                                       Icon(
                                         Icons.check_circle_outline,
-                                        color: AppTheme.etherealCyan,
+                                        color: AppTheme.warmGold,
                                         size: 48,
                                       ),
                                       const SizedBox(height: 16),
@@ -291,8 +302,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                         provider.isEditMode
                                             ? 'Character card updated and ready'
                                             : 'Character card successfully created',
-                                        style: const TextStyle(
-                                          color: Colors.white,
+                                        style: GoogleFonts.cinzel(
+                                          color: AppTheme.silverMist,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 18,
                                         ),
@@ -303,7 +314,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                             ? 'Click below to apply these changes to your character'
                                             : 'Your digital twin is ready to chat with you',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7),
+                                          color: AppTheme.silverMist
+                                              .withOpacity(0.7),
                                           fontSize: 14,
                                         ),
                                         textAlign: TextAlign.center,
@@ -314,13 +326,13 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                           milliseconds: 200,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.etherealCyan,
+                                          color: AppTheme.warmGold,
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: AppTheme.etherealCyan
+                                              color: AppTheme.warmGold
                                                   .withOpacity(0.3),
                                               blurRadius: 8,
                                               spreadRadius: 1,
@@ -494,7 +506,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                           vertical: 8.0,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.deepIndigo.withOpacity(0.7),
+                          color: AppTheme.midnightPurple.withOpacity(0.7),
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(20),
                           ),
@@ -513,24 +525,30 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               Expanded(
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.black26,
+                                    color: AppTheme.midnightPurple.withOpacity(
+                                      0.5,
+                                    ),
                                     borderRadius: BorderRadius.circular(25.0),
                                     border: Border.all(
-                                      color: Colors.white10,
+                                      color: AppTheme.warmGold.withOpacity(0.3),
                                       width: 1,
                                     ),
                                   ),
                                   child: TextField(
                                     controller: _messageController,
                                     focusNode: _inputFocusNode,
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                      color: AppTheme.silverMist,
+                                    ),
                                     decoration: InputDecoration(
                                       hintText:
                                           _isProcessingFile
                                               ? 'Processing file...'
                                               : 'Type your message...',
                                       hintStyle: TextStyle(
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: AppTheme.silverMist.withOpacity(
+                                          0.5,
+                                        ),
                                       ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(
@@ -545,8 +563,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                           ),
                                       prefixIcon: Icon(
                                         Icons.chat_bubble_outline,
-                                        color: AppTheme.etherealCyan
-                                            .withOpacity(0.5),
+                                        color: AppTheme.warmGold.withOpacity(
+                                          0.5,
+                                        ),
                                         size: 18,
                                       ),
                                     ),
@@ -563,13 +582,11 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               const SizedBox(width: 12.0),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: AppTheme.etherealCyan,
+                                  color: AppTheme.warmGold,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppTheme.etherealCyan.withOpacity(
-                                        0.3,
-                                      ),
+                                      color: AppTheme.warmGold.withOpacity(0.3),
                                       blurRadius: 8,
                                       spreadRadius: 1,
                                     ),

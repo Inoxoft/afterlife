@@ -270,7 +270,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: AppTheme.etherealCyan.withOpacity(0.3),
+            backgroundColor: AppTheme.midnightPurple.withOpacity(0.7),
             backgroundImage:
                 widget.imageUrl != null ? AssetImage(widget.imageUrl!) : null,
             child:
@@ -280,9 +280,16 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                           ? widget.characterName[0].toUpperCase()
                           : '?',
                       style: TextStyle(
-                        color: AppTheme.etherealCyan,
+                        color: AppTheme.warmGold,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        shadows: [
+                          Shadow(
+                            color: AppTheme.warmGold.withOpacity(0.5),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                     )
                     : null,
@@ -386,11 +393,15 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: Colors.black12,
+            color: AppTheme.midnightPurple.withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppTheme.warmGold.withOpacity(0.3),
+              width: 0.5,
+            ),
           ),
           child: IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.white70),
+            icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
             tooltip: 'Clear Chat',
             onPressed: _showClearChatDialog,
           ),

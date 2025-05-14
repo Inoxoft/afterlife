@@ -19,10 +19,10 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleColor =
         message.isUser
-            ? AppTheme.accentPurple.withOpacity(0.6)
+            ? AppTheme.midnightPurple.withOpacity(0.6)
             : (hasCharacterCard()
-                ? AppTheme.deepIndigo.withOpacity(0.8)
-                : Colors.black.withOpacity(0.4));
+                ? AppTheme.midnightPurple.withOpacity(0.8)
+                : AppTheme.midnightPurple.withOpacity(0.5));
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -56,12 +56,10 @@ class ChatBubble extends StatelessWidget {
                 border: Border.all(
                   color:
                       message.isUser
-                          ? AppTheme.accentPurple.withOpacity(0.7)
+                          ? AppTheme.warmGold.withOpacity(0.5)
                           : (hasCharacterCard()
-                              ? AppTheme.warmGold.withOpacity(
-                                0.7,
-                              ) // Gold border for character cards
-                              : AppTheme.etherealCyan.withOpacity(0.3)),
+                              ? AppTheme.warmGold.withOpacity(0.7)
+                              : AppTheme.warmGold.withOpacity(0.4)),
                   width:
                       hasCharacterCard()
                           ? 2.0
@@ -71,9 +69,7 @@ class ChatBubble extends StatelessWidget {
                   BoxShadow(
                     color:
                         hasCharacterCard()
-                            ? AppTheme.warmGold.withOpacity(
-                              0.2,
-                            ) // Gold glow for character cards
+                            ? AppTheme.warmGold.withOpacity(0.2)
                             : Colors.black.withOpacity(0.1),
                     blurRadius: hasCharacterCard() ? 8 : 3,
                     spreadRadius: hasCharacterCard() ? 2 : 0,
@@ -99,18 +95,21 @@ class ChatBubble extends StatelessWidget {
   }
 
   Widget _buildAvatar() {
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor:
-          message.isUser
-              ? AppTheme.accentPurple.withOpacity(0.8)
-              : AppTheme.etherealCyan.withOpacity(0.8),
-      child: Text(
-        avatarText.isNotEmpty ? avatarText : (message.isUser ? 'You' : 'AI'),
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+      ),
+      child: CircleAvatar(
+        radius: 16,
+        backgroundColor: AppTheme.midnightPurple.withOpacity(0.8),
+        child: Text(
+          avatarText.isNotEmpty ? avatarText : (message.isUser ? 'You' : 'AI'),
+          style: TextStyle(
+            color: AppTheme.warmGold,
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+          ),
         ),
       ),
     );
@@ -144,19 +143,21 @@ class ChatBubble extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 16,
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppTheme.warmGold.withOpacity(0.7),
+              ),
             ),
           ),
           const SizedBox(width: 12),
           Text(
             'Thinking...',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: AppTheme.silverMist.withOpacity(0.7),
               fontSize: 14,
               fontStyle: FontStyle.italic,
             ),
@@ -189,7 +190,7 @@ class ChatBubble extends StatelessWidget {
                       message.text.indexOf('## CHARACTER CARD SUMMARY ##'),
                     ),
                   ),
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  style: TextStyle(color: AppTheme.silverMist, fontSize: 15),
                 ),
 
               // Character card header with name if available
@@ -204,7 +205,7 @@ class ChatBubble extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       AppTheme.warmGold.withOpacity(0.4),
-                      AppTheme.accentPurple.withOpacity(0.3),
+                      AppTheme.midnightPurple.withOpacity(0.5),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -226,10 +227,10 @@ class ChatBubble extends StatelessWidget {
                           color: AppTheme.warmGold,
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'CHARACTER CARD',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.silverMist,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -245,7 +246,7 @@ class ChatBubble extends StatelessWidget {
                           horizontal: 16,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black26,
+                          color: AppTheme.midnightPurple.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: AppTheme.warmGold.withOpacity(0.4),
@@ -273,7 +274,7 @@ class ChatBubble extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.2),
+                  color: AppTheme.midnightPurple.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: AppTheme.warmGold.withOpacity(0.2),
@@ -295,15 +296,15 @@ class ChatBubble extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.etherealCyan.withOpacity(0.1),
+                  color: AppTheme.midnightPurple.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppTheme.etherealCyan.withOpacity(0.3),
+                    color: AppTheme.warmGold.withOpacity(0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.etherealCyan.withOpacity(0.05),
+                      color: AppTheme.warmGold.withOpacity(0.05),
                       blurRadius: 8,
                       spreadRadius: 0,
                     ),
@@ -317,13 +318,13 @@ class ChatBubble extends StatelessWidget {
                         Icon(
                           Icons.info_outline,
                           size: 16,
-                          color: AppTheme.etherealCyan,
+                          color: AppTheme.warmGold,
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'Instructions',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.silverMist,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -331,9 +332,12 @@ class ChatBubble extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Type "agree" to confirm this character card or continue the conversation to make changes.',
-                      style: TextStyle(color: Colors.white, fontSize: 14),
+                      style: TextStyle(
+                        color: AppTheme.silverMist,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -347,7 +351,7 @@ class ChatBubble extends StatelessWidget {
     // Regular text messages
     return Text(
       message.text,
-      style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
+      style: TextStyle(color: AppTheme.silverMist, fontSize: 15, height: 1.4),
     );
   }
 
@@ -413,7 +417,7 @@ class ChatBubble extends StatelessWidget {
     final content = _extractCharacterCardContent();
     return RichText(
       text: TextSpan(
-        style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
+        style: TextStyle(color: AppTheme.silverMist, fontSize: 14, height: 1.5),
         children: _buildFormattedTextSpans(content),
       ),
     );
@@ -432,7 +436,8 @@ class ChatBubble extends StatelessWidget {
         spans.add(
           TextSpan(
             text: headerText + '\n',
-            style: const TextStyle(
+            style: TextStyle(
+              color: AppTheme.warmGold,
               fontWeight: FontWeight.bold,
               fontSize: 16,
               height: 2.0,
@@ -455,7 +460,10 @@ class ChatBubble extends StatelessWidget {
             lineSpans.add(
               TextSpan(
                 text: segments[j],
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppTheme.warmGold,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             );
           }
@@ -469,7 +477,24 @@ class ChatBubble extends StatelessWidget {
       // Handle bullet points
       if (line.trim().startsWith('-')) {
         final bulletText = line.replaceFirst(RegExp(r'-\s+'), '').trim();
-        spans.add(TextSpan(text: '• ' + bulletText + '\n'));
+        spans.add(
+          TextSpan(
+            text: '• ',
+            style: TextStyle(
+              color: AppTheme.warmGold,
+              fontWeight: FontWeight.bold,
+            ),
+            children: [
+              TextSpan(
+                text: bulletText + '\n',
+                style: TextStyle(
+                  color: AppTheme.silverMist,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        );
         continue;
       }
 

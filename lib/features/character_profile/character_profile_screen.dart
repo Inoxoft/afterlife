@@ -212,483 +212,605 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Character not loaded yet
     if (_character == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Character Profile'),
-          backgroundColor: AppTheme.backgroundStart,
-        ),
+        appBar: AppBar(title: const Text('Character Profile')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
+    // Build sections from prompt
+    final sections = _parseSystemPrompt(_character!.systemPrompt);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundStart,
-        title: Text('${_character!.name}\'s Profile'),
+        backgroundColor: AppTheme.midnightPurple,
+        title: Text(_isEditing ? 'Edit Character' : 'Character Profile'),
         actions: [
-          if (_isEditing)
-            IconButton(icon: const Icon(Icons.save), onPressed: _saveChanges)
-          else
+          if (!_isEditing)
             IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditing = true),
+              icon: const Icon(Icons.edit, color: AppTheme.silverMist),
+              tooltip: 'Edit Character',
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                  _nameController.text = _character!.name;
+                  _systemPromptController.text = _character!.systemPrompt;
+                });
+              },
+            ),
+          if (_isEditing)
+            TextButton(
+              onPressed: _saveChanges,
+              child: Text(
+                'SAVE',
+                style: TextStyle(
+                  color: AppTheme.warmGold,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
         ],
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Character Avatar with improved styling
-              Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Outer glow effect
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: _character!.accentColor.withOpacity(0.4),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Character avatar
-                    Container(
-                      width: 130,
-                      height: 130,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            _character!.accentColor.withOpacity(0.7),
-                            _character!.accentColor.withOpacity(0.3),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.6),
-                          width: 3,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _character!.name.isNotEmpty
-                              ? _character!.name[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 4,
-                                color: Colors.black26,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
+        child: _isEditing ? _buildEditMode() : _buildViewMode(sections),
+      ),
+    );
+  }
 
-              // Character name display (when not editing)
-              if (!_isEditing)
-                Center(
-                  child: Text(
-                    _character!.name,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 3,
-                          color: Colors.black45,
-                          offset: Offset(1, 1),
-                        ),
-                      ],
-                    ),
+  Widget _buildViewMode(List<_PromptSection> sections) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Character header card
+        _buildCharacterHeader(),
+        const SizedBox(height: 24),
+
+        // Character info sections
+        ...sections.map(_buildSectionCard).toList(),
+
+        // Add AI Model Selection section
+        const SizedBox(height: 24),
+        _buildAIModelSection(),
+
+        // Reinterview button
+        const SizedBox(height: 24),
+        _buildReinterviewButton(),
+      ],
+    );
+  }
+
+  Widget _buildAIModelSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'AI MODEL',
+            style: GoogleFonts.cinzel(
+              textStyle: TextStyle(
+                color: AppTheme.warmGold,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildModelOptions(),
+
+          // View all models option
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: () async {
+              final result = await ModelSelectionDialog.show(
+                context,
+                currentModel: _character!.model,
+              );
+
+              if (result != null && mounted) {
+                final charactersProvider = Provider.of<CharactersProvider>(
+                  context,
+                  listen: false,
+                );
+
+                final updatedCharacter = CharacterModel(
+                  id: _character!.id,
+                  name: _character!.name,
+                  systemPrompt: _character!.systemPrompt,
+                  imageUrl: _character!.imageUrl,
+                  createdAt: _character!.createdAt,
+                  accentColor: _character!.accentColor,
+                  chatHistory: _character!.chatHistory,
+                  additionalInfo: _character!.additionalInfo,
+                  model: result,
+                );
+
+                await charactersProvider.updateCharacter(updatedCharacter);
+                _loadCharacter();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('AI model updated for ${_character!.name}'),
                   ),
-                ),
-              const SizedBox(height: 24),
-
-              // Basic Information
-              _buildSection(
-                title: 'Basic Information',
-                child: Column(
-                  children: [
-                    if (_isEditing)
-                      _buildTextField(
-                        label: 'Name',
-                        controller: _nameController,
-                        enabled: true,
-                      )
-                    else
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          children: [
-                            const Text(
-                              'Name:',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              _nameController.text,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                    _buildInfoRow(
-                      label: 'Created',
-                      value: _formatDate(_character!.createdAt),
-                    ),
-                    _buildInfoRow(
-                      label: 'Chat Messages',
-                      value: '${_character!.chatHistory.length}',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // AI Model section styled like Biography
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppTheme.deepIndigo.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
+                );
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                border: Border(
+                  top: BorderSide(
                     color: AppTheme.warmGold.withOpacity(0.3),
                     width: 1,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'AI MODEL',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2.0,
-                        color: AppTheme.warmGold,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'View all available models',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      Text(
+                        'Explore more AI options',
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppTheme.warmGold,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelOptions() {
+    // Define the models for user-created twins
+    final models = [
+      {
+        'id': 'google/gemini-2.0-flash-001',
+        'name': 'Gemini 2.0 Flash',
+        'description': 'Speed, multimodal support, and 1M token context window',
+        'provider': 'Google Cloud',
+        'recommended': true,
+      },
+      {
+        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
+        'name': 'Mistral Small 3.1',
+        'description':
+            'Lightweight, instruction-tuned model for conversational creativity',
+        'provider': 'apidog',
+        'free': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4o',
+        'name': 'GPT-4o',
+        'description':
+            'Superior multilingual and vision capabilities via OpenRouter',
+        'provider': 'OpenRouter',
+        'recommended': false,
+      },
+      {
+        'id': 'deepseek/deepseek-r1',
+        'name': 'DeepSeek R1',
+        'description':
+            'MoE-based specialist for scientific and logical reasoning',
+        'provider': 'apidog',
+        'recommended': false,
+      },
+    ];
+
+    return Column(
+      children: [
+        ...models
+            .map(
+              (model) => _buildModelOption(
+                id: model['id'] as String,
+                name: model['name'] as String,
+                description: model['description'] as String,
+                provider: model['provider'] as String,
+                isRecommended: model['recommended'] == true,
+                isFree: model['free'] == true,
+                isSelected: _character!.model == model['id'],
+              ),
+            )
+            .toList(),
+      ],
+    );
+  }
+
+  Widget _buildModelOption({
+    required String id,
+    required String name,
+    required String description,
+    required String provider,
+    required bool isRecommended,
+    bool isFree = false,
+    required bool isSelected,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color:
+            isSelected ? AppTheme.deepIndigo.withOpacity(0.7) : Colors.black12,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color:
+              isSelected
+                  ? AppTheme.warmGold.withOpacity(0.7)
+                  : AppTheme.warmGold.withOpacity(0.2),
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            // Update the character's model
+            final charactersProvider = Provider.of<CharactersProvider>(
+              context,
+              listen: false,
+            );
+
+            final updatedCharacter = CharacterModel(
+              id: _character!.id,
+              name: _character!.name,
+              systemPrompt: _character!.systemPrompt,
+              imageUrl: _character!.imageUrl,
+              createdAt: _character!.createdAt,
+              accentColor: _character!.accentColor,
+              chatHistory: _character!.chatHistory,
+              additionalInfo: _character!.additionalInfo,
+              model: id,
+            );
+
+            await charactersProvider.updateCharacter(updatedCharacter);
+            _loadCharacter();
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('AI model updated for ${_character!.name}'),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        isSelected
+                            ? AppTheme.warmGold.withOpacity(0.2)
+                            : Colors.black26,
+                    border: Border.all(
+                      color:
+                          isSelected
+                              ? AppTheme.warmGold
+                              : AppTheme.warmGold.withOpacity(0.3),
+                      width: 1.5,
                     ),
-                    const SizedBox(height: 12),
-                    // Model info with dropdown-like appearance
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black26,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white24, width: 1),
-                      ),
-                      child: Row(
+                  ),
+                  child: Icon(
+                    isSelected ? Icons.check : Icons.psychology_outlined,
+                    color: AppTheme.warmGold,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Icon(
-                            Icons.psychology_outlined,
-                            size: 20,
-                            color: AppTheme.warmGold,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getModelDisplayName(_character!.model),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  _getModelDescription(_character!.model),
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            name,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                           ),
-                          InkWell(
-                            onTap: _showModelSelectionDialog,
-                            child: Container(
+                          const SizedBox(width: 8),
+                          if (isRecommended)
+                            Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 6,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: AppTheme.warmGold.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'CHANGE',
-                                    style: TextStyle(
-                                      color: AppTheme.warmGold,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Icon(
-                                    Icons.arrow_drop_down,
-                                    color: AppTheme.warmGold,
-                                    size: 16,
-                                  ),
-                                ],
+                              child: Text(
+                                'RECOMMENDED',
+                                style: TextStyle(
+                                  color: AppTheme.warmGold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
-                          ),
+                          if (isFree)
+                            Container(
+                              margin: const EdgeInsets.only(left: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.gentlePurple.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'FREE',
+                                style: TextStyle(
+                                  color: AppTheme.gentlePurple,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Re-Interview Button
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.etherealCyan.withOpacity(0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: _startReinterview,
-                      icon: const Icon(Icons.edit, size: 22),
-                      label: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 12,
-                        ),
-                        child: Text(
-                          'Edit Character through chat',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        provider,
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.etherealCyan,
-                        foregroundColor: Colors.black87,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 4,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                Icon(
+                  Icons.radio_button_checked,
+                  color: isSelected ? AppTheme.warmGold : Colors.transparent,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              // Character Card Actions
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Character Card Options',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 12,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          _buildCardOptionButton(
-                            icon: Icons.visibility,
-                            label: 'View Card Info',
-                            onPressed: _showCharacterCardInfo,
-                            backgroundColor: _character!.accentColor
-                                .withOpacity(0.8),
-                          ),
-                          _buildCardOptionButton(
-                            icon: Icons.psychology,
-                            label: 'Change AI Model',
-                            onPressed: _showModelSelectionDialog,
-                            backgroundColor: AppTheme.etherealCyan.withOpacity(
-                              0.8,
-                            ),
-                          ),
-                        ],
+  Widget _buildCharacterHeader() {
+    return Column(
+      children: [
+        // Character avatar with glow
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Outer glow effect
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.warmGold.withOpacity(0.4),
+                    blurRadius: 20,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+            ),
+            // Character avatar
+            Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppTheme.midnightPurple.withOpacity(0.7),
+                    AppTheme.deepNavy.withOpacity(0.5),
+                  ],
+                ),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppTheme.warmGold.withOpacity(0.6),
+                  width: 3,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  _character!.name.isNotEmpty
+                      ? _character!.name[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    fontSize: 52,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4,
+                        color: Colors.black26,
+                        offset: Offset(2, 2),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
 
-              // System Prompt
-              _buildSection(
-                title: 'System Prompt',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_isEditing)
-                      _buildTextField(
-                        label: 'System Prompt',
-                        controller: _systemPromptController,
-                        enabled: true,
-                        maxLines: 15,
-                      )
-                    else
-                      Container(
-                        height: 300,
-                        decoration: BoxDecoration(
-                          color: Colors.black26,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Styled text for system prompt
-                                    Text(
-                                      _systemPromptController.text,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                    // Add extra padding at the bottom to avoid text being hidden by copy button
-                                    const SizedBox(height: 40),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Copy button overlay
-                            Positioned(
-                              right: 8,
-                              bottom: 8,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.content_copy,
-                                    color: Colors.white70,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    Clipboard.setData(
-                                      ClipboardData(
-                                        text: _systemPromptController.text,
-                                      ),
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Prompt copied to clipboard',
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  tooltip: 'Copy prompt',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 8),
-                    if (!_isEditing)
-                      Center(
-                        child: Text(
-                          '↑ Scroll to view full prompt ↑',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
-                  ],
+        // Character name display
+        Center(
+          child: Text(
+            _character!.name,
+            style: GoogleFonts.cinzel(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.silverMist,
+              letterSpacing: 1.5,
+              shadows: [
+                Shadow(
+                  blurRadius: 3,
+                  color: AppTheme.warmGold.withOpacity(0.5),
+                  offset: Offset(1, 1),
                 ),
-              ),
-
-              // Add some spacing at the bottom for better scrolling experience
-              const SizedBox(height: 40),
-            ],
+              ],
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildSectionCard(_PromptSection section) {
+    return _buildSection(
+      title: section.title,
+      child: Column(
+        children: [
+          if (_isEditing)
+            _buildTextField(
+              label: section.title,
+              controller: TextEditingController(text: section.content),
+              enabled: true,
+            )
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.midnightPurple.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.warmGold.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                section.content,
+                style: TextStyle(
+                  color: AppTheme.silverMist,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Text(
+                'Created:',
+                style: TextStyle(
+                  color: AppTheme.silverMist.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.midnightPurple.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  _formatDate(_character!.createdAt),
+                  style: TextStyle(
+                    color: AppTheme.silverMist,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                'Messages:',
+                style: TextStyle(
+                  color: AppTheme.silverMist.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.midnightPurple.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${_character!.chatHistory.length}',
+                  style: TextStyle(
+                    color: AppTheme.silverMist,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -697,9 +819,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: Colors.black.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
@@ -719,16 +841,16 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   title == 'Basic Information'
                       ? Icons.person
                       : Icons.text_fields,
-                  color: _character!.accentColor,
+                  color: AppTheme.warmGold,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: TextStyle(
+                  style: GoogleFonts.cinzel(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
+                    color: AppTheme.warmGold,
+                    letterSpacing: 2.0,
                     shadows: [
                       Shadow(
                         blurRadius: 2,
@@ -740,7 +862,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 ),
               ],
             ),
-            const Divider(color: Colors.white24, thickness: 1, height: 24),
+            Divider(
+              color: AppTheme.warmGold.withOpacity(0.3),
+              thickness: 1,
+              height: 24,
+            ),
             child,
           ],
         ),
@@ -758,23 +884,23 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       controller: controller,
       enabled: enabled,
       maxLines: maxLines,
-      style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+      style: TextStyle(color: AppTheme.silverMist, fontSize: 15, height: 1.5),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
-          color: Colors.white.withOpacity(0.8),
+          color: AppTheme.silverMist.withOpacity(0.8),
           fontWeight: FontWeight.w500,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderSide: BorderSide(color: AppTheme.warmGold.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: _character!.accentColor, width: 2),
+          borderSide: BorderSide(color: AppTheme.warmGold, width: 2),
         ),
         filled: true,
-        fillColor: Colors.black26,
+        fillColor: AppTheme.midnightPurple.withOpacity(0.5),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -789,22 +915,28 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Text(label, style: TextStyle(color: Colors.white70, fontSize: 16)),
+          Text(
+            label,
+            style: TextStyle(
+              color: AppTheme.silverMist.withOpacity(0.7),
+              fontSize: 16,
+            ),
+          ),
           const SizedBox(width: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: _character!.accentColor.withOpacity(0.2),
+              color: AppTheme.midnightPurple.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _character!.accentColor.withOpacity(0.3),
+                color: AppTheme.warmGold.withOpacity(0.3),
                 width: 1,
               ),
             ),
             child: Text(
               value,
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.silverMist,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
                 letterSpacing: 0.5,
@@ -873,175 +1005,122 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return cleanedPrompt;
   }
 
-  // Parse system prompt to detect sections
-  List<_PromptSection> _parseSystemPromptSections(String systemPrompt) {
-    final sections = <_PromptSection>[];
+  // Parse the system prompt into sections
+  List<_PromptSection> _parseSystemPrompt(String systemPrompt) {
+    final List<_PromptSection> sections = [];
 
-    // Clean the prompt by removing separator lines and problematic characters
-    final cleanedPrompt = _cleanPromptText(systemPrompt);
+    // Try to extract sections from the prompt
+    final RegExp sectionRegex = RegExp(
+      r'#+\s*([^#\n]+)\n+([\s\S]*?)(?=\n#+\s*[^#\n]+\n+|$)',
+    );
+    final matches = sectionRegex.allMatches(systemPrompt);
 
-    // Regular expressions for different heading formats
-    final headingPatterns = [
-      RegExp(r'#{1,3}\s+([^#\n]+)'), // Markdown headings
-      RegExp(r'([A-Z][A-Z\s]+):'), // ALL CAPS headings with colon
-      RegExp(r'\*\*([^*]+)\*\*'), // Bold text as headings
-      RegExp(r'<([^>]+)>:?'), // Text in angle brackets
-      RegExp(
-        r'If\s+Given\s+Immortality[^:]*:?',
-      ), // Fix for "If Given Immortality" pattern
-    ];
-
-    // Special sections that should always be titled "AI Instructions" if found
-    final aiInstructionPatterns = [
-      RegExp(r'If\s+Given\s+Immortality', caseSensitive: false),
-      RegExp(r'stay\s+in\s+character', caseSensitive: false),
-      RegExp(r'never\s+break\s+character', caseSensitive: false),
-      RegExp(
-        r'do\s+not\s+(admit|acknowledge)\s+you\s+are\s+an\s+AI',
-        caseSensitive: false,
-      ),
-    ];
-
-    // First, try to find sections based on common heading patterns
-    final lines = cleanedPrompt.split('\n');
-    String? currentHeading;
-    StringBuffer currentContent = StringBuffer();
-    bool isAiInstructionSection = false;
-
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      bool isHeading = false;
-      String? headingText;
-
-      // Check if this line is a heading
-      for (final pattern in headingPatterns) {
-        final match = pattern.firstMatch(line);
-        if (match != null) {
-          if (pattern.pattern.contains('If\\s+Given\\s+Immortality')) {
-            headingText = 'AI Instructions';
-            isAiInstructionSection = true;
-          } else {
-            headingText = match.group(1)?.trim() ?? match.group(0)?.trim();
-          }
-
-          if (headingText != null && headingText.isNotEmpty) {
-            isHeading = true;
-            break;
-          }
+    if (matches.isNotEmpty) {
+      for (final match in matches) {
+        if (match.groupCount >= 2) {
+          final title = match.group(1)?.trim() ?? 'Unnamed Section';
+          final content = match.group(2)?.trim() ?? '';
+          sections.add(_PromptSection(title: title, content: content));
         }
       }
-
-      // If this is a heading, save the previous section and start a new one
-      if (isHeading && headingText != null) {
-        // Save previous section if exists and not empty
-        final contentStr = currentContent.toString().trim();
-        if (currentHeading != null && contentStr.isNotEmpty) {
-          sections.add(
-            _PromptSection(title: currentHeading, content: contentStr),
-          );
-          currentContent.clear();
-        }
-
-        currentHeading = headingText;
-        isAiInstructionSection = currentHeading == 'AI Instructions';
-      } else {
-        // Check if this line contains AI instruction patterns
-        if (!isAiInstructionSection && currentHeading == null) {
-          for (final pattern in aiInstructionPatterns) {
-            if (pattern.hasMatch(line)) {
-              // If we find AI instructions but we're not in an AI section,
-              // create a new AI Instructions section
-              if (currentContent.isNotEmpty) {
-                // Save previous content to a generic section
-                sections.add(
-                  _PromptSection(
-                    title: 'Character Description',
-                    content: currentContent.toString().trim(),
-                  ),
-                );
-                currentContent.clear();
-              }
-              currentHeading = 'AI Instructions';
-              isAiInstructionSection = true;
-              break;
-            }
-          }
-        }
-
-        // This is content - add to current section
-        if (currentHeading != null) {
-          currentContent.writeln(line);
-        } else if (line.trim().isNotEmpty) {
-          // If no heading yet but we have content, buffer it
-          currentContent.writeln(line);
-        }
-      }
-    }
-
-    // Add the last section if not empty
-    final finalContent = currentContent.toString().trim();
-    if (currentHeading != null && finalContent.isNotEmpty) {
-      sections.add(
-        _PromptSection(title: currentHeading, content: finalContent),
-      );
-    } else if (finalContent.isNotEmpty) {
-      // If there's content without a heading, add as character description
-      sections.add(
-        _PromptSection(title: 'Character Description', content: finalContent),
-      );
-    }
-
-    // If no sections were detected, create a default section
-    if (sections.isEmpty) {
-      sections.add(
-        _PromptSection(
-          title: 'Character Description',
-          content: cleanedPrompt.trim(),
-        ),
-      );
+    } else {
+      // If no sections found, create a single "Description" section
+      sections.add(_PromptSection(title: 'Description', content: systemPrompt));
     }
 
     return sections;
   }
 
-  // Helper to clean prompt text of separators and problematic characters
-  String _cleanPromptText(String text) {
-    // First remove separator lines
-    String cleaned = _removeAllSeparatorLines(text);
+  Widget _buildEditMode() {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Name field
+        _buildTextField(
+          label: 'Character Name',
+          controller: _nameController,
+          enabled: true,
+        ),
+        const SizedBox(height: 16),
 
-    // Remove non-standard characters and Unicode control chars
-    cleaned = cleaned.replaceAll(
-      RegExp(r'[\u0080-\u009F\u200B-\u200F\u2028-\u202F\uFEFF]'),
-      '',
+        // System prompt field
+        _buildTextField(
+          label: 'System Prompt',
+          controller: _systemPromptController,
+          enabled: true,
+          maxLines: 15,
+        ),
+
+        const SizedBox(height: 24),
+
+        // Cancel button
+        Center(
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                _isEditing = false;
+              });
+            },
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                color: AppTheme.silverMist.withOpacity(0.8),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
-
-    // Replace "ã" characters often seen in "Immortalityã" with nothing
-    cleaned = cleaned.replaceAll('ã', '');
-
-    // Replace common malformed patterns
-    cleaned = cleaned.replaceAll(
-      'If Given Immortalityï¿½:',
-      'AI Instructions:',
-    );
-    cleaned = cleaned.replaceAll('If Given Immortality:', 'AI Instructions:');
-
-    return cleaned;
   }
 
-  // Helper to remove all separator lines from a string
-  String _removeAllSeparatorLines(String text) {
-    // Define a pattern for separator lines
-    final separatorPattern = RegExp(r'^[-_*=]{3,}$');
-
-    // Split the text into lines, filter out the separators, and join back
-    final lines = text.split('\n');
-    final filteredLines =
-        lines.where((line) {
-          final trimmed = line.trim();
-          return trimmed.isEmpty || !separatorPattern.hasMatch(trimmed);
-        }).toList();
-
-    return filteredLines.join('\n');
+  Widget _buildReinterviewButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.midnightPurple.withOpacity(0.7),
+            AppTheme.deepNavy.withOpacity(0.9),
+          ],
+        ),
+        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _startReinterview,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.edit_note, color: AppTheme.warmGold, size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  'Recreate Character Through Interview',
+                  style: TextStyle(
+                    color: AppTheme.silverMist,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // Show character card info dialog with AI-structured information
@@ -1060,7 +1139,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     print('Showing character card info for: ${_character!.name}');
 
     // Parse the system prompt to detect headings and sections
-    final parsedSections = _parseSystemPromptSections(_character!.systemPrompt);
+    final parsedSections = _parseSystemPrompt(_character!.systemPrompt);
 
     showDialog(
       context: context,
@@ -1070,7 +1149,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: _character!.accentColor.withOpacity(0.3),
+                color: AppTheme.warmGold.withOpacity(0.3),
                 width: 1,
               ),
             ),
@@ -1079,17 +1158,18 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 Expanded(
                   child: Text(
                     'Character Card: ${_character!.name}',
-                    style: TextStyle(
-                      color: Colors.white,
+                    style: GoogleFonts.cinzel(
+                      color: AppTheme.warmGold,
                       fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.content_copy,
                     size: 20,
-                    color: Colors.white70,
+                    color: AppTheme.warmGold,
                   ),
                   onPressed: () {
                     _copyFullCharacterCard();
@@ -1132,7 +1212,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Container(
                         height: 1,
-                        color: _character!.accentColor.withOpacity(0.3),
+                        color: AppTheme.warmGold.withOpacity(0.3),
                       ),
                     ),
 
@@ -1210,7 +1290,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Container(
                         height: 1,
-                        color: _character!.accentColor.withOpacity(0.3),
+                        color: AppTheme.warmGold.withOpacity(0.3),
                       ),
                     ),
 
@@ -1255,10 +1335,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       children: [
         Text(
           title,
-          style: TextStyle(
-            color: _character!.accentColor,
+          style: GoogleFonts.cinzel(
+            color: AppTheme.warmGold,
             fontWeight: FontWeight.bold,
             fontSize: 18,
+            letterSpacing: 1.5,
           ),
         ),
         const SizedBox(height: 8),
@@ -1281,9 +1362,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black26,
+        color: AppTheme.midnightPurple.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white24, width: 1),
+        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1292,7 +1373,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             Text(
               label,
               style: TextStyle(
-                color: Colors.white70,
+                color: AppTheme.silverMist.withOpacity(0.7),
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -1303,17 +1384,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.2),
+                color: AppTheme.midnightPurple.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: accentColor.withOpacity(0.3),
+                  color: AppTheme.warmGold.withOpacity(0.3),
                   width: 1,
                 ),
               ),
               child: Text(
                 value,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.silverMist,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   letterSpacing: 0.5,
@@ -1324,7 +1405,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             SelectableText(
               value,
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.silverMist,
                 fontSize: isMultiline ? 14 : 15,
                 height: isMultiline ? 1.5 : 1.2,
               ),
@@ -1370,7 +1451,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: _character!.accentColor.withOpacity(0.3),
+            color: AppTheme.warmGold.withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1392,7 +1473,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
-          foregroundColor: Colors.white,
+          foregroundColor: AppTheme.silverMist,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

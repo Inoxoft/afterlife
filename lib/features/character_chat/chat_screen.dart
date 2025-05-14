@@ -6,6 +6,7 @@ import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_profile/character_profile_screen.dart';
 import 'chat_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -292,15 +293,22 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: _character!.accentColor.withOpacity(0.3),
+            backgroundColor: AppTheme.midnightPurple.withOpacity(0.7),
             child: Text(
               _character!.name.isNotEmpty
                   ? _character!.name[0].toUpperCase()
                   : '?',
               style: TextStyle(
-                color: _character!.accentColor,
+                color: AppTheme.warmGold,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                shadows: [
+                  Shadow(
+                    color: AppTheme.warmGold.withOpacity(0.5),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
             ),
           ),
@@ -320,7 +328,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                 Text(
                   'Your Digital Twin',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white60,
+                    color: AppTheme.silverMist.withOpacity(0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -334,11 +342,15 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: Colors.black12,
+            color: AppTheme.midnightPurple.withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppTheme.warmGold.withOpacity(0.3),
+              width: 0.5,
+            ),
           ),
           child: IconButton(
-            icon: const Icon(Icons.person_outline, color: Colors.white70),
+            icon: Icon(Icons.person_outline, color: AppTheme.silverMist),
             tooltip: 'View Profile',
             onPressed: () => _navigateToProfile(),
           ),
@@ -348,11 +360,15 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: Colors.black12,
+            color: AppTheme.midnightPurple.withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppTheme.warmGold.withOpacity(0.3),
+              width: 0.5,
+            ),
           ),
           child: IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.white70),
+            icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
             tooltip: 'Clear Chat',
             onPressed: _showClearChatDialog,
           ),
@@ -417,7 +433,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: AppTheme.deepIndigo.withOpacity(0.7),
+        color: AppTheme.midnightPurple.withOpacity(0.7),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
@@ -434,16 +450,21 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black26,
+                  color: AppTheme.midnightPurple.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(25.0),
-                  border: Border.all(color: Colors.white10, width: 1),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                    width: 1,
+                  ),
                 ),
                 child: TextField(
                   controller: _messageController,
                   focusNode: _inputFocusNode,
                   decoration: InputDecoration(
                     hintText: 'Type your message...',
-                    hintStyle: const TextStyle(color: Colors.white60),
+                    hintStyle: TextStyle(
+                      color: AppTheme.silverMist.withOpacity(0.6),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
@@ -455,11 +476,11 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                     ),
                     prefixIcon: Icon(
                       Icons.chat_bubble_outline,
-                      color: AppTheme.etherealCyan.withOpacity(0.5),
+                      color: AppTheme.warmGold.withOpacity(0.5),
                       size: 18,
                     ),
                   ),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: AppTheme.silverMist),
                   minLines: 1,
                   maxLines: 5,
                   onSubmitted:
@@ -498,22 +519,39 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Clear Chat History'),
-            content: const Text(
-              'This will delete all messages in this conversation. This action cannot be undone.',
+            title: Text(
+              'Clear Chat History',
+              style: GoogleFonts.cinzel(
+                color: AppTheme.warmGold,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            backgroundColor: AppTheme.deepIndigo,
+            content: Text(
+              'This will delete all messages in this conversation. This action cannot be undone.',
+              style: TextStyle(color: AppTheme.silverMist),
+            ),
+            backgroundColor: AppTheme.midnightPurple,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withOpacity(0.3),
+                width: 1,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
               ),
               TextButton(
                 onPressed: () => _clearChatHistory(context),
-                child: const Text('Clear'),
+                child: Text(
+                  'Clear',
+                  style: TextStyle(color: AppTheme.warmGold),
+                ),
               ),
             ],
           ),
@@ -591,8 +629,8 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleColor =
         isUser
-            ? AppTheme.accentPurple.withOpacity(0.6)
-            : Colors.black.withOpacity(0.4);
+            ? AppTheme.midnightPurple.withOpacity(0.6)
+            : AppTheme.midnightPurple.withOpacity(0.5);
     final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
 
     // Check if message is very long (over 1000 characters)
@@ -636,8 +674,8 @@ class _MessageBubble extends StatelessWidget {
                 border: Border.all(
                   color:
                       isUser
-                          ? AppTheme.accentPurple.withOpacity(0.7)
-                          : AppTheme.etherealCyan.withOpacity(0.5),
+                          ? AppTheme.warmGold.withOpacity(0.5)
+                          : AppTheme.warmGold.withOpacity(0.4),
                   width: 1,
                 ),
                 boxShadow: [
@@ -669,12 +707,12 @@ class _MessageBubble extends StatelessWidget {
       radius: 16,
       backgroundColor:
           isUser
-              ? AppTheme.accentPurple.withOpacity(0.8)
-              : AppTheme.etherealCyan.withOpacity(0.8),
+              ? AppTheme.midnightPurple.withOpacity(0.8)
+              : AppTheme.midnightPurple.withOpacity(0.8),
       child: Text(
         isUser ? 'You' : 'AI',
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: AppTheme.warmGold,
           fontWeight: FontWeight.bold,
           fontSize: 10,
         ),
@@ -686,8 +724,8 @@ class _MessageBubble extends StatelessWidget {
   Widget _buildMessageText() {
     return Text(
       message,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: AppTheme.silverMist,
         height: 1.4, // Improve line spacing
       ),
       softWrap: true, // Ensure text wraps properly
@@ -711,14 +749,12 @@ class _SendButton extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color:
-            isLoading
-                ? AppTheme.etherealCyan.withOpacity(0.3)
-                : AppTheme.etherealCyan,
+            isLoading ? AppTheme.warmGold.withOpacity(0.3) : AppTheme.warmGold,
         shape: BoxShape.circle,
         boxShadow: [
           if (!isLoading)
             BoxShadow(
-              color: AppTheme.etherealCyan.withOpacity(0.3),
+              color: AppTheme.warmGold.withOpacity(0.3),
               blurRadius: 8,
               spreadRadius: 1,
             ),
@@ -732,10 +768,10 @@ class _SendButton extends StatelessWidget {
           },
           child:
               isLoading
-                  ? const Icon(
+                  ? Icon(
                     Icons.hourglass_top,
                     key: ValueKey('loading'),
-                    color: Colors.white60,
+                    color: AppTheme.silverMist.withOpacity(0.6),
                   )
                   : const Icon(
                     Icons.send,

@@ -213,7 +213,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppTheme.cosmicBlack.withOpacity(0.7),
+          color: AppTheme.midnightPurple.withOpacity(0.7),
           border: Border(
             top: BorderSide(
               color: AppTheme.warmGold.withOpacity(0.3),
@@ -222,7 +222,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: AppTheme.deepNavy.withOpacity(0.3),
               blurRadius: 10,
               spreadRadius: 0,
               offset: const Offset(0, -2),
@@ -414,7 +414,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.deepSpaceNavy.withOpacity(0.3),
+                color: AppTheme.midnightPurple.withOpacity(0.3),
                 border: Border.all(
                   color: AppTheme.warmGold.withOpacity(0.3),
                   width: 1,
@@ -442,7 +442,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               style: GoogleFonts.cinzel(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.9),
+                color: AppTheme.silverMist,
                 letterSpacing: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -473,7 +473,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     gradient: LinearGradient(
                       colors: [
                         AppTheme.warmGold.withOpacity(0.8),
-                        AppTheme.gentlePurple.withOpacity(0.8),
+                        AppTheme.midnightPurple.withOpacity(0.8),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(24),
@@ -485,7 +485,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                       ),
                     ],
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: AppTheme.silverMist.withOpacity(0.3),
                       width: 0.5,
                     ),
                   ),
@@ -495,7 +495,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                       Icon(
                         Icons.add,
                         size: 20,
-                        color: Colors.white.withOpacity(0.9),
+                        color: AppTheme.silverMist.withOpacity(0.9),
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -503,7 +503,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                         style: GoogleFonts.cinzel(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: AppTheme.silverMist,
                           letterSpacing: 1.5,
                         ),
                       ),
@@ -612,8 +612,16 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
     return GestureDetector(
       onTap: () => _navigateToProfile(context),
       child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovering = true),
-        onExit: (_) => setState(() => _isHovering = false),
+        onEnter:
+            (_) => setState(() {
+              _isHovering = true;
+              _controller.forward();
+            }),
+        onExit:
+            (_) => setState(() {
+              _isHovering = false;
+              _controller.reverse();
+            }),
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
@@ -628,7 +636,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppTheme.deepNavy, AppTheme.deepIndigo],
+                        colors: [AppTheme.midnightPurple, AppTheme.deepNavy],
                       ),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
@@ -636,7 +644,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           color:
                               _isHovering
                                   ? accentColor.withOpacity(0.6)
-                                  : AppTheme.deepIndigo.withOpacity(0.3),
+                                  : AppTheme.midnightPurple.withOpacity(0.3),
                           blurRadius: _isHovering ? 15 : 8,
                           spreadRadius: _isHovering ? 2 : 0,
                           offset: Offset(0, 5 * _glowAnimation.value),
@@ -646,7 +654,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         color:
                             _isHovering
                                 ? accentColor.withOpacity(0.7)
-                                : AppTheme.accentPurple.withOpacity(0.3),
+                                : accentColor.withOpacity(0.3),
                         width: 1.5,
                       ),
                     ),
@@ -724,7 +732,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                                 radius: 1.2,
                                 colors: [
                                   Colors.transparent,
-                                  AppTheme.cosmicBlack.withOpacity(0.4),
+                                  AppTheme.deepNavy.withOpacity(0.4),
                                 ],
                                 stops: const [0.6, 1.0],
                               ),
@@ -764,8 +772,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                          Colors.black.withOpacity(0.9),
+                          AppTheme.deepNavy.withOpacity(0.7),
+                          AppTheme.deepNavy.withOpacity(0.9),
                         ],
                         stops: const [0.6, 0.85, 1.0],
                       ),
@@ -789,8 +797,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           style: AppTheme.twinNameStyle.copyWith(
                             shadows: [
                               Shadow(
-                                color: Colors.black.withOpacity(0.7),
-                                blurRadius: 3,
+                                color: AppTheme.warmGold.withOpacity(0.5),
+                                blurRadius: 4,
                                 offset: const Offset(0, 1),
                               ),
                             ],
@@ -812,8 +820,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                               style: AppTheme.metadataStyle.copyWith(
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black.withOpacity(0.7),
-                                    blurRadius: 3,
+                                    color: AppTheme.warmGold.withOpacity(0.5),
+                                    blurRadius: 4,
                                     offset: const Offset(0, 1),
                                   ),
                                 ],
@@ -831,17 +839,17 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.2),
+                            color: AppTheme.warmGold.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: accentColor.withOpacity(0.4),
+                              color: AppTheme.warmGold.withOpacity(0.4),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             widget.profession,
                             style: TextStyle(
-                              color: accentColor,
+                              color: AppTheme.warmGold,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
@@ -865,11 +873,11 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.etherealCyan.withOpacity(0.9),
+                        color: AppTheme.warmGold.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: AppTheme.deepNavy.withOpacity(0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -880,14 +888,14 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         children: [
                           Icon(
                             Icons.arrow_forward,
-                            color: Colors.black.withOpacity(0.7),
+                            color: AppTheme.midnightPurple.withOpacity(0.9),
                             size: 14,
                           ),
                           const SizedBox(width: 4),
-                          const Text(
+                          Text(
                             'View',
                             style: TextStyle(
-                              color: Colors.black87,
+                              color: AppTheme.midnightPurple,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -1112,26 +1120,32 @@ class _CharacterCardState extends State<_CharacterCard>
       context: context,
       builder:
           (context) => AlertDialog(
-            backgroundColor: AppTheme.backgroundStart,
+            backgroundColor: AppTheme.midnightPurple,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: _accentColor.withOpacity(0.3), width: 1),
+              side: BorderSide(
+                color: AppTheme.warmGold.withOpacity(0.3),
+                width: 1,
+              ),
             ),
             title: Text(
               'Delete Character',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.silverMist,
                 fontWeight: FontWeight.bold,
               ),
             ),
             content: Text(
               'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppTheme.silverMist.withOpacity(0.7)),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist.withOpacity(0.7)),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -1168,7 +1182,7 @@ class _CharacterCardState extends State<_CharacterCard>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: _accentColor.withOpacity(
+                    color: AppTheme.warmGold.withOpacity(
                       0.2 + _glowAnimation.value * 0.1,
                     ),
                     blurRadius: 8 + _glowAnimation.value * 4,
@@ -1202,8 +1216,8 @@ class _CharacterCardState extends State<_CharacterCard>
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              AppTheme.deepNavy.withOpacity(0.3),
-                              AppTheme.cosmicBlack.withOpacity(0.85),
+                              AppTheme.midnightPurple.withOpacity(0.3),
+                              AppTheme.deepNavy.withOpacity(0.85),
                             ],
                             stops: const [0.5, 1.0],
                           ),
@@ -1220,12 +1234,16 @@ class _CharacterCardState extends State<_CharacterCard>
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.black54,
+                            color: AppTheme.midnightPurple.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppTheme.warmGold.withOpacity(0.3),
+                              width: 0.5,
+                            ),
                           ),
                           child: Icon(
                             Icons.delete_outline,
-                            color: Colors.white70,
+                            color: AppTheme.silverMist,
                             size: 20,
                           ),
                         ),
@@ -1246,10 +1264,17 @@ class _CharacterCardState extends State<_CharacterCard>
                             Text(
                               widget.character.name,
                               style: GoogleFonts.spaceMono(
-                                color: Colors.white,
+                                color: AppTheme.silverMist,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
+                                shadows: [
+                                  Shadow(
+                                    color: AppTheme.warmGold.withOpacity(0.5),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -1280,11 +1305,14 @@ class _CharacterCardState extends State<_CharacterCard>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [_accentColor.withOpacity(0.3), AppTheme.deepSpaceNavy],
+              colors: [
+                AppTheme.warmGold.withOpacity(0.3),
+                AppTheme.midnightPurple,
+              ],
             ),
           ),
           child: CustomPaint(
-            painter: GeometricBackgroundPainter(color: _accentColor),
+            painter: GeometricBackgroundPainter(color: AppTheme.warmGold),
           ),
         );
       case 1:
@@ -1313,7 +1341,7 @@ class _CharacterCardState extends State<_CharacterCard>
             ),
           ),
           child: CustomPaint(
-            painter: NeuralBackgroundPainter(lineColor: _accentColor),
+            painter: NeuralBackgroundPainter(lineColor: AppTheme.warmGold),
           ),
         );
       case 3:
@@ -1330,7 +1358,7 @@ class _CharacterCardState extends State<_CharacterCard>
           ),
           child: CustomPaint(
             painter: WaveBackgroundPainter(
-              waveColor: _accentColor.withOpacity(0.5),
+              waveColor: AppTheme.warmGold.withOpacity(0.5),
             ),
           ),
         );
@@ -1344,7 +1372,7 @@ class _CharacterCardState extends State<_CharacterCard>
             ),
           ),
           child: CustomPaint(
-            painter: DigitalBackgroundPainter(lineColor: _accentColor),
+            painter: DigitalBackgroundPainter(lineColor: AppTheme.warmGold),
           ),
         );
       default:
@@ -1357,7 +1385,7 @@ class _CharacterCardState extends State<_CharacterCard>
             ),
           ),
           child: CustomPaint(
-            painter: LightBackgroundPainter(lightColor: _accentColor),
+            painter: LightBackgroundPainter(lightColor: AppTheme.warmGold),
           ),
         );
     }
@@ -1979,9 +2007,9 @@ class ScanLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.black.withOpacity(lineOpacity)
+          ..color = AppTheme.midnightPurple.withOpacity(lineOpacity)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0;
+          ..strokeWidth = 0.5;
 
     // Draw horizontal scan lines
     for (double y = 0; y < size.height; y += lineSpacing) {
@@ -1991,7 +2019,7 @@ class ScanLinePainter extends CustomPainter {
     // Add some faint vertical distortion lines occasionally
     final distortionPaint =
         Paint()
-          ..color = Colors.white.withOpacity(lineOpacity * 0.5)
+          ..color = AppTheme.warmGold.withOpacity(lineOpacity * 0.3)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 0.5;
 
@@ -2014,10 +2042,13 @@ class ScanLinePainter extends CustomPainter {
 class StarfieldPainter extends CustomPainter {
   final int starCount;
   final List<_Star> _stars = [];
-  final Paint _starPaint = Paint()..color = Colors.white;
-
-  // Fixed random for consistent rendering
   final Random _random = Random(42);
+  final Paint _goldStarPaint =
+      Paint()..color = AppTheme.warmGold.withOpacity(0.8);
+  final Paint _purpleStarPaint =
+      Paint()..color = AppTheme.gentlePurple.withOpacity(0.6);
+  final Paint _silverStarPaint =
+      Paint()..color = AppTheme.silverMist.withOpacity(0.7);
 
   StarfieldPainter({this.starCount = 100}) {
     // Pre-generate stars only once for performance
@@ -2026,12 +2057,25 @@ class StarfieldPainter extends CustomPainter {
 
   void _generateStars() {
     for (int i = 0; i < starCount; i++) {
+      final starType = _random.nextInt(10); // 0-9 random value for star type
+      final Color starColor;
+
+      // Distribute colors: 20% gold, 30% purple, 50% silver
+      if (starType < 2) {
+        starColor = AppTheme.warmGold;
+      } else if (starType < 5) {
+        starColor = AppTheme.gentlePurple;
+      } else {
+        starColor = AppTheme.silverMist;
+      }
+
       _stars.add(
         _Star(
           x: _random.nextDouble(),
           y: _random.nextDouble(),
           size: _random.nextDouble() * 2 + 0.5,
           opacity: _random.nextDouble() * 0.7 + 0.3,
+          color: starColor,
         ),
       );
     }
@@ -2042,8 +2086,21 @@ class StarfieldPainter extends CustomPainter {
     for (final star in _stars) {
       final x = star.x * size.width;
       final y = star.y * size.height;
-      _starPaint.color = Colors.white.withOpacity(star.opacity);
-      canvas.drawCircle(Offset(x, y), star.size, _starPaint);
+
+      final Paint starPaint =
+          Paint()..color = star.color.withOpacity(star.opacity);
+
+      canvas.drawCircle(Offset(x, y), star.size, starPaint);
+
+      // Add subtle glow to larger stars
+      if (star.size > 1.2) {
+        final glowPaint =
+            Paint()
+              ..color = star.color.withOpacity(star.opacity * 0.3)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+
+        canvas.drawCircle(Offset(x, y), star.size * 2, glowPaint);
+      }
     }
   }
 
@@ -2056,11 +2113,13 @@ class _Star {
   final double y;
   final double size;
   final double opacity;
+  final Color color;
 
   _Star({
     required this.x,
     required this.y,
     required this.size,
     required this.opacity,
+    required this.color,
   });
 }

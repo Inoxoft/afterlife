@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../character_gallery/character_gallery_screen.dart';
@@ -24,6 +25,7 @@ class _SplashScreenState extends State<SplashScreen>
   double _loadingProgress = 0.0;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  late Animation<double> _fadeInAnimation;
 
   // Cache widgets for performance
   late final Widget _backgroundParticles = const RepaintBoundary(
@@ -50,6 +52,14 @@ class _SplashScreenState extends State<SplashScreen>
 
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    // Create fade-in animation
+    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      ),
     );
 
     // Start initialization sequence
@@ -199,102 +209,125 @@ class _SplashScreenState extends State<SplashScreen>
 
             // Main content
             Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // App logo/icon
-                  AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _pulseAnimation.value,
-                        child: Container(
-                          width: 120,
-                          height: 180,
-                          decoration: BoxDecoration(
-                            color: AppTheme.etherealCyan.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.etherealCyan.withOpacity(0.5),
-                                blurRadius: 20,
-                                spreadRadius: 5,
+              child: FadeTransition(
+                opacity: _fadeInAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // App logo/icon
+                    AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _pulseAnimation.value,
+                          child: Container(
+                            width: 130,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  AppTheme.midnightPurple,
+                                  AppTheme.deepNavy,
+                                ],
+                                radius: 0.7,
                               ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.psychology_alt,
-                              size: 60,
-                              color: Colors.white.withOpacity(0.9),
+                              border: Border.all(
+                                color: AppTheme.warmGold.withOpacity(0.7),
+                                width: 3,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.warmGold.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  spreadRadius: 3,
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Image.asset(
+                                  'assets/images/afterlife_icon.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 60),
-
-                  // App title
-                  const Text(
-                    'AFTERLIFE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 8,
+                        );
+                      },
                     ),
-                  ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 60),
 
-                  // Subtitle
-                  Text(
-                    'PRESERVED CONSCIOUSNESS',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                      letterSpacing: 2,
+                    // App title
+                    Text(
+                      'AFTERLIFE',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 8,
+                        color: AppTheme.silverMist,
+                        shadows: [
+                          Shadow(
+                            color: AppTheme.warmGold.withOpacity(0.5),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 80),
+                    const SizedBox(height: 12),
 
-                  // Loading status & progress
-                  SizedBox(
-                    width: 240,
-                    child: Column(
-                      children: [
-                        // Loading bar
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: _loadingProgress,
-                            backgroundColor: Colors.black.withOpacity(0.3),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppTheme.etherealCyan,
+                    // Subtitle
+                    Text(
+                      'PRESERVED CONSCIOUSNESS',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 14,
+                        letterSpacing: 2,
+                        color: AppTheme.silverMist.withOpacity(0.7),
+                      ),
+                    ),
+
+                    const SizedBox(height: 80),
+
+                    // Loading status & progress
+                    SizedBox(
+                      width: 240,
+                      child: Column(
+                        children: [
+                          // Loading bar
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _loadingProgress,
+                              backgroundColor: AppTheme.midnightPurple
+                                  .withOpacity(0.3),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.warmGold,
+                              ),
+                              minHeight: 4,
                             ),
-                            minHeight: 4,
                           ),
-                        ),
 
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // Status message
-                        Text(
-                          _statusMessage,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 12,
-                            letterSpacing: 1,
+                          // Status message
+                          Text(
+                            _statusMessage,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 12,
+                              letterSpacing: 1,
+                              color: AppTheme.silverMist.withOpacity(0.8),
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -310,7 +343,7 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.teal.withOpacity(0.15)
+          ..color = AppTheme.warmGold.withOpacity(0.08)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;
 
