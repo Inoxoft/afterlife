@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Preserved Consciousness</b><br>
-  Connect with digital twins of historical figures through the power of AI
+  Talk to the dead. Or just back up your weird uncle.
 </p>
 
 <p align="center">
@@ -19,7 +19,7 @@
 
 Afterlife lets you build lifelike conversational agents from real humans — living or gone. Feed it documents, diaries, emails, transcripts, or just interview someone. Then it builds a portable, flexible digital twin you can talk to. 
 
-> **Talk to the dead. Or just back up your weird uncle.**
+> ****
 
 ## 🎭 The Concept of Masks
 
