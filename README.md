@@ -37,7 +37,7 @@ This approach allows for a respectful and engaging way to explore history and th
 
 ## 📱 Screenshots
 
-<here will be gifs from mobile and tablet mode>
+here I'll place gifs from mobile and tablet 
 
 
 ## 🌟 Features
