@@ -17,9 +17,9 @@
 
 ## ✨ Overview
 
-Afterlife is a cutting-edge Flutter application that enables you to interact with digital recreations of historical figures and create your own AI twins. The app leverages advanced large language models through OpenRouter to provide immersive and historically accurate conversations.
+Afterlife lets you build lifelike conversational agents from real humans — living or gone. Feed it documents, diaries, emails, transcripts, or just interview someone. Then it builds a portable, flexible digital twin you can talk to. 
 
-> **"The boundaries between history and the present dissolve in Afterlife."**
+> **Talk to the dead. Or just back up your weird uncle.**
 
 ## 🎭 The Concept of Masks
 
