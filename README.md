@@ -37,10 +37,7 @@ This approach allows for a respectful and engaging way to explore history and th
 
 ## 📱 Screenshots
 
-
-
-https://github.com/user-attachments/assets/56ef9bcb-1f84-4245-993b-b480ab5c46ed
-
+<here will be gifs from mobile and tablet mode>
 
 
 ## 🌟 Features
