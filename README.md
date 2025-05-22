@@ -19,8 +19,6 @@
 
 Afterlife lets you build lifelike conversational agents from real humans — living or gone. Feed it documents, diaries, emails, transcripts, or just interview someone. Then it builds a portable, flexible digital twin you can talk to. 
 
-> ****
-
 ## 🎭 The Concept of Masks
 
 <p align="center">
