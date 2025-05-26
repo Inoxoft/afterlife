@@ -3,6 +3,9 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../chat/models/chat_message.dart';
+import '../chat/widgets/chat_message_bubble.dart';
 
 class FamousCharacterChatScreen extends StatefulWidget {
   final String characterName;
@@ -420,23 +423,26 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.chat_bubble_outline,
                 size: 48,
-                color: Colors.white54,
+                color: AppTheme.silverMist.withOpacity(0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 'Start chatting with ${widget.characterName}',
-                style: const TextStyle(fontSize: 18, color: Colors.white70),
+                style: GoogleFonts.lato(
+                  fontSize: 18,
+                  color: AppTheme.silverMist.withOpacity(0.8),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 'Send a message below to begin the conversation',
-                style: TextStyle(
+                style: GoogleFonts.lato(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.5),
+                  color: AppTheme.silverMist.withOpacity(0.5),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -448,14 +454,19 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: _messages.length,
       itemBuilder: (context, index) {
         final message = _messages[index];
-        return _MessageBubble(
-          key: ValueKey('msg_${index}_${message['isUser']}'),
-          message: message['content'] as String,
-          isUser: message['isUser'] as bool,
+        return ChatMessageBubble(
+          message: ChatMessage(
+            content: message['content'] as String,
+            isUser: message['isUser'] as bool,
+            timestamp: DateTime.parse(message['timestamp'] as String),
+          ),
+          showAvatar: true,
+          avatarText: message['isUser'] as bool ? 'You' : widget.characterName[0].toUpperCase(),
+          avatarIcon: message['isUser'] as bool ? Icons.person : null,
         );
       },
     );
@@ -464,78 +475,67 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   // Extract input area to a separate method for readability and performance
   Widget _buildInputArea() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.deepIndigo.withOpacity(0.7),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, -1),
-            blurRadius: 6.0,
-            spreadRadius: 0.0,
-            color: Colors.black.withOpacity(0.1),
+        color: AppTheme.midnightPurple.withOpacity(0.3),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.warmGold.withOpacity(0.3),
+            width: 1,
           ),
-        ],
+        ),
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(25.0),
-                  border: Border.all(color: Colors.white10, width: 1),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              focusNode: _inputFocusNode,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                hintText: 'Type your message...',
+                hintStyle: TextStyle(
+                  color: AppTheme.silverMist.withOpacity(0.5),
                 ),
-                child: TextField(
-                  controller: _messageController,
-                  focusNode: _inputFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Type your message...',
-                    hintStyle: const TextStyle(color: Colors.white60),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: false,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 14.0,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.chat_bubble_outline,
-                      color: AppTheme.etherealCyan.withOpacity(0.5),
-                      size: 18,
-                    ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withOpacity(0.3),
                   ),
-                  style: const TextStyle(color: Colors.white),
-                  minLines: 1,
-                  maxLines: 5,
-                  onSubmitted:
-                      _isLoading
-                          ? null
-                          : (text) {
-                            if (text.trim().isNotEmpty) {
-                              _sendMessage();
-                            }
-                          },
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withOpacity(0.3),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
                 ),
               ),
+              onSubmitted: (_) => _sendMessage(),
             ),
-            const SizedBox(width: 12.0),
-            _SendButton(
-              isLoading: _isLoading,
-              onPressed:
-                  _isLoading
-                      ? null
-                      : () {
-                        if (_messageController.text.trim().isNotEmpty) {
-                          _sendMessage();
-                        }
-                      },
+          ),
+          const SizedBox(width: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.warmGold,
+              borderRadius: BorderRadius.circular(25),
             ),
-          ],
-        ),
+            child: IconButton(
+              icon: const Icon(Icons.send),
+              color: AppTheme.midnightPurple,
+              onPressed: _sendMessage,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../../core/utils/env_config.dart';
 import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
 import '../character_interview/chat_service.dart' as character_interview;
+import '../developer_chat/developer_chat_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -295,6 +296,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 16),
+
+                    // Developer Chat section
+                    _buildSectionHeader('Developer Connection'),
+                    _buildSettingCard(
+                      title: 'Chat with Developer',
+                      subtitle: 'Get direct assistance and share feedback about the app',
+                      icon: Icons.developer_mode,
+                      onTap: () => _navigateToDeveloperChat(context),
+                    ),
                   ],
                 ),
               ),
@@ -543,5 +555,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
+  }
+
+  void _navigateToDeveloperChat(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeveloperChatScreen(),
+      ),
+    );
   }
 }

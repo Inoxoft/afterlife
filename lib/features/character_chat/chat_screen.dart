@@ -7,6 +7,8 @@ import '../providers/characters_provider.dart';
 import '../character_profile/character_profile_screen.dart';
 import 'chat_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../chat/models/chat_message.dart';
+import '../chat/widgets/chat_message_bubble.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -387,23 +389,26 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.chat_bubble_outline,
                 size: 48,
-                color: Colors.white54,
+                color: AppTheme.silverMist.withOpacity(0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 'Start chatting with ${_character!.name}',
-                style: const TextStyle(fontSize: 18, color: Colors.white70),
+                style: GoogleFonts.lato(
+                  fontSize: 18,
+                  color: AppTheme.silverMist.withOpacity(0.8),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 'Send a message below to begin the conversation',
-                style: TextStyle(
+                style: GoogleFonts.lato(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.5),
+                  color: AppTheme.silverMist.withOpacity(0.5),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -415,14 +420,19 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: _character!.chatHistory.length,
       itemBuilder: (context, index) {
         final message = _character!.chatHistory[index];
-        return _MessageBubble(
-          key: ValueKey('msg_${index}_${message['isUser']}'),
-          message: message['content'] as String,
-          isUser: message['isUser'] as bool,
+        return ChatMessageBubble(
+          message: ChatMessage(
+            content: message['content'] as String,
+            isUser: message['isUser'] as bool,
+            timestamp: DateTime.now(), // TODO: Add actual timestamp to messages
+          ),
+          showAvatar: true,
+          avatarText: message['isUser'] as bool ? 'You' : _character!.name[0].toUpperCase(),
+          avatarIcon: message['isUser'] as bool ? Icons.person : null,
         );
       },
     );
@@ -431,83 +441,67 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   // Extract input area to a separate method for readability and performance
   Widget _buildInputArea() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.7),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, -1),
-            blurRadius: 6.0,
-            spreadRadius: 0.0,
-            color: Colors.black.withOpacity(0.1),
+        color: AppTheme.midnightPurple.withOpacity(0.3),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.warmGold.withOpacity(0.3),
+            width: 1,
           ),
-        ],
+        ),
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(25.0),
-                  border: Border.all(
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              focusNode: _inputFocusNode,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                hintText: 'Type your message...',
+                hintStyle: TextStyle(
+                  color: AppTheme.silverMist.withOpacity(0.5),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
                     color: AppTheme.warmGold.withOpacity(0.3),
-                    width: 1,
                   ),
                 ),
-                child: TextField(
-                  controller: _messageController,
-                  focusNode: _inputFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Type your message...',
-                    hintStyle: TextStyle(
-                      color: AppTheme.silverMist.withOpacity(0.6),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: false,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 14.0,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.chat_bubble_outline,
-                      color: AppTheme.warmGold.withOpacity(0.5),
-                      size: 18,
-                    ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withOpacity(0.3),
                   ),
-                  style: TextStyle(color: AppTheme.silverMist),
-                  minLines: 1,
-                  maxLines: 5,
-                  onSubmitted:
-                      _isLoading
-                          ? null
-                          : (text) {
-                            if (text.trim().isNotEmpty) {
-                              _sendMessage();
-                            }
-                          },
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
                 ),
               ),
+              onSubmitted: (_) => _sendMessage(),
             ),
-            const SizedBox(width: 12.0),
-            _SendButton(
-              isLoading: _isLoading,
-              onPressed:
-                  _isLoading
-                      ? null
-                      : () {
-                        if (_messageController.text.trim().isNotEmpty) {
-                          _sendMessage();
-                        }
-                      },
+          ),
+          const SizedBox(width: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.warmGold,
+              borderRadius: BorderRadius.circular(25),
             ),
-          ],
-        ),
+            child: IconButton(
+              icon: const Icon(Icons.send),
+              color: AppTheme.midnightPurple,
+              onPressed: _sendMessage,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -640,7 +634,9 @@ class _MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // AI avatar (only shown for AI messages)

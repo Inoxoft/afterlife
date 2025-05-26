@@ -2,12 +2,22 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' show pi, cos, sin, atan2, sqrt;
+import '../../../features/developer_chat/developer_chat_screen.dart';
 
 class ExplorePage extends StatelessWidget {
   final AnimationController animationController;
 
   const ExplorePage({Key? key, required this.animationController})
     : super(key: key);
+
+  void _navigateToDeveloperChat(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeveloperChatScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -244,15 +254,7 @@ class ExplorePage extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             ElevatedButton(
-                              onPressed: () {
-                                // This is just a placeholder button for now
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Developer twin coming soon'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
+                              onPressed: () => _navigateToDeveloperChat(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.midnightPurple,
                                 foregroundColor: AppTheme.warmGold,
