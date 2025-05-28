@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/characters_provider.dart';
+import '../providers/language_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'themed_icon.dart';
 import '../../core/widgets/api_key_input_dialog.dart';
@@ -11,6 +12,7 @@ import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
 import '../character_interview/chat_service.dart' as character_interview;
 import '../developer_chat/developer_chat_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -71,6 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
@@ -110,12 +113,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Settings',
+                            localizations.settings,
                             style: AppTheme.titleStyle.copyWith(fontSize: 28),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Customize your Afterlife experience',
+                            localizations.settingsDescription,
                             style: AppTheme.captionStyle,
                           ),
                         ],
@@ -130,11 +133,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     // Appearance section
-                    _buildSectionHeader('Appearance'),
+                    _buildSectionHeader(localizations.appearance),
+                    
+                    // Language selection
+                    Consumer<LanguageProvider>(
+                      builder: (context, languageProvider, child) {
+                        return _buildSettingCard(
+                          title: localizations.language,
+                          subtitle: localizations.languageDescription,
+                          icon: Icons.language,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                languageProvider.currentLanguageName,
+                                style: TextStyle(
+                                  color: AppTheme.silverMist,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                color: AppTheme.silverMist,
+                                size: 16,
+                              ),
+                            ],
+                          ),
+                          onTap: () => _showLanguageSelectionDialog(context),
+                        );
+                      },
+                    ),
+                    
                     _buildSettingCard(
-                      title: 'Dark Mode',
-                      subtitle:
-                          'Enhance your viewing experience in low light conditions(soon)',
+                      title: localizations.darkMode,
+                      subtitle: localizations.darkModeDescription,
                       icon: Icons.dark_mode,
                       trailing: Switch(
                         value: _isDarkModeEnabled,
@@ -150,8 +183,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
 
                     _buildSettingCard(
-                      title: 'Chat Font Size',
-                      subtitle: 'Adjust the text size in chat conversations',
+                      title: localizations.chatFontSize,
+                      subtitle: localizations.chatFontSizeDescription,
                       icon: Icons.text_fields,
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -187,9 +220,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
 
                     _buildSettingCard(
-                      title: 'Enable Animations',
-                      subtitle:
-                          'Toggle interface animations and visual effects',
+                      title: localizations.enableAnimations,
+                      subtitle: localizations.enableAnimationsDescription,
                       icon: Icons.animation,
                       trailing: Switch(
                         value: _isAnimationsEnabled,
@@ -207,11 +239,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     // Notifications section
-                    _buildSectionHeader('Notifications'),
+                    _buildSectionHeader(localizations.notifications),
                     _buildSettingCard(
-                      title: 'Enable Notifications',
-                      subtitle:
-                          'Get notified when your digital twins want to chat',
+                      title: localizations.enableNotifications,
+                      subtitle: localizations.enableNotificationsDescription,
                       icon: Icons.notifications,
                       trailing: Switch(
                         value: _isNotificationsEnabled,
@@ -229,18 +260,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     // Data management section
-                    _buildSectionHeader('Data Management'),
+                    _buildSectionHeader(localizations.dataManagement),
                     _buildSettingCard(
-                      title: 'Export All Characters',
-                      subtitle: 'Save your digital twins to a file',
+                      title: localizations.exportAllCharacters,
+                      subtitle: localizations.exportAllCharactersDescription,
                       icon: Icons.download,
                       onTap: () => _exportAllCharacters(context),
                     ),
 
                     _buildSettingCard(
-                      title: 'Clear All Data',
-                      subtitle:
-                          'Delete all characters and reset app (caution: cannot be undone)',
+                      title: localizations.clearAllData,
+                      subtitle: localizations.clearAllDataDescription,
                       icon: Icons.delete_forever,
                       iconColor: Colors.redAccent,
                       onTap: () => _showClearDataDialog(context),
@@ -249,23 +279,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     // About section
-                    _buildSectionHeader('About'),
+                    _buildSectionHeader(localizations.about),
                     _buildSettingCard(
-                      title: 'App Version',
+                      title: localizations.appVersion,
                       subtitle: 'Afterlife v1.0.0',
                       icon: Icons.info_outline,
                     ),
 
                     _buildSettingCard(
-                      title: 'Privacy Policy',
-                      subtitle: 'Read how your data is used and protected',
+                      title: localizations.privacyPolicy,
+                      subtitle: localizations.privacyPolicyDescription,
                       icon: Icons.privacy_tip_outlined,
                       onTap: () {
                         // Open privacy policy
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Privacy Policy not available in this version',
+                              localizations.privacyPolicyNotAvailable,
                             ),
                             backgroundColor: AppTheme.deepIndigo,
                           ),
@@ -276,11 +306,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     // API & Connectivity section
-                    _buildSectionHeader('API & Connectivity'),
+                    _buildSectionHeader(localizations.apiConnectivity),
                     _buildSettingCard(
-                      title: 'Custom OpenRouter API Key',
-                      subtitle:
-                          'Set or update your personal API key',
+                      title: localizations.customApiKey,
+                      subtitle: localizations.customApiKeyDescription,
                       icon: Icons.vpn_key,
                       onTap: () => _showApiKeyDialog(context),
                     ),
@@ -288,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                       child: Text(
-                        'Note: The default API key from .env file will be used as a fallback if no custom key is provided.',
+                        localizations.apiKeyNote,
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 12,
@@ -300,10 +329,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     // Developer Chat section
-                    _buildSectionHeader('Developer Connection'),
+                    _buildSectionHeader(localizations.developerConnection),
                     _buildSettingCard(
-                      title: 'Chat with Developer',
-                      subtitle: 'Get direct assistance and share feedback about the app',
+                      title: localizations.chatWithDeveloper,
+                      subtitle: localizations.chatWithDeveloperDescription,
                       icon: Icons.developer_mode,
                       onTap: () => _navigateToDeveloperChat(context),
                     ),
@@ -438,78 +467,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showClearDataDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(
-              'Clear All Data',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text(
-              'This will permanently delete all your characters and reset the app to its default state. This action cannot be undone.',
-              style: TextStyle(color: Colors.white70),
-            ),
-            backgroundColor: AppTheme.deepIndigo,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: Colors.redAccent.withOpacity(0.5),
-                width: 1,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: AppTheme.silverMist),
-                ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  try {
-                    final charactersProvider = Provider.of<CharactersProvider>(
-                      context,
-                      listen: false,
-                    );
-                    await charactersProvider.clearAll();
-
-                    // Also clear settings
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.clear();
-
-                    // Reload settings after clearing
-                    _loadSettings();
-
-                    Navigator.pop(context);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('All data has been cleared'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } catch (e) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error clearing data: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: Text(
-                  'Delete Everything',
-                  style: TextStyle(color: Colors.redAccent),
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(
+          localizations.clearAllData,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
+        ),
+        content: Text(
+          localizations.clearAllDataConfirmation,
+          style: TextStyle(color: Colors.white70),
+        ),
+        backgroundColor: AppTheme.deepIndigo,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Colors.redAccent.withOpacity(0.5),
+            width: 1,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              localizations.cancel,
+              style: TextStyle(color: AppTheme.silverMist),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                final charactersProvider = Provider.of<CharactersProvider>(
+                  context,
+                  listen: false,
+                );
+                await charactersProvider.clearAll();
+
+                // Also clear settings
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+
+                // Reload settings after clearing
+                _loadSettings();
+
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(localizations.dataCleared),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(localizations.errorClearingData),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Text(
+              localizations.deleteEverything,
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -562,6 +591,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => const DeveloperChatScreen(),
+      ),
+    );
+  }
+
+  void _showLanguageSelectionDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
+    final languages = [
+      {'code': 'en', 'name': localizations.languageEnglish},
+      {'code': 'es', 'name': localizations.languageSpanish},
+      {'code': 'fr', 'name': localizations.languageFrench},
+      {'code': 'de', 'name': localizations.languageGerman},
+      {'code': 'ja', 'name': localizations.languageJapanese},
+      {'code': 'ko', 'name': localizations.languageKorean},
+      {'code': 'zh', 'name': localizations.languageChinese},
+      {'code': 'pt', 'name': localizations.languagePortuguese},
+      {'code': 'ru', 'name': localizations.languageRussian},
+      {'code': 'hi', 'name': localizations.languageHindi},
+      {'code': 'it', 'name': localizations.languageItalian},
+      {'code': 'uk', 'name': localizations.languageUkrainian},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Select Language',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: languages.length,
+            itemBuilder: (context, index) {
+              final language = languages[index];
+              final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+              final isSelected = languageProvider.currentLanguageCode == language['code'];
+              
+              return ListTile(
+                title: Text(
+                  language['name']!,
+                  style: TextStyle(
+                    color: isSelected ? AppTheme.warmGold : Colors.white,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                trailing: isSelected ? Icon(
+                  Icons.check,
+                  color: AppTheme.warmGold,
+                ) : null,
+                onTap: () {
+                  languageProvider.setLanguage(language['code']!);
+                  Navigator.pop(context);
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Language changed to ${language['name']}'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        backgroundColor: AppTheme.deepIndigo,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: AppTheme.warmGold.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.silverMist),
+            ),
+          ),
+        ],
       ),
     );
   }

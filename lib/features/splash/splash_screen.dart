@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import '../onboarding/onboarding_screen.dart';
+import '../providers/language_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../character_gallery/character_gallery_screen.dart';
-import '../onboarding/onboarding_screen.dart';
 import '../../core/utils/env_config.dart';
 import '../../core/utils/image_optimizer.dart';
 import '../../core/utils/performance_optimizer.dart';
@@ -20,12 +25,12 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  bool _isInitialized = false;
   String _statusMessage = 'INITIALIZING PRESERVATION SYSTEMS';
   double _loadingProgress = 0.0;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _fadeInAnimation;
+  static const String _firstTimeKey = 'is_first_time_user';
 
   // Cache widgets for performance
   late final Widget _backgroundParticles = const RepaintBoundary(
@@ -73,124 +78,67 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _initializeApp() async {
-    // Simulate loading for visual feedback (min 1.5 seconds)
-    final loadingTimer = Timer.periodic(const Duration(milliseconds: 50), (
-      timer,
-    ) {
-      if (_loadingProgress < 0.95) {
-        // Only go up to 95% during initialization
-        setState(() {
-          _loadingProgress += 0.025;
-          if (_loadingProgress > 0.95) _loadingProgress = 0.95;
-        });
-      } else {
-        timer.cancel();
-      }
-    });
-
     try {
-      // Initialize services in sequence with status updates
-
-      // Step 1: Load environment configuration
-      setState(() => _statusMessage = 'LOADING ENVIRONMENT CONFIGURATION');
-      await EnvConfig.initialize();
-
-      // Step 2: Initialize chat services
-      setState(() => _statusMessage = 'ESTABLISHING NEURAL CONNECTIONS');
-      await interview_chat.ChatService.initialize();
-
-      // Step 3: Optimize performance
-      setState(() => _statusMessage = 'OPTIMIZING NEURAL PATHWAYS');
-      await PerformanceOptimizer.initialize();
-
-      // Step 4: Preload critical images
-      setState(() => _statusMessage = 'LOADING MEMORY FRAGMENTS');
-      await ImageOptimizer.preloadAppImages();
-
-      // Step 5: Check for API key
-      setState(() => _statusMessage = 'VERIFYING ACCESS CREDENTIALS');
-      final hasApiKey = EnvConfig.hasValue('OPENROUTER_API_KEY');
-
-      // Step 6: Complete initialization
-      setState(() {
-        _statusMessage = 'PRESERVATION SYSTEMS ONLINE';
-        _isInitialized = true;
-      });
-
-      // Ensure minimum display time (visual polish)
-      final minimumDisplayDuration = Duration(milliseconds: 1500);
-      final elapsed = DateTime.now().difference(
-        DateTime.now().subtract(minimumDisplayDuration),
-      );
-      if (elapsed < minimumDisplayDuration) {
-        await Future.delayed(minimumDisplayDuration - elapsed);
-      }
-
-      // Cancel the timer if it's still active
-      loadingTimer.cancel();
-
-      // Complete the loading bar to 100%
-      setState(() {
-        _loadingProgress = 1.0;
-      });
-
-      // Wait a moment to show the completed loading bar
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Navigate to next screen
-      if (mounted) {
-        if (!hasApiKey) {
-          // Show API key input dialog if needed
-          final result = await ApiKeyInputDialog.show(context);
-          if (result) {
-            // User entered API key, proceed to main screen
-            _navigateToMainScreen();
-          } else {
-            // User cancelled, still proceed but they'll be prompted again later
-            _navigateToMainScreen();
-          }
-        } else {
-          // API key exists, proceed directly
-          _navigateToMainScreen();
-        }
-      }
-    } catch (e) {
-      // Handle initialization errors
-      setState(() {
-        _statusMessage = 'INITIALIZATION ERROR: $e';
-        _isInitialized = false;
-      });
-      loadingTimer.cancel();
-    }
-  }
-
-  void _navigateToMainScreen() {
-    // Animate loading bar from current value to 100% over 2 seconds
-    final startValue = _loadingProgress;
-    final animationDuration = const Duration(seconds: 2);
-    final frameDuration = const Duration(milliseconds: 16); // ~60fps
-    final totalFrames =
-        animationDuration.inMilliseconds ~/ frameDuration.inMilliseconds;
-    int currentFrame = 0;
-
-    Timer.periodic(frameDuration, (timer) {
-      currentFrame++;
-      if (currentFrame <= totalFrames && mounted) {
-        final progress =
-            startValue + ((1.0 - startValue) * (currentFrame / totalFrames));
+      // Simulate loading progress
+      for (int i = 0; i <= 100; i += 10) {
+        if (!mounted) return;
+        await Future.delayed(const Duration(milliseconds: 100));
         setState(() {
-          _loadingProgress = progress;
+          _loadingProgress = i / 100;
+          switch (i) {
+            case 20:
+              _statusMessage = 'CALIBRATING NEURAL NETWORKS';
+              break;
+            case 40:
+              _statusMessage = 'SYNCHRONIZING QUANTUM STATES';
+              break;
+            case 60:
+              _statusMessage = 'ALIGNING CONSCIOUSNESS MATRICES';
+              break;
+            case 80:
+              _statusMessage = 'ESTABLISHING NEURAL LINKS';
+              break;
+            case 100:
+              _statusMessage = 'PRESERVATION SYSTEMS READY';
+              break;
+          }
         });
-      } else {
-        timer.cancel();
-        if (mounted) {
-          // Navigate to onboarding screen instead of character gallery
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-          );
-        }
       }
-    });
+
+      // Check if this is the first time running the app
+      final prefs = await SharedPreferences.getInstance();
+      // For debugging: always show onboarding
+      const isFirstTime = true;
+      // Uncomment below line for production:
+      // final isFirstTime = prefs.getBool(_firstTimeKey) ?? true;
+
+      // Wait for a minimum time to show the splash screen
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
+
+      // Navigate to the appropriate screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => isFirstTime
+              ? const OnboardingScreen()
+              : const CharacterGalleryScreen(),
+        ),
+      );
+
+      // Set first time flag to false (commented out for debugging)
+      // if (isFirstTime) {
+      //   await prefs.setBool(_firstTimeKey, false);
+      // }
+    } catch (e) {
+      print('Error during app initialization: $e');
+      if (!mounted) return;
+      
+      // Show error state in the UI
+      setState(() {
+        _statusMessage = 'ERROR INITIALIZING SYSTEMS';
+      });
+    }
   }
 
   @override
@@ -221,109 +169,77 @@ class _SplashScreenState extends State<SplashScreen>
                         return Transform.scale(
                           scale: _pulseAnimation.value,
                           child: Container(
-                            width: 130,
-                            height: 130,
+                            width: 120,
+                            height: 120,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  AppTheme.midnightPurple,
-                                  AppTheme.deepNavy,
-                                ],
-                                radius: 0.7,
-                              ),
                               border: Border.all(
-                                color: AppTheme.warmGold.withOpacity(0.7),
-                                width: 3,
+                                color: AppTheme.warmGold.withOpacity(0.5),
+                                width: 2,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: AppTheme.warmGold.withOpacity(0.3),
                                   blurRadius: 20,
-                                  spreadRadius: 3,
+                                  spreadRadius: 5,
                                 ),
                               ],
                             ),
-                            child: ClipOval(
-                              child: Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: Image.asset(
-                                  'assets/images/afterlife_icon.png',
-                                  fit: BoxFit.contain,
-                                ),
+                            child: Center(
+                              child: Icon(
+                                Icons.psychology_outlined,
+                                size: 60,
+                                color: AppTheme.warmGold,
                               ),
                             ),
                           ),
                         );
                       },
                     ),
+                    const SizedBox(height: 40),
 
-                    const SizedBox(height: 60),
-
-                    // App title
+                    // App name
                     Text(
                       'AFTERLIFE',
                       style: GoogleFonts.cinzel(
-                        fontSize: 36,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 8,
-                        color: AppTheme.silverMist,
+                        color: AppTheme.warmGold,
                         shadows: [
                           Shadow(
                             color: AppTheme.warmGold.withOpacity(0.5),
-                            blurRadius: 8,
+                            blurRadius: 10,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 8),
 
-                    const SizedBox(height: 12),
-
-                    // Subtitle
+                    // Status message
                     Text(
-                      'PRESERVED CONSCIOUSNESS',
-                      style: GoogleFonts.cinzel(
+                      _statusMessage,
+                      style: GoogleFonts.spaceMono(
                         fontSize: 14,
-                        letterSpacing: 2,
                         color: AppTheme.silverMist.withOpacity(0.7),
+                        letterSpacing: 2,
                       ),
                     ),
+                    const SizedBox(height: 40),
 
-                    const SizedBox(height: 80),
-
-                    // Loading status & progress
+                    // Loading progress indicator
                     SizedBox(
-                      width: 240,
-                      child: Column(
-                        children: [
-                          // Loading bar
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: _loadingProgress,
-                              backgroundColor: AppTheme.midnightPurple
-                                  .withOpacity(0.3),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppTheme.warmGold,
-                              ),
-                              minHeight: 4,
-                            ),
+                      width: 200,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: _loadingProgress,
+                          backgroundColor: AppTheme.midnightPurple,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.warmGold,
                           ),
-
-                          const SizedBox(height: 16),
-
-                          // Status message
-                          Text(
-                            _statusMessage,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 12,
-                              letterSpacing: 1,
-                              color: AppTheme.silverMist.withOpacity(0.8),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],

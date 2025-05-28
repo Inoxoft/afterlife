@@ -2,11 +2,18 @@
 
 import 'dart:convert';
 import '../character_chat/chat_service.dart';
+import '../providers/language_provider.dart';
 import 'famous_character_prompts.dart';
 
 /// Service for interacting with famous characters
 class FamousCharacterService {
   static final Map<String, List<Map<String, dynamic>>> _chatHistories = {};
+  static LanguageProvider? _languageProvider;
+
+  /// Set the language provider for language support
+  static void setLanguageProvider(LanguageProvider languageProvider) {
+    _languageProvider = languageProvider;
+  }
 
   /// Initialize a chat with a famous character
   static Future<void> initializeChat(String characterName) async {
@@ -28,9 +35,16 @@ class FamousCharacterService {
       }
 
       // Get system prompt for the character
-      final systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
+      String? systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
       if (systemPrompt == null) {
         return "Error: Character profile not found.";
+      }
+
+      // Add language instructions if not English
+      if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+        final languageName = _languageProvider!.currentLanguageName;
+        final languageInstruction = '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language. Stay in character while responding in $languageName.\n';
+        systemPrompt = systemPrompt + languageInstruction;
       }
 
       // Get the selected model for this character

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' show pi, cos, sin;
 
@@ -72,7 +73,7 @@ class _LLMPageState extends State<LLMPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'THE MIND BEHIND YOUR TWINS',
+                      AppLocalizations.of(context)!.theMindBehindTwins,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.cinzel(
                         fontSize: 24,
@@ -90,7 +91,7 @@ class _LLMPageState extends State<LLMPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Powered by Advanced Language Models',
+                      AppLocalizations.of(context)!.poweredByAdvancedLanguageModels,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(
                         fontSize: 16,
@@ -135,7 +136,7 @@ class _LLMPageState extends State<LLMPage> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'How It Works',
+                            AppLocalizations.of(context)!.howItWorks,
                             style: GoogleFonts.cinzel(
                               color: AppTheme.warmGold,
                               fontSize: 18,
@@ -146,7 +147,7 @@ class _LLMPageState extends State<LLMPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Your digital twins are powered by sophisticated AI language models that enable them to think, reason, and interact naturally. The more advanced the model, the more authentic and knowledgeable your interactions will be.',
+                        AppLocalizations.of(context)!.twinsPoweredByAI,
                         style: GoogleFonts.lato(
                           color: AppTheme.silverMist,
                           fontSize: 14,
@@ -186,7 +187,7 @@ class _LLMPageState extends State<LLMPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'BASIC LLM',
+                                      AppLocalizations.of(context)!.basicLLM,
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.cinzel(
                                         fontSize: maxWidth * 0.035,
@@ -206,7 +207,7 @@ class _LLMPageState extends State<LLMPage> {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Limited Knowledge',
+                                      AppLocalizations.of(context)!.limitedKnowledge,
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.lato(
                                         fontSize: maxWidth * 0.03,
@@ -229,7 +230,7 @@ class _LLMPageState extends State<LLMPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'ADVANCED LLM',
+                                      AppLocalizations.of(context)!.advancedLLM,
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.cinzel(
                                         fontSize: maxWidth * 0.035,
@@ -249,7 +250,7 @@ class _LLMPageState extends State<LLMPage> {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Deep Expertise',
+                                      AppLocalizations.of(context)!.deepKnowledge,
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.lato(
                                         fontSize: maxWidth * 0.03,
@@ -317,7 +318,7 @@ class _LLMPageState extends State<LLMPage> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Example Interaction',
+                          AppLocalizations.of(context)!.exampleInteraction,
                           style: GoogleFonts.cinzel(
                             color: AppTheme.warmGold,
                             fontSize: 18,
@@ -328,7 +329,7 @@ class _LLMPageState extends State<LLMPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'When discussing relativity with Einstein:',
+                      AppLocalizations.of(context)!.whenDiscussingRelativityWithEinstein,
                       style: GoogleFonts.lato(
                         color: AppTheme.warmGold,
                         fontSize: 14,
@@ -337,14 +338,14 @@ class _LLMPageState extends State<LLMPage> {
                     ),
                     const SizedBox(height: 8),
                     _buildExampleBubble(
-                      'With Advanced LLM:',
-                      '"Let me explain how spacetime curvature affects gravitational lensing, and why this was crucial for the experimental verification of general relativity..."',
+                      AppLocalizations.of(context)!.withAdvancedLLMLabel,
+                      AppLocalizations.of(context)!.withAdvancedLLMExample,
                       true,
                     ),
                     const SizedBox(height: 8),
                     _buildExampleBubble(
-                      'With Basic LLM:',
-                      '"Well, E=mc² is important for relativity, but I cannot explain the deeper implications or mathematical framework..."',
+                      AppLocalizations.of(context)!.withBasicLLMLabel,
+                      AppLocalizations.of(context)!.withBasicLLMExample,
                       false,
                     ),
                   ],

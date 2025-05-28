@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../providers/language_provider.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
+import '../../l10n/app_localizations.dart';
 
 class FamousCharacterChatScreen extends StatefulWidget {
   final String characterName;
@@ -48,6 +51,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     _selectedModel = FamousCharacterPrompts.getSelectedModel(
       widget.characterName,
     );
+    
+    // Inject the LanguageProvider
+    final languageProvider = context.read<LanguageProvider>();
+    FamousCharacterService.setLanguageProvider(languageProvider);
+    
     _initializeChat();
   }
 
@@ -102,6 +110,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     final message = _messageController.text.trim();
     if (message.isEmpty || _isLoading) return;
 
+    final localizations = AppLocalizations.of(context);
+
     // Clear the input field
     _messageController.clear();
 
@@ -134,10 +144,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         });
       } else {
         // Handle null response by showing a fallback message
-        final fallbackMessage =
-            "I'm sorry, I couldn't process your message at this time. Please try again later.";
         _messages.add({
-          'content': fallbackMessage,
+          'content': localizations.errorProcessingMessage,
           'isUser': false,
           'timestamp': DateTime.now().toIso8601String(),
         });
@@ -151,8 +159,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
 
       // Add error message to chat history
       _messages.add({
-        'content':
-            "I'm sorry, there was an error processing your message. Please try again.",
+        'content': localizations.errorConnecting,
         'isUser': false,
         'timestamp': DateTime.now().toIso8601String(),
       });
@@ -170,14 +177,13 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   }
 
   void _showClearChatDialog() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Clear Chat History'),
-            content: const Text(
-              'This will delete all messages in this conversation. This action cannot be undone.',
-            ),
+            title: Text(localizations.clearChatHistoryTitle),
+            content: Text(localizations.clearChatHistoryConfirm),
             backgroundColor: AppTheme.deepIndigo,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -185,11 +191,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(localizations.cancel),
               ),
               TextButton(
                 onPressed: () => _clearChatHistory(context),
-                child: const Text('Clear'),
+                child: Text(localizations.clear),
               ),
             ],
           ),
@@ -197,6 +203,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   }
 
   void _clearChatHistory(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     // Clear chat history
     FamousCharacterService.clearChatHistory(widget.characterName);
     setState(() {
@@ -209,7 +216,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     // Show a confirmation
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
+    ).showSnackBar(SnackBar(content: Text(localizations.chatHistoryCleared)));
   }
 
   void _changeModel(String newModel) {
@@ -229,8 +236,9 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(localizations),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
         child: Stack(
@@ -241,10 +249,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
             Column(
               children: [
                 // Chat messages
-                Expanded(child: _buildChatList()),
+                Expanded(child: _buildChatList(localizations)),
 
                 // Input area
-                _buildInputArea(),
+                _buildInputArea(localizations),
               ],
             ),
           ],
@@ -253,8 +261,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     );
   }
 
-  // Extract app bar to a separate method for readability and performance
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
     // Get available models
     final models = FamousCharacterPrompts.getModelsForCharacter(
       widget.characterName,
@@ -405,7 +412,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
           ),
           child: IconButton(
             icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
-            tooltip: 'Clear Chat',
+            tooltip: localizations.clearChatHistory,
             onPressed: _showClearChatDialog,
           ),
         ),
@@ -413,8 +420,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     );
   }
 
-  // Extract chat list to a separate method for readability and performance
-  Widget _buildChatList() {
+  Widget _buildChatList(AppLocalizations localizations) {
     // If no messages, show a welcome message
     if (_messages.isEmpty) {
       return Center(
@@ -430,7 +436,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Start chatting with ${widget.characterName}',
+                localizations.startChattingWith.replaceAll('{name}', widget.characterName),
                 style: GoogleFonts.lato(
                   fontSize: 18,
                   color: AppTheme.silverMist.withOpacity(0.8),
@@ -439,7 +445,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Send a message below to begin the conversation',
+                localizations.sendMessageToBegin,
                 style: GoogleFonts.lato(
                   fontSize: 14,
                   color: AppTheme.silverMist.withOpacity(0.5),
@@ -465,15 +471,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
             timestamp: DateTime.parse(message['timestamp'] as String),
           ),
           showAvatar: true,
-          avatarText: message['isUser'] as bool ? 'You' : widget.characterName[0].toUpperCase(),
+          avatarText: message['isUser'] as bool ? localizations.you : widget.characterName[0].toUpperCase(),
           avatarIcon: message['isUser'] as bool ? Icons.person : null,
         );
       },
     );
   }
 
-  // Extract input area to a separate method for readability and performance
-  Widget _buildInputArea() {
+  Widget _buildInputArea(AppLocalizations localizations) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -493,7 +498,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               focusNode: _inputFocusNode,
               style: TextStyle(color: AppTheme.silverMist),
               decoration: InputDecoration(
-                hintText: 'Type your message...',
+                hintText: localizations.typeMessage,
                 hintStyle: TextStyle(
                   color: AppTheme.silverMist.withOpacity(0.5),
                 ),

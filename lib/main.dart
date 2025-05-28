@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/env_config.dart';
 import 'core/utils/app_optimizer.dart';
 import 'features/providers/characters_provider.dart';
+import 'features/providers/language_provider.dart';
 import 'features/character_interview/interview_provider.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/character_interview/chat_service.dart' as interview_chat;
 import 'features/providers/chat_service.dart' as providers_chat;
 import 'features/character_prompts/famous_character_prompts.dart';
+import 'l10n/app_localizations.dart';
 
 class AppInitializationError extends Error {
   final String message;
@@ -63,6 +66,7 @@ Future<void> main() async {
             providers: [
               ChangeNotifierProvider(create: (_) => CharactersProvider()),
               ChangeNotifierProvider(create: (_) => InterviewProvider()),
+              ChangeNotifierProvider(create: (_) => LanguageProvider()),
             ],
             child: const MyApp(),
           ),
@@ -81,35 +85,64 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize language on app start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LanguageProvider>().initializeLanguage();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Afterlife',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        primaryColor: AppTheme.etherealCyan,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppTheme.etherealCyan,
-          brightness: Brightness.dark,
-        ),
-        scaffoldBackgroundColor: AppTheme.backgroundStart,
-        dialogTheme: DialogThemeData(
-          backgroundColor: AppTheme.deepIndigo,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, child) {
+        return MaterialApp(
+          title: 'Afterlife',
+          debugShowCheckedModeBanner: false,
+          
+          // Add localization support
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: languageProvider.currentLocale,
+          
+          theme: ThemeData(
+            useMaterial3: true,
+            primaryColor: AppTheme.etherealCyan,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppTheme.etherealCyan,
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: AppTheme.backgroundStart,
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppTheme.deepIndigo,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            snackBarTheme: SnackBarThemeData(
+              backgroundColor: AppTheme.deepIndigo,
+              contentTextStyle: const TextStyle(color: Colors.white),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
           ),
-        ),
-        snackBarTheme: SnackBarThemeData(
-          backgroundColor: AppTheme.deepIndigo,
-          contentTextStyle: const TextStyle(color: Colors.white),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-      home: const SplashScreen(), // Use the splash screen as the home screen
+          home: const SplashScreen(), // Use the splash screen as the home screen
+        );
+      },
     );
   }
 }

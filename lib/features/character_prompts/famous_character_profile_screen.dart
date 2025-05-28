@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import 'famous_character_prompts.dart';
 import 'famous_character_chat_screen.dart';
 import '../character_gallery/character_gallery_screen.dart';
+import '../../l10n/app_localizations.dart';
 import 'dart:math';
 
 class FamousCharacterProfileScreen extends StatefulWidget {
@@ -58,14 +59,15 @@ class _FamousCharacterProfileScreenState
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final shortBio =
         FamousCharacterPrompts.getShortBio(widget.name) ??
-        'No biography available.';
+        localizations.noBiographyAvailable;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundStart,
-        title: Text('${widget.name}\'s Profile'),
+        title: Text(localizations.profileOf.replaceAll('{name}', widget.name)),
         elevation: 0,
       ),
       body: Container(

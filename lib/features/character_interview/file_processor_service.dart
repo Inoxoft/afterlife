@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:file_selector/file_selector.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math' show pi, cos, sin, atan2, sqrt;
 import '../../../features/developer_chat/developer_chat_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ExplorePage extends StatelessWidget {
   final AnimationController animationController;
 
-  const ExplorePage({Key? key, required this.animationController})
-    : super(key: key);
+  const ExplorePage({super.key, required this.animationController});
 
   void _navigateToDeveloperChat(BuildContext context) {
     Navigator.push(
@@ -21,6 +20,8 @@ class ExplorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),
@@ -77,7 +78,7 @@ class ExplorePage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      'DIVERSE PERSPECTIVES',
+                      l10n?.diversePerspectives ?? 'DIVERSE PERSPECTIVES',
                       style: GoogleFonts.cinzel(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -94,7 +95,7 @@ class ExplorePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'From politics to art, history comes alive',
+                      l10n?.fromPoliticsToArt ?? 'From politics to art, history comes alive',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(
                         fontSize: 16,
@@ -115,7 +116,7 @@ class ExplorePage extends StatelessWidget {
               opacity: imageAnimation,
               child: ScaleTransition(
                 scale: imageAnimation,
-                child: Container(
+                child: SizedBox(
                   height: 180,
                   width: double.infinity,
                   child: Image.asset(
@@ -162,17 +163,17 @@ class ExplorePage extends StatelessWidget {
                     children: [
                       _buildTipRow(
                         Icons.history_edu,
-                        'Engage with diverse figures from politics, science, art, and more who shaped our world.',
+                        l10n?.engageWithDiverseFigures ?? 'Engage with diverse figures from politics, science, art, and more who shaped our world.',
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
                         Icons.psychology_alt,
-                        'Remember that these are simulations based on available data - responses represent our best attempt at historical accuracy.',
+                        l10n?.rememberSimulations ?? 'Remember that these are simulations based on available data - responses represent our best attempt at historical accuracy.',
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
                         Icons.add_circle_outline,
-                        'Create your own digital twins by using the Create button in the bottom navigation.',
+                        l10n?.createYourOwnTwins ?? 'Create your own digital twins by using the Create button in the bottom navigation.',
                       ),
                     ],
                   ),
@@ -237,7 +238,7 @@ class ExplorePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Questions about Afterlife?',
+                              l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
                               style: GoogleFonts.cinzel(
                                 color: AppTheme.silverMist,
                                 fontSize: 16,
@@ -246,7 +247,7 @@ class ExplorePage extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Chat with the developer\'s digital twin to learn more about the app and how it works.',
+                              l10n?.chatWithDeveloperDescription ?? 'Chat with the developer\'s digital twin to learn more about the app and how it works.',
                               style: GoogleFonts.lato(
                                 color: AppTheme.silverMist.withOpacity(0.7),
                                 fontSize: 14,
@@ -269,7 +270,7 @@ class ExplorePage extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                'CHAT WITH DEVELOPER TWIN',
+                                l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
                                 style: GoogleFonts.cinzel(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,

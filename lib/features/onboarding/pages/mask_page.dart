@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../l10n/app_localizations.dart';
 
 class MaskPage extends StatelessWidget {
   final AnimationController animationController;
@@ -10,6 +11,8 @@ class MaskPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),
@@ -56,7 +59,7 @@ class MaskPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      'UNDERSTAND MASKS',
+                      localizations.understandMasks,
                       style: GoogleFonts.cinzel(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -73,7 +76,7 @@ class MaskPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Digital personas with historical essence',
+                      localizations.digitalPersonasWithHistoricalEssence,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lato(
                         fontSize: 16,
@@ -176,7 +179,7 @@ class MaskPage extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Einstein with mask and LLM armor',
+                                      localizations.einsteinWithMaskAndLLMArmor,
                                       textAlign: TextAlign.center,
                                       style: AppTheme.captionStyle,
                                     ),
@@ -208,18 +211,21 @@ class MaskPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     _buildExplanationWithIcon(
+                      context,
                       Icons.face_retouching_natural,
-                      'Masks are AI personas created from historical data, personal accounts, and detailed character specifications.',
+                      localizations.masksAreAIPersonas,
                     ),
                     const SizedBox(height: 10),
                     _buildExplanationWithIcon(
+                      context,
                       Icons.psychology,
-                      'Each mask tries to embody the authentic character, personality, and knowledge of its historical figure.',
+                      localizations.eachMaskTriesToEmbody,
                     ),
                     const SizedBox(height: 10),
                     _buildExplanationWithIcon(
+                      context,
                       Icons.people_alt,
-                      'These digital twins allow you to interact with perspectives from across time and reality.',
+                      localizations.theseDigitalTwinsAllow,
                     ),
                     // Add extra spacing at the bottom to avoid button overlap
                     const SizedBox(height: 24),
@@ -233,7 +239,7 @@ class MaskPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExplanationWithIcon(IconData iconData, String text) {
+  Widget _buildExplanationWithIcon(BuildContext context, IconData iconData, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(

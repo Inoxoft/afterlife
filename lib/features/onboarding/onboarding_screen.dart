@@ -5,6 +5,7 @@ import '../character_gallery/character_gallery_screen.dart';
 import 'pages/mask_page.dart';
 import 'pages/llm_page.dart';
 import 'pages/explore_page.dart';
+import 'pages/language_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
 
@@ -38,7 +39,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _navigateToNextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _animationController.reset();
       setState(() {
         _currentPage++;
@@ -67,10 +68,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _getPage() {
     switch (_currentPage) {
       case 0:
-        return MaskPage(animationController: _animationController);
+        return LanguagePage(animationController: _animationController);
       case 1:
-        return LLMPage(animationController: _animationController);
+        return MaskPage(animationController: _animationController);
       case 2:
+        return LLMPage(animationController: _animationController);
+      case 3:
         return ExplorePage(animationController: _animationController);
       default:
         return Container();
@@ -179,7 +182,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     // Page indicators
                     Row(
                       children: List.generate(
-                        3,
+                        4,
                         (index) => Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           width: 10,
@@ -214,7 +217,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         shadowColor: AppTheme.warmGold.withOpacity(0.5),
                       ),
                       child: Text(
-                        _currentPage == 2 ? "BEGIN" : "NEXT",
+                        _currentPage == 3 ? "BEGIN" : "NEXT",
                         style: GoogleFonts.cinzel(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

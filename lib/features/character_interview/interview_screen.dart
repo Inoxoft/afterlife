@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
+import '../providers/language_provider.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import 'interview_provider.dart';
 import 'chat_bubble.dart';
@@ -47,6 +48,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
   void _initializeProvider() {
     _interviewProvider = InterviewProvider();
+    
+    // Inject the LanguageProvider
+    final languageProvider = context.read<LanguageProvider>();
+    _interviewProvider.setLanguageProvider(languageProvider);
 
     // If editing an existing character, initialize with their data
     if (widget.editMode && widget.existingCharacter != null) {

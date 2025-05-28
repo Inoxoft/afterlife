@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math';
 import 'message_model.dart';
 import 'chat_service.dart';
 import 'prompts.dart';
+import '../providers/language_provider.dart';
+import '../../l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'package:afterlife/features/providers/characters_provider.dart';
 
 /// Manages the interview process for creating or editing a character.
 ///
@@ -22,6 +27,9 @@ class InterviewProvider with ChangeNotifier {
   bool isSuccess = false;
   bool isEditMode = false;
   bool isAiThinking = false;
+
+  // Add a reference to LanguageProvider at the class level
+  LanguageProvider? _languageProvider;
 
   List<Message> get messages => _messages.where((m) => !m.isHidden).toList();
 
@@ -143,7 +151,18 @@ What specific edits would you like me to make?
     }
   }
 
+  void setLanguageProvider(LanguageProvider languageProvider) {
+    _languageProvider = languageProvider;
+  }
+
   String _getSystemPrompt() {
+    String languageInstruction = '';
+    
+    if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+      final languageName = _languageProvider!.currentLanguageName;
+      languageInstruction = '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
+    }
+    
     if (isEditMode) {
       return """You are an AI assistant helping to edit a character's system prompt.
 
@@ -167,9 +186,9 @@ When the user types "agree", format the final prompt as:
 ## CHARACTER CARD SUMMARY ##
 [FULL UPDATED SYSTEM PROMPT WITH ALL CHANGES]
 ## END OF CHARACTER CARD ##
-```""";
+```$languageInstruction""";
     } else {
-      return InterviewPrompts.interviewSystemPrompt;
+      return InterviewPrompts.interviewSystemPrompt + languageInstruction;
     }
   }
 

@@ -11,6 +11,7 @@ import '../settings/settings_screen.dart';
 import '../character_chat/chat_screen.dart';
 import '../character_interview/interview_screen.dart';
 import '../character_prompts/famous_character_profile_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class PulseRingPainter extends CustomPainter {
   final double progress;
@@ -70,55 +71,63 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   late final TextStyle _captionStyle = AppTheme.captionStyle;
 
   // Cached bottom navigation items for better performance
-  final List<BottomNavigationBarItem> _navigationItems = const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.explore, size: 24),
-      label: 'Explore',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person_outline, size: 24),
-      label: 'Your Twins',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.add_circle_outline, size: 24),
-      label: 'Create',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.settings, size: 24),
-      label: 'Settings',
-    ),
-  ];
+  List<BottomNavigationBarItem> _getNavigationItems(AppLocalizations localizations) {
+    return [
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.explore, size: 24),
+        label: localizations.explore,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.person_outline, size: 24),
+        label: localizations.yourTwins,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.add_circle_outline, size: 24),
+        label: localizations.create,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.settings, size: 24),
+        label: localizations.settings,
+      ),
+    ];
+  }
 
   // Sample famous people for the Explore tab - using const for better performance
-  final List<Map<String, dynamic>> _famousPeople = const [
-    {
-      'name': 'Albert Einstein',
-      'years': '1879-1955',
-      'profession': 'PHYSICIST',
-      'imageUrl': 'assets/images/einstein.png',
-    },
-    {
-      'name': 'Ronald Reagan',
-      'years': '1911-2004',
-      'profession': 'PRESIDENT, ACTOR',
-      'imageUrl': 'assets/images/reagan.png',
-    },
-    {
-      'name': 'Alan Turing',
-      'years': '1912-1954',
-      'profession': 'COMPUTER SCIENTIST',
-      'imageUrl': 'assets/images/turing.png',
-    },
-    {
-      'name': 'Marilyn Monroe',
-      'years': '1926-1962',
-      'profession': 'ACTRESS, MODEL & SINGER',
-      'imageUrl': 'assets/images/monroe.png',
-    },
-  ];
+  List<Map<String, dynamic>> _getFamousPeople(AppLocalizations localizations) {
+    return [
+      {
+        'name': 'Albert Einstein',
+        'years': '1879-1955',
+        'profession': localizations.physicist,
+        'imageUrl': 'assets/images/einstein.png',
+      },
+      {
+        'name': 'Ronald Reagan',
+        'years': '1911-2004',
+        'profession': localizations.presidentActor,
+        'imageUrl': 'assets/images/reagan.png',
+      },
+      {
+        'name': 'Alan Turing',
+        'years': '1912-1954',
+        'profession': localizations.computerScientist,
+        'imageUrl': 'assets/images/turing.png',
+      },
+      {
+        'name': 'Marilyn Monroe',
+        'years': '1926-1962',
+        'profession': localizations.actressModelSinger,
+        'imageUrl': 'assets/images/monroe.png',
+      },
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final navigationItems = _getNavigationItems(localizations);
+    final famousPeople = _getFamousPeople(localizations);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -143,58 +152,27 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                 // Header section with enhanced styling
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Main title with elegant styling
-                      Text('AFTERLIFE', style: _titleStyle),
-
-                      // Animated divider with gradient effect
-                      const SizedBox(height: 16),
-                      Container(
-                        width: 120,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.warmGold,
-                              AppTheme.warmGold.withOpacity(0.1),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 0.7, 1.0],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.warmGold.withOpacity(0.4),
-                              blurRadius: 6,
-                              spreadRadius: 0,
-                            ),
-                          ],
+                  child: Text(
+                    _selectedIndex == 0
+                        ? localizations.exploreDigitalTwins
+                        : localizations.yourDigitalTwins,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 3.0,
+                      color: AppTheme.silverMist,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10.0,
+                          color: AppTheme.warmGold.withOpacity(0.8),
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Subtitle with section indicator
-                      Text(
-                        _selectedIndex == 0
-                            ? 'EXPLORE DIGITAL TWINS'
-                            : 'YOUR DIGITAL TWINS',
-                        style: _subtitleStyle,
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Caption text
-                      Text(
-                        'Interact with historical figures through their masks',
-                        style: _captionStyle,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
-                // Content based on selected tab
+                // Main content area with PageView
                 Expanded(
                   child: PageView(
                     controller: _pageController,
@@ -203,7 +181,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                         _selectedIndex = index;
                       });
                     },
-                    children: [_buildExploreTab(), _buildYourTwinsTab()],
+                    children: [
+                      _buildExploreTab(localizations, famousPeople),
+                      _buildYourTwinsTab(localizations),
+                    ],
                   ),
                 ),
               ],
@@ -245,7 +226,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
           unselectedItemColor: AppTheme.silverMist.withOpacity(0.5),
           selectedItemColor: AppTheme.warmGold,
-          items: _navigationItems,
+          items: navigationItems,
         ),
       ),
     );
@@ -284,36 +265,52 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   }
 
   // Explore tab with famous digital twins
-  Widget _buildExploreTab() {
+  Widget _buildExploreTab(AppLocalizations localizations, List<Map<String, dynamic>> famousPeople) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.builder(
-        key: const PageStorageKey('exploreTab'),
-        padding: const EdgeInsets.only(top: 12, bottom: 24),
-        physics: const BouncingScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
-        ),
-        itemCount: _famousPeople.length,
-        itemBuilder: (context, index) {
-          final person = _famousPeople[index];
-          return _FamousPersonCard(
-            key: ValueKey('famous_person_${person['name']}'),
-            name: person['name'] as String,
-            years: person['years'] as String,
-            profession: person['profession'] as String,
-            imageUrl: person['imageUrl'] as String?,
-          );
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            localizations.interactWithHistoricalFigures,
+            style: GoogleFonts.lato(
+              fontSize: 16,
+              color: AppTheme.silverMist.withOpacity(0.8),
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Expanded(
+            child: GridView.builder(
+              key: const PageStorageKey('exploreTab'),
+              padding: const EdgeInsets.only(top: 12, bottom: 24),
+              physics: const BouncingScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.7,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+              ),
+              itemCount: famousPeople.length,
+              itemBuilder: (context, index) {
+                final person = famousPeople[index];
+                return _FamousPersonCard(
+                  key: ValueKey('famous_person_${person['name']}'),
+                  name: person['name'] as String,
+                  years: person['years'] as String,
+                  profession: person['profession'] as String,
+                  imageUrl: person['imageUrl'] as String?,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
   // Your Twins tab with user's digital twins
-  Widget _buildYourTwinsTab() {
+  Widget _buildYourTwinsTab(AppLocalizations localizations) {
     return Consumer<CharactersProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
@@ -334,7 +331,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'ACCESSING DATA STORAGE',
+                  localizations.accessingDataStorage,
                   style: GoogleFonts.cinzel(
                     fontSize: 14,
                     color: AppTheme.warmGold,
@@ -349,7 +346,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         final characters = provider.characters;
 
         if (characters.isEmpty) {
-          return _buildEmptyState(context);
+          return _buildEmptyState(context, localizations);
         }
 
         // Grid of user-created character cards
@@ -401,119 +398,112 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations localizations) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Empty state icon with glow effect
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTheme.midnightPurple.withOpacity(0.3),
-                border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.3),
-                  width: 1,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Empty state illustration
+          Container(
+            width: 160,
+            height: 160,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.midnightPurple.withOpacity(0.3),
+              border: Border.all(
+                color: AppTheme.warmGold.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.person_outline,
+              size: 80,
+              color: AppTheme.warmGold.withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Empty state message
+          Text(
+            localizations.noDigitalTwinsDetected,
+            style: GoogleFonts.cinzel(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.warmGold,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Description text
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              localizations.createNewTwinDescription,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.lato(
+                fontSize: 16,
+                color: AppTheme.silverMist.withOpacity(0.8),
+                height: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Create button
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => _onAddCharacter(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.warmGold.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.person_outline,
-                size: 50,
-                color: AppTheme.warmGold.withOpacity(0.7),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Empty state title
-            Text(
-              'NO DIGITAL TWINS DETECTED',
-              style: GoogleFonts.cinzel(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.silverMist,
-                letterSpacing: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Empty state description
-            Text(
-              'Create a new digital twin to begin interacting with your preserved consciousness',
-              style: AppTheme.captionStyle,
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 32),
-
-            // Create button with energy field styling
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () => _onAddCharacter(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppTheme.warmGold.withOpacity(0.8),
-                        AppTheme.midnightPurple.withOpacity(0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.warmGold.withOpacity(0.3),
-                        blurRadius: 10,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                    border: Border.all(
-                      color: AppTheme.silverMist.withOpacity(0.3),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        size: 20,
-                        color: AppTheme.silverMist.withOpacity(0.9),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'CREATE NEW TWIN',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.silverMist,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.warmGold.withOpacity(0.8),
+                      AppTheme.midnightPurple.withOpacity(0.8),
                     ],
                   ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.warmGold.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: AppTheme.silverMist.withOpacity(0.3),
+                    width: 0.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: 20,
+                      color: AppTheme.silverMist.withOpacity(0.9),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      localizations.createNewTwin,
+                      style: GoogleFonts.cinzel(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.silverMist,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
