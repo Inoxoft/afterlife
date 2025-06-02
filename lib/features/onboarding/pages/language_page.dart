@@ -1,15 +1,55 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 import 'package:provider/provider.dart';
 import '../../../features/providers/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
 
-class LanguagePage extends StatelessWidget {
-  final AnimationController animationController;
+class LanguagePage extends StatefulWidget {
+  const LanguagePage({super.key});
 
-  const LanguagePage({Key? key, required this.animationController})
-      : super(key: key);
+  @override
+  State<LanguagePage> createState() => _LanguagePageState();
+}
+
+class _LanguagePageState extends State<LanguagePage>
+    with TickerProviderStateMixin {
+  late AnimationController animationController;
+  late Animation<Offset> titleAnimation;
+  late Animation<Offset> contentAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    titleAnimation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+    ));
+
+    contentAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
+    ));
+
+    animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +109,8 @@ class LanguagePage extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       localizations.language.toUpperCase(),
-                      style: GoogleFonts.cinzel(
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: localizations.language.toUpperCase(),
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -87,7 +128,8 @@ class LanguagePage extends StatelessWidget {
                     Text(
                       localizations.languageDescription,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: localizations.languageDescription,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
                         color: AppTheme.silverMist.withOpacity(0.9),
@@ -140,7 +182,8 @@ class LanguagePage extends StatelessWidget {
                             child: Center(
                               child: Text(
                                 language['name']!,
-                                style: GoogleFonts.lato(
+                                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                                  text: language['name']!,
                                   fontSize: 16,
                                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   color: isSelected ? AppTheme.warmGold : AppTheme.silverMist,

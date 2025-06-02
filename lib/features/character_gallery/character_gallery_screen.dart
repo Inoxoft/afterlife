@@ -12,6 +12,7 @@ import '../character_chat/chat_screen.dart';
 import '../character_interview/interview_screen.dart';
 import '../character_prompts/famous_character_profile_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 
 class PulseRingPainter extends CustomPainter {
   final double progress;
@@ -156,7 +157,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     _selectedIndex == 0
                         ? localizations.exploreDigitalTwins
                         : localizations.yourDigitalTwins,
-                    style: GoogleFonts.cinzel(
+                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                      text: _selectedIndex == 0
+                          ? localizations.exploreDigitalTwins
+                          : localizations.yourDigitalTwins,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 3.0,
@@ -216,11 +220,13 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
-          selectedLabelStyle: GoogleFonts.lato(
+          selectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: "Tab", // Placeholder text for style detection
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
-          unselectedLabelStyle: GoogleFonts.lato(
+          unselectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: "Tab", // Placeholder text for style detection
             fontSize: 12,
             fontWeight: FontWeight.w400,
           ),
@@ -273,7 +279,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         children: [
           Text(
             localizations.interactWithHistoricalFigures,
-            style: GoogleFonts.lato(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: localizations.interactWithHistoricalFigures,
               fontSize: 16,
               color: AppTheme.silverMist.withOpacity(0.8),
               letterSpacing: 0.5,
@@ -332,7 +339,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                 const SizedBox(height: 16),
                 Text(
                   localizations.accessingDataStorage,
-                  style: GoogleFonts.cinzel(
+                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                    text: localizations.accessingDataStorage,
                     fontSize: 14,
                     color: AppTheme.warmGold,
                     letterSpacing: 1.5,
@@ -426,7 +434,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           // Empty state message
           Text(
             localizations.noDigitalTwinsDetected,
-            style: GoogleFonts.cinzel(
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: localizations.noDigitalTwinsDetected,
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppTheme.warmGold,
@@ -441,7 +450,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             child: Text(
               localizations.createNewTwinDescription,
               textAlign: TextAlign.center,
-              style: GoogleFonts.lato(
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.createNewTwinDescription,
                 fontSize: 16,
                 color: AppTheme.silverMist.withOpacity(0.8),
                 height: 1.5,
@@ -491,7 +501,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     const SizedBox(width: 10),
                     Text(
                       localizations.createNewTwin,
-                      style: GoogleFonts.cinzel(
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: localizations.createNewTwin,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.silverMist,
@@ -784,7 +795,12 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         // Digital twin name
                         Text(
                           widget.name,
-                          style: AppTheme.twinNameStyle.copyWith(
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: widget.name,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            color: AppTheme.warmGold,
                             shadows: [
                               Shadow(
                                 color: AppTheme.warmGold.withOpacity(0.5),
@@ -807,7 +823,11 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             const SizedBox(width: 8),
                             Text(
                               widget.years,
-                              style: AppTheme.metadataStyle.copyWith(
+                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                text: widget.years,
+                                fontSize: 14,
+                                color: AppTheme.warmGold,
+                                letterSpacing: 0.5,
                                 shadows: [
                                   Shadow(
                                     color: AppTheme.warmGold.withOpacity(0.5),
@@ -838,11 +858,12 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           ),
                           child: Text(
                             widget.profession,
-                            style: TextStyle(
-                              color: AppTheme.warmGold,
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: widget.profession,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
+                              color: AppTheme.warmGold,
                             ),
                           ),
                         ),
@@ -884,10 +905,11 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           const SizedBox(width: 4),
                           Text(
                             'View',
-                            style: TextStyle(
-                              color: AppTheme.midnightPurple,
-                              fontWeight: FontWeight.bold,
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: 'View',
                               fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.midnightPurple,
                             ),
                           ),
                         ],
@@ -1120,21 +1142,31 @@ class _CharacterCardState extends State<_CharacterCard>
             ),
             title: Text(
               'Delete Character',
-              style: TextStyle(
-                color: AppTheme.silverMist,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: 'Delete Character',
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: AppTheme.silverMist,
               ),
             ),
             content: Text(
               'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
-              style: TextStyle(color: AppTheme.silverMist.withOpacity(0.7)),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: 'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
+                fontSize: 16,
+                color: AppTheme.silverMist.withOpacity(0.7),
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   'Cancel',
-                  style: TextStyle(color: AppTheme.silverMist.withOpacity(0.7)),
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: AppTheme.silverMist.withOpacity(0.7),
+                  ),
                 ),
               ),
               TextButton(
@@ -1253,11 +1285,12 @@ class _CharacterCardState extends State<_CharacterCard>
                             // Character name
                             Text(
                               widget.character.name,
-                              style: GoogleFonts.spaceMono(
-                                color: AppTheme.silverMist,
+                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                text: widget.character.name,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
+                                color: AppTheme.silverMist,
                                 shadows: [
                                   Shadow(
                                     color: AppTheme.warmGold.withOpacity(0.5),

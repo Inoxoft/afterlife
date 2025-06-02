@@ -101,7 +101,10 @@ class CharactersProvider with ChangeNotifier {
     List<String> charactersJson,
   ) {
     return charactersJson.map((json) {
-      final decoded = jsonDecode(json);
+      // Explicitly decode as UTF-8 to preserve Ukrainian characters
+      final jsonBytes = utf8.encode(json);
+      final decodedJson = utf8.decode(jsonBytes);
+      final decoded = jsonDecode(decodedJson);
       return CharacterModel.fromJson(decoded);
     }).toList();
   }
@@ -139,7 +142,12 @@ class CharactersProvider with ChangeNotifier {
 
   // Encode character JSON in an isolate for better performance
   static List<String> _encodeCharactersJson(List<CharacterModel> characters) {
-    return characters.map((char) => jsonEncode(char.toJson())).toList();
+    return characters.map((char) {
+      // Explicitly encode to UTF-8 to preserve Ukrainian characters
+      final jsonString = jsonEncode(char.toJson());
+      final jsonBytes = utf8.encode(jsonString);
+      return utf8.decode(jsonBytes);
+    }).toList();
   }
 
   Future<void> addCharacter(CharacterModel character) async {

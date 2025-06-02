@@ -15,6 +15,7 @@ import '../../core/utils/image_optimizer.dart';
 import '../../core/utils/performance_optimizer.dart';
 import '../character_interview/chat_service.dart' as interview_chat;
 import '../../core/widgets/api_key_input_dialog.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -201,7 +202,8 @@ class _SplashScreenState extends State<SplashScreen>
                     // App name
                     Text(
                       'AFTERLIFE',
-                      style: GoogleFonts.cinzel(
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: 'AFTERLIFE',
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 8,
@@ -220,10 +222,16 @@ class _SplashScreenState extends State<SplashScreen>
                     // Status message
                     Text(
                       _statusMessage,
-                      style: GoogleFonts.spaceMono(
-                        fontSize: 14,
-                        color: AppTheme.silverMist.withOpacity(0.7),
-                        letterSpacing: 2,
+                      style: UkrainianFontUtils.getTextStyleWithUkrainianSupport(
+                        text: _statusMessage,
+                        googleFontStyle: () => TextStyle(
+                          fontFamily: 'SpaceMono',
+                          fontSize: 14,
+                          color: AppTheme.silverMist.withOpacity(0.7),
+                          letterSpacing: 2,
+                        ),
+                        fallbackFontFamily: 'monospace',
+                        customFallbacks: ['Courier New', 'monospace'],
                       ),
                     ),
                     const SizedBox(height: 40),

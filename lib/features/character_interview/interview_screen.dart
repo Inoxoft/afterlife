@@ -1,17 +1,21 @@
 // lib/features/character_interview/interview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/widgets/animated_particles.dart';
-import '../models/character_model.dart';
-import '../providers/characters_provider.dart';
-import '../providers/language_provider.dart';
-import '../character_gallery/character_gallery_screen.dart';
+import '../../../core/theme/app_theme.dart';
 import 'interview_provider.dart';
+import '../models/character_model.dart';
+import '../character_gallery/character_gallery_screen.dart';
+import '../providers/characters_provider.dart';
 import 'chat_bubble.dart';
-import 'file_processor_service.dart';
-import 'package:path/path.dart' as path;
+import '../../core/utils/ukrainian_font_utils.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/widgets/animated_particles.dart';
+import 'file_processor_service.dart';
+import '../providers/language_provider.dart';
+import '../chat/models/chat_message.dart';
+import '../chat/widgets/chat_message_bubble.dart';
+import 'package:path/path.dart' as path;
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 
@@ -386,7 +390,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
         children: [
           Text(
             'Interview Complete!',
-            style: GoogleFonts.cinzel(
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: 'Interview Complete!',
               color: AppTheme.warmGold,
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -396,7 +401,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
           const SizedBox(height: 16),
           Text(
             'I have gathered enough information to create your digital twin.',
-            style: GoogleFonts.lato(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: 'I have gathered enough information to create your digital twin.',
               color: AppTheme.silverMist,
               fontSize: 16,
             ),
@@ -423,7 +429,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
               children: [
                 Text(
                   provider.isEditMode ? 'Update Character' : 'Continue to Gallery',
-                  style: GoogleFonts.lato(
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: provider.isEditMode ? 'Update Character' : 'Continue to Gallery',
                     color: AppTheme.midnightPurple,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

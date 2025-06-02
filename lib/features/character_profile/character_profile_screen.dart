@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
+import '../providers/language_provider.dart';
+import '../character_chat/chat_screen.dart';
+import '../../core/widgets/animated_particles.dart';
 import '../character_interview/interview_screen.dart';
 import '../../core/widgets/model_selection_dialog.dart';
+import '../../l10n/app_localizations.dart';
+import '../character_chat/chat_screen.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -296,13 +302,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         children: [
           Text(
             'AI MODEL',
-            style: GoogleFonts.cinzel(
-              textStyle: TextStyle(
-                color: AppTheme.warmGold,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: 'AI MODEL',
+              color: AppTheme.warmGold,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
             ),
           ),
           const SizedBox(height: 16),
@@ -365,7 +370,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     children: [
                       Text(
                         'View all available models',
-                        style: TextStyle(
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: 'View all available models',
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -373,7 +379,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       ),
                       Text(
                         'Explore more AI options',
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: 'Explore more AI options',
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -1222,11 +1232,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       children: [
                         Text(
                           'AI MODEL',
-                          style: GoogleFonts.cinzel(
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: 'AI MODEL',
+                            color: AppTheme.warmGold,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2.0,
-                            color: AppTheme.warmGold,
                           ),
                         ),
                         const SizedBox(height: 12),

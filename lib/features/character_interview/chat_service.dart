@@ -110,10 +110,11 @@ class ChatService {
           .post(
             Uri.parse(_openRouterUrl),
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json; charset=utf-8',
               'Authorization': 'Bearer $_apiKey',
               'HTTP-Referer': 'https://afterlife.app',
               'X-Title': 'Afterlife AI',
+              'Accept': 'application/json; charset=utf-8',
             },
             body: body,
           )
@@ -126,7 +127,9 @@ class ChatService {
         throw ChatServiceException(errorMessage);
       }
 
-      final data = jsonDecode(response.body);
+      // Explicitly decode response body as UTF-8
+      final responseBody = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(responseBody);
       return data['choices'][0]['message']['content'] as String;
     } on http.ClientException catch (e) {
       print('Network error in chat service: $e');

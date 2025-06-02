@@ -8,6 +8,8 @@ import 'pages/explore_page.dart';
 import 'pages/language_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
+import '../../l10n/app_localizations.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -68,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _getPage() {
     switch (_currentPage) {
       case 0:
-        return LanguagePage(animationController: _animationController);
+        return const LanguagePage();
       case 1:
         return MaskPage(animationController: _animationController);
       case 2:
@@ -168,7 +170,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         ),
                         child: Text(
                           "BACK",
-                          style: GoogleFonts.cinzel(
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: "BACK",
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.0,
@@ -218,7 +221,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ),
                       child: Text(
                         _currentPage == 3 ? "BEGIN" : "NEXT",
-                        style: GoogleFonts.cinzel(
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text: _currentPage == 3 ? "BEGIN" : "NEXT",
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.0,

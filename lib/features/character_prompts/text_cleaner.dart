@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'famous_character_prompts.dart';
 
 /// Utility class to clean up encoding issues in text
@@ -26,6 +25,43 @@ class TextCleaner {
 
   /// Clean a text by removing or replacing problematic characters
   static String _cleanText(String text) {
+    // Preserve Ukrainian characters explicitly
+    if (text.contains('і') || text.contains('ї')) {
+      // Store Ukrainian characters temporarily
+      final ukrainianChars = <int, String>{};
+      int index = 0;
+      
+      // Replace Ukrainian characters with placeholders
+      String tempText = text;
+      for (int i = 0; i < text.length; i++) {
+        if (text[i] == 'і' || text[i] == 'ї') {
+          final placeholder = '___UKRAINIAN_${index}___';
+          ukrainianChars[index] = text[i];
+          tempText = tempText.replaceFirst(text[i], placeholder);
+          index++;
+        }
+      }
+      
+      // Process the text normally
+      String cleaned = tempText;
+      
+      // Apply normal cleaning
+      cleaned = _applyCleaning(cleaned);
+      
+      // Restore Ukrainian characters
+      ukrainianChars.forEach((idx, char) {
+        cleaned = cleaned.replaceFirst('___UKRAINIAN_${idx}___', char);
+      });
+      
+      return cleaned;
+    }
+    
+    // Normal processing for non-Ukrainian text
+    return _applyCleaning(text);
+  }
+  
+  /// Apply standard text cleaning operations
+  static String _applyCleaning(String text) {
     // Replace common problematic characters
     String cleaned = text
         // Fix common encoding issues
@@ -57,16 +93,20 @@ class TextCleaner {
         .replaceAll('MariÄ', 'Marie')
         .replaceAll('LÃ¶wenthal', 'Lowenthal');
 
-    // Remove any remaining non-standard characters
-    cleaned = _removeNonStandardChars(cleaned);
+    // DO NOT remove Unicode characters - preserve international text
+    // cleaned = _removeNonStandardChars(cleaned);
 
     return cleaned;
   }
 
-  /// Remove any remaining non-standard characters that might cause issues
-  static String _removeNonStandardChars(String text) {
-    // Keep only standard ASCII characters, basic punctuation, and common symbols
-    return text.replaceAll(RegExp(r'[^\x00-\x7F]'), '');
+  /// Remove only problematic control characters while preserving Unicode
+  static String _removeProblematicChars(String text) {
+    // Remove only control characters and problematic sequences
+    // Preserve all Unicode characters for international languages
+    return text
+        .replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]'), '') // Control chars
+        .replaceAll(RegExp(r'[^\S ]+'), ' ') // Multiple whitespace to single space
+        .trim();
   }
 
   /// Clean text for public use
@@ -77,6 +117,6 @@ class TextCleaner {
   /// Run the cleaner when the app starts
   static void initializeCleaner() {
     cleanAllPrompts();
-    print('Text cleaner initialized');
+    print('Text cleaner initialized - Unicode characters preserved');
   }
 }

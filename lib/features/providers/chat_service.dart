@@ -123,10 +123,11 @@ class ChatService {
           .post(
             Uri.parse(_openRouterUrl),
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json; charset=utf-8',
               'Authorization': 'Bearer $_apiKey',
               'HTTP-Referer': 'https://afterlife.app',
               'X-Title': 'Afterlife AI',
+              'Accept': 'application/json; charset=utf-8',
             },
             body: jsonEncode(body),
           )
@@ -134,7 +135,9 @@ class ChatService {
 
       // Check if the request was successful
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+        // Explicitly decode response body as UTF-8
+        final responseBody = utf8.decode(response.bodyBytes);
+        final jsonResponse = jsonDecode(responseBody);
         final content = jsonResponse['choices'][0]['message']['content'];
         return content;
       } else {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 import '../../../l10n/app_localizations.dart';
 
 class MaskPage extends StatelessWidget {
@@ -60,7 +60,8 @@ class MaskPage extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       localizations.understandMasks,
-                      style: GoogleFonts.cinzel(
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: localizations.understandMasks,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -78,7 +79,8 @@ class MaskPage extends StatelessWidget {
                     Text(
                       localizations.digitalPersonasWithHistoricalEssence,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: localizations.digitalPersonasWithHistoricalEssence,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
                         color: AppTheme.silverMist.withOpacity(0.9),
@@ -105,10 +107,10 @@ class MaskPage extends StatelessWidget {
                       right: 40,
                       child: Text(
                         'E=mc²',
-                        style: GoogleFonts.lato(
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: 'E=mc²',
                           color: AppTheme.warmGold.withOpacity(0.3),
                           fontSize: 22,
-                          fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w200,
                         ),
                       ),
@@ -118,10 +120,10 @@ class MaskPage extends StatelessWidget {
                       left: 40,
                       child: Text(
                         'π',
-                        style: GoogleFonts.lato(
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: 'π',
                           color: AppTheme.warmGold.withOpacity(0.25),
                           fontSize: 24,
-                          fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w200,
                         ),
                       ),
@@ -133,10 +135,10 @@ class MaskPage extends StatelessWidget {
                         angle: -0.2,
                         child: Text(
                           'ψ',
-                          style: GoogleFonts.lato(
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text: 'ψ',
                             color: AppTheme.warmGold.withOpacity(0.2),
                             fontSize: 20,
-                            fontStyle: FontStyle.italic,
                             fontWeight: FontWeight.w200,
                           ),
                         ),
@@ -276,7 +278,8 @@ class MaskPage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.lato(
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: text,
                 color: AppTheme.silverMist,
                 fontSize: 14,
                 height: 1.3,

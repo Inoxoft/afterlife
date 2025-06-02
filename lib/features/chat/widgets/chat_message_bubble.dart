@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/chat_message.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
+import '../models/chat_message.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -23,17 +24,15 @@ class ChatMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Row(
-        mainAxisAlignment:
-            message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!message.isUser && showAvatar) ...[
             _buildAvatar(),
             const SizedBox(width: 8),
           ],
-          Flexible(
+          Expanded(
             child: Column(
               crossAxisAlignment: message.isUser
                   ? CrossAxisAlignment.end
@@ -41,36 +40,25 @@ class ChatMessageBubble extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+                    vertical: 8,
+                    horizontal: 12,
                   ),
                   decoration: BoxDecoration(
                     color: message.isUser
                         ? AppTheme.warmGold.withOpacity(0.1)
-                        : AppTheme.midnightPurple.withOpacity(0.3),
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(message.isUser ? 16 : 4),
-                      bottomRight: Radius.circular(message.isUser ? 4 : 16),
-                    ),
+                        : AppTheme.midnightPurple.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: message.isUser
                           ? AppTheme.warmGold.withOpacity(0.3)
-                          : AppTheme.silverMist.withOpacity(0.3),
+                          : AppTheme.silverMist.withOpacity(0.2),
                       width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
                   ),
                   child: Text(
                     message.content,
-                    style: GoogleFonts.lato(
+                    style: UkrainianFontUtils.latoWithUkrainianSupport(
+                      text: message.content,
                       color: message.isUser
                           ? AppTheme.warmGold
                           : AppTheme.silverMist,
@@ -123,7 +111,8 @@ class ChatMessageBubble extends StatelessWidget {
           : Center(
               child: Text(
                 avatarText ?? (message.isUser ? 'You' : 'AI'),
-                style: GoogleFonts.lato(
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: avatarText ?? (message.isUser ? 'You' : 'AI'),
                   color: AppTheme.warmGold,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,

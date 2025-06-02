@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,7 +59,17 @@ class LanguageProvider with ChangeNotifier {
   Future<void> setLanguage(String languageCode) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_languageKey, languageCode);
+      
+      // Ensure proper UTF-8 encoding for Ukrainian language
+      if (languageCode == 'uk') {
+        // Use explicit UTF-8 encoding for Ukrainian
+        final encodedCode = utf8.encode(languageCode);
+        final decodedCode = utf8.decode(encodedCode);
+        await prefs.setString(_languageKey, decodedCode);
+      } else {
+        await prefs.setString(_languageKey, languageCode);
+      }
+      
       _currentLocale = Locale(languageCode);
       notifyListeners();
     } catch (e) {

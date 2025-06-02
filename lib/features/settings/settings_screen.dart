@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 import '../providers/characters_provider.dart';
 import '../providers/language_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/env_config.dart';
+import '../../../core/widgets/api_key_input_dialog.dart';
 import 'themed_icon.dart';
-import '../../core/widgets/api_key_input_dialog.dart';
-import '../../core/utils/env_config.dart';
 import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
-import '../character_interview/chat_service.dart' as character_interview;
+import '../character_interview/chat_service.dart' as interview_chat;
 import '../developer_chat/developer_chat_screen.dart';
-import '../../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -348,7 +348,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
       child: Row(
         children: [
           Container(
@@ -356,13 +356,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             height: 20,
             decoration: BoxDecoration(
               color: AppTheme.warmGold,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 8),
           Text(
             title.toUpperCase(),
-            style: GoogleFonts.cinzel(
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: title,
               color: AppTheme.warmGold,
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -398,7 +399,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: title,
             color: AppTheme.silverMist,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -408,7 +410,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             subtitle,
-            style: TextStyle(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: subtitle,
               color: AppTheme.silverMist.withOpacity(0.7),
               fontSize: 13,
             ),
@@ -473,14 +476,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         title: Text(
           localizations.clearAllData,
-          style: TextStyle(
+          style: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: localizations.clearAllData,
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           localizations.clearAllDataConfirmation,
-          style: TextStyle(color: Colors.white70),
+          style: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: localizations.clearAllDataConfirmation,
+            color: Colors.white70,
+          ),
         ),
         backgroundColor: AppTheme.deepIndigo,
         shape: RoundedRectangleBorder(
@@ -495,7 +502,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               localizations.cancel,
-              style: TextStyle(color: AppTheme.silverMist),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.cancel,
+                color: AppTheme.silverMist,
+              ),
             ),
           ),
           TextButton(
@@ -534,7 +544,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: Text(
               localizations.deleteEverything,
-              style: TextStyle(color: Colors.redAccent),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.deleteEverything,
+                color: Colors.redAccent,
+              ),
             ),
           ),
         ],
@@ -557,13 +570,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Reinitialize all chat services
           ChatService.initialize();
           character_chat.ChatService.initialize();
-          character_interview.ChatService.initialize();
+          interview_chat.ChatService.initialize();
           
           // Force a refresh of API keys in each service
           try {
             ChatService.refreshApiKey();
             character_chat.ChatService.refreshApiKey();
-            character_interview.ChatService.refreshApiKey();
+            interview_chat.ChatService.refreshApiKey();
           } catch (e) {
             print('Error refreshing API keys: $e');
           }

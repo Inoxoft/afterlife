@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -241,11 +242,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           Expanded(
             child: Text(
               _character!.name,
-              style: GoogleFonts.cinzel(
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: _character!.name,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -292,7 +292,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             const SizedBox(height: 16),
             Text(
               localizations.startChattingWith.replaceAll('{name}', _character!.name),
-              style: TextStyle(
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.startChattingWith.replaceAll('{name}', _character!.name),
                 color: Colors.white.withOpacity(0.7),
                 fontSize: 16,
               ),
@@ -301,7 +302,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             const SizedBox(height: 8),
             Text(
               localizations.sendMessageToBegin,
-              style: TextStyle(
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.sendMessageToBegin,
                 color: Colors.white.withOpacity(0.5),
                 fontSize: 14,
               ),
@@ -353,7 +355,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
               focusNode: _inputFocusNode,
               decoration: InputDecoration(
                 hintText: localizations.typeMessage,
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                hintStyle: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.typeMessage,
+                  color: Colors.white.withOpacity(0.5),
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide(
@@ -377,7 +382,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                   vertical: 12,
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: "Sample text", // Placeholder for style detection
+                color: Colors.white,
+              ),
               maxLines: null,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
@@ -413,25 +421,37 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         backgroundColor: AppTheme.backgroundStart,
         title: Text(
           localizations.clearChatHistoryTitle,
-          style: const TextStyle(color: Colors.white),
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: localizations.clearChatHistoryTitle,
+            color: Colors.white,
+          ),
         ),
         content: Text(
           localizations.clearChatHistoryConfirm,
-          style: const TextStyle(color: Colors.white70),
+          style: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: localizations.clearChatHistoryConfirm,
+            color: Colors.white70,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               localizations.cancel,
-              style: const TextStyle(color: AppTheme.warmGold),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.cancel,
+                color: AppTheme.warmGold,
+              ),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               localizations.clear,
-              style: const TextStyle(color: Colors.red),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.clear,
+                color: Colors.red,
+              ),
             ),
           ),
         ],

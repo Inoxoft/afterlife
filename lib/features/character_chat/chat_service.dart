@@ -108,10 +108,11 @@ class ChatService {
           .post(
             Uri.parse(_openRouterUrl),
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json; charset=utf-8',
               'Authorization': 'Bearer $_apiKey',
               'HTTP-Referer': 'https://afterlife.app',
               'X-Title': 'Afterlife AI',
+              'Accept': 'application/json; charset=utf-8',
             },
             body: body,
           )
@@ -122,8 +123,9 @@ class ChatService {
         throw Exception('Failed to get response: ${response.body}');
       }
 
-      // Parse response
-      final data = jsonDecode(response.body);
+      // Parse response with explicit UTF-8 decoding
+      final responseBody = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(responseBody);
       return data['choices'][0]['message']['content'] as String;
     } on TimeoutException catch (e) {
       print('Request timed out after ${_requestTimeout.inSeconds} seconds: $e');

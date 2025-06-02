@@ -1,6 +1,7 @@
 // lib/core/theme/app_theme.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../utils/ukrainian_font_utils.dart';
 
 /// Central theme configuration for the Afterlife application
 class AppTheme {
@@ -129,6 +130,77 @@ class AppTheme {
   );
 
   static TextStyle get labelStyle => GoogleFonts.lato(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.8,
+    color: warmGold,
+  );
+
+  // NEW: Ukrainian-aware text style methods
+  static TextStyle titleStyleFor(String text) => UkrainianFontUtils.cinzelWithUkrainianSupport(
+    text: text,
+    fontSize: 36,
+    fontWeight: FontWeight.bold,
+    letterSpacing: 3.0,
+    color: silverMist,
+    shadows: [
+      Shadow(
+        color: warmGold.withOpacity(0.8),
+        blurRadius: 10,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+
+  static TextStyle subtitleStyleFor(String text) => UkrainianFontUtils.cinzelWithUkrainianSupport(
+    text: text,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 3.0,
+    color: silverMist,
+    shadows: [
+      Shadow(
+        color: warmGold.withOpacity(0.6),
+        blurRadius: 8,
+        offset: const Offset(0, 1),
+      ),
+    ],
+  );
+
+  static TextStyle bodyTextStyleFor(String text) => UkrainianFontUtils.latoWithUkrainianSupport(
+    text: text,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: silverMist,
+    letterSpacing: 0.5,
+  );
+
+  static TextStyle captionStyleFor(String text) => UkrainianFontUtils.latoWithUkrainianSupport(
+    text: text,
+    fontSize: 14,
+    fontWeight: FontWeight.w300,
+    color: silverMist.withOpacity(0.9),
+    letterSpacing: 0.5,
+  );
+
+  static TextStyle twinNameStyleFor(String text) => UkrainianFontUtils.cinzelWithUkrainianSupport(
+    text: text,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 1.0,
+    color: silverMist,
+  );
+
+  static TextStyle metadataStyleFor(String text) => UkrainianFontUtils.latoWithUkrainianSupport(
+    text: text,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    color: silverMist.withOpacity(0.8),
+    letterSpacing: 0.3,
+  );
+
+  static TextStyle labelStyleFor(String text) => UkrainianFontUtils.latoWithUkrainianSupport(
+    text: text,
     fontSize: 11,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.8,

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/developer_chat/developer_chat_screen.dart';
-import '../../../l10n/app_localizations.dart';
 
 class ExplorePage extends StatelessWidget {
   final AnimationController animationController;
@@ -79,7 +80,8 @@ class ExplorePage extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       l10n?.diversePerspectives ?? 'DIVERSE PERSPECTIVES',
-                      style: GoogleFonts.cinzel(
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: l10n?.diversePerspectives ?? 'DIVERSE PERSPECTIVES',
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -97,7 +99,8 @@ class ExplorePage extends StatelessWidget {
                     Text(
                       l10n?.fromPoliticsToArt ?? 'From politics to art, history comes alive',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: l10n?.fromPoliticsToArt ?? 'From politics to art, history comes alive',
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
                         color: AppTheme.silverMist.withOpacity(0.9),
@@ -239,7 +242,8 @@ class ExplorePage extends StatelessWidget {
                           children: [
                             Text(
                               l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
-                              style: GoogleFonts.cinzel(
+                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                text: l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
                                 color: AppTheme.silverMist,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -248,8 +252,9 @@ class ExplorePage extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               l10n?.chatWithDeveloperDescription ?? 'Chat with the developer\'s digital twin to learn more about the app and how it works.',
-                              style: GoogleFonts.lato(
-                                color: AppTheme.silverMist.withOpacity(0.7),
+                              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                                text: l10n?.chatWithDeveloperDescription ?? 'Chat with the developer\'s digital twin to learn more about the app and how it works.',
+                                color: AppTheme.silverMist,
                                 fontSize: 14,
                               ),
                             ),
@@ -271,7 +276,8 @@ class ExplorePage extends StatelessWidget {
                               ),
                               child: Text(
                                 l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
-                                style: GoogleFonts.cinzel(
+                                style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text: l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.0,
@@ -308,7 +314,8 @@ class ExplorePage extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.lato(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: text,
               color: AppTheme.silverMist,
               fontSize: 14,
               height: 1.4,

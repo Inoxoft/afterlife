@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 import 'dart:math' show pi, cos, sin;
 
 class LLMPage extends StatefulWidget {
@@ -75,7 +75,8 @@ class _LLMPageState extends State<LLMPage> {
                     Text(
                       AppLocalizations.of(context)!.theMindBehindTwins,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.cinzel(
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: AppLocalizations.of(context)!.theMindBehindTwins,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -93,7 +94,8 @@ class _LLMPageState extends State<LLMPage> {
                     Text(
                       AppLocalizations.of(context)!.poweredByAdvancedLanguageModels,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: AppLocalizations.of(context)!.poweredByAdvancedLanguageModels,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
                         color: AppTheme.silverMist.withOpacity(0.9),
@@ -137,7 +139,8 @@ class _LLMPageState extends State<LLMPage> {
                           const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.howItWorks,
-                            style: GoogleFonts.cinzel(
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: AppLocalizations.of(context)!.howItWorks,
                               color: AppTheme.warmGold,
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -148,7 +151,8 @@ class _LLMPageState extends State<LLMPage> {
                       const SizedBox(height: 16),
                       Text(
                         AppLocalizations.of(context)!.twinsPoweredByAI,
-                        style: GoogleFonts.lato(
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: AppLocalizations.of(context)!.twinsPoweredByAI,
                           color: AppTheme.silverMist,
                           fontSize: 14,
                           height: 1.4,
@@ -189,7 +193,8 @@ class _LLMPageState extends State<LLMPage> {
                                     Text(
                                       AppLocalizations.of(context)!.basicLLM,
                                       textAlign: TextAlign.center,
-                                      style: GoogleFonts.cinzel(
+                                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                        text: AppLocalizations.of(context)!.basicLLM,
                                         fontSize: maxWidth * 0.035,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.silverMist.withOpacity(0.8),
@@ -209,11 +214,11 @@ class _LLMPageState extends State<LLMPage> {
                                     Text(
                                       AppLocalizations.of(context)!.limitedKnowledge,
                                       textAlign: TextAlign.center,
-                                      style: GoogleFonts.lato(
+                                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                                        text: AppLocalizations.of(context)!.limitedKnowledge,
                                         fontSize: maxWidth * 0.03,
                                         fontWeight: FontWeight.w300,
                                         color: AppTheme.silverMist.withOpacity(0.7),
-                                        fontStyle: FontStyle.italic,
                                       ),
                                     ),
                                   ],
@@ -232,7 +237,8 @@ class _LLMPageState extends State<LLMPage> {
                                     Text(
                                       AppLocalizations.of(context)!.advancedLLM,
                                       textAlign: TextAlign.center,
-                                      style: GoogleFonts.cinzel(
+                                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                        text: AppLocalizations.of(context)!.advancedLLM,
                                         fontSize: maxWidth * 0.035,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.warmGold,
@@ -252,11 +258,11 @@ class _LLMPageState extends State<LLMPage> {
                                     Text(
                                       AppLocalizations.of(context)!.deepKnowledge,
                                       textAlign: TextAlign.center,
-                                      style: GoogleFonts.lato(
+                                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                                        text: AppLocalizations.of(context)!.deepKnowledge,
                                         fontSize: maxWidth * 0.03,
                                         fontWeight: FontWeight.w300,
                                         color: AppTheme.warmGold,
-                                        fontStyle: FontStyle.italic,
                                       ),
                                     ),
                                   ],
@@ -319,7 +325,8 @@ class _LLMPageState extends State<LLMPage> {
                         const SizedBox(width: 12),
                         Text(
                           AppLocalizations.of(context)!.exampleInteraction,
-                          style: GoogleFonts.cinzel(
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: AppLocalizations.of(context)!.exampleInteraction,
                             color: AppTheme.warmGold,
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -330,7 +337,8 @@ class _LLMPageState extends State<LLMPage> {
                     const SizedBox(height: 16),
                     Text(
                       AppLocalizations.of(context)!.whenDiscussingRelativityWithEinstein,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: AppLocalizations.of(context)!.whenDiscussingRelativityWithEinstein,
                         color: AppTheme.warmGold,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -383,7 +391,8 @@ class _LLMPageState extends State<LLMPage> {
             children: [
               Text(
                 name,
-                style: GoogleFonts.cinzel(
+                style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                  text: name,
                   color: AppTheme.warmGold,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -392,7 +401,8 @@ class _LLMPageState extends State<LLMPage> {
               const SizedBox(height: 4),
               Text(
                 description,
-                style: GoogleFonts.lato(
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: description,
                   color: AppTheme.silverMist,
                   fontSize: 13,
                   height: 1.3,
@@ -421,7 +431,8 @@ class _LLMPageState extends State<LLMPage> {
         children: [
           Text(
             title,
-            style: GoogleFonts.lato(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: title,
               color: isAdvanced ? AppTheme.warmGold : AppTheme.silverMist,
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -430,11 +441,11 @@ class _LLMPageState extends State<LLMPage> {
           const SizedBox(height: 4),
           Text(
             content,
-            style: GoogleFonts.lato(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: content,
               color: isAdvanced ? AppTheme.silverMist : AppTheme.silverMist.withOpacity(0.7),
               fontSize: 13,
               height: 1.3,
-              fontStyle: FontStyle.italic,
             ),
           ),
         ],
