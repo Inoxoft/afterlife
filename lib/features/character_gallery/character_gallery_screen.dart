@@ -73,6 +73,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
   // Cached bottom navigation items for better performance
   List<BottomNavigationBarItem> _getNavigationItems(AppLocalizations localizations) {
+    // Debug Ukrainian text detection
+    UkrainianFontUtils.debugUkrainianDetection(localizations.explore);
+    UkrainianFontUtils.debugUkrainianDetection(localizations.yourTwins);
+    
     return [
       BottomNavigationBarItem(
         icon: const Icon(Icons.explore, size: 24),
@@ -196,43 +200,56 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.midnightPurple.withOpacity(0.7),
-          border: Border(
-            top: BorderSide(
-              color: AppTheme.warmGold.withOpacity(0.3),
-              width: 1.0,
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          textTheme: Theme.of(context).textTheme.copyWith(
+            bodySmall: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: "Sample", // This will be used for tab labels
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
             ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.deepNavy.withOpacity(0.3),
-              blurRadius: 10,
-              spreadRadius: 0,
-              offset: const Offset(0, -2),
-            ),
-          ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onTabTapped,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          type: BottomNavigationBarType.fixed,
-          selectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
-            text: "Tab", // Placeholder text for style detection
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppTheme.midnightPurple.withOpacity(0.7),
+            border: Border(
+              top: BorderSide(
+                color: AppTheme.warmGold.withOpacity(0.3),
+                width: 1.0,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.deepNavy.withOpacity(0.3),
+                blurRadius: 10,
+                spreadRadius: 0,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
-          unselectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
-            text: "Tab", // Placeholder text for style detection
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onTabTapped,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: "Tab", // Placeholder text for style detection
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.warmGold,
+            ),
+            unselectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: "Tab", // Placeholder text for style detection
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: AppTheme.silverMist.withOpacity(0.5),
+            ),
+            unselectedItemColor: AppTheme.silverMist.withOpacity(0.5),
+            selectedItemColor: AppTheme.warmGold,
+            items: navigationItems,
           ),
-          unselectedItemColor: AppTheme.silverMist.withOpacity(0.5),
-          selectedItemColor: AppTheme.warmGold,
-          items: navigationItems,
         ),
       ),
     );

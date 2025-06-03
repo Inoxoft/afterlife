@@ -1,34 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 /// Utility class for handling Ukrainian font rendering across the entire app
 class UkrainianFontUtils {
-  /// Checks if text contains Ukrainian characters that need special font handling
+  /// Enhanced list of Ukrainian characters and common Ukrainian words
   static bool hasUkrainianCharacters(String text) {
-    return text.contains('і') || 
-           text.contains('ї') || 
-           text.contains('Ї') || 
-           text.contains('І') ||
-           text.contains('українська') || 
-           text.contains('Українська') ||
-           text.contains('відповідей') ||
-           text.contains('налаштування') ||
-           text.contains('Налаштування') ||
-           text.contains('повідомлення') ||
-           text.contains('Повідомлення') ||
-           // Add more common Ukrainian words that contain these characters
-           text.contains('Виберіть') ||
-           text.contains('виберіть') ||
-           text.contains('бажану') ||
-           text.contains('мову') ||
-           text.contains('додатку') ||
-           text.contains('підтримку') ||
-           text.contains('налаштувати') ||
-           text.contains('сповіщення') ||
-           text.contains('історію') ||
-           text.contains('розмови') ||
-           text.contains('двійники') ||
-           text.contains('персонажі');
+    // Ukrainian-specific characters
+    const ukrainianChars = [
+      'а', 'б', 'в', 'г', 'ґ', 'д', 'е', 'є', 'ж', 'з', 'и', 'і', 'ї', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ь', 'ю', 'я',
+      'А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ь', 'Ю', 'Я'
+    ];
+    
+    // Common Ukrainian words
+    const ukrainianWords = [
+      'дослідити', 'двійники', 'створити', 'налаштування',
+      'Дослідити', 'Двійники', 'Створити', 'Налаштування',
+      'мова', 'бажану', 'додатку', 'сповіщення', 'зберегти',
+      'українська', 'ДОСЛІДИТИ', 'ДВІЙНИКІВ', 'ЦИФРОВИХ',
+      'афтерлайф', 'безкоштовно', 'персонажа'
+    ];
+    
+    // Check for Ukrainian characters
+    for (String char in ukrainianChars) {
+      if (text.contains(char)) return true;
+    }
+    
+    // Check for Ukrainian words
+    for (String word in ukrainianWords) {
+      if (text.contains(word)) return true;
+    }
+    
+    return false;
+  }
+
+  /// Get the best font family for Ukrainian text on mobile
+  static String _getMobileFontFamily() {
+    if (kIsWeb) {
+      return 'system-ui';
+    }
+    
+    if (Platform.isAndroid) {
+      return 'Noto Sans';  // Android's Noto fonts have excellent Ukrainian support
+    } else if (Platform.isIOS) {
+      return '.SF UI Text';  // iOS system font with good Unicode support
+    }
+    
+    return 'system-ui';
+  }
+
+  static List<String> _getMobileFontFallbacks() {
+    if (kIsWeb) {
+      return ['system-ui', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'];
+    }
+    
+    if (Platform.isAndroid) {
+      return [
+        'Noto Sans',
+        'Noto Sans UI', 
+        'Roboto',
+        'Droid Sans',
+        'Arial Unicode MS',
+        'system-ui',
+        'sans-serif'
+      ];
+    } else if (Platform.isIOS) {
+      return [
+        '.SF UI Text',
+        '.SF Pro Text',
+        'SF Pro Display',
+        'Helvetica Neue',
+        'Arial Unicode MS',
+        'system-ui',
+        'sans-serif'
+      ];
+    }
+    
+    return ['system-ui', 'sans-serif'];
+  }
+
+  static List<String> _getMobileSerifFontFallbacks() {
+    if (kIsWeb) {
+      return ['system-ui', 'Georgia', 'Times New Roman', 'serif'];
+    }
+    
+    if (Platform.isAndroid) {
+      return [
+        'Noto Serif',
+        'Noto Sans',  // Fallback to sans if serif not available
+        'Droid Serif',
+        'Times New Roman',
+        'Georgia',
+        'system-ui',
+        'serif'
+      ];
+    } else if (Platform.isIOS) {
+      return [
+        '.SF UI Text',
+        'New York',  // iOS serif font
+        'Georgia',
+        'Times New Roman',
+        'system-ui',
+        'serif'
+      ];
+    }
+    
+    return ['system-ui', 'serif'];
   }
 
   /// Gets Lato text style with Ukrainian character support
@@ -39,32 +117,32 @@ class UkrainianFontUtils {
     Color? color,
     double? letterSpacing,
     List<Shadow>? shadows,
-    double? height,
     TextDecoration? decoration,
+    double? height,
   }) {
     if (hasUkrainianCharacters(text)) {
       return TextStyle(
-        fontFamily: 'system',
-        fontFamilyFallback: const ['Roboto', 'Noto Sans', 'Arial', 'sans-serif'],
+        fontFamily: _getMobileFontFamily(),
+        fontFamilyFallback: _getMobileFontFallbacks(),
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
         letterSpacing: letterSpacing,
         shadows: shadows,
-        height: height,
         decoration: decoration,
-      );
-    } else {
-      return GoogleFonts.lato(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        letterSpacing: letterSpacing,
-        shadows: shadows,
         height: height,
-        decoration: decoration,
       );
     }
+    
+    return GoogleFonts.lato(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      shadows: shadows,
+      decoration: decoration,
+      height: height,
+    );
   }
 
   /// Gets Cinzel text style with Ukrainian character support
@@ -79,9 +157,8 @@ class UkrainianFontUtils {
     TextDecoration? decoration,
   }) {
     if (hasUkrainianCharacters(text)) {
+      // Always use system default font for Ukrainian text to ensure proper rendering
       return TextStyle(
-        fontFamily: 'system',
-        fontFamilyFallback: const ['Roboto', 'Noto Sans', 'Arial', 'serif'],
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
@@ -129,5 +206,20 @@ class UkrainianFontUtils {
     } else {
       return googleFontStyle();
     }
+  }
+
+  // Debug method to test Ukrainian character detection
+  static void debugUkrainianDetection(String text) {
+    print('=== Ukrainian Detection Debug ===');
+    print('Text: "$text"');
+    print('Has Ukrainian characters: ${hasUkrainianCharacters(text)}');
+    print('Contains "і": ${text.contains("і")}');
+    print('Contains "ї": ${text.contains("ї")}');
+    print('Contains "Дослідити": ${text.contains("Дослідити")}');
+    print('Contains "Двійники": ${text.contains("Двійники")}');
+    print('Platform: ${kIsWeb ? "Web" : Platform.operatingSystem}');
+    print('Font family: ${_getMobileFontFamily()}');
+    print('Font fallbacks: ${_getMobileFontFallbacks()}');
+    print('==================================');
   }
 } 

@@ -697,7 +697,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         Center(
           child: Text(
             _character!.name,
-            style: GoogleFonts.cinzel(
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: _character!.name,
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: AppTheme.silverMist,
@@ -856,7 +857,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: GoogleFonts.cinzel(
+                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                    text: title,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.warmGold,
@@ -1168,7 +1170,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 Expanded(
                   child: Text(
                     'Character Card: ${_character!.name}',
-                    style: GoogleFonts.cinzel(
+                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                      text: 'Character Card: ${_character!.name}',
                       color: AppTheme.warmGold,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -1346,10 +1349,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       children: [
         Text(
           title,
-          style: GoogleFonts.cinzel(
-            color: AppTheme.warmGold,
-            fontWeight: FontWeight.bold,
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: title,
             fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.warmGold,
             letterSpacing: 1.5,
           ),
         ),
