@@ -91,7 +91,7 @@ Afterlife uses OpenRouter to connect to various LLM providers. By default, the a
 
 ### Environment Variables
 
-- `OPENROUTER_API_KEY`: Your OpenRouter API key(or just paste it in app manualy)
+- `OPENROUTER_API_KEY`: Your OpenRouter API key(paste it in app manualy)
 
 ## 💡 Usage
 
