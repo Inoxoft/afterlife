@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class CharacterModel {
@@ -99,7 +100,7 @@ class CharacterModel {
       'systemPrompt': systemPrompt,
       'imageUrl': imageUrl,
       'createdAt': createdAt.toIso8601String(),
-      'accentColor': accentColor.value,
+      'accentColor': accentColor.toARGB32(),
       'chatHistory': chatHistory,
       'additionalInfo': additionalInfo,
       'model': model,
@@ -121,7 +122,6 @@ class CharacterModel {
       try {
         createdAt = DateTime.parse(json['createdAt'] as String);
       } catch (e) {
-        print('Error parsing date, using current time: $e');
         createdAt = DateTime.now();
       }
 
@@ -130,7 +130,6 @@ class CharacterModel {
       try {
         accentColor = Color(json['accentColor'] as int);
       } catch (e) {
-        print('Error parsing accent color, using default: $e');
         accentColor = Color(int.parse(_defaultAccentColor));
       }
 
@@ -141,7 +140,7 @@ class CharacterModel {
           chatHistory = List<Map<String, dynamic>>.from(json['chatHistory']);
         }
       } catch (e) {
-        print('Error parsing chat history, using empty list: $e');
+        // Use empty list as fallback
       }
 
       return CharacterModel(

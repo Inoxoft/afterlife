@@ -52,7 +52,6 @@ class LanguageProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error loading saved language: $e');
     }
   }
 
@@ -73,7 +72,6 @@ class LanguageProvider with ChangeNotifier {
       _currentLocale = Locale(languageCode);
       notifyListeners();
     } catch (e) {
-      print('Error saving language: $e');
     }
   }
 

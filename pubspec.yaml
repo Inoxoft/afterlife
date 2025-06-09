@@ -43,6 +43,7 @@ dependencies:
   path: ^1.8.3
   path_provider: ^2.1.2
   syncfusion_flutter_pdf: ^24.1.41
+  onnxruntime: ^1.4.1
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +78,10 @@ flutter:
     - assets/images/afterlife_icon.png
     - assets/images/einstein_mask.png  # Einstein with LLM armor illustration
     - assets/images/perspective_mask.png
+    # ONNX Model files for leading question detection
+    - assets/models/model.onnx
+    - assets/models/vocab.json
+    - assets/models/scaler.json
     # Optional assets - these may not exist during development
     - .env
 

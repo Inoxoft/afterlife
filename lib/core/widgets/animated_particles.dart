@@ -1,5 +1,5 @@
-// lib/core/widgets/animated_particles.dart
 import 'dart:math';
+// lib/core/widgets/animated_particles.dart
 import 'package:flutter/material.dart';
 
 class AnimatedParticles extends StatefulWidget {
@@ -76,7 +76,6 @@ class _AnimatedParticlesState extends State<AnimatedParticles>
       _initialized = true;
       if (mounted) setState(() {});
     } catch (e) {
-      print("Error initializing particles: $e");
       // Try again after delay
       Future.delayed(Duration(milliseconds: 500), () {
         if (mounted) _initializeParticles();
@@ -107,7 +106,6 @@ class _AnimatedParticlesState extends State<AnimatedParticles>
 
       if (mounted) setState(() {});
     } catch (e) {
-      print("Error updating particles: $e");
     }
   }
 

@@ -1,8 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../features/developer_chat/developer_chat_screen.dart';
 
 class ExplorePage extends StatelessWidget {
@@ -79,9 +79,9 @@ class ExplorePage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      l10n?.diversePerspectives ?? 'DIVERSE PERSPECTIVES',
+                      l10n.diversePerspectives,
                       style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                        text: l10n?.diversePerspectives ?? 'DIVERSE PERSPECTIVES',
+                        text: l10n.diversePerspectives,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -89,7 +89,7 @@ class ExplorePage extends StatelessWidget {
                         shadows: [
                           Shadow(
                             blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
+                            color: AppTheme.warmGold.withValues(alpha: 0.8),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -97,13 +97,13 @@ class ExplorePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      l10n?.fromPoliticsToArt ?? 'From politics to art, history comes alive',
+                      l10n.fromPoliticsToArt,
                       textAlign: TextAlign.center,
                       style: UkrainianFontUtils.latoWithUkrainianSupport(
-                        text: l10n?.fromPoliticsToArt ?? 'From politics to art, history comes alive',
+                        text: l10n.fromPoliticsToArt,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
+                        color: AppTheme.silverMist.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -129,7 +129,7 @@ class ExplorePage extends StatelessWidget {
                       return Center(
                         child: Icon(
                           Icons.image_not_supported,
-                          color: AppTheme.silverMist.withOpacity(0.5),
+                          color: AppTheme.silverMist.withValues(alpha: 0.5),
                           size: 40,
                         ),
                       );
@@ -152,11 +152,11 @@ class ExplorePage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    color: AppTheme.midnightPurple.withOpacity(0.4),
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.cosmicBlack.withOpacity(0.3),
+                        color: AppTheme.cosmicBlack.withValues(alpha: 0.3),
                         blurRadius: 8,
                         spreadRadius: 0,
                       ),
@@ -166,17 +166,17 @@ class ExplorePage extends StatelessWidget {
                     children: [
                       _buildTipRow(
                         Icons.history_edu,
-                        l10n?.engageWithDiverseFigures ?? 'Engage with diverse figures from politics, science, art, and more who shaped our world.',
+                        l10n.engageWithDiverseFigures,
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
                         Icons.psychology_alt,
-                        l10n?.rememberSimulations ?? 'Remember that these are simulations based on available data - responses represent our best attempt at historical accuracy.',
+                        l10n.rememberSimulations,
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
                         Icons.add_circle_outline,
-                        l10n?.createYourOwnTwins ?? 'Create your own digital twins by using the Create button in the bottom navigation.',
+                        l10n.createYourOwnTwins,
                       ),
                     ],
                   ),
@@ -199,8 +199,8 @@ class ExplorePage extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppTheme.midnightPurple.withOpacity(0.7),
-                        AppTheme.backgroundStart.withOpacity(0.4),
+                        AppTheme.midnightPurple.withValues(alpha: 0.7),
+                        AppTheme.backgroundStart.withValues(alpha: 0.4),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -208,7 +208,7 @@ class ExplorePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.warmGold.withOpacity(0.1),
+                        color: AppTheme.warmGold.withValues(alpha: 0.1),
                         blurRadius: 15,
                         spreadRadius: 0,
                       ),
@@ -219,11 +219,11 @@ class ExplorePage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withOpacity(0.6),
+                          color: AppTheme.midnightPurple.withValues(alpha: 0.6),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.warmGold.withOpacity(0.15),
+                              color: AppTheme.warmGold.withValues(alpha: 0.15),
                               blurRadius: 8,
                               spreadRadius: 0,
                             ),
@@ -241,9 +241,9 @@ class ExplorePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
+                              l10n.chatWithDeveloperTwin,
                               style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                text: l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
+                                text: l10n.chatWithDeveloperTwin,
                                 color: AppTheme.silverMist,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -251,9 +251,9 @@ class ExplorePage extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              l10n?.chatWithDeveloperDescription ?? 'Chat with the developer\'s digital twin to learn more about the app and how it works.',
+                              l10n.chatWithDeveloperDescription,
                               style: UkrainianFontUtils.latoWithUkrainianSupport(
-                                text: l10n?.chatWithDeveloperDescription ?? 'Chat with the developer\'s digital twin to learn more about the app and how it works.',
+                                text: l10n.chatWithDeveloperDescription,
                                 color: AppTheme.silverMist,
                                 fontSize: 14,
                               ),
@@ -265,7 +265,7 @@ class ExplorePage extends StatelessWidget {
                                 backgroundColor: AppTheme.midnightPurple,
                                 foregroundColor: AppTheme.warmGold,
                                 elevation: 5,
-                                shadowColor: AppTheme.warmGold.withOpacity(0.2),
+                                shadowColor: AppTheme.warmGold.withValues(alpha: 0.2),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 8,
@@ -275,9 +275,9 @@ class ExplorePage extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
+                                l10n.chatWithDeveloperTwin,
                                 style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                  text: l10n?.chatWithDeveloperTwin ?? 'CHAT WITH DEVELOPER TWIN',
+                                  text: l10n.chatWithDeveloperTwin,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.0,
@@ -305,7 +305,7 @@ class ExplorePage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.warmGold.withOpacity(0.15),
+            color: AppTheme.warmGold.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: AppTheme.warmGold, size: 22),

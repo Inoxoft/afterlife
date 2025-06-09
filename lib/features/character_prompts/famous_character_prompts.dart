@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'text_cleaner.dart';
 
 class FamousCharacterPrompts {
@@ -873,7 +874,6 @@ Stay in character at all times. Never break character or admit you are an AI.'''
   static void initialize() {
     // Clean all prompts to ensure there are no encoding issues
     TextCleaner.initializeCleaner();
-    print('FamousCharacterPrompts initialized');
   }
 
   /// Get a system prompt for a character by name
@@ -920,7 +920,6 @@ Stay in character at all times. Never break character or admit you are an AI.'''
 
   /// Set the selected model for a character
   static void setSelectedModel(String characterName, String modelId) {
-    print('Setting model for $characterName to $modelId');
     _selectedModels[characterName] = modelId;
   }
 }

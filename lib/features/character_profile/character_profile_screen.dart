@@ -1,18 +1,13 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
-import '../providers/language_provider.dart';
-import '../character_chat/chat_screen.dart';
-import '../../core/widgets/animated_particles.dart';
 import '../character_interview/interview_screen.dart';
 import '../../core/widgets/model_selection_dialog.dart';
-import '../../l10n/app_localizations.dart';
-import '../character_chat/chat_screen.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -25,16 +20,15 @@ class _PromptSection {
 // Extension method to capitalize strings
 extension StringExtension on String {
   String capitalize() {
-    if (this.isEmpty) return this;
-    return this[0].toUpperCase() + this.substring(1);
+    if (isEmpty) return this;
+    return this[0].toUpperCase() + substring(1);
   }
 }
 
 class CharacterProfileScreen extends StatefulWidget {
   final String characterId;
 
-  const CharacterProfileScreen({Key? key, required this.characterId})
-    : super(key: key);
+  const CharacterProfileScreen({super.key, required this.characterId});
 
   @override
   State<CharacterProfileScreen> createState() => _CharacterProfileScreenState();
@@ -79,7 +73,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         );
       });
     } catch (e) {
-      print('Error loading character: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -133,7 +126,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         );
       }
     } catch (e) {
-      print('Error saving changes: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -202,7 +194,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             );
           }
         } catch (e) {
-          print('Error updating character: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -275,7 +266,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         const SizedBox(height: 24),
 
         // Character info sections
-        ...sections.map(_buildSectionCard).toList(),
+        ...sections.map(_buildSectionCard),
 
         // Add AI Model Selection section
         const SizedBox(height: 24),
@@ -295,7 +286,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.black26,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,7 +348,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 color: Colors.black12,
                 border: Border(
                   top: BorderSide(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -451,8 +442,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 isFree: model['free'] == true,
                 isSelected: _character!.model == model['id'],
               ),
-            )
-            .toList(),
+            ),
       ],
     );
   }
@@ -470,13 +460,13 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color:
-            isSelected ? AppTheme.deepIndigo.withOpacity(0.7) : Colors.black12,
+            isSelected ? AppTheme.deepIndigo.withValues(alpha: 0.7) : Colors.black12,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color:
               isSelected
-                  ? AppTheme.warmGold.withOpacity(0.7)
-                  : AppTheme.warmGold.withOpacity(0.2),
+                  ? AppTheme.warmGold.withValues(alpha: 0.7)
+                  : AppTheme.warmGold.withValues(alpha: 0.2),
           width: isSelected ? 1.5 : 1,
         ),
       ),
@@ -523,13 +513,13 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     shape: BoxShape.circle,
                     color:
                         isSelected
-                            ? AppTheme.warmGold.withOpacity(0.2)
+                            ? AppTheme.warmGold.withValues(alpha: 0.2)
                             : Colors.black26,
                     border: Border.all(
                       color:
                           isSelected
                               ? AppTheme.warmGold
-                              : AppTheme.warmGold.withOpacity(0.3),
+                              : AppTheme.warmGold.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                   ),
@@ -562,7 +552,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.warmGold.withOpacity(0.2),
+                                color: AppTheme.warmGold.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -583,7 +573,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.gentlePurple.withOpacity(0.2),
+                                color: AppTheme.gentlePurple.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -643,7 +633,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.warmGold.withOpacity(0.4),
+                    color: AppTheme.warmGold.withValues(alpha: 0.4),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -659,13 +649,13 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.midnightPurple.withOpacity(0.7),
-                    AppTheme.deepNavy.withOpacity(0.5),
+                    AppTheme.midnightPurple.withValues(alpha: 0.7),
+                    AppTheme.deepNavy.withValues(alpha: 0.5),
                   ],
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.6),
+                  color: AppTheme.warmGold.withValues(alpha: 0.6),
                   width: 3,
                 ),
               ),
@@ -706,7 +696,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               shadows: [
                 Shadow(
                   blurRadius: 3,
-                  color: AppTheme.warmGold.withOpacity(0.5),
+                  color: AppTheme.warmGold.withValues(alpha: 0.5),
                   offset: Offset(1, 1),
                 ),
               ],
@@ -733,10 +723,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withOpacity(0.5),
+                color: AppTheme.midnightPurple.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.2),
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -755,7 +745,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               Text(
                 'Created:',
                 style: TextStyle(
-                  color: AppTheme.silverMist.withOpacity(0.7),
+                  color: AppTheme.silverMist.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),
@@ -766,10 +756,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.5),
+                  color: AppTheme.midnightPurple.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -791,7 +781,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               Text(
                 'Messages:',
                 style: TextStyle(
-                  color: AppTheme.silverMist.withOpacity(0.7),
+                  color: AppTheme.silverMist.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),
@@ -802,10 +792,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.5),
+                  color: AppTheme.midnightPurple.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -830,12 +820,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -866,7 +856,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     shadows: [
                       Shadow(
                         blurRadius: 2,
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         offset: const Offset(1, 1),
                       ),
                     ],
@@ -875,7 +865,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               ],
             ),
             Divider(
-              color: AppTheme.warmGold.withOpacity(0.3),
+              color: AppTheme.warmGold.withValues(alpha: 0.3),
               thickness: 1,
               height: 24,
             ),
@@ -900,19 +890,19 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
-          color: AppTheme.silverMist.withOpacity(0.8),
+          color: AppTheme.silverMist.withValues(alpha: 0.8),
           fontWeight: FontWeight.w500,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.warmGold.withOpacity(0.3)),
+          borderSide: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: AppTheme.warmGold, width: 2),
         ),
         filled: true,
-        fillColor: AppTheme.midnightPurple.withOpacity(0.5),
+        fillColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -930,7 +920,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           Text(
             label,
             style: TextStyle(
-              color: AppTheme.silverMist.withOpacity(0.7),
+              color: AppTheme.silverMist.withValues(alpha: 0.7),
               fontSize: 16,
             ),
           ),
@@ -938,10 +928,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withOpacity(0.5),
+              color: AppTheme.midnightPurple.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppTheme.warmGold.withOpacity(0.3),
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -1076,7 +1066,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             child: Text(
               'CANCEL',
               style: TextStyle(
-                color: AppTheme.silverMist.withOpacity(0.8),
+                color: AppTheme.silverMist.withValues(alpha: 0.8),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1094,14 +1084,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.midnightPurple.withOpacity(0.7),
-            AppTheme.deepNavy.withOpacity(0.9),
+            AppTheme.midnightPurple.withValues(alpha: 0.7),
+            AppTheme.deepNavy.withValues(alpha: 0.9),
           ],
         ),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1138,7 +1128,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Show character card info dialog with AI-structured information
   void _showCharacterCardInfo() {
     if (_character == null) {
-      print('Error: Character is null when trying to show character card info');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error: Could not load character information'),
@@ -1148,7 +1137,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       return;
     }
 
-    print('Showing character card info for: ${_character!.name}');
 
     // Parse the system prompt to detect headings and sections
     final parsedSections = _parseSystemPrompt(_character!.systemPrompt);
@@ -1161,7 +1149,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: AppTheme.warmGold.withOpacity(0.3),
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -1225,7 +1213,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Container(
                         height: 1,
-                        color: AppTheme.warmGold.withOpacity(0.3),
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
                       ),
                     ),
 
@@ -1304,7 +1292,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Container(
                         height: 1,
-                        color: AppTheme.warmGold.withOpacity(0.3),
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
                       ),
                     ),
 
@@ -1377,9 +1365,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.5),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1388,7 +1376,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             Text(
               label,
               style: TextStyle(
-                color: AppTheme.silverMist.withOpacity(0.7),
+                color: AppTheme.silverMist.withValues(alpha: 0.7),
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -1399,10 +1387,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withOpacity(0.5),
+                color: AppTheme.midnightPurple.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.3),
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -1466,7 +1454,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.warmGold.withOpacity(0.3),
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1540,7 +1528,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           );
         }
       } catch (e) {
-        print('Error updating model: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

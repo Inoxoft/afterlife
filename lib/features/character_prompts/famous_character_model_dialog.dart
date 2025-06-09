@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'famous_character_prompts.dart';
@@ -75,8 +76,8 @@ class _FamousCharacterModelDialogState
                   return Card(
                     color:
                         isSelected
-                            ? AppTheme.warmGold.withOpacity(0.2)
-                            : AppTheme.backgroundEnd.withOpacity(0.3),
+                            ? AppTheme.warmGold.withValues(alpha: 0.2)
+                            : AppTheme.backgroundEnd.withValues(alpha: 0.3),
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -105,7 +106,7 @@ class _FamousCharacterModelDialogState
                                   _selectedModel = value!;
                                 });
                               },
-                              activeColor: AppTheme.warmGold,
+                              fillColor: WidgetStateProperty.all(AppTheme.warmGold),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -131,7 +132,7 @@ class _FamousCharacterModelDialogState
                                           ),
                                           decoration: BoxDecoration(
                                             color: AppTheme.warmGold
-                                                .withOpacity(0.2),
+                                                .withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(
                                               4,
                                             ),

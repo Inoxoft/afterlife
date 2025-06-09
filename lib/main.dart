@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,9 +28,7 @@ Future<void> _initializeApp() async {
   // Initialize environment configuration
   try {
     await EnvConfig.initialize();
-    print("Environment configuration initialized successfully");
   } catch (e) {
-    print("Error initializing environment configuration: $e");
   }
 
   // Initialize services
@@ -50,7 +49,6 @@ Future<void> _initializeApp() async {
     // Initialize and clean famous character prompts
     FamousCharacterPrompts.initialize();
   } catch (e) {
-    print("Error initializing services: $e");
   }
 }
 
@@ -72,14 +70,10 @@ Future<void> main() async {
           ),
         );
       } catch (e, stackTrace) {
-        print('Error during app initialization: $e');
-        print(stackTrace);
         runApp(const ErrorApp(error: 'Initialization Error'));
       }
     },
     (error, stackTrace) {
-      print('Uncaught error: $error');
-      print(stackTrace);
       runApp(ErrorApp(error: error.toString()));
     },
   );

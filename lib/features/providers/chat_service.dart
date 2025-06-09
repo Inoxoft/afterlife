@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -188,6 +189,5 @@ class ChatService {
     debugPrint('=============================');
   }
 
-  // Helper function to avoid importing dart:math
   static int min(int a, int b) => a < b ? a : b;
 }

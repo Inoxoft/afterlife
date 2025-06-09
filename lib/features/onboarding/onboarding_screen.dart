@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
@@ -6,8 +7,6 @@ import 'pages/mask_page.dart';
 import 'pages/llm_page.dart';
 import 'pages/explore_page.dart';
 import 'pages/language_page.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 
@@ -195,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             color:
                                 _currentPage == index
                                     ? AppTheme.warmGold
-                                    : AppTheme.warmGold.withOpacity(0.3),
+                                    : AppTheme.warmGold.withValues(alpha: 0.3),
                           ),
                         ),
                       ),
@@ -217,7 +216,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           borderRadius: BorderRadius.circular(30),
                         ),
                         elevation: 5,
-                        shadowColor: AppTheme.warmGold.withOpacity(0.5),
+                        shadowColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                       child: Text(
                         _currentPage == 3 ? "BEGIN" : "NEXT",

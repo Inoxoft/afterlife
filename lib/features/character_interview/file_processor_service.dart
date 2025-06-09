@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:file_selector/file_selector.dart';
@@ -100,7 +101,6 @@ class FileProcessorService {
 
       return files;
     } catch (e) {
-      print('Error picking files: $e');
       return null;
     }
   }

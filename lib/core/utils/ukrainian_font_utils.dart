@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 
@@ -210,16 +210,5 @@ class UkrainianFontUtils {
 
   // Debug method to test Ukrainian character detection
   static void debugUkrainianDetection(String text) {
-    print('=== Ukrainian Detection Debug ===');
-    print('Text: "$text"');
-    print('Has Ukrainian characters: ${hasUkrainianCharacters(text)}');
-    print('Contains "і": ${text.contains("і")}');
-    print('Contains "ї": ${text.contains("ї")}');
-    print('Contains "Дослідити": ${text.contains("Дослідити")}');
-    print('Contains "Двійники": ${text.contains("Двійники")}');
-    print('Platform: ${kIsWeb ? "Web" : Platform.operatingSystem}');
-    print('Font family: ${_getMobileFontFamily()}');
-    print('Font fallbacks: ${_getMobileFontFallbacks()}');
-    print('==================================');
   }
 } 

@@ -118,7 +118,7 @@ class _LanguagePageState extends State<LanguagePage>
                         shadows: [
                           Shadow(
                             blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
+                            color: AppTheme.warmGold.withValues(alpha: 0.8),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -132,7 +132,7 @@ class _LanguagePageState extends State<LanguagePage>
                         text: localizations.languageDescription,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
+                        color: AppTheme.silverMist.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -172,12 +172,12 @@ class _LanguagePageState extends State<LanguagePage>
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: isSelected ? AppTheme.warmGold : AppTheme.warmGold.withOpacity(0.3),
+                                color: isSelected ? AppTheme.warmGold : AppTheme.warmGold.withValues(alpha: 0.3),
                                 width: isSelected ? 2 : 1,
                               ),
                               color: isSelected 
-                                ? AppTheme.warmGold.withOpacity(0.1)
-                                : AppTheme.midnightPurple.withOpacity(0.3),
+                                ? AppTheme.warmGold.withValues(alpha: 0.1)
+                                : AppTheme.midnightPurple.withValues(alpha: 0.3),
                             ),
                             child: Center(
                               child: Text(

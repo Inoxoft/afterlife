@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'app_localizations.dart';
 
 class AppLocalizationsPt extends AppLocalizations {

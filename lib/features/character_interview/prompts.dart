@@ -1,3 +1,4 @@
+import 'dart:math';
 class InterviewPrompts {
   static const String interviewSystemPrompt = """
 You are an AI assistant tasked with helping the user create their digital twin—a fully detailed and multidimensional role-play character. Your role is to engage the user through a natural, flowing conversation that uncovers their personality, life story, beliefs, habits, and emotional world. 

@@ -1,8 +1,7 @@
-import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:math';
 import 'message_model.dart';
 import 'chat_service.dart';
 import 'prompts.dart';
@@ -64,16 +63,12 @@ class InterviewProvider with ChangeNotifier {
     characterCardSummary = existingSystemPrompt;
 
     // Debug the system prompt to ensure it's being loaded properly
-    print('=== SYSTEM PROMPT DEBUG ===');
-    print('Character name: $existingName');
-    print('System prompt length: ${existingSystemPrompt.length} characters');
     print(
       'First 200 chars: ${existingSystemPrompt.substring(0, min(200, existingSystemPrompt.length))}...',
     );
     print(
       'Last 200 chars: ...${existingSystemPrompt.substring(max(0, existingSystemPrompt.length - 200))}',
     );
-    print('=========================');
 
     // Add loading message to indicate AI is thinking
     _addLoadingMessage();
@@ -87,7 +82,6 @@ class InterviewProvider with ChangeNotifier {
 
     final systemPrompt = _getSystemPrompt();
 
-    print('=== SENDING EDIT MESSAGE ===');
     print(
       'Character card summary length: ${characterCardSummary?.length ?? 0}',
     );
@@ -96,9 +90,8 @@ class InterviewProvider with ChangeNotifier {
         'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
       );
     } else {
-      print('WARNING: Character card summary is empty or null!');
+      print('Character card summary is null or empty');
     }
-    print('===========================');
 
     try {
       // Create a formatted message to send to the AI with the existing character details
@@ -126,9 +119,6 @@ What specific edits would you like me to make?
       );
       notifyListeners();
 
-      print(
-        'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
-      );
       final response = await ChatService.sendMessage(
         messages:
             _convertMessagesToAPI(), // Use all messages including the initial one
@@ -274,7 +264,6 @@ When the user types "agree", format the final prompt as:
               final nameMatch = namePattern.firstMatch(msg.text);
               if (nameMatch != null && nameMatch.group(1) != null) {
                 characterName = nameMatch.group(1)!.trim();
-                print('Found character name: $characterName');
                 break;
               }
             }
@@ -283,7 +272,6 @@ When the user types "agree", format the final prompt as:
           // If still no name found, use a default name
           if (characterName == null) {
             characterName = "Character";
-            print('Using default character name: $characterName');
           }
         }
 
@@ -314,8 +302,6 @@ When the user types "agree", format the final prompt as:
         // We're still in interview mode
         final systemPrompt = _getSystemPrompt();
         
-        print("Interview Provider: Sending message with system prompt length: ${systemPrompt.length}");
-        print("Interview Provider: First 50 chars of system prompt: ${systemPrompt.substring(0, min(50, systemPrompt.length))}...");
         
         final response = await ChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
@@ -341,7 +327,6 @@ When the user types "agree", format the final prompt as:
             final nameMatch = namePattern.firstMatch(response);
             if (nameMatch != null && nameMatch.group(1) != null) {
               characterName = nameMatch.group(1)!.trim();
-              print('Extracted character name: $characterName');
             }
           }
         } else {
@@ -392,7 +377,6 @@ When the user types "agree", format the final prompt as:
         if (endLine > startName) {
           final name = cardContent.substring(startName, endLine).trim();
           characterName = name.replaceAll('##', '').trim();
-          print('Extracted character name: $characterName');
         }
       }
     }
@@ -461,7 +445,6 @@ When the user types "agree", format the final prompt as:
 
   void _handleErrorState(String message) {
     // Implement the logic to handle an error state
-    print(message);
     _removeLoadingMessage();
     addAIMessage(
       "I apologize, but there was an error processing your request. Please try again.",

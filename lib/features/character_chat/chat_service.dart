@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../../core/utils/env_config.dart';
@@ -41,7 +42,6 @@ class ChatService {
 
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing character chat service: $e');
       _isInitialized = true; // Mark as initialized to prevent repeated attempts
     }
   }
@@ -49,7 +49,6 @@ class ChatService {
   // Method to refresh API key from the latest source
   static Future<void> refreshApiKey() async {
     try {
-      print('Character Chat Service: Refreshing API key...');
 
       // Get the latest key directly
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
@@ -58,14 +57,12 @@ class ChatService {
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        print('Warning: No API key found after refresh');
       } else {
         print(
           'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
         );
       }
     } catch (e) {
-      print('Error refreshing API key: $e');
     }
   }
 
@@ -86,7 +83,6 @@ class ChatService {
 
     // Validate API key exists
     if (_apiKey == null || _apiKey!.isEmpty) {
-      print('Error: API key is missing. Cannot send message.');
       return 'Error: Unable to connect to AI service. Please check your API key configuration.';
     }
 
@@ -119,7 +115,6 @@ class ChatService {
           .timeout(_requestTimeout);
 
       if (response.statusCode != 200) {
-        print('API error: ${response.body}');
         throw Exception('Failed to get response: ${response.body}');
       }
 
@@ -128,25 +123,18 @@ class ChatService {
       final data = jsonDecode(responseBody);
       return data['choices'][0]['message']['content'] as String;
     } on TimeoutException catch (e) {
-      print('Request timed out after ${_requestTimeout.inSeconds} seconds: $e');
       return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
     } catch (e) {
-      print('Error in chat service: $e');
       return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
 
   // Method for logging diagnostic info
   static void logDiagnostics() {
-    print('=== Character Chat Service Diagnostics ===');
-    print('Is initialized: $_isInitialized');
-    print('Is using default key: $_isUsingDefaultKey');
     print(
       'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
     );
-    print('=============================');
   }
 
-  // Helper function to avoid importing dart:math
   static int min(int a, int b) => a < b ? a : b;
 }

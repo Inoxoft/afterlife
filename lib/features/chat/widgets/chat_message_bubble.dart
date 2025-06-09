@@ -45,13 +45,13 @@ class ChatMessageBubble extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: message.isUser
-                        ? AppTheme.warmGold.withOpacity(0.1)
-                        : AppTheme.midnightPurple.withOpacity(0.7),
+                        ? AppTheme.warmGold.withValues(alpha: 0.1)
+                        : AppTheme.midnightPurple.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: message.isUser
-                          ? AppTheme.warmGold.withOpacity(0.3)
-                          : AppTheme.silverMist.withOpacity(0.2),
+                          ? AppTheme.warmGold.withValues(alpha: 0.3)
+                          : AppTheme.silverMist.withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -73,7 +73,7 @@ class ChatMessageBubble extends StatelessWidget {
                     child: Text(
                       DateFormat('HH:mm').format(message.timestamp),
                       style: TextStyle(
-                        color: AppTheme.silverMist.withOpacity(0.5),
+                        color: AppTheme.silverMist.withValues(alpha: 0.5),
                         fontSize: 10,
                       ),
                     ),
@@ -98,7 +98,7 @@ class ChatMessageBubble extends StatelessWidget {
         color: AppTheme.midnightPurple,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.warmGold.withOpacity(0.5),
+          color: AppTheme.warmGold.withValues(alpha: 0.5),
           width: 1,
         ),
       ),

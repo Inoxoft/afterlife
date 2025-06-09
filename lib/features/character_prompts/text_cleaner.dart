@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'famous_character_prompts.dart';
 
 /// Utility class to clean up encoding issues in text
@@ -20,7 +21,6 @@ class TextCleaner {
       }
     });
 
-    print('All character prompts have been cleaned');
   }
 
   /// Clean a text by removing or replacing problematic characters
@@ -117,6 +117,5 @@ class TextCleaner {
   /// Run the cleaner when the app starts
   static void initializeCleaner() {
     cleanAllPrompts();
-    print('Text cleaner initialized - Unicode characters preserved');
   }
 }

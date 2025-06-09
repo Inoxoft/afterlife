@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
@@ -69,7 +70,7 @@ class MaskPage extends StatelessWidget {
                         shadows: [
                           Shadow(
                             blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
+                            color: AppTheme.warmGold.withValues(alpha: 0.8),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -83,7 +84,7 @@ class MaskPage extends StatelessWidget {
                         text: localizations.digitalPersonasWithHistoricalEssence,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
+                        color: AppTheme.silverMist.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -109,7 +110,7 @@ class MaskPage extends StatelessWidget {
                         'E=mc²',
                         style: UkrainianFontUtils.latoWithUkrainianSupport(
                           text: 'E=mc²',
-                          color: AppTheme.warmGold.withOpacity(0.3),
+                          color: AppTheme.warmGold.withValues(alpha: 0.3),
                           fontSize: 22,
                           fontWeight: FontWeight.w200,
                         ),
@@ -122,7 +123,7 @@ class MaskPage extends StatelessWidget {
                         'π',
                         style: UkrainianFontUtils.latoWithUkrainianSupport(
                           text: 'π',
-                          color: AppTheme.warmGold.withOpacity(0.25),
+                          color: AppTheme.warmGold.withValues(alpha: 0.25),
                           fontSize: 24,
                           fontWeight: FontWeight.w200,
                         ),
@@ -137,7 +138,7 @@ class MaskPage extends StatelessWidget {
                           'ψ',
                           style: UkrainianFontUtils.latoWithUkrainianSupport(
                             text: 'ψ',
-                            color: AppTheme.warmGold.withOpacity(0.2),
+                            color: AppTheme.warmGold.withValues(alpha: 0.2),
                             fontSize: 20,
                             fontWeight: FontWeight.w200,
                           ),
@@ -167,7 +168,7 @@ class MaskPage extends StatelessWidget {
                             return Container(
                               height: 280,
                               decoration: BoxDecoration(
-                                color: AppTheme.midnightPurple.withOpacity(0.4),
+                                color: AppTheme.midnightPurple.withValues(alpha: 0.4),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Center(
@@ -245,11 +246,11 @@ class MaskPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.5),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.cosmicBlack.withOpacity(0.3),
+            color: AppTheme.cosmicBlack.withValues(alpha: 0.3),
             blurRadius: 8,
             spreadRadius: 0,
             offset: const Offset(0, 2),
@@ -262,11 +263,11 @@ class MaskPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withOpacity(0.7),
+              color: AppTheme.midnightPurple.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.warmGold.withOpacity(0.2),
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
                   blurRadius: 5,
                   spreadRadius: 0,
                 ),
@@ -299,7 +300,7 @@ class NeuralLinesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.4)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.4)
           ..strokeWidth = 1.5
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
@@ -338,7 +339,7 @@ class NeuralLinesPainter extends CustomPainter {
     // Add some small circles at the neural connection endpoints
     final circlePaint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.6)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.6)
           ..style = PaintingStyle.fill;
 
     canvas.drawCircle(

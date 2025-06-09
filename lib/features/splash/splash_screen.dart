@@ -1,6 +1,6 @@
+import 'dart:math';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -132,7 +132,6 @@ class _SplashScreenState extends State<SplashScreen>
       //   await prefs.setBool(_firstTimeKey, false);
       // }
     } catch (e) {
-      print('Error during app initialization: $e');
       if (!mounted) return;
       
       // Show error state in the UI
@@ -175,12 +174,12 @@ class _SplashScreenState extends State<SplashScreen>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: AppTheme.warmGold.withOpacity(0.5),
+                                color: AppTheme.warmGold.withValues(alpha: 0.5),
                                 width: 2,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.warmGold.withOpacity(0.3),
+                                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                                   blurRadius: 20,
                                   spreadRadius: 5,
                                 ),
@@ -210,7 +209,7 @@ class _SplashScreenState extends State<SplashScreen>
                         color: AppTheme.warmGold,
                         shadows: [
                           Shadow(
-                            color: AppTheme.warmGold.withOpacity(0.5),
+                            color: AppTheme.warmGold.withValues(alpha: 0.5),
                             blurRadius: 10,
                             offset: const Offset(0, 2),
                           ),
@@ -227,7 +226,7 @@ class _SplashScreenState extends State<SplashScreen>
                         googleFontStyle: () => TextStyle(
                           fontFamily: 'SpaceMono',
                           fontSize: 14,
-                          color: AppTheme.silverMist.withOpacity(0.7),
+                          color: AppTheme.silverMist.withValues(alpha: 0.7),
                           letterSpacing: 2,
                         ),
                         fallbackFontFamily: 'monospace',
@@ -267,7 +266,7 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.08)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.08)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;
 

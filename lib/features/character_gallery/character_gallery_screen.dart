@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
@@ -172,7 +171,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                       shadows: [
                         Shadow(
                           blurRadius: 10.0,
-                          color: AppTheme.warmGold.withOpacity(0.8),
+                          color: AppTheme.warmGold.withValues(alpha: 0.8),
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -212,16 +211,16 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withOpacity(0.7),
+            color: AppTheme.midnightPurple.withValues(alpha: 0.7),
             border: Border(
               top: BorderSide(
-                color: AppTheme.warmGold.withOpacity(0.3),
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1.0,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.deepNavy.withOpacity(0.3),
+                color: AppTheme.deepNavy.withValues(alpha: 0.3),
                 blurRadius: 10,
                 spreadRadius: 0,
                 offset: const Offset(0, -2),
@@ -244,9 +243,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               text: "Tab", // Placeholder text for style detection
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: AppTheme.silverMist.withOpacity(0.5),
+              color: AppTheme.silverMist.withValues(alpha: 0.5),
             ),
-            unselectedItemColor: AppTheme.silverMist.withOpacity(0.5),
+            unselectedItemColor: AppTheme.silverMist.withValues(alpha: 0.5),
             selectedItemColor: AppTheme.warmGold,
             items: navigationItems,
           ),
@@ -299,7 +298,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             style: UkrainianFontUtils.latoWithUkrainianSupport(
               text: localizations.interactWithHistoricalFigures,
               fontSize: 16,
-              color: AppTheme.silverMist.withOpacity(0.8),
+              color: AppTheme.silverMist.withValues(alpha: 0.8),
               letterSpacing: 0.5,
             ),
           ),
@@ -404,7 +403,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                   if (!snapshot.hasData) {
                     return Container(
                       decoration: BoxDecoration(
-                        color: AppTheme.deepSpaceNavy.withOpacity(0.2),
+                        color: AppTheme.deepSpaceNavy.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(16),
                       ),
                     );
@@ -434,16 +433,16 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             height: 160,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppTheme.midnightPurple.withOpacity(0.3),
+              color: AppTheme.midnightPurple.withValues(alpha: 0.3),
               border: Border.all(
-                color: AppTheme.warmGold.withOpacity(0.3),
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
             child: Icon(
               Icons.person_outline,
               size: 80,
-              color: AppTheme.warmGold.withOpacity(0.5),
+              color: AppTheme.warmGold.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 32),
@@ -470,7 +469,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               style: UkrainianFontUtils.latoWithUkrainianSupport(
                 text: localizations.createNewTwinDescription,
                 fontSize: 16,
-                color: AppTheme.silverMist.withOpacity(0.8),
+                color: AppTheme.silverMist.withValues(alpha: 0.8),
                 height: 1.5,
               ),
             ),
@@ -490,20 +489,20 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.warmGold.withOpacity(0.8),
-                      AppTheme.midnightPurple.withOpacity(0.8),
+                      AppTheme.warmGold.withValues(alpha: 0.8),
+                      AppTheme.midnightPurple.withValues(alpha: 0.8),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.warmGold.withOpacity(0.3),
+                      color: AppTheme.warmGold.withValues(alpha: 0.3),
                       blurRadius: 10,
                       spreadRadius: 0,
                     ),
                   ],
                   border: Border.all(
-                    color: AppTheme.silverMist.withOpacity(0.3),
+                    color: AppTheme.silverMist.withValues(alpha: 0.3),
                     width: 0.5,
                   ),
                 ),
@@ -513,7 +512,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     Icon(
                       Icons.add,
                       size: 20,
-                      color: AppTheme.silverMist.withOpacity(0.9),
+                      color: AppTheme.silverMist.withValues(alpha: 0.9),
                     ),
                     const SizedBox(width: 10),
                     Text(
@@ -661,8 +660,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         BoxShadow(
                           color:
                               _isHovering
-                                  ? accentColor.withOpacity(0.6)
-                                  : AppTheme.midnightPurple.withOpacity(0.3),
+                                  ? accentColor.withValues(alpha: 0.6)
+                                  : AppTheme.midnightPurple.withValues(alpha: 0.3),
                           blurRadius: _isHovering ? 15 : 8,
                           spreadRadius: _isHovering ? 2 : 0,
                           offset: Offset(0, 5 * _glowAnimation.value),
@@ -671,8 +670,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                       border: Border.all(
                         color:
                             _isHovering
-                                ? accentColor.withOpacity(0.7)
-                                : accentColor.withOpacity(0.3),
+                                ? accentColor.withValues(alpha: 0.7)
+                                : accentColor.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                     ),
@@ -750,7 +749,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                                 radius: 1.2,
                                 colors: [
                                   Colors.transparent,
-                                  AppTheme.deepNavy.withOpacity(0.4),
+                                  AppTheme.deepNavy.withValues(alpha: 0.4),
                                 ],
                                 stops: const [0.6, 1.0],
                               ),
@@ -775,7 +774,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         child: Icon(
                           Icons.person_outline,
                           size: 80,
-                          color: accentColor.withOpacity(0.5),
+                          color: accentColor.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -790,8 +789,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          AppTheme.deepNavy.withOpacity(0.7),
-                          AppTheme.deepNavy.withOpacity(0.9),
+                          AppTheme.deepNavy.withValues(alpha: 0.7),
+                          AppTheme.deepNavy.withValues(alpha: 0.9),
                         ],
                         stops: const [0.6, 0.85, 1.0],
                       ),
@@ -820,7 +819,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             color: AppTheme.warmGold,
                             shadows: [
                               Shadow(
-                                color: AppTheme.warmGold.withOpacity(0.5),
+                                color: AppTheme.warmGold.withValues(alpha: 0.5),
                                 blurRadius: 4,
                                 offset: const Offset(0, 1),
                               ),
@@ -847,7 +846,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                                 letterSpacing: 0.5,
                                 shadows: [
                                   Shadow(
-                                    color: AppTheme.warmGold.withOpacity(0.5),
+                                    color: AppTheme.warmGold.withValues(alpha: 0.5),
                                     blurRadius: 4,
                                     offset: const Offset(0, 1),
                                   ),
@@ -866,10 +865,10 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.warmGold.withOpacity(0.2),
+                            color: AppTheme.warmGold.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: AppTheme.warmGold.withOpacity(0.4),
+                              color: AppTheme.warmGold.withValues(alpha: 0.4),
                               width: 1,
                             ),
                           ),
@@ -901,11 +900,11 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.warmGold.withOpacity(0.9),
+                        color: AppTheme.warmGold.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.deepNavy.withOpacity(0.2),
+                            color: AppTheme.deepNavy.withValues(alpha: 0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -916,7 +915,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         children: [
                           Icon(
                             Icons.arrow_forward,
-                            color: AppTheme.midnightPurple.withOpacity(0.9),
+                            color: AppTheme.midnightPurple.withValues(alpha: 0.9),
                             size: 14,
                           ),
                           const SizedBox(width: 4),
@@ -1153,7 +1152,7 @@ class _CharacterCardState extends State<_CharacterCard>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: AppTheme.warmGold.withOpacity(0.3),
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -1171,7 +1170,7 @@ class _CharacterCardState extends State<_CharacterCard>
               style: UkrainianFontUtils.latoWithUkrainianSupport(
                 text: 'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
                 fontSize: 16,
-                color: AppTheme.silverMist.withOpacity(0.7),
+                color: AppTheme.silverMist.withValues(alpha: 0.7),
               ),
             ),
             actions: [
@@ -1182,7 +1181,7 @@ class _CharacterCardState extends State<_CharacterCard>
                   style: UkrainianFontUtils.latoWithUkrainianSupport(
                     text: 'Cancel',
                     fontSize: 14,
-                    color: AppTheme.silverMist.withOpacity(0.7),
+                    color: AppTheme.silverMist.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -1255,8 +1254,8 @@ class _CharacterCardState extends State<_CharacterCard>
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              AppTheme.midnightPurple.withOpacity(0.3),
-                              AppTheme.deepNavy.withOpacity(0.85),
+                              AppTheme.midnightPurple.withValues(alpha: 0.3),
+                              AppTheme.deepNavy.withValues(alpha: 0.85),
                             ],
                             stops: const [0.5, 1.0],
                           ),
@@ -1273,10 +1272,10 @@ class _CharacterCardState extends State<_CharacterCard>
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppTheme.midnightPurple.withOpacity(0.7),
+                            color: AppTheme.midnightPurple.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppTheme.warmGold.withOpacity(0.3),
+                              color: AppTheme.warmGold.withValues(alpha: 0.3),
                               width: 0.5,
                             ),
                           ),
@@ -1310,7 +1309,7 @@ class _CharacterCardState extends State<_CharacterCard>
                                 color: AppTheme.silverMist,
                                 shadows: [
                                   Shadow(
-                                    color: AppTheme.warmGold.withOpacity(0.5),
+                                    color: AppTheme.warmGold.withValues(alpha: 0.5),
                                     blurRadius: 4,
                                     offset: const Offset(0, 1),
                                   ),
@@ -1346,7 +1345,7 @@ class _CharacterCardState extends State<_CharacterCard>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppTheme.warmGold.withOpacity(0.3),
+                AppTheme.warmGold.withValues(alpha: 0.3),
                 AppTheme.midnightPurple,
               ],
             ),
@@ -1376,7 +1375,7 @@ class _CharacterCardState extends State<_CharacterCard>
               end: Alignment.bottomLeft,
               colors: [
                 AppTheme.deepSpaceNavy,
-                AppTheme.deepNavy.withOpacity(0.7),
+                AppTheme.deepNavy.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -1391,14 +1390,14 @@ class _CharacterCardState extends State<_CharacterCard>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.deepIndigo.withOpacity(0.8),
+                AppTheme.deepIndigo.withValues(alpha: 0.8),
                 AppTheme.cosmicBlack,
               ],
             ),
           ),
           child: CustomPaint(
             painter: WaveBackgroundPainter(
-              waveColor: AppTheme.warmGold.withOpacity(0.5),
+              waveColor: AppTheme.warmGold.withValues(alpha: 0.5),
             ),
           ),
         );
@@ -1442,7 +1441,7 @@ class GeometricBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = color.withOpacity(0.15)
+          ..color = color.withValues(alpha: 0.15)
           ..strokeWidth = 1.5
           ..style = PaintingStyle.stroke;
 
@@ -1505,13 +1504,13 @@ class CosmicBackgroundPainter extends CustomPainter {
 
       final paint =
           Paint()
-            ..color = starColor.withOpacity(0.8)
+            ..color = starColor.withValues(alpha: 0.8)
             ..style = PaintingStyle.fill;
 
       // Inner glow
       final glowPaint =
           Paint()
-            ..color = starColor.withOpacity(0.2)
+            ..color = starColor.withValues(alpha: 0.2)
             ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x, y), radius * 3, glowPaint);
@@ -1533,13 +1532,13 @@ class NeuralBackgroundPainter extends CustomPainter {
     final random = Random(25); // Fixed seed for consistency
     final paint =
         Paint()
-          ..color = lineColor.withOpacity(0.2)
+          ..color = lineColor.withValues(alpha: 0.2)
           ..strokeWidth = 0.8
           ..style = PaintingStyle.stroke;
 
     final nodePaint =
         Paint()
-          ..color = lineColor.withOpacity(0.3)
+          ..color = lineColor.withValues(alpha: 0.3)
           ..style = PaintingStyle.fill;
 
     // Create a network of nodes and connections
@@ -1583,7 +1582,7 @@ class WaveBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = waveColor.withOpacity(0.2)
+          ..color = waveColor.withValues(alpha: 0.2)
           ..strokeWidth = 1.2
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
@@ -1619,7 +1618,7 @@ class DigitalBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = lineColor.withOpacity(0.25)
+          ..color = lineColor.withValues(alpha: 0.25)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
@@ -1656,7 +1655,7 @@ class DigitalBackgroundPainter extends CustomPainter {
       // Add some circuit nodes/connection points
       final nodePaint =
           Paint()
-            ..color = lineColor.withOpacity(0.4)
+            ..color = lineColor.withValues(alpha: 0.4)
             ..style = PaintingStyle.fill;
 
       currentX = startX;
@@ -1817,13 +1816,13 @@ class BubblePainter extends CustomPainter {
     // Base bubble paint
     final bubblePaint =
         Paint()
-          ..color = Colors.white.withOpacity(0.25)
+          ..color = Colors.white.withValues(alpha: 0.25)
           ..style = PaintingStyle.fill;
 
     // Highlight paint for bubble shine
     final highlightPaint =
         Paint()
-          ..color = Colors.white.withOpacity(0.6)
+          ..color = Colors.white.withValues(alpha: 0.6)
           ..style = PaintingStyle.fill;
 
     // Draw different sized bubbles in a natural pattern
@@ -1874,7 +1873,7 @@ class GridOverlayPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.cyanAccent.withOpacity(0.15)
+          ..color = Colors.cyanAccent.withValues(alpha: 0.15)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 0.5;
 
@@ -2084,11 +2083,11 @@ class StarfieldPainter extends CustomPainter {
   final List<_Star> _stars = [];
   final Random _random = Random(42);
   final Paint _goldStarPaint =
-      Paint()..color = AppTheme.warmGold.withOpacity(0.8);
+      Paint()..color = AppTheme.warmGold.withValues(alpha: 0.8);
   final Paint _purpleStarPaint =
-      Paint()..color = AppTheme.gentlePurple.withOpacity(0.6);
+      Paint()..color = AppTheme.gentlePurple.withValues(alpha: 0.6);
   final Paint _silverStarPaint =
-      Paint()..color = AppTheme.silverMist.withOpacity(0.7);
+      Paint()..color = AppTheme.silverMist.withValues(alpha: 0.7);
 
   StarfieldPainter({this.starCount = 100}) {
     // Pre-generate stars only once for performance

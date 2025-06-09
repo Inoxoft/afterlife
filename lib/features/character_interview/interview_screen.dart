@@ -1,33 +1,30 @@
+import 'dart:math';
 // lib/features/character_interview/interview_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import 'interview_provider.dart';
 import '../models/character_model.dart';
-import '../character_gallery/character_gallery_screen.dart';
-import '../providers/characters_provider.dart';
-import 'chat_bubble.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/widgets/animated_particles.dart';
 import 'file_processor_service.dart';
 import '../providers/language_provider.dart';
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 import 'package:path/path.dart' as path;
-import '../chat/models/chat_message.dart';
-import '../chat/widgets/chat_message_bubble.dart';
+import '../models/leading_question_detector.dart';
+import '../widgets/leading_question_warning.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
   final CharacterModel? existingCharacter;
 
   const InterviewScreen({
-    Key? key,
+    super.key,
     this.editMode = false,
     this.existingCharacter,
-  }) : super(key: key);
+  });
 
   @override
   State<InterviewScreen> createState() => _InterviewScreenState();
@@ -40,10 +37,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
   late InterviewProvider _interviewProvider;
   bool _isProcessingFile = false;
 
+  // Leading question detection state
+  Map<String, dynamic>? _leadingQuestionWarning;
+  String? _pendingMessage;
+
   @override
   void initState() {
     super.initState();
     _initializeProvider();
+    _initializeLeadingQuestionDetector();
     // Set focus to the input field after a short delay
     Future.delayed(const Duration(milliseconds: 300), () {
       _inputFocusNode.requestFocus();
@@ -72,6 +74,52 @@ class _InterviewScreenState extends State<InterviewScreen> {
     _scrollController.dispose();
     _inputFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeLeadingQuestionDetector() async {
+    try {
+      await LeadingQuestionDetector.initialize();
+    } catch (e) {
+      print('Error initializing leading question detector: $e');
+    }
+  }
+
+  /// Check if a message contains leading questions
+  Future<Map<String, dynamic>?> _checkForLeadingQuestion(String message) async {
+    try {
+      print('🔍 Checking for leading question: "$message"');
+      
+      final result = await LeadingQuestionDetector.detectLeadingQuestion(message);
+      
+      if (result['isLeading'] == true) {
+        print('⚠️ Leading question detected with confidence: ${result['confidence']}');
+        return result;
+      } else {
+        print('✅ No leading question detected (confidence: ${result['confidence']})');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Leading question detection failed: $e');
+      return null;
+    }
+  }
+
+  void _handleContinueAnyway(InterviewProvider provider) {
+    if (_pendingMessage != null) {
+      _messageController.text = _pendingMessage!;
+      _sendMessage(provider, bypassWarning: true);
+    }
+  }
+
+  void _handleRephrase() {
+    if (_pendingMessage != null) {
+      _messageController.text = _pendingMessage!;
+    }
+    setState(() {
+      _leadingQuestionWarning = null;
+      _pendingMessage = null;
+    });
+    _inputFocusNode.requestFocus();
   }
 
   Future<void> _handleFileUpload() async {
@@ -212,7 +260,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(
-                                  color: AppTheme.warmGold.withOpacity(0.3),
+                                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                                   width: 1,
                                 ),
                               ),
@@ -293,19 +341,35 @@ class _InterviewScreenState extends State<InterviewScreen> {
                     ),
                   ),
 
-                  // Input area
+                  // Leading question warning
+                  Consumer<InterviewProvider>(
+                    builder: (context, provider, _) {
+                      if (_leadingQuestionWarning != null) {
+                        return LeadingQuestionWarning(
+                          warningMessage: _leadingQuestionWarning!['message'] as String,
+                          confidence: _leadingQuestionWarning!['confidence'] as double,
+                          onContinueAnyway: () => _handleContinueAnyway(provider),
+                          onRephrase: _handleRephrase,
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
+                  // Message input
                   Consumer<InterviewProvider>(
                     builder: (context, provider, _) {
                       if (provider.isSuccess) {
                         return const SizedBox.shrink();
                       }
+
                       return Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withOpacity(0.3),
+                          color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                           border: Border(
                             top: BorderSide(
-                              color: AppTheme.warmGold.withOpacity(0.3),
+                              color: AppTheme.warmGold.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -315,22 +379,23 @@ class _InterviewScreenState extends State<InterviewScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _messageController,
+                                focusNode: _inputFocusNode,
                                 style: TextStyle(color: AppTheme.silverMist),
                                 decoration: InputDecoration(
                                   hintText: 'Type your message...',
                                   hintStyle: TextStyle(
-                                    color: AppTheme.silverMist.withOpacity(0.5),
+                                    color: AppTheme.silverMist.withValues(alpha: 0.5),
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
                                     borderSide: BorderSide(
-                                      color: AppTheme.warmGold.withOpacity(0.3),
+                                      color: AppTheme.warmGold.withValues(alpha: 0.3),
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
                                     borderSide: BorderSide(
-                                      color: AppTheme.warmGold.withOpacity(0.3),
+                                      color: AppTheme.warmGold.withValues(alpha: 0.3),
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
@@ -378,10 +443,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
       margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.3),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.warmGold.withOpacity(0.3),
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -450,11 +515,36 @@ class _InterviewScreenState extends State<InterviewScreen> {
     );
   }
 
-  void _sendMessage(InterviewProvider provider) {
-    final text = _messageController.text;
-    if (text.trim().isNotEmpty) {
-      provider.sendMessage(text);
-      _messageController.clear();
+  void _sendMessage(InterviewProvider provider, {bool bypassWarning = false}) async {
+    final text = _messageController.text.trim();
+    if (text.isEmpty) return;
+
+    // If we're not bypassing the warning, check for leading questions first
+    if (!bypassWarning) {
+      try {
+        final leadingQuestionResult = await _checkForLeadingQuestion(text);
+        if (leadingQuestionResult != null) {
+          // Show warning instead of sending message
+          setState(() {
+            _leadingQuestionWarning = leadingQuestionResult;
+            _pendingMessage = text;
+          });
+          return;
+        }
+      } catch (e) {
+        // If detection fails, proceed with sending the message
+        print('Leading question detection failed: $e');
+      }
     }
+
+    // Clear the input field and any warnings
+    _messageController.clear();
+    setState(() {
+      _leadingQuestionWarning = null;
+      _pendingMessage = null;
+    });
+
+    // Send the message
+    provider.sendMessage(text);
   }
 }

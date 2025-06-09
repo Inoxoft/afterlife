@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,7 +50,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _chatFontSize = prefs.getDouble(_fontSizeKey) ?? 15.0;
       });
     } catch (e) {
-      print('Error loading settings: $e');
     }
   }
 
@@ -61,7 +61,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await prefs.setBool(_animationsKey, _isAnimationsEnabled);
       await prefs.setDouble(_fontSizeKey, _chatFontSize);
     } catch (e) {
-      print('Error saving settings: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to save settings: $e'),
@@ -95,7 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           color: Colors.black26,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.warmGold.withOpacity(0.3),
+                            color: AppTheme.warmGold.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -177,8 +176,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                           _saveSettings();
                         },
-                        activeColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withOpacity(0.5),
+                        activeThumbColor: AppTheme.warmGold,
+                        activeTrackColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                     ),
 
@@ -203,8 +202,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               min: 12.0,
                               max: 20.0,
                               divisions: 8,
+                              thumbColor: AppTheme.warmGold,
                               activeColor: AppTheme.warmGold,
-                              inactiveColor: AppTheme.warmGold.withOpacity(0.3),
+                              inactiveColor: AppTheme.warmGold.withValues(alpha: 0.3),
                               onChanged: (value) {
                                 setState(() {
                                   _chatFontSize = value;
@@ -231,8 +231,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                           _saveSettings();
                         },
-                        activeColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withOpacity(0.5),
+                        activeThumbColor: AppTheme.warmGold,
+                        activeTrackColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                     ),
 
@@ -252,8 +252,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                           _saveSettings();
                         },
-                        activeColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withOpacity(0.5),
+                        activeThumbColor: AppTheme.warmGold,
+                        activeTrackColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                     ),
 
@@ -388,9 +388,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        side: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
       ),
-      color: AppTheme.midnightPurple.withOpacity(0.5),
+      color: AppTheme.midnightPurple.withValues(alpha: 0.5),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ThemedIcon(
@@ -412,7 +412,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle,
             style: UkrainianFontUtils.latoWithUkrainianSupport(
               text: subtitle,
-              color: AppTheme.silverMist.withOpacity(0.7),
+              color: AppTheme.silverMist.withValues(alpha: 0.7),
               fontSize: 13,
             ),
           ),
@@ -493,7 +493,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Colors.redAccent.withOpacity(0.5),
+            color: Colors.redAccent.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -564,7 +564,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isFromSettings: true,
       onKeyUpdated: () {
         // Re-initialize env config and all services that use the API key
-        print('API key updated, reinitializing services...');
         EnvConfig.forceReload().then((_) {
           // Force refresh all chat services to use the new key
           // Reinitialize all chat services
@@ -578,10 +577,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             character_chat.ChatService.refreshApiKey();
             interview_chat.ChatService.refreshApiKey();
           } catch (e) {
-            print('Error refreshing API keys: $e');
           }
           
-          print('All chat services reinitialized with new API key');
 
           // Dump diagnostics after updating
           EnvConfig.dumpApiKeyInfo();
@@ -677,7 +674,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: AppTheme.warmGold.withOpacity(0.3),
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

@@ -1,8 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
-import 'dart:math' show pi, cos, sin;
 
 class LLMPage extends StatefulWidget {
   final AnimationController animationController;
@@ -84,7 +84,7 @@ class _LLMPageState extends State<LLMPage> {
                         shadows: [
                           Shadow(
                             blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
+                            color: AppTheme.warmGold.withValues(alpha: 0.8),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -98,7 +98,7 @@ class _LLMPageState extends State<LLMPage> {
                         text: AppLocalizations.of(context)!.poweredByAdvancedLanguageModels,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
+                        color: AppTheme.silverMist.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -120,10 +120,10 @@ class _LLMPageState extends State<LLMPage> {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppTheme.midnightPurple.withOpacity(0.3),
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppTheme.warmGold.withOpacity(0.3),
+                      color: AppTheme.warmGold.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -197,7 +197,7 @@ class _LLMPageState extends State<LLMPage> {
                                         text: AppLocalizations.of(context)!.basicLLM,
                                         fontSize: maxWidth * 0.035,
                                         fontWeight: FontWeight.bold,
-                                        color: AppTheme.silverMist.withOpacity(0.8),
+                                        color: AppTheme.silverMist.withValues(alpha: 0.8),
                                       ),
                                     ),
                                     const SizedBox(height: 16),
@@ -218,7 +218,7 @@ class _LLMPageState extends State<LLMPage> {
                                         text: AppLocalizations.of(context)!.limitedKnowledge,
                                         fontSize: maxWidth * 0.03,
                                         fontWeight: FontWeight.w300,
-                                        color: AppTheme.silverMist.withOpacity(0.7),
+                                        color: AppTheme.silverMist.withValues(alpha: 0.7),
                                       ),
                                     ),
                                   ],
@@ -280,9 +280,9 @@ class _LLMPageState extends State<LLMPage> {
                                     begin: Alignment.centerLeft,
                                     end: Alignment.centerRight,
                                     colors: [
-                                      AppTheme.silverMist.withOpacity(0.2),
-                                      AppTheme.warmGold.withOpacity(0.7),
-                                      AppTheme.silverMist.withOpacity(0.2),
+                                      AppTheme.silverMist.withValues(alpha: 0.2),
+                                      AppTheme.warmGold.withValues(alpha: 0.7),
+                                      AppTheme.silverMist.withValues(alpha: 0.2),
                                     ],
                                   ),
                                 ),
@@ -305,10 +305,10 @@ class _LLMPageState extends State<LLMPage> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.3),
+                  color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -375,7 +375,7 @@ class _LLMPageState extends State<LLMPage> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withOpacity(0.5),
+            color: AppTheme.midnightPurple.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -419,10 +419,10 @@ class _LLMPageState extends State<LLMPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.5),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isAdvanced ? AppTheme.warmGold.withOpacity(0.3) : AppTheme.silverMist.withOpacity(0.3),
+          color: isAdvanced ? AppTheme.warmGold.withValues(alpha: 0.3) : AppTheme.silverMist.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -443,7 +443,7 @@ class _LLMPageState extends State<LLMPage> {
             content,
             style: UkrainianFontUtils.latoWithUkrainianSupport(
               text: content,
-              color: isAdvanced ? AppTheme.silverMist : AppTheme.silverMist.withOpacity(0.7),
+              color: isAdvanced ? AppTheme.silverMist : AppTheme.silverMist.withValues(alpha: 0.7),
               fontSize: 13,
               height: 1.3,
             ),
@@ -465,16 +465,16 @@ class SimpleNeuronPainter extends CustomPainter {
     final paint =
         Paint()
           ..color = highlighted 
-              ? AppTheme.warmGold.withOpacity(0.6) 
-              : AppTheme.silverMist.withOpacity(0.3)
+              ? AppTheme.warmGold.withValues(alpha: 0.6) 
+              : AppTheme.silverMist.withValues(alpha: 0.3)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
     final dotPaint =
         Paint()
           ..color = highlighted 
-              ? AppTheme.warmGold.withOpacity(0.8) 
-              : AppTheme.silverMist.withOpacity(0.5)
+              ? AppTheme.warmGold.withValues(alpha: 0.8) 
+              : AppTheme.silverMist.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     // Draw a few simple connections
@@ -504,7 +504,7 @@ class SimpleNeuronPainter extends CustomPainter {
         center,
         25,
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.1)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.1)
           ..style = PaintingStyle.fill,
       );
     }
@@ -527,16 +527,16 @@ class ComplexNeuronPainter extends CustomPainter {
     final paint =
         Paint()
           ..color = highlighted 
-              ? AppTheme.warmGold.withOpacity(0.6) 
-              : AppTheme.silverMist.withOpacity(0.3)
+              ? AppTheme.warmGold.withValues(alpha: 0.6) 
+              : AppTheme.silverMist.withValues(alpha: 0.3)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
     final dotPaint =
         Paint()
           ..color = highlighted 
-              ? AppTheme.warmGold.withOpacity(0.8) 
-              : AppTheme.silverMist.withOpacity(0.5)
+              ? AppTheme.warmGold.withValues(alpha: 0.8) 
+              : AppTheme.silverMist.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     // Draw many connections in a more complex pattern
@@ -575,7 +575,7 @@ class ComplexNeuronPainter extends CustomPainter {
         center,
         25,
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.1)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.1)
           ..style = PaintingStyle.fill,
       );
     }

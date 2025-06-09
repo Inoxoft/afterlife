@@ -1,11 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 import 'famous_character_prompts.dart';
 import 'famous_character_chat_screen.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import '../../l10n/app_localizations.dart';
-import 'dart:math';
 
 class FamousCharacterProfileScreen extends StatefulWidget {
   final String name;
@@ -83,12 +83,12 @@ class _FamousCharacterProfileScreenState
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.cosmicBlack.withOpacity(0.3),
+                      color: AppTheme.cosmicBlack.withValues(alpha: 0.3),
                       blurRadius: 10,
                       spreadRadius: 1,
                       offset: const Offset(0, 4),
@@ -136,7 +136,7 @@ class _FamousCharacterProfileScreenState
                               center: Alignment.topCenter,
                               radius: 0.8,
                               colors: [
-                                AppTheme.warmGold.withOpacity(0.3),
+                                AppTheme.warmGold.withValues(alpha: 0.3),
                                 Colors.transparent,
                               ],
                             ),
@@ -152,7 +152,7 @@ class _FamousCharacterProfileScreenState
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.warmGold.withOpacity(0.2),
+                                color: AppTheme.warmGold.withValues(alpha: 0.2),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               ),
@@ -171,7 +171,7 @@ class _FamousCharacterProfileScreenState
                                         boxShadow: [
                                           BoxShadow(
                                             color: AppTheme.warmGold
-                                                .withOpacity(0.1),
+                                                .withValues(alpha: 0.1),
                                             blurRadius: 10,
                                             spreadRadius: 2,
                                           ),
@@ -186,7 +186,7 @@ class _FamousCharacterProfileScreenState
                                   : Center(
                                     child: Icon(
                                       Icons.face,
-                                      color: AppTheme.warmGold.withOpacity(0.5),
+                                      color: AppTheme.warmGold.withValues(alpha: 0.5),
                                       size: 80,
                                     ),
                                   ),
@@ -205,7 +205,7 @@ class _FamousCharacterProfileScreenState
                               center: Alignment.center,
                               radius: 0.5,
                               colors: [
-                                AppTheme.warmGold.withOpacity(0.05),
+                                AppTheme.warmGold.withValues(alpha: 0.05),
                                 Colors.transparent,
                               ],
                             ),
@@ -238,16 +238,17 @@ class _FamousCharacterProfileScreenState
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.deepNavy.withOpacity(0.7),
+                            color: AppTheme.deepNavy.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppTheme.warmGold.withOpacity(0.4),
+                              color: AppTheme.warmGold.withValues(alpha: 0.4),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             widget.profession,
-                            style: GoogleFonts.cinzel(
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: widget.profession,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.warmGold,
@@ -266,10 +267,10 @@ class _FamousCharacterProfileScreenState
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -307,7 +308,7 @@ class _FamousCharacterProfileScreenState
                   color: Colors.black26,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -316,13 +317,12 @@ class _FamousCharacterProfileScreenState
                   children: [
                     Text(
                       'Biography',
-                      style: GoogleFonts.cinzel(
-                        textStyle: TextStyle(
-                          color: AppTheme.warmGold,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                        ),
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: 'Biography',
+                        color: AppTheme.warmGold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -348,7 +348,7 @@ class _FamousCharacterProfileScreenState
                   color: Colors.black26,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -357,13 +357,12 @@ class _FamousCharacterProfileScreenState
                   children: [
                     Text(
                       'AI MODEL',
-                      style: GoogleFonts.cinzel(
-                        textStyle: TextStyle(
-                          color: AppTheme.warmGold,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                        ),
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: 'AI MODEL',
+                        color: AppTheme.warmGold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -393,7 +392,7 @@ class _FamousCharacterProfileScreenState
                           color: Colors.black12,
                           border: Border(
                             top: BorderSide(
-                              color: AppTheme.warmGold.withOpacity(0.3),
+                              color: AppTheme.warmGold.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -445,7 +444,7 @@ class _FamousCharacterProfileScreenState
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.warmGold.withOpacity(0.4),
+                        color: AppTheme.warmGold.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 1,
                       ),
@@ -543,8 +542,7 @@ class _FamousCharacterProfileScreenState
                 isRecommended: model['recommended'] == true,
                 isSelected: _selectedModel == model['id'],
               ),
-            )
-            .toList(),
+            ),
       ],
     );
   }
@@ -560,13 +558,13 @@ class _FamousCharacterProfileScreenState
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color:
-            isSelected ? AppTheme.deepIndigo.withOpacity(0.7) : Colors.black12,
+            isSelected ? AppTheme.deepIndigo.withValues(alpha: 0.7) : Colors.black12,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color:
               isSelected
-                  ? AppTheme.warmGold.withOpacity(0.7)
-                  : AppTheme.warmGold.withOpacity(0.2),
+                  ? AppTheme.warmGold.withValues(alpha: 0.7)
+                  : AppTheme.warmGold.withValues(alpha: 0.2),
           width: isSelected ? 1.5 : 1,
         ),
       ),
@@ -598,13 +596,13 @@ class _FamousCharacterProfileScreenState
                     shape: BoxShape.circle,
                     color:
                         isSelected
-                            ? AppTheme.warmGold.withOpacity(0.2)
+                            ? AppTheme.warmGold.withValues(alpha: 0.2)
                             : Colors.black26,
                     border: Border.all(
                       color:
                           isSelected
                               ? AppTheme.warmGold
-                              : AppTheme.warmGold.withOpacity(0.3),
+                              : AppTheme.warmGold.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                   ),
@@ -637,7 +635,7 @@ class _FamousCharacterProfileScreenState
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.warmGold.withOpacity(0.2),
+                                color: AppTheme.warmGold.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(

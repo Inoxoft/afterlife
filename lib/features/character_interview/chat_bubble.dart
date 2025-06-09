@@ -1,3 +1,4 @@
+import 'dart:math';
 // lib/features/character_interview/chat_bubble.dart
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
@@ -19,10 +20,10 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleColor =
         message.isUser
-            ? AppTheme.midnightPurple.withOpacity(0.6)
+            ? AppTheme.midnightPurple.withValues(alpha: 0.6)
             : (hasCharacterCard()
-                ? AppTheme.midnightPurple.withOpacity(0.8)
-                : AppTheme.midnightPurple.withOpacity(0.5));
+                ? AppTheme.midnightPurple.withValues(alpha: 0.8)
+                : AppTheme.midnightPurple.withValues(alpha: 0.5));
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -56,10 +57,10 @@ class ChatBubble extends StatelessWidget {
                 border: Border.all(
                   color:
                       message.isUser
-                          ? AppTheme.warmGold.withOpacity(0.5)
+                          ? AppTheme.warmGold.withValues(alpha: 0.5)
                           : (hasCharacterCard()
-                              ? AppTheme.warmGold.withOpacity(0.7)
-                              : AppTheme.warmGold.withOpacity(0.4)),
+                              ? AppTheme.warmGold.withValues(alpha: 0.7)
+                              : AppTheme.warmGold.withValues(alpha: 0.4)),
                   width:
                       hasCharacterCard()
                           ? 2.0
@@ -69,8 +70,8 @@ class ChatBubble extends StatelessWidget {
                   BoxShadow(
                     color:
                         hasCharacterCard()
-                            ? AppTheme.warmGold.withOpacity(0.2)
-                            : Colors.black.withOpacity(0.1),
+                            ? AppTheme.warmGold.withValues(alpha: 0.2)
+                            : Colors.black.withValues(alpha: 0.1),
                     blurRadius: hasCharacterCard() ? 8 : 3,
                     spreadRadius: hasCharacterCard() ? 2 : 0,
                     offset: const Offset(0, 1),
@@ -98,11 +99,11 @@ class ChatBubble extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
       ),
       child: CircleAvatar(
         radius: 16,
-        backgroundColor: AppTheme.midnightPurple.withOpacity(0.8),
+        backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.8),
         child: Text(
           avatarText.isNotEmpty ? avatarText : (message.isUser ? 'You' : 'AI'),
           style: TextStyle(
@@ -149,7 +150,7 @@ class ChatBubble extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                AppTheme.warmGold.withOpacity(0.7),
+                AppTheme.warmGold.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -157,7 +158,7 @@ class ChatBubble extends StatelessWidget {
           Text(
             'Thinking...',
             style: TextStyle(
-              color: AppTheme.silverMist.withOpacity(0.7),
+              color: AppTheme.silverMist.withValues(alpha: 0.7),
               fontSize: 14,
               fontStyle: FontStyle.italic,
             ),
@@ -204,15 +205,15 @@ class ChatBubble extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.warmGold.withOpacity(0.4),
-                      AppTheme.midnightPurple.withOpacity(0.5),
+                      AppTheme.warmGold.withValues(alpha: 0.4),
+                      AppTheme.midnightPurple.withValues(alpha: 0.5),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.5),
+                    color: AppTheme.warmGold.withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                 ),
@@ -246,10 +247,10 @@ class ChatBubble extends StatelessWidget {
                           horizontal: 16,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withOpacity(0.5),
+                          color: AppTheme.midnightPurple.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: AppTheme.warmGold.withOpacity(0.4),
+                            color: AppTheme.warmGold.withValues(alpha: 0.4),
                             width: 1,
                           ),
                         ),
@@ -274,15 +275,15 @@ class ChatBubble extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.3),
+                  color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.2),
+                    color: AppTheme.warmGold.withValues(alpha: 0.2),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 5,
                       spreadRadius: 0,
                     ),
@@ -296,15 +297,15 @@ class ChatBubble extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.3),
+                  color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.warmGold.withOpacity(0.05),
+                      color: AppTheme.warmGold.withValues(alpha: 0.05),
                       blurRadius: 8,
                       spreadRadius: 0,
                     ),

@@ -1,5 +1,5 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import '../theme/app_theme.dart';
 
 class GridBackground extends StatelessWidget {
@@ -19,8 +19,8 @@ class GridBackground extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppTheme.darkColor.withOpacity(0.9),
-                AppTheme.darkAccentColor.withOpacity(0.95),
+                AppTheme.darkColor.withValues(alpha: 0.9),
+                AppTheme.darkAccentColor.withValues(alpha: 0.95),
               ],
             ),
           ),
@@ -40,7 +40,7 @@ class GridBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppTheme.primaryColor.withOpacity(0.4),
+                  AppTheme.primaryColor.withValues(alpha: 0.4),
                   Colors.transparent,
                 ],
               ),
@@ -58,7 +58,7 @@ class GridBackground extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppTheme.accentColor.withOpacity(0.3),
+                  AppTheme.accentColor.withValues(alpha: 0.3),
                   Colors.transparent,
                 ],
               ),
@@ -74,9 +74,9 @@ class GridBackground extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppTheme.darkColor.withOpacity(0.6),
-                  AppTheme.darkColor.withOpacity(0.3),
-                  AppTheme.darkColor.withOpacity(0.6),
+                  AppTheme.darkColor.withValues(alpha: 0.6),
+                  AppTheme.darkColor.withValues(alpha: 0.3),
+                  AppTheme.darkColor.withValues(alpha: 0.6),
                 ],
               ),
             ),
@@ -96,7 +96,7 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = AppTheme.primaryColor.withOpacity(0.3)
+          ..color = AppTheme.primaryColor.withValues(alpha: 0.3)
           ..strokeWidth = 1;
 
     // Horizontal lines
@@ -114,10 +114,10 @@ class GridPainter extends CustomPainter {
     // Add random highlight points at grid intersections
     final highlightPaint =
         Paint()
-          ..color = AppTheme.primaryColor.withOpacity(0.7)
+          ..color = AppTheme.primaryColor.withValues(alpha: 0.7)
           ..strokeWidth = 3;
 
-    final random = math.Random(42); // Fixed seed for consistent pattern
+    final random = Random(42); // Fixed seed for consistent pattern
 
     for (double x = 0; x < size.width; x += spacingX) {
       for (double y = 0; y < size.height; y += spacingY) {
@@ -131,7 +131,7 @@ class GridPainter extends CustomPainter {
               Offset(x, y),
               6,
               Paint()
-                ..color = AppTheme.primaryColor.withOpacity(0.3)
+                ..color = AppTheme.primaryColor.withValues(alpha: 0.3)
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = 1,
             );
@@ -143,7 +143,7 @@ class GridPainter extends CustomPainter {
     // Draw a few larger grid elements to suggest tech interfaces
     final techInterfacePaint =
         Paint()
-          ..color = AppTheme.accentColor.withOpacity(0.4)
+          ..color = AppTheme.accentColor.withValues(alpha: 0.4)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
 

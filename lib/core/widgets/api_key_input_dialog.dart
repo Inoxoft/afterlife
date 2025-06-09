@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -66,11 +67,9 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
       
       if (_isUserKey) {
         _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
-        print('Loaded user-set API key');
       } else {
         // Don't show the default key from .env in the input field
         _currentKey = null;
-        print('No user-set API key found');
       }
 
       // Don't display placeholder as a real key
@@ -92,7 +91,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading current API key: $e');
       setState(() {
         _isLoading = false;
       });
@@ -131,7 +129,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
 
       // If the input contains the masked key, don't update it
       if (skipValidation) {
-        print('Masked key detected, skipping update');
         // No changes to save, but consider it a successful close if from settings
         if (widget.isFromSettings) {
           Navigator.of(context).pop(false);
@@ -139,7 +136,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         return;
       }
 
-      print('Saving new API key to storage: ${apiKey.substring(0, 4)}...');
 
       // Instead of writing to .env file, save to SharedPreferences
       final success = await EnvConfig.setUserApiKey(apiKey);
@@ -170,7 +166,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      print('Error saving API key: $e');
       setState(() {
         _errorText = 'Error saving API key: $e';
         _isSubmitting = false;
@@ -213,10 +208,10 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: AppTheme.backgroundEnd.withOpacity(0.3),
+                      fillColor: AppTheme.backgroundEnd.withValues(alpha: 0.3),
                       hintText: 'Enter API Key (sk-...)',
                       hintStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                       errorText: _errorText,
                       prefixIcon:
@@ -224,7 +219,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                               ? IconButton(
                                 icon: Icon(
                                   Icons.delete_outline,
-                                  color: Colors.redAccent.withOpacity(0.7),
+                                  color: Colors.redAccent.withValues(alpha: 0.7),
                                 ),
                                 tooltip: 'Clear current key',
                                 onPressed: () async {
@@ -239,7 +234,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                                   try {
                                     // Use the new removeUserApiKey method
                                     await EnvConfig.removeUserApiKey();
-                                    print('API key cleared via clear button');
 
                                     // Reinitialize config to reflect changes with force reload
                                     await EnvConfig.forceReload();
@@ -248,7 +242,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                                       widget.onKeyUpdated!();
                                     }
                                   } catch (e) {
-                                    print('Error clearing API key: $e');
                                   } finally {
                                     if (mounted) {
                                       setState(() {
@@ -273,7 +266,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: AppTheme.etherealCyan.withOpacity(0.5),
+                          color: AppTheme.etherealCyan.withValues(alpha: 0.5),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -304,7 +297,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                             child: Text(
                               'To replace with a different key, clear the field first and enter new key',
                               style: TextStyle(
-                                color: Colors.amber.withOpacity(0.8),
+                                color: Colors.amber.withValues(alpha: 0.8),
                                 fontSize: 12,
                               ),
                             ),
@@ -403,7 +396,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                         if (!success) {
                           throw Exception('Failed to remove API key');
                         }
-                        print('API key removed successfully');
 
                         // Re-initialize env config with force reload
                         await EnvConfig.forceReload();
@@ -433,7 +425,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.etherealCyan,
             foregroundColor: Colors.black87,
-            disabledBackgroundColor: AppTheme.etherealCyan.withOpacity(0.3),
+            disabledBackgroundColor: AppTheme.etherealCyan.withValues(alpha: 0.3),
           ),
           child:
               _isSubmitting

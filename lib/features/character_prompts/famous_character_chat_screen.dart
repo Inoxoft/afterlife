@@ -1,14 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
+import '../widgets/leading_question_warning.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
-import '../../l10n/app_localizations.dart';
 
 class FamousCharacterChatScreen extends StatefulWidget {
   final String characterName;
@@ -32,6 +34,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   bool _isLoading = false;
   List<Map<String, dynamic>> _messages = [];
   late String _selectedModel;
+  
+  // Leading question detection state
+  Map<String, dynamic>? _leadingQuestionWarning;
+  String? _pendingMessage;
 
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
@@ -81,7 +87,6 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error initializing chat: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -106,14 +111,36 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     }
   }
 
-  Future<void> _sendMessage() async {
+  Future<void> _sendMessage({bool bypassWarning = false}) async {
     final message = _messageController.text.trim();
     if (message.isEmpty || _isLoading) return;
 
     final localizations = AppLocalizations.of(context);
 
-    // Clear the input field
+    // If we're not bypassing the warning, check for leading questions first
+    if (!bypassWarning) {
+      try {
+        final leadingQuestionResult = await FamousCharacterService.checkForLeadingQuestion(message);
+        if (leadingQuestionResult != null) {
+          // Show warning instead of sending message
+          setState(() {
+            _leadingQuestionWarning = leadingQuestionResult;
+            _pendingMessage = message;
+          });
+          return;
+        }
+      } catch (e) {
+        // If detection fails, proceed with sending the message
+        print('Leading question detection failed: $e');
+      }
+    }
+
+    // Clear the input field and any warnings
     _messageController.clear();
+    setState(() {
+      _leadingQuestionWarning = null;
+      _pendingMessage = null;
+    });
 
     // Add user message to chat locally for immediate UI update
     setState(() {
@@ -129,10 +156,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     _scrollToBottom();
 
     try {
-      // Send the message to the character
+      // Send the message to the character (bypass leading question check since we already did it)
       final response = await FamousCharacterService.sendMessage(
         characterName: widget.characterName,
         message: message,
+        bypassLeadingQuestionCheck: true,
       );
 
       // Add AI response to chat history if not null
@@ -174,6 +202,24 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         _scrollToBottom();
       }
     }
+  }
+
+  void _handleContinueAnyway() {
+    if (_pendingMessage != null) {
+      _messageController.text = _pendingMessage!;
+      _sendMessage(bypassWarning: true);
+    }
+  }
+
+  void _handleRephrase() {
+    if (_pendingMessage != null) {
+      _messageController.text = _pendingMessage!;
+    }
+    setState(() {
+      _leadingQuestionWarning = null;
+      _pendingMessage = null;
+    });
+    _inputFocusNode.requestFocus();
   }
 
   void _showClearChatDialog() {
@@ -251,6 +297,15 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                 // Chat messages
                 Expanded(child: _buildChatList(localizations)),
 
+                // Leading question warning
+                if (_leadingQuestionWarning != null)
+                  LeadingQuestionWarning(
+                    warningMessage: _leadingQuestionWarning!['message'] as String,
+                    confidence: _leadingQuestionWarning!['confidence'] as double,
+                    onContinueAnyway: _handleContinueAnyway,
+                    onRephrase: _handleRephrase,
+                  ),
+
                 // Input area
                 _buildInputArea(localizations),
               ],
@@ -280,7 +335,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: AppTheme.midnightPurple.withOpacity(0.7),
+            backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.7),
             backgroundImage:
                 widget.imageUrl != null ? AssetImage(widget.imageUrl!) : null,
             child:
@@ -295,7 +350,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                         fontSize: 16,
                         shadows: [
                           Shadow(
-                            color: AppTheme.warmGold.withOpacity(0.5),
+                            color: AppTheme.warmGold.withValues(alpha: 0.5),
                             blurRadius: 2,
                             offset: const Offset(0, 1),
                           ),
@@ -365,7 +420,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: AppTheme.warmGold
-                                                .withOpacity(0.2),
+                                                .withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(
                                               2,
                                             ),
@@ -403,10 +458,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withOpacity(0.5),
+            color: AppTheme.midnightPurple.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: AppTheme.warmGold.withOpacity(0.3),
+              color: AppTheme.warmGold.withValues(alpha: 0.3),
               width: 0.5,
             ),
           ),
@@ -432,14 +487,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               Icon(
                 Icons.chat_bubble_outline,
                 size: 48,
-                color: AppTheme.silverMist.withOpacity(0.5),
+                color: AppTheme.silverMist.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 localizations.startChattingWith.replaceAll('{name}', widget.characterName),
                 style: GoogleFonts.lato(
                   fontSize: 18,
-                  color: AppTheme.silverMist.withOpacity(0.8),
+                  color: AppTheme.silverMist.withValues(alpha: 0.8),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -448,7 +503,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                 localizations.sendMessageToBegin,
                 style: GoogleFonts.lato(
                   fontSize: 14,
-                  color: AppTheme.silverMist.withOpacity(0.5),
+                  color: AppTheme.silverMist.withValues(alpha: 0.5),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -482,10 +537,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.3),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.3),
         border: Border(
           top: BorderSide(
-            color: AppTheme.warmGold.withOpacity(0.3),
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -500,18 +555,18 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               decoration: InputDecoration(
                 hintText: localizations.typeMessage,
                 hintStyle: TextStyle(
-                  color: AppTheme.silverMist.withOpacity(0.5),
+                  color: AppTheme.silverMist.withValues(alpha: 0.5),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -558,8 +613,8 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleColor =
         isUser
-            ? AppTheme.accentPurple.withOpacity(0.6)
-            : Colors.black.withOpacity(0.4);
+            ? AppTheme.accentPurple.withValues(alpha: 0.6)
+            : Colors.black.withValues(alpha: 0.4);
     final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
 
     // Check if message is very long (over 1000 characters)
@@ -569,7 +624,9 @@ class _MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // AI avatar (only shown for AI messages)
@@ -603,13 +660,13 @@ class _MessageBubble extends StatelessWidget {
                 border: Border.all(
                   color:
                       isUser
-                          ? AppTheme.accentPurple.withOpacity(0.7)
-                          : AppTheme.etherealCyan.withOpacity(0.5),
+                          ? AppTheme.accentPurple.withValues(alpha: 0.7)
+                          : AppTheme.etherealCyan.withValues(alpha: 0.5),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 3,
                     offset: const Offset(0, 1),
                   ),
@@ -636,8 +693,8 @@ class _MessageBubble extends StatelessWidget {
       radius: 16,
       backgroundColor:
           isUser
-              ? AppTheme.accentPurple.withOpacity(0.8)
-              : AppTheme.etherealCyan.withOpacity(0.8),
+              ? AppTheme.accentPurple.withValues(alpha: 0.8)
+              : AppTheme.etherealCyan.withValues(alpha: 0.8),
       child: Text(
         isUser ? 'You' : 'AI',
         style: const TextStyle(
@@ -679,13 +736,13 @@ class _SendButton extends StatelessWidget {
       decoration: BoxDecoration(
         color:
             isLoading
-                ? AppTheme.etherealCyan.withOpacity(0.3)
+                ? AppTheme.etherealCyan.withValues(alpha: 0.3)
                 : AppTheme.etherealCyan,
         shape: BoxShape.circle,
         boxShadow: [
           if (!isLoading)
             BoxShadow(
-              color: AppTheme.etherealCyan.withOpacity(0.3),
+              color: AppTheme.etherealCyan.withValues(alpha: 0.3),
               blurRadius: 8,
               spreadRadius: 1,
             ),

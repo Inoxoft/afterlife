@@ -1,6 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
 // lib/features/character_interview/chat_service.dart
 import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/utils/env_config.dart';
 
@@ -31,16 +32,19 @@ class ChatService {
 
       if (_apiKey == null || _apiKey!.isEmpty) {
         print(
-          'WARNING: No OpenRouter API key found. The application will not function properly.',
+          'Warning: No OpenRouter API key found. The application will not function properly.',
         );
-        print('Please set OPENROUTER_API_KEY in your .env file or in Settings.');
+        print(
+          'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
+        );
       } else {
-        print('API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+        print(
+          'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
 
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing chat service: $e');
       _isInitialized =
           true; // Still mark as initialized to prevent repeated attempts
     }
@@ -49,7 +53,6 @@ class ChatService {
   // Method to refresh API key from the latest source
   static Future<void> refreshApiKey() async {
     try {
-      print('Interview Chat Service: Refreshing API key...');
 
       // Get the latest key directly
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
@@ -58,9 +61,13 @@ class ChatService {
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        print('Warning: No API key found after refresh');
+        print(
+          'Warning: API key refresh failed - No key found',
+        );
       } else {
-        print('API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key');
+        print(
+          'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
     } catch (e) {
       print('Error refreshing API key: $e');
@@ -83,7 +90,6 @@ class ChatService {
 
     // Validate API key exists
     if (_apiKey == null || _apiKey!.isEmpty) {
-      print('Error: API key is missing. Cannot send message.');
       return 'Error: Unable to connect to AI service. Please check your API key configuration.';
     }
 
@@ -103,8 +109,7 @@ class ChatService {
 
     try {
       // Log headers and API key for debugging
-      print('Interview Chat Service: Sending request with API key: ${_apiKey!.substring(0, min(4, _apiKey!.length))}...');
-      print('Is using default key: $_isUsingDefaultKey');
+      logDiagnostics();
       
       final response = await http
           .post(
@@ -123,7 +128,6 @@ class ChatService {
       if (response.statusCode != 200) {
         final errorMessage =
             'API error (${response.statusCode}): ${response.body}';
-        print(errorMessage);
         throw ChatServiceException(errorMessage);
       }
 
@@ -132,26 +136,19 @@ class ChatService {
       final data = jsonDecode(responseBody);
       return data['choices'][0]['message']['content'] as String;
     } on http.ClientException catch (e) {
-      print('Network error in chat service: $e');
       throw ChatServiceException('Network error: ${e.message}');
     } on FormatException catch (e) {
-      print('Invalid response format: $e');
       throw ChatServiceException('Invalid response format');
     } catch (e) {
-      print('Unexpected error in chat service: $e');
       throw ChatServiceException('Unexpected error occurred: $e');
     }
   }
 
   // Method for logging diagnostic info
   static void logDiagnostics() {
-    print('=== ChatService Diagnostics ===');
-    print('Is initialized: $_isInitialized');
-    print('Is using default key: $_isUsingDefaultKey');
     print(
       'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(8, _apiKey!.length))}...)")}',
     );
-    print('=============================');
   }
 }
 
@@ -163,5 +160,4 @@ class ChatServiceException implements Exception {
   String toString() => 'ChatServiceException: $message';
 }
 
-// Helper function to avoid importing dart:math
 int min(int a, int b) => a < b ? a : b;
