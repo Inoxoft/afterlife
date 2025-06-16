@@ -18,14 +18,21 @@ class LeadingQuestionDetector {
       // Load the ONNX model
       final modelBytes = await rootBundle.load('assets/models/model.onnx');
       final sessionOptions = OrtSessionOptions();
-      _session = OrtSession.fromBuffer(modelBytes.buffer.asUint8List(), sessionOptions);
+      _session = OrtSession.fromBuffer(
+        modelBytes.buffer.asUint8List(),
+        sessionOptions,
+      );
 
       // Load vocabulary
-      final vocabString = await rootBundle.loadString('assets/models/vocab.json');
+      final vocabString = await rootBundle.loadString(
+        'assets/models/vocab.json',
+      );
       _vocab = json.decode(vocabString);
 
       // Load scaler parameters
-      final scalerString = await rootBundle.loadString('assets/models/scaler.json');
+      final scalerString = await rootBundle.loadString(
+        'assets/models/scaler.json',
+      );
       _scaler = json.decode(scalerString);
 
       _isInitialized = true;
@@ -40,7 +47,9 @@ class LeadingQuestionDetector {
 
   /// Detect if a message contains leading questions
   /// Returns a Map with 'isLeading' (bool) and 'confidence' (double 0.0-1.0)
-  static Future<Map<String, dynamic>> detectLeadingQuestion(String message) async {
+  static Future<Map<String, dynamic>> detectLeadingQuestion(
+    String message,
+  ) async {
     if (!_isInitialized) {
       await initialize();
     }
@@ -51,18 +60,20 @@ class LeadingQuestionDetector {
 
     try {
       print('🔍 Analyzing message: "$message"');
-      
+
       // Preprocess the message to create feature vector
       final features = _preprocessMessage(message);
-      
+
       // Debug: Count non-zero features
       final nonZeroFeatures = features.where((f) => f != 0.0).length;
       final maxFeature = features.reduce((a, b) => a.abs() > b.abs() ? a : b);
-      print('📊 Features: ${features.length} total, $nonZeroFeatures non-zero, max: $maxFeature');
-      
+      print(
+        '📊 Features: ${features.length} total, $nonZeroFeatures non-zero, max: $maxFeature',
+      );
+
       // Convert to Float32List for ONNX model compatibility
       final float32Features = Float32List.fromList(features);
-      
+
       // Create input tensor - use the first input name from the session
       final inputName = _session!.inputNames.first;
       final inputTensor = OrtValueTensor.createTensorWithDataList(
@@ -74,15 +85,15 @@ class LeadingQuestionDetector {
       final inputs = {inputName: inputTensor};
       final runOptions = OrtRunOptions();
       final outputs = _session!.run(runOptions, inputs);
-      
-      // Get prediction (assuming binary classification with sigmoid output)  
+
+      // Get prediction (assuming binary classification with sigmoid output)
       final outputTensor = outputs.first;
       double confidence = 0.0;
-      
+
       try {
         final prediction = outputTensor?.value;
         print('🔬 Raw prediction: $prediction (${prediction.runtimeType})');
-        
+
         if (prediction is List<List<double>>) {
           // 2D tensor [1, 1] or [1, num_classes]
           confidence = prediction.first.first.toDouble();
@@ -96,13 +107,13 @@ class LeadingQuestionDetector {
           print('❌ Unexpected prediction format: ${prediction.runtimeType}');
           confidence = 0.0;
         }
-        
+
         print('📈 Confidence: $confidence');
       } catch (e) {
         print('❌ Error extracting prediction: $e');
         confidence = 0.0;
       }
-      
+
       // Clean up
       inputTensor.release();
       for (final output in outputs) {
@@ -110,8 +121,10 @@ class LeadingQuestionDetector {
       }
       runOptions.release();
 
-      final isLeading = confidence > 0.3; // Temporarily lowered from 0.5 for testing
-      print('🎯 Result: ${isLeading ? "LEADING" : "NOT LEADING"} (confidence: $confidence)');
+      final isLeading = confidence > 0.65; // Lowered sensitivity from 0.5
+      print(
+        '🎯 Result: ${isLeading ? "LEADING" : "NOT LEADING"} (confidence: $confidence)',
+      );
 
       return {
         'isLeading': isLeading,
@@ -133,15 +146,15 @@ class LeadingQuestionDetector {
     final vocab = _vocab!['vocab'] as Map<String, dynamic>;
     final mean = (_scaler!['mean'] as List).cast<double>();
     final scale = (_scaler!['scale'] as List).cast<double>();
-    
+
     // Clean and expand contractions
     String cleanMessage = message.toLowerCase().trim();
     print('📝 Original: "$message" -> Cleaned: "$cleanMessage"');
-    
+
     // Expand common contractions to match training data preprocessing
     final contractions = {
       "don't": "do not",
-      "won't": "will not", 
+      "won't": "will not",
       "can't": "cannot",
       "shouldn't": "should not",
       "wouldn't": "would not",
@@ -170,7 +183,7 @@ class LeadingQuestionDetector {
       "there's": "there is",
       "here's": "here is",
     };
-    
+
     // Apply contraction expansion
     for (final entry in contractions.entries) {
       if (cleanMessage.contains(entry.key)) {
@@ -178,23 +191,23 @@ class LeadingQuestionDetector {
         cleanMessage = cleanMessage.replaceAll(entry.key, entry.value);
       }
     }
-    
+
     // Remove punctuation and extra whitespace
     cleanMessage = cleanMessage.replaceAll(RegExp(r'[^\w\s]'), ' ');
     cleanMessage = cleanMessage.replaceAll(RegExp(r'\s+'), ' ').trim();
-    
+
     final words = cleanMessage.split(' ');
     print('🔤 Final tokens: $words');
-    
+
     // Create feature vector (TF-IDF style)
     final features = List<double>.filled(mean.length, 0.0);
     final matchedFeatures = <String>[];
     final matchedIndices = <int>{};
-    
+
     // Process individual words and n-grams
     for (int i = 0; i < words.length; i++) {
       final word = words[i];
-      
+
       // Single words
       if (vocab.containsKey(word)) {
         final index = vocab[word] as int;
@@ -204,7 +217,7 @@ class LeadingQuestionDetector {
           matchedIndices.add(index);
         }
       }
-      
+
       // Bigrams
       if (i < words.length - 1) {
         final bigram = '${words[i]} ${words[i + 1]}';
@@ -217,7 +230,7 @@ class LeadingQuestionDetector {
           }
         }
       }
-      
+
       // Trigrams
       if (i < words.length - 2) {
         final trigram = '${words[i]} ${words[i + 1]} ${words[i + 2]}';
@@ -231,13 +244,13 @@ class LeadingQuestionDetector {
         }
       }
     }
-    
+
     print('✅ Matched features: ${matchedFeatures.join(", ")}');
     print('🎯 Matched indices count: ${matchedIndices.length}');
-    
+
     // Let's try WITH scaling again but with better debugging
     print('🧪 Testing WITH scaling - applying StandardScaler normalization');
-    
+
     // Apply scaling (standardization) ONLY to matched features
     // Keep unmatched features as 0.0 (don't subtract mean from zeros)
     for (final index in matchedIndices) {
@@ -246,14 +259,16 @@ class LeadingQuestionDetector {
         final meanValue = mean[index];
         final scaleValue = scale[index];
         features[index] = (features[index] - mean[index]) / scale[index];
-        
+
         // Debug the first few scalings
         if (matchedIndices.length <= 10) {
-          print('🔢 Scaling idx $index: $originalValue -> ($originalValue - $meanValue) / $scaleValue = ${features[index]}');
+          print(
+            '🔢 Scaling idx $index: $originalValue -> ($originalValue - $meanValue) / $scaleValue = ${features[index]}',
+          );
         }
       }
     }
-    
+
     return features;
   }
 
@@ -278,4 +293,4 @@ class LeadingQuestionDetector {
     _scaler = null;
     _isInitialized = false;
   }
-} 
+}

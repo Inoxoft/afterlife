@@ -58,65 +58,292 @@ class _LLMPageState extends State<LLMPage> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Title with animation
-            SlideTransition(
-              position: titleAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: widget.animationController,
-                  curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.theMindBehindTwins,
-                      textAlign: TextAlign.center,
-                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                        text: AppLocalizations.of(context)!.theMindBehindTwins,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: AppTheme.silverMist,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 10.0,
-                            color: AppTheme.warmGold.withValues(alpha: 0.8),
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Title with animation
+              SlideTransition(
+                position: titleAnimation,
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: widget.animationController,
+                    curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.theMindBehindTwins,
+                        textAlign: TextAlign.center,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text:
+                              AppLocalizations.of(context)!.theMindBehindTwins,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 3.0,
+                          color: AppTheme.silverMist,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 10.0,
+                              color: AppTheme.warmGold.withValues(alpha: 0.8),
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      AppLocalizations.of(context)!.poweredByAdvancedLanguageModels,
-                      textAlign: TextAlign.center,
-                      style: UkrainianFontUtils.latoWithUkrainianSupport(
-                        text: AppLocalizations.of(context)!.poweredByAdvancedLanguageModels,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withValues(alpha: 0.9),
-                        letterSpacing: 0.5,
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.poweredByAdvancedLanguageModels,
+                        textAlign: TextAlign.center,
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text:
+                              AppLocalizations.of(
+                                context,
+                              )!.poweredByAdvancedLanguageModels,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w300,
+                          color: AppTheme.silverMist.withValues(alpha: 0.9),
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Main explanation
-            SlideTransition(
-              position: contentAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: widget.animationController,
-                  curve: const Interval(0.3, 1.0),
+              // Main explanation
+              SlideTransition(
+                position: contentAnimation,
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: widget.animationController,
+                    curve: const Interval(0.3, 1.0),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.psychology,
+                              color: AppTheme.warmGold,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context)!.howItWorks,
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text:
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.howItWorks,
+                                    color: AppTheme.warmGold,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(context)!.twinsPoweredByAI,
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text:
+                                AppLocalizations.of(context)!.twinsPoweredByAI,
+                            color: AppTheme.silverMist,
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // LLM comparison visualization
+              SlideTransition(
+                position: contentAnimation,
+                child: FadeTransition(
+                  opacity: imageAnimation,
+                  child: ScaleTransition(
+                    scale: imageAnimation,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxWidth = constraints.maxWidth;
+                        final visualHeight = maxWidth * 0.4;
+                        return SizedBox(
+                          height: visualHeight,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Left side - Basic LLM
+                              Positioned(
+                                left: 0,
+                                child: SizedBox(
+                                  width: maxWidth * 0.45,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!.basicLLM,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.basicLLM,
+                                              fontSize: maxWidth * 0.035,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppTheme.silverMist
+                                                  .withValues(alpha: 0.8),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      SizedBox(
+                                        width: maxWidth * 0.22,
+                                        height: maxWidth * 0.22,
+                                        child: CustomPaint(
+                                          painter: SimpleNeuronPainter(
+                                            highlighted: false,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.limitedKnowledge,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.latoWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.limitedKnowledge,
+                                              fontSize: maxWidth * 0.03,
+                                              fontWeight: FontWeight.w300,
+                                              color: AppTheme.silverMist
+                                                  .withValues(alpha: 0.7),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Right side - Advanced LLM
+                              Positioned(
+                                right: 0,
+                                child: SizedBox(
+                                  width: maxWidth * 0.45,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.advancedLLM,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.advancedLLM,
+                                              fontSize: maxWidth * 0.035,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppTheme.warmGold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      SizedBox(
+                                        width: maxWidth * 0.22,
+                                        height: maxWidth * 0.22,
+                                        child: CustomPaint(
+                                          painter: ComplexNeuronPainter(
+                                            highlighted: true,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.deepKnowledge,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.latoWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.deepKnowledge,
+                                              fontSize: maxWidth * 0.03,
+                                              fontWeight: FontWeight.w300,
+                                              color: AppTheme.warmGold,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Center connecting line
+                              Center(
+                                child: Container(
+                                  width: maxWidth * 0.1,
+                                  height: 2,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        AppTheme.silverMist.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        AppTheme.warmGold.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                        AppTheme.silverMist.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Example Scenario
+              SlideTransition(
+                position: contentAnimation,
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -128,241 +355,66 @@ class _LLMPageState extends State<LLMPage> {
                     ),
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           Icon(
-                            Icons.psychology,
+                            Icons.lightbulb_outline,
                             color: AppTheme.warmGold,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            AppLocalizations.of(context)!.howItWorks,
-                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                              text: AppLocalizations.of(context)!.howItWorks,
-                              color: AppTheme.warmGold,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            AppLocalizations.of(context)!.exampleInteraction,
+                            style:
+                                UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.exampleInteraction,
+                                  color: AppTheme.warmGold,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        AppLocalizations.of(context)!.twinsPoweredByAI,
+                        AppLocalizations.of(
+                          context,
+                        )!.whenDiscussingRelativityWithEinstein,
                         style: UkrainianFontUtils.latoWithUkrainianSupport(
-                          text: AppLocalizations.of(context)!.twinsPoweredByAI,
-                          color: AppTheme.silverMist,
+                          text:
+                              AppLocalizations.of(
+                                context,
+                              )!.whenDiscussingRelativityWithEinstein,
+                          color: AppTheme.warmGold,
                           fontSize: 14,
-                          height: 1.4,
+                          fontWeight: FontWeight.w500,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildExampleBubble(
+                        AppLocalizations.of(context)!.withAdvancedLLMLabel,
+                        AppLocalizations.of(context)!.withAdvancedLLMExample,
+                        true,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildExampleBubble(
+                        AppLocalizations.of(context)!.withBasicLLMLabel,
+                        AppLocalizations.of(context)!.withBasicLLMExample,
+                        false,
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 20),
-
-            // LLM comparison visualization
-            SlideTransition(
-              position: contentAnimation,
-              child: FadeTransition(
-                opacity: imageAnimation,
-                child: ScaleTransition(
-                  scale: imageAnimation,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final maxWidth = constraints.maxWidth;
-                      final visualHeight = maxWidth * 0.4;
-                      return SizedBox(
-                        height: visualHeight,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Left side - Basic LLM
-                            Positioned(
-                              left: 0,
-                              child: SizedBox(
-                                width: maxWidth * 0.45,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.basicLLM,
-                                      textAlign: TextAlign.center,
-                                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                        text: AppLocalizations.of(context)!.basicLLM,
-                                        fontSize: maxWidth * 0.035,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.silverMist.withValues(alpha: 0.8),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    SizedBox(
-                                      width: maxWidth * 0.22,
-                                      height: maxWidth * 0.22,
-                                      child: CustomPaint(
-                                        painter: SimpleNeuronPainter(
-                                          highlighted: false,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      AppLocalizations.of(context)!.limitedKnowledge,
-                                      textAlign: TextAlign.center,
-                                      style: UkrainianFontUtils.latoWithUkrainianSupport(
-                                        text: AppLocalizations.of(context)!.limitedKnowledge,
-                                        fontSize: maxWidth * 0.03,
-                                        fontWeight: FontWeight.w300,
-                                        color: AppTheme.silverMist.withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            // Right side - Advanced LLM
-                            Positioned(
-                              right: 0,
-                              child: SizedBox(
-                                width: maxWidth * 0.45,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.advancedLLM,
-                                      textAlign: TextAlign.center,
-                                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                        text: AppLocalizations.of(context)!.advancedLLM,
-                                        fontSize: maxWidth * 0.035,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.warmGold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    SizedBox(
-                                      width: maxWidth * 0.22,
-                                      height: maxWidth * 0.22,
-                                      child: CustomPaint(
-                                        painter: ComplexNeuronPainter(
-                                          highlighted: true,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      AppLocalizations.of(context)!.deepKnowledge,
-                                      textAlign: TextAlign.center,
-                                      style: UkrainianFontUtils.latoWithUkrainianSupport(
-                                        text: AppLocalizations.of(context)!.deepKnowledge,
-                                        fontSize: maxWidth * 0.03,
-                                        fontWeight: FontWeight.w300,
-                                        color: AppTheme.warmGold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            // Center connecting line
-                            Center(
-                              child: Container(
-                                width: maxWidth * 0.1,
-                                height: 2,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                    colors: [
-                                      AppTheme.silverMist.withValues(alpha: 0.2),
-                                      AppTheme.warmGold.withValues(alpha: 0.7),
-                                      AppTheme.silverMist.withValues(alpha: 0.2),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Example Scenario
-            SlideTransition(
-              position: contentAnimation,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline,
-                          color: AppTheme.warmGold,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          AppLocalizations.of(context)!.exampleInteraction,
-                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                            text: AppLocalizations.of(context)!.exampleInteraction,
-                            color: AppTheme.warmGold,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      AppLocalizations.of(context)!.whenDiscussingRelativityWithEinstein,
-                      style: UkrainianFontUtils.latoWithUkrainianSupport(
-                        text: AppLocalizations.of(context)!.whenDiscussingRelativityWithEinstein,
-                        color: AppTheme.warmGold,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildExampleBubble(
-                      AppLocalizations.of(context)!.withAdvancedLLMLabel,
-                      AppLocalizations.of(context)!.withAdvancedLLMExample,
-                      true,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildExampleBubble(
-                      AppLocalizations.of(context)!.withBasicLLMLabel,
-                      AppLocalizations.of(context)!.withBasicLLMExample,
-                      false,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -378,11 +430,7 @@ class _LLMPageState extends State<LLMPage> {
             color: AppTheme.midnightPurple.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            color: AppTheme.warmGold,
-            size: 20,
-          ),
+          child: Icon(icon, color: AppTheme.warmGold, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -422,7 +470,10 @@ class _LLMPageState extends State<LLMPage> {
         color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isAdvanced ? AppTheme.warmGold.withValues(alpha: 0.3) : AppTheme.silverMist.withValues(alpha: 0.3),
+          color:
+              isAdvanced
+                  ? AppTheme.warmGold.withValues(alpha: 0.3)
+                  : AppTheme.silverMist.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -443,7 +494,10 @@ class _LLMPageState extends State<LLMPage> {
             content,
             style: UkrainianFontUtils.latoWithUkrainianSupport(
               text: content,
-              color: isAdvanced ? AppTheme.silverMist : AppTheme.silverMist.withValues(alpha: 0.7),
+              color:
+                  isAdvanced
+                      ? AppTheme.silverMist
+                      : AppTheme.silverMist.withValues(alpha: 0.7),
               fontSize: 13,
               height: 1.3,
             ),
@@ -457,24 +511,26 @@ class _LLMPageState extends State<LLMPage> {
 // Paint a simple neuron network
 class SimpleNeuronPainter extends CustomPainter {
   final bool highlighted;
-  
+
   SimpleNeuronPainter({this.highlighted = false});
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = highlighted 
-              ? AppTheme.warmGold.withValues(alpha: 0.6) 
-              : AppTheme.silverMist.withValues(alpha: 0.3)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.6)
+                  : AppTheme.silverMist.withValues(alpha: 0.3)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
     final dotPaint =
         Paint()
-          ..color = highlighted 
-              ? AppTheme.warmGold.withValues(alpha: 0.8) 
-              : AppTheme.silverMist.withValues(alpha: 0.5)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.8)
+                  : AppTheme.silverMist.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     // Draw a few simple connections
@@ -497,7 +553,7 @@ class SimpleNeuronPainter extends CustomPainter {
 
     // Draw center node
     canvas.drawCircle(center, 5, dotPaint);
-    
+
     // Add glow effect if highlighted
     if (highlighted) {
       canvas.drawCircle(
@@ -511,32 +567,34 @@ class SimpleNeuronPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => 
-      oldDelegate is SimpleNeuronPainter && 
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate is SimpleNeuronPainter &&
       oldDelegate.highlighted != highlighted;
 }
 
 // Paint a complex neuron network
 class ComplexNeuronPainter extends CustomPainter {
   final bool highlighted;
-  
+
   ComplexNeuronPainter({this.highlighted = true});
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = highlighted 
-              ? AppTheme.warmGold.withValues(alpha: 0.6) 
-              : AppTheme.silverMist.withValues(alpha: 0.3)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.6)
+                  : AppTheme.silverMist.withValues(alpha: 0.3)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
     final dotPaint =
         Paint()
-          ..color = highlighted 
-              ? AppTheme.warmGold.withValues(alpha: 0.8) 
-              : AppTheme.silverMist.withValues(alpha: 0.5)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.8)
+                  : AppTheme.silverMist.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     // Draw many connections in a more complex pattern
@@ -582,7 +640,7 @@ class ComplexNeuronPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => 
-      oldDelegate is ComplexNeuronPainter && 
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate is ComplexNeuronPainter &&
       oldDelegate.highlighted != highlighted;
 }

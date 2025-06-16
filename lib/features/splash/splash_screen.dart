@@ -12,7 +12,6 @@ import '../../core/widgets/animated_particles.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import '../../core/utils/env_config.dart';
 import '../../core/utils/image_optimizer.dart';
-import '../../core/utils/performance_optimizer.dart';
 import '../character_interview/chat_service.dart' as interview_chat;
 import '../../core/widgets/api_key_input_dialog.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
@@ -121,9 +120,11 @@ class _SplashScreenState extends State<SplashScreen>
       // Navigate to the appropriate screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => isFirstTime
-              ? const OnboardingScreen()
-              : const CharacterGalleryScreen(),
+          builder:
+              (_) =>
+                  isFirstTime
+                      ? const OnboardingScreen()
+                      : const CharacterGalleryScreen(),
         ),
       );
 
@@ -133,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
       // }
     } catch (e) {
       if (!mounted) return;
-      
+
       // Show error state in the UI
       setState(() {
         _statusMessage = 'ERROR INITIALIZING SYSTEMS';
@@ -179,7 +180,9 @@ class _SplashScreenState extends State<SplashScreen>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                                  color: AppTheme.warmGold.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 20,
                                   spreadRadius: 5,
                                 ),
@@ -221,17 +224,21 @@ class _SplashScreenState extends State<SplashScreen>
                     // Status message
                     Text(
                       _statusMessage,
-                      style: UkrainianFontUtils.getTextStyleWithUkrainianSupport(
-                        text: _statusMessage,
-                        googleFontStyle: () => TextStyle(
-                          fontFamily: 'SpaceMono',
-                          fontSize: 14,
-                          color: AppTheme.silverMist.withValues(alpha: 0.7),
-                          letterSpacing: 2,
-                        ),
-                        fallbackFontFamily: 'monospace',
-                        customFallbacks: ['Courier New', 'monospace'],
-                      ),
+                      style:
+                          UkrainianFontUtils.getTextStyleWithUkrainianSupport(
+                            text: _statusMessage,
+                            googleFontStyle:
+                                () => TextStyle(
+                                  fontFamily: 'SpaceMono',
+                                  fontSize: 14,
+                                  color: AppTheme.silverMist.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                  letterSpacing: 2,
+                                ),
+                            fallbackFontFamily: 'monospace',
+                            customFallbacks: ['Courier New', 'monospace'],
+                          ),
                     ),
                     const SizedBox(height: 40),
 

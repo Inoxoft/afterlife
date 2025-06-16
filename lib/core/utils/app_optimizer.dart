@@ -2,14 +2,19 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'image_optimizer.dart';
-import 'performance_optimizer.dart';
 
 /// A comprehensive app optimization utility that combines all optimizations
 class AppOptimizer {
   /// Initialize all app optimizations
   static Future<void> initializeApp() async {
-    // Initialize performance optimizations
-    await PerformanceOptimizer.initialize();
+    // Ensure Flutter is initialized first
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Set preferred device orientations
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
     // Preload important app images
     await ImageOptimizer.preloadAppImages();

@@ -32,6 +32,14 @@ class InterviewProvider with ChangeNotifier {
 
   List<Message> get messages => _messages.where((m) => !m.isHidden).toList();
 
+  /// Checks if the last AI message is a valid, final character card.
+  bool get isCardReadyForFinalize {
+    final lastMessage = _messages.where((m) => !m.isUser).lastOrNull;
+    if (lastMessage == null) return false;
+    return lastMessage.text.contains('## CHARACTER CARD SUMMARY ##') &&
+        lastMessage.text.contains('## END OF CHARACTER CARD ##');
+  }
+
   InterviewProvider() {
     _initialize();
   }
@@ -147,12 +155,14 @@ What specific edits would you like me to make?
 
   String _getSystemPrompt() {
     String languageInstruction = '';
-    
-    if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+
+    if (_languageProvider != null &&
+        _languageProvider!.currentLanguageCode != 'en') {
       final languageName = _languageProvider!.currentLanguageName;
-      languageInstruction = '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
+      languageInstruction =
+          '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
     }
-    
+
     if (isEditMode) {
       return """You are an AI assistant helping to edit a character's system prompt.
 
@@ -202,7 +212,7 @@ When the user types "agree", format the final prompt as:
     try {
       // Debug API key information before sending
       ChatService.logDiagnostics();
-      
+
       // Handle 'agree' command - this completes the character creation
       if (text.toLowerCase().trim() == 'agree' && !isComplete) {
         bool foundValidCard = false;
@@ -301,8 +311,7 @@ When the user types "agree", format the final prompt as:
       } else {
         // We're still in interview mode
         final systemPrompt = _getSystemPrompt();
-        
-        
+
         final response = await ChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,

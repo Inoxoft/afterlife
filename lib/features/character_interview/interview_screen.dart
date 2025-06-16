@@ -54,7 +54,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
   void _initializeProvider() {
     _interviewProvider = InterviewProvider();
-    
+
     // Inject the LanguageProvider
     final languageProvider = context.read<LanguageProvider>();
     _interviewProvider.setLanguageProvider(languageProvider);
@@ -88,14 +88,20 @@ class _InterviewScreenState extends State<InterviewScreen> {
   Future<Map<String, dynamic>?> _checkForLeadingQuestion(String message) async {
     try {
       print('🔍 Checking for leading question: "$message"');
-      
-      final result = await LeadingQuestionDetector.detectLeadingQuestion(message);
-      
+
+      final result = await LeadingQuestionDetector.detectLeadingQuestion(
+        message,
+      );
+
       if (result['isLeading'] == true) {
-        print('⚠️ Leading question detected with confidence: ${result['confidence']}');
+        print(
+          '⚠️ Leading question detected with confidence: ${result['confidence']}',
+        );
         return result;
       } else {
-        print('✅ No leading question detected (confidence: ${result['confidence']})');
+        print(
+          '✅ No leading question detected (confidence: ${result['confidence']})',
+        );
         return null;
       }
     } catch (e) {
@@ -109,6 +115,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
       _messageController.text = _pendingMessage!;
       _sendMessage(provider, bypassWarning: true);
     }
+    setState(() {
+      _leadingQuestionWarning = null;
+      _pendingMessage = null;
+    });
   }
 
   void _handleRephrase() {
@@ -197,7 +207,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
       // Ask for confirmation
       _interviewProvider.addAIMessage(
         "I've created a character card based on your ${files.length > 1 ? 'files' : 'file'}. "
-        "Please review it and type 'agree' if you'd like to use it, or let me know what changes you'd like to make.",
+        "Please review it. If it's accurate, you can finalize it. Otherwise, let me know what changes you'd like to make.",
       );
     } catch (e) {
       _interviewProvider.addAIMessage(
@@ -260,7 +270,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(
-                                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                                  color: AppTheme.warmGold.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -311,25 +323,54 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
               Column(
                 children: [
+                  // Warning for leading questions
+                  if (_leadingQuestionWarning != null)
+                    LeadingQuestionWarning(
+                      confidence:
+                          _leadingQuestionWarning!['confidence'] as double,
+                      warningMessage:
+                          "This question might influence the AI's response, making it less neutral. Try asking a more open-ended question.",
+                      onContinueAnyway:
+                          () => _handleContinueAnyway(_interviewProvider),
+                      onRephrase: _handleRephrase,
+                    ),
+
                   // Chat messages
                   Expanded(
                     child: Consumer<InterviewProvider>(
-                      builder: (context, provider, _) {
+                      builder: (context, provider, child) {
+                        // Scroll to bottom when new messages are added
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (_scrollController.hasClients) {
+                            _scrollController.jumpTo(
+                              _scrollController.position.maxScrollExtent,
+                            );
+                          }
+                        });
+
                         return ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          itemCount: provider.messages.length + (provider.isSuccess ? 1 : 0),
+                          padding: const EdgeInsets.all(16.0),
+                          itemCount: provider.messages.length,
                           itemBuilder: (context, index) {
-                            if (provider.isSuccess && index == provider.messages.length) {
-                              return _buildSuccessMessage(context, provider);
-                            }
-
                             final message = provider.messages[index];
+                            if (message.isLoading) {
+                              // Display a loading indicator bubble
+                              return ChatMessageBubble(
+                                message: ChatMessage(
+                                  content: '...',
+                                  isUser: false,
+                                  timestamp: DateTime.now(),
+                                ),
+                                showAvatar: true,
+                                avatarText: 'AI',
+                              );
+                            }
                             return ChatMessageBubble(
                               message: ChatMessage(
                                 content: message.text,
                                 isUser: message.isUser,
-                                timestamp: DateTime.now(), // TODO: Add actual timestamp to messages
+                                timestamp: message.timestamp,
                               ),
                               showAvatar: true,
                               avatarText: message.isUser ? 'You' : 'AI',
@@ -341,15 +382,38 @@ class _InterviewScreenState extends State<InterviewScreen> {
                     ),
                   ),
 
-                  // Leading question warning
+                  // Finalize button area
                   Consumer<InterviewProvider>(
-                    builder: (context, provider, _) {
-                      if (_leadingQuestionWarning != null) {
-                        return LeadingQuestionWarning(
-                          warningMessage: _leadingQuestionWarning!['message'] as String,
-                          confidence: _leadingQuestionWarning!['confidence'] as double,
-                          onContinueAnyway: () => _handleContinueAnyway(provider),
-                          onRephrase: _handleRephrase,
+                    builder: (context, provider, child) {
+                      if (provider.isCardReadyForFinalize) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Use the "agree" logic to finalize
+                              provider.sendMessage('agree');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.warmGold,
+                              foregroundColor: AppTheme.midnightPurple,
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              "Finalize Character",
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text: "Finalize Character",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ),
                         );
                       }
                       return const SizedBox.shrink();
@@ -384,18 +448,24 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 decoration: InputDecoration(
                                   hintText: 'Type your message...',
                                   hintStyle: TextStyle(
-                                    color: AppTheme.silverMist.withValues(alpha: 0.5),
+                                    color: AppTheme.silverMist.withValues(
+                                      alpha: 0.5,
+                                    ),
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
                                     borderSide: BorderSide(
-                                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                                      color: AppTheme.warmGold.withValues(
+                                        alpha: 0.3,
+                                      ),
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
                                     borderSide: BorderSide(
-                                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                                      color: AppTheme.warmGold.withValues(
+                                        alpha: 0.3,
+                                      ),
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
@@ -438,7 +508,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
     );
   }
 
-  Widget _buildSuccessMessage(BuildContext context, InterviewProvider provider) {
+  Widget _buildSuccessMessage(
+    BuildContext context,
+    InterviewProvider provider,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.all(20),
@@ -467,7 +540,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
           Text(
             'I have gathered enough information to create your digital twin.',
             style: UkrainianFontUtils.latoWithUkrainianSupport(
-              text: 'I have gathered enough information to create your digital twin.',
+              text:
+                  'I have gathered enough information to create your digital twin.',
               color: AppTheme.silverMist,
               fontSize: 16,
             ),
@@ -493,9 +567,14 @@ class _InterviewScreenState extends State<InterviewScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  provider.isEditMode ? 'Update Character' : 'Continue to Gallery',
+                  provider.isEditMode
+                      ? 'Update Character'
+                      : 'Continue to Gallery',
                   style: UkrainianFontUtils.latoWithUkrainianSupport(
-                    text: provider.isEditMode ? 'Update Character' : 'Continue to Gallery',
+                    text:
+                        provider.isEditMode
+                            ? 'Update Character'
+                            : 'Continue to Gallery',
                     color: AppTheme.midnightPurple,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -515,7 +594,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
     );
   }
 
-  void _sendMessage(InterviewProvider provider, {bool bypassWarning = false}) async {
+  void _sendMessage(
+    InterviewProvider provider, {
+    bool bypassWarning = false,
+  }) async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 

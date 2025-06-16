@@ -49,8 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _isAnimationsEnabled = prefs.getBool(_animationsKey) ?? true;
         _chatFontSize = prefs.getDouble(_fontSizeKey) ?? 15.0;
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> _saveSettings() async {
@@ -133,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     // Appearance section
                     _buildSectionHeader(localizations.appearance),
-                    
+
                     // Language selection
                     Consumer<LanguageProvider>(
                       builder: (context, languageProvider, child) {
@@ -163,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       },
                     ),
-                    
+
                     _buildSettingCard(
                       title: localizations.darkMode,
                       subtitle: localizations.darkModeDescription,
@@ -176,8 +175,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                           _saveSettings();
                         },
-                        activeThumbColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withValues(alpha: 0.5),
+                        thumbColor: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.warmGold;
+                          }
+                          return null; // Use default
+                        }),
+                        trackColor: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.warmGold.withValues(alpha: 0.5);
+                          }
+                          return null; // Use default
+                        }),
                       ),
                     ),
 
@@ -204,7 +217,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               divisions: 8,
                               thumbColor: AppTheme.warmGold,
                               activeColor: AppTheme.warmGold,
-                              inactiveColor: AppTheme.warmGold.withValues(alpha: 0.3),
+                              inactiveColor: AppTheme.warmGold.withValues(
+                                alpha: 0.3,
+                              ),
                               onChanged: (value) {
                                 setState(() {
                                   _chatFontSize = value;
@@ -231,8 +246,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                           _saveSettings();
                         },
-                        activeThumbColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withValues(alpha: 0.5),
+                        thumbColor: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.warmGold;
+                          }
+                          return null; // Use default
+                        }),
+                        trackColor: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.warmGold.withValues(alpha: 0.5);
+                          }
+                          return null; // Use default
+                        }),
                       ),
                     ),
 
@@ -252,8 +281,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           });
                           _saveSettings();
                         },
-                        activeThumbColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withValues(alpha: 0.5),
+                        thumbColor: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.warmGold;
+                          }
+                          return null; // Use default
+                        }),
+                        trackColor: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.selected)) {
+                            return AppTheme.warmGold.withValues(alpha: 0.5);
+                          }
+                          return null; // Use default
+                        }),
                       ),
                     ),
 
@@ -313,9 +356,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       icon: Icons.vpn_key,
                       onTap: () => _showApiKeyDialog(context),
                     ),
-                    
+
                     Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                      ),
                       child: Text(
                         localizations.apiKeyNote,
                         style: TextStyle(
@@ -388,7 +435,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+        side: BorderSide(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       color: AppTheme.midnightPurple.withValues(alpha: 0.5),
       child: ListTile(
@@ -473,85 +523,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          localizations.clearAllData,
-          style: UkrainianFontUtils.latoWithUkrainianSupport(
-            text: localizations.clearAllData,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
-          localizations.clearAllDataConfirmation,
-          style: UkrainianFontUtils.latoWithUkrainianSupport(
-            text: localizations.clearAllDataConfirmation,
-            color: Colors.white70,
-          ),
-        ),
-        backgroundColor: AppTheme.deepIndigo,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: Colors.redAccent.withValues(alpha: 0.5),
-            width: 1,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              localizations.cancel,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              localizations.clearAllData,
               style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: localizations.cancel,
-                color: AppTheme.silverMist,
+                text: localizations.clearAllData,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                final charactersProvider = Provider.of<CharactersProvider>(
-                  context,
-                  listen: false,
-                );
-                await charactersProvider.clearAll();
-
-                // Also clear settings
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
-
-                // Reload settings after clearing
-                _loadSettings();
-
-                Navigator.pop(context);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(localizations.dataCleared),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } catch (e) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(localizations.errorClearingData),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: Text(
-              localizations.deleteEverything,
+            content: Text(
+              localizations.clearAllDataConfirmation,
               style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: localizations.deleteEverything,
-                color: Colors.redAccent,
+                text: localizations.clearAllDataConfirmation,
+                color: Colors.white70,
               ),
             ),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Colors.redAccent.withValues(alpha: 0.5),
+                width: 1,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  localizations.cancel,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.cancel,
+                    color: AppTheme.silverMist,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    final charactersProvider = Provider.of<CharactersProvider>(
+                      context,
+                      listen: false,
+                    );
+                    await charactersProvider.clearAll();
+
+                    // Also clear settings
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+
+                    // Reload settings after clearing
+                    _loadSettings();
+
+                    Navigator.pop(context);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(localizations.dataCleared),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(localizations.errorClearingData),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  localizations.deleteEverything,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.deleteEverything,
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -570,15 +621,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ChatService.initialize();
           character_chat.ChatService.initialize();
           interview_chat.ChatService.initialize();
-          
+
           // Force a refresh of API keys in each service
           try {
             ChatService.refreshApiKey();
             character_chat.ChatService.refreshApiKey();
             interview_chat.ChatService.refreshApiKey();
-          } catch (e) {
-          }
-          
+          } catch (e) {}
 
           // Dump diagnostics after updating
           EnvConfig.dumpApiKeyInfo();
@@ -599,15 +648,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _navigateToDeveloperChat(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const DeveloperChatScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const DeveloperChatScreen()),
     );
   }
 
   void _showLanguageSelectionDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     final languages = [
       {'code': 'en', 'name': localizations.languageEnglish},
       {'code': 'es', 'name': localizations.languageSpanish},
@@ -625,69 +672,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Select Language',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: languages.length,
-            itemBuilder: (context, index) {
-              final language = languages[index];
-              final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-              final isSelected = languageProvider.currentLanguageCode == language['code'];
-              
-              return ListTile(
-                title: Text(
-                  language['name']!,
-                  style: TextStyle(
-                    color: isSelected ? AppTheme.warmGold : Colors.white,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-                trailing: isSelected ? Icon(
-                  Icons.check,
-                  color: AppTheme.warmGold,
-                ) : null,
-                onTap: () {
-                  languageProvider.setLanguage(language['code']!);
-                  Navigator.pop(context);
-                  
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Language changed to ${language['name']}'),
-                      backgroundColor: Colors.green,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Select Language',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: languages.length,
+                itemBuilder: (context, index) {
+                  final language = languages[index];
+                  final languageProvider = Provider.of<LanguageProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final isSelected =
+                      languageProvider.currentLanguageCode == language['code'];
+
+                  return ListTile(
+                    title: Text(
+                      language['name']!,
+                      style: TextStyle(
+                        color: isSelected ? AppTheme.warmGold : Colors.white,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
+                    trailing:
+                        isSelected
+                            ? Icon(Icons.check, color: AppTheme.warmGold)
+                            : null,
+                    onTap: () {
+                      languageProvider.setLanguage(language['code']!);
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Language changed to ${language['name']}',
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
                   );
                 },
-              );
-            },
-          ),
-        ),
-        backgroundColor: AppTheme.deepIndigo,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: AppTheme.warmGold.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.silverMist),
+              ),
             ),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
