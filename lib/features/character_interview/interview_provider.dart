@@ -216,6 +216,7 @@ When the user types "agree", format the final prompt as:
       // Handle 'agree' command - this completes the character creation
       if (text.toLowerCase().trim() == 'agree' && !isComplete) {
         bool foundValidCard = false;
+        String? lastCardContent;
 
         // First, try to find a character card with proper markers
         for (int i = _messages.length - 1; i >= 0; i--) {
@@ -223,6 +224,7 @@ When the user types "agree", format the final prompt as:
           if (!msg.isUser &&
               msg.text.contains('## CHARACTER CARD SUMMARY ##') &&
               msg.text.contains('## END OF CHARACTER CARD ##')) {
+            lastCardContent = msg.text;
             // Extract the clean system prompt
             final startMarker = '## CHARACTER CARD SUMMARY ##';
             final endMarker = '## END OF CHARACTER CARD ##';
@@ -244,51 +246,46 @@ When the user types "agree", format the final prompt as:
           }
         }
 
-        // If no valid card found, try to use the last substantial AI message
-        if (!foundValidCard) {
-          for (int i = _messages.length - 1; i >= 0; i--) {
-            final msg = _messages[i];
-            if (!msg.isUser && !msg.isLoading && msg.text.length > 50) {
-              characterCardSummary = _prepareSystemPromptForCharacter(msg.text);
-              foundValidCard = true;
-              break;
-            }
-          }
-        }
-
-        // If still no valid card found, show error message
         if (!foundValidCard) {
           _removeLoadingMessage();
           addAIMessage(
-            "I couldn't find a valid character card to process. Please try again or continue your conversation so I can create one for you.",
+            "I couldn't find a valid character card to process. Please continue the conversation so I can create one for you.",
           );
           return;
         }
 
         // Extract character name if not already found
-        if (characterName == null) {
-          for (int i = _messages.length - 1; i >= 0; i--) {
-            final msg = _messages[i];
-            if (!msg.isUser) {
-              final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
-              final nameMatch = namePattern.firstMatch(msg.text);
-              if (nameMatch != null && nameMatch.group(1) != null) {
-                characterName = nameMatch.group(1)!.trim();
+        if (characterName == null && lastCardContent != null) {
+          final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
+          final nameMatch = namePattern.firstMatch(lastCardContent);
+          if (nameMatch != null && nameMatch.group(1) != null) {
+            characterName = nameMatch.group(1)!.trim();
+          } else {
+            // If no name found in markers, try to find it in the content
+            final lines = lastCardContent.split('\n');
+            for (final line in lines) {
+              if (line.toLowerCase().contains('name:')) {
+                characterName = line.split(':')[1].trim();
                 break;
               }
             }
           }
 
           // If still no name found, use a default name
-          if (characterName == null) {
-            characterName = "Character";
-          }
+          characterName ??= "Unnamed Character";
         }
 
         // Set completion state
         isSuccess = true;
         isComplete = true;
         _removeLoadingMessage();
+        
+        // Add confirmation message
+        addAIMessage(
+          "Character card has been finalized! Your character '$characterName' is now ready to chat. "
+          "You can find them in your character gallery.",
+        );
+        
         notifyListeners();
         return;
       }

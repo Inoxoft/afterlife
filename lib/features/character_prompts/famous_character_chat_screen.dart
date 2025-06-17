@@ -520,11 +520,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       itemBuilder: (context, index) {
         final message = _messages[index];
         return ChatMessageBubble(
-          message: ChatMessage(
-            content: message['content'] as String,
-            isUser: message['isUser'] as bool,
-            timestamp: DateTime.parse(message['timestamp'] as String),
-          ),
+          text: message['content'] as String,
+          isUser: message['isUser'] as bool,
           showAvatar: true,
           avatarText: message['isUser'] as bool ? localizations.you : widget.characterName[0].toUpperCase(),
           avatarIcon: message['isUser'] as bool ? Icons.person : null,

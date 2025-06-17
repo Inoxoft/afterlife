@@ -357,21 +357,17 @@ class _InterviewScreenState extends State<InterviewScreen> {
                             if (message.isLoading) {
                               // Display a loading indicator bubble
                               return ChatMessageBubble(
-                                message: ChatMessage(
-                                  content: '...',
+                                text: '...',
                                   isUser: false,
-                                  timestamp: DateTime.now(),
-                                ),
                                 showAvatar: true,
                                 avatarText: 'AI',
                               );
                             }
                             return ChatMessageBubble(
-                              message: ChatMessage(
-                                content: message.text,
+                              text: message.text.contains('## CHARACTER CARD SUMMARY ##') 
+                                ? _formatCharacterCard(message.text)
+                                : message.text,
                                 isUser: message.isUser,
-                                timestamp: message.timestamp,
-                              ),
                               showAvatar: true,
                               avatarText: message.isUser ? 'You' : 'AI',
                               avatarIcon: message.isUser ? Icons.person : null,
@@ -386,14 +382,198 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   Consumer<InterviewProvider>(
                     builder: (context, provider, child) {
                       if (provider.isCardReadyForFinalize) {
-                        return Padding(
+                        // Find the last message containing the character card
+                        final cardMessage = provider.messages.lastWhere(
+                          (msg) => !msg.isUser && msg.text.contains('## CHARACTER CARD SUMMARY ##'),
+                          orElse: () => provider.messages.last,
+                        );
+
+                        return Column(
+                          children: [
+                            // Highlighted character card container
+                            Container(
+                              margin: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppTheme.warmGold.withOpacity(0.15),
+                                    AppTheme.midnightPurple.withOpacity(0.3),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppTheme.warmGold.withOpacity(0.5),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.warmGold.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                  BoxShadow(
+                                    color: AppTheme.midnightPurple.withOpacity(0.2),
+                                    blurRadius: 15,
+                                    spreadRadius: -2,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: AppTheme.warmGold,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Character Card Ready for Review',
+                                        style: TextStyle(
+                                          color: AppTheme.warmGold,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.warmGold.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppTheme.warmGold.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Please review your character card below. If you\'re satisfied with it, click "Finalize Character" to save it.',
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist,
+                                        fontSize: 14,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.midnightPurple.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppTheme.warmGold.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Name marker highlight
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                          margin: const EdgeInsets.only(bottom: 16),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.warmGold.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: AppTheme.warmGold.withOpacity(0.5),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            cardMessage.text.split('\n').firstWhere(
+                                              (line) => line.contains('## CHARACTER NAME:'),
+                                              orElse: () => '',
+                                            ),
+                                            style: TextStyle(
+                                              color: AppTheme.warmGold,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        // Summary marker and content highlight
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.warmGold.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: AppTheme.warmGold.withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              // Summary start marker
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                                margin: const EdgeInsets.only(bottom: 12),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.warmGold.withOpacity(0.15),
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  '## CHARACTER CARD SUMMARY ##',
+                                                  style: TextStyle(
+                                                    color: AppTheme.warmGold,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              // Card content
+                                              SelectableText(
+                                                _extractCardContent(cardMessage.text),
+                                                style: TextStyle(
+                                                  color: AppTheme.silverMist,
+                                                  fontSize: 14,
+                                                  height: 1.6,
+                                                ),
+                                              ),
+                                              // Summary end marker
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                                margin: const EdgeInsets.only(top: 12),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.warmGold.withOpacity(0.15),
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  '## END OF CHARACTER CARD ##',
+                                                  style: TextStyle(
+                                                    color: AppTheme.warmGold,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Finalize button
+                            Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 8,
                           ),
                           child: ElevatedButton(
                             onPressed: () {
-                              // Use the "agree" logic to finalize
                               provider.sendMessage('agree');
                             },
                             style: ElevatedButton.styleFrom(
@@ -406,14 +586,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
                             ),
                             child: Text(
                               "Finalize Character",
-                              style:
-                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
                                     text: "Finalize Character",
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
                           ),
+                            ),
+                          ],
                         );
                       }
                       return const SizedBox.shrink();
@@ -628,5 +809,44 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
     // Send the message
     provider.sendMessage(text);
+  }
+
+  String _extractCardContent(String text) {
+    final startMarker = '## CHARACTER CARD SUMMARY ##';
+    final endMarker = '## END OF CHARACTER CARD ##';
+    
+    final startIndex = text.indexOf(startMarker) + startMarker.length;
+    final endIndex = text.indexOf(endMarker);
+    
+    if (startIndex >= 0 && endIndex > startIndex) {
+      return text.substring(startIndex, endIndex).trim();
+    }
+    return text;
+  }
+
+  // Add this helper method to format the character card
+  String _formatCharacterCard(String text) {
+    final lines = text.split('\n');
+    final formattedLines = <String>[];
+    bool isInSummary = false;
+
+    for (final line in lines) {
+      if (line.contains('## CHARACTER NAME:')) {
+        formattedLines.add('<highlight>$line</highlight>');
+      } else if (line.contains('## CHARACTER CARD SUMMARY ##')) {
+        isInSummary = true;
+        formattedLines.add('<highlight>$line</highlight>');
+      } else if (line.contains('## END OF CHARACTER CARD ##')) {
+        isInSummary = false;
+        formattedLines.add('<highlight>$line</highlight>');
+      } else if (isInSummary && line.startsWith('### ')) {
+        // Highlight section headers
+        formattedLines.add('<section>$line</section>');
+      } else {
+        formattedLines.add(line);
+      }
+    }
+
+    return formattedLines.join('\n');
   }
 }

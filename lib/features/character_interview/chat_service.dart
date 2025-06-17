@@ -9,7 +9,7 @@ class ChatService {
   static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
   static const Duration _requestTimeout = Duration(seconds: 120);
-  static const String _defaultModel = 'google/gemini-2.0-flash-001';
+  static const String _defaultModel = 'google/gemini-2.5-flash-preview-05-20';
   static const double _defaultTemperature = 0.7;
   static const int _defaultMaxTokens = 25000;
 

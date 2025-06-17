@@ -241,8 +241,10 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                 itemBuilder: (context, index) {
                   final message = _messages[index];
                   return ChatMessageBubble(
-                    message: message,
-                    showAvatar: !message.isUser,
+                    text: message.content,
+                    isUser: message.isUser,
+                    showAvatar: true,
+                    avatarText: message.isUser ? 'You' : 'AI',
                   );
                 },
               ),

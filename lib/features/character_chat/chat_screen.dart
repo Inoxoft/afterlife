@@ -404,11 +404,9 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       itemBuilder: (context, index) {
         final message = _character!.chatHistory[index];
         return ChatMessageBubble(
-          message: ChatMessage(
-            content: message['content'] as String,
-            isUser: message['isUser'] as bool,
-            timestamp: DateTime.parse(message['timestamp'] as String),
-          ),
+          text: message['content'] as String,
+          isUser: message['isUser'] as bool,
+          showAvatar: true,
           avatarText: message['isUser'] as bool
               ? localizations.you
               : _character!.name[0].toUpperCase(),
