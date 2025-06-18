@@ -13,8 +13,8 @@ import '../providers/language_provider.dart';
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 import 'package:path/path.dart' as path;
-import '../models/leading_question_detector.dart';
-import '../widgets/leading_question_warning.dart';
+import '../providers/characters_provider.dart';
+import '../character_gallery/character_gallery_screen.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
@@ -37,15 +37,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
   late InterviewProvider _interviewProvider;
   bool _isProcessingFile = false;
 
-  // Leading question detection state
-  Map<String, dynamic>? _leadingQuestionWarning;
-  String? _pendingMessage;
-
   @override
   void initState() {
     super.initState();
     _initializeProvider();
-    _initializeLeadingQuestionDetector();
     // Set focus to the input field after a short delay
     Future.delayed(const Duration(milliseconds: 300), () {
       _inputFocusNode.requestFocus();
@@ -53,7 +48,23 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   void _initializeProvider() {
-    _interviewProvider = InterviewProvider();
+    // Get the CharactersProvider first to avoid context issues
+    final charactersProvider = Provider.of<CharactersProvider>(context, listen: false);
+    
+    _interviewProvider = InterviewProvider(
+      onCharacterSaved: (character) async {
+        // Save the character using the CharactersProvider
+        await charactersProvider.addCharacter(character);
+        
+        // Navigate to the gallery (Your Twins tab) after saving
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const CharacterGalleryScreen()),
+          );
+        }
+      },
+    );
 
     // Inject the LanguageProvider
     final languageProvider = context.read<LanguageProvider>();
@@ -74,62 +85,6 @@ class _InterviewScreenState extends State<InterviewScreen> {
     _scrollController.dispose();
     _inputFocusNode.dispose();
     super.dispose();
-  }
-
-  Future<void> _initializeLeadingQuestionDetector() async {
-    try {
-      await LeadingQuestionDetector.initialize();
-    } catch (e) {
-      print('Error initializing leading question detector: $e');
-    }
-  }
-
-  /// Check if a message contains leading questions
-  Future<Map<String, dynamic>?> _checkForLeadingQuestion(String message) async {
-    try {
-      print('🔍 Checking for leading question: "$message"');
-
-      final result = await LeadingQuestionDetector.detectLeadingQuestion(
-        message,
-      );
-
-      if (result['isLeading'] == true) {
-        print(
-          '⚠️ Leading question detected with confidence: ${result['confidence']}',
-        );
-        return result;
-      } else {
-        print(
-          '✅ No leading question detected (confidence: ${result['confidence']})',
-        );
-        return null;
-      }
-    } catch (e) {
-      print('❌ Leading question detection failed: $e');
-      return null;
-    }
-  }
-
-  void _handleContinueAnyway(InterviewProvider provider) {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-      _sendMessage(provider, bypassWarning: true);
-    }
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
-  }
-
-  void _handleRephrase() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-    }
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
-    _inputFocusNode.requestFocus();
   }
 
   Future<void> _handleFileUpload() async {
@@ -189,25 +144,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
       // Store the character card summary in the provider
       if (characterCard.contains('## CHARACTER CARD SUMMARY ##') &&
           characterCard.contains('## END OF CHARACTER CARD ##')) {
-        _interviewProvider.characterCardSummary = characterCard;
-
-        // Try to extract character name
-        if (characterCard.contains('## CHARACTER NAME:')) {
-          final startName =
-              characterCard.indexOf('## CHARACTER NAME:') +
-              '## CHARACTER NAME:'.length;
-          final endLine = characterCard.indexOf('\n', startName);
-          if (endLine > startName) {
-            final name = characterCard.substring(startName, endLine).trim();
-            _interviewProvider.characterName = name.replaceAll('##', '').trim();
-          }
-        }
+        _interviewProvider.updateCardSummary(characterCard);
       }
 
       // Ask for confirmation
       _interviewProvider.addAIMessage(
-        "I've created a character card based on your ${files.length > 1 ? 'files' : 'file'}. "
-        "Please review it. If it's accurate, you can finalize it. Otherwise, let me know what changes you'd like to make.",
+        "Perfect! I've created your character card based on your ${files.length > 1 ? 'files' : 'file'}. "
+        "Review it above and:\n\n"
+        "• Type 'agree' to save your character\n"
+        "• Or describe any changes you'd like me to make (e.g., 'make them more outgoing', 'change their background to include more travel')",
       );
     } catch (e) {
       _interviewProvider.addAIMessage(
@@ -323,18 +268,6 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
               Column(
                 children: [
-                  // Warning for leading questions
-                  if (_leadingQuestionWarning != null)
-                    LeadingQuestionWarning(
-                      confidence:
-                          _leadingQuestionWarning!['confidence'] as double,
-                      warningMessage:
-                          "This question might influence the AI's response, making it less neutral. Try asking a more open-ended question.",
-                      onContinueAnyway:
-                          () => _handleContinueAnyway(_interviewProvider),
-                      onRephrase: _handleRephrase,
-                    ),
-
                   // Chat messages
                   Expanded(
                     child: Consumer<InterviewProvider>(
@@ -776,36 +709,13 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   void _sendMessage(
-    InterviewProvider provider, {
-    bool bypassWarning = false,
-  }) async {
+    InterviewProvider provider,
+  ) async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    // If we're not bypassing the warning, check for leading questions first
-    if (!bypassWarning) {
-      try {
-        final leadingQuestionResult = await _checkForLeadingQuestion(text);
-        if (leadingQuestionResult != null) {
-          // Show warning instead of sending message
-          setState(() {
-            _leadingQuestionWarning = leadingQuestionResult;
-            _pendingMessage = text;
-          });
-          return;
-        }
-      } catch (e) {
-        // If detection fails, proceed with sending the message
-        print('Leading question detection failed: $e');
-      }
-    }
-
-    // Clear the input field and any warnings
+    // Clear the input field
     _messageController.clear();
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
 
     // Send the message
     provider.sendMessage(text);

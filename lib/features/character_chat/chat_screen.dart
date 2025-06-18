@@ -89,6 +89,11 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         setState(() {
           _character = character;
         });
+        
+        // Select this character so it becomes the active one
+        if (character != null) {
+          charactersProvider.selectCharacter(character.id);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -168,7 +173,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     });
 
     // Add user message to chat history
-    await charactersProvider.addMessageToSelectedCharacter(
+    await charactersProvider.addMessageToCharacter(
+      characterId: widget.characterId,
       text: message,
       isUser: true,
     );
@@ -176,9 +182,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     if (mounted) {
       setState(() {
         _isLoading = true;
-        // Update character reference to reflect new message
-        _character = charactersProvider.selectedCharacter;
       });
+      
+      // Reload the character to get updated chat history
+      await _loadCharacter();
     }
 
     // Scroll to the bottom after state update
@@ -196,13 +203,15 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
       // Add AI response to chat history if not null
       if (response != null) {
-        await charactersProvider.addMessageToSelectedCharacter(
+        await charactersProvider.addMessageToCharacter(
+          characterId: widget.characterId,
           text: response,
           isUser: false,
         );
       } else {
         // Handle null response by showing a fallback message
-        await charactersProvider.addMessageToSelectedCharacter(
+        await charactersProvider.addMessageToCharacter(
+          characterId: widget.characterId,
           text: localizations.errorProcessingMessage,
           isUser: false,
         );
@@ -215,7 +224,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       }
 
       // Add error message to chat history
-      await charactersProvider.addMessageToSelectedCharacter(
+      await charactersProvider.addMessageToCharacter(
+        characterId: widget.characterId,
         text: localizations.errorConnecting,
         isUser: false,
       );
@@ -224,9 +234,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          // Refresh character data
-          _character = charactersProvider.selectedCharacter;
         });
+        
+        // Reload character to get the latest chat history
+        await _loadCharacter();
 
         // Scroll to bottom to show new messages
         _scrollToBottom();
@@ -405,7 +416,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         final message = _character!.chatHistory[index];
         return ChatMessageBubble(
           text: message['content'] as String,
-          isUser: message['isUser'] as bool,
+            isUser: message['isUser'] as bool,
           showAvatar: true,
           avatarText: message['isUser'] as bool
               ? localizations.you

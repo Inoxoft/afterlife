@@ -9,7 +9,6 @@ import 'core/utils/env_config.dart';
 import 'core/utils/app_optimizer.dart';
 import 'features/providers/characters_provider.dart';
 import 'features/providers/language_provider.dart';
-import 'features/character_interview/interview_provider.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/character_interview/chat_service.dart' as interview_chat;
 import 'features/providers/chat_service.dart' as providers_chat;
@@ -63,7 +62,6 @@ Future<void> main() async {
           MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (_) => CharactersProvider()),
-              ChangeNotifierProvider(create: (_) => InterviewProvider()),
               ChangeNotifierProvider(create: (_) => LanguageProvider()),
             ],
             child: const MyApp(),

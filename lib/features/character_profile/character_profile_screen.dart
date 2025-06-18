@@ -8,6 +8,7 @@ import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_interview/interview_screen.dart';
 import '../../core/widgets/model_selection_dialog.dart';
+import '../character_chat/chat_screen.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -265,8 +266,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         _buildCharacterHeader(),
         const SizedBox(height: 24),
 
-        // Character info sections
-        ...sections.map(_buildSectionCard),
+        // Character Card section (simplified)
+        _buildCharacterCardSection(),
 
         // Add AI Model Selection section
         const SizedBox(height: 24),
@@ -276,6 +277,119 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         const SizedBox(height: 24),
         _buildReinterviewButton(),
       ],
+    );
+  }
+
+  // New simplified character card section
+  Widget _buildCharacterCardSection() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with title and copy button
+            Row(
+              children: [
+                Icon(
+                  Icons.badge,
+                  color: AppTheme.warmGold,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'CHARACTER CARD',
+                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                      text: 'CHARACTER CARD',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.warmGold,
+                      letterSpacing: 1.5,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 2,
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Copy button
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.warmGold.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: _copyFullCharacterCard,
+                    icon: Icon(
+                      Icons.copy,
+                      color: AppTheme.warmGold,
+                      size: 18,
+                    ),
+                    tooltip: 'Copy Character Card',
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Divider(
+              color: AppTheme.warmGold.withValues(alpha: 0.3),
+              thickness: 1,
+              height: 20,
+            ),
+            // Compact scrollable character card content
+            Container(
+              width: double.infinity,
+              height: 200, // Fixed height to make it compact
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.midnightPurple.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  child: Text(
+                    _character!.systemPrompt,
+                    style: TextStyle(
+                      color: AppTheme.silverMist,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -703,334 +817,41 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 20),
+
+        // Chat button
+        if (!_isEditing)
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CharacterChatScreen(characterId: _character!.id),
+                ),
+              );
+            },
+            icon: const Icon(Icons.chat_bubble_outline, size: 20),
+            label: Text(
+              'Start Chat',
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: 'Start Chat',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.warmGold,
+              foregroundColor: AppTheme.midnightPurple,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              elevation: 8,
+              shadowColor: AppTheme.warmGold.withValues(alpha: 0.3),
+            ),
+          ),
       ],
     );
-  }
-
-  Widget _buildSectionCard(_PromptSection section) {
-    return _buildSection(
-      title: section.title,
-      child: Column(
-        children: [
-          if (_isEditing)
-            _buildTextField(
-              label: section.title,
-              controller: TextEditingController(text: section.content),
-              enabled: true,
-            )
-          else
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.warmGold.withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                section.content,
-                style: TextStyle(
-                  color: AppTheme.silverMist,
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(
-                'Created:',
-                style: TextStyle(
-                  color: AppTheme.silverMist.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  _formatDate(_character!.createdAt),
-                  style: TextStyle(
-                    color: AppTheme.silverMist,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Messages:',
-                style: TextStyle(
-                  color: AppTheme.silverMist.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  '${_character!.chatHistory.length}',
-                  style: TextStyle(
-                    color: AppTheme.silverMist,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection({required String title, required Widget child}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  title == 'Basic Information'
-                      ? Icons.person
-                      : Icons.text_fields,
-                  color: AppTheme.warmGold,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                    text: title,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.warmGold,
-                    letterSpacing: 2.0,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 2,
-                        color: Colors.black.withValues(alpha: 0.3),
-                        offset: const Offset(1, 1),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Divider(
-              color: AppTheme.warmGold.withValues(alpha: 0.3),
-              thickness: 1,
-              height: 24,
-            ),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    bool enabled = true,
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      enabled: enabled,
-      maxLines: maxLines,
-      style: TextStyle(color: AppTheme.silverMist, fontSize: 15, height: 1.5),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(
-          color: AppTheme.silverMist.withValues(alpha: 0.8),
-          fontWeight: FontWeight.w500,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.warmGold, width: 2),
-        ),
-        filled: true,
-        fillColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-      ),
-    );
-  }
-
-  Widget _buildInfoRow({required String label, required String value}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: AppTheme.silverMist.withValues(alpha: 0.7),
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.warmGold.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Text(
-              value,
-              style: TextStyle(
-                color: AppTheme.silverMist,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Format date for display
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays < 1) {
-      if (difference.inHours < 1) {
-        return 'Just now';
-      } else {
-        return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
-      }
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
-  }
-
-  // Helper method to clean system prompts
-  String _cleanSystemPrompt(String prompt, String characterName) {
-    // Remove any ## markers if they somehow got included
-    String cleanedPrompt = prompt;
-
-    // Check if the prompt still contains markdown markers
-    if (prompt.contains('## CHARACTER CARD SUMMARY ##') &&
-        prompt.contains('## END OF CHARACTER CARD ##')) {
-      final startMarker = '## CHARACTER CARD SUMMARY ##';
-      final endMarker = '## END OF CHARACTER CARD ##';
-
-      final startIndex = prompt.indexOf(startMarker);
-      final cleanStart = startIndex + startMarker.length;
-      final endIndex = prompt.indexOf(endMarker);
-
-      if (startIndex >= 0 && endIndex > startIndex) {
-        cleanedPrompt = prompt.substring(cleanStart, endIndex).trim();
-      }
-    }
-
-    // Remove any remaining markdown markers
-    cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
-
-    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
-    if (!cleanedPrompt.contains("You are")) {
-      cleanedPrompt =
-          "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
-    }
-
-    // Add clear instructions to stay in character if not already present
-    if (!cleanedPrompt.contains("stay in character") &&
-        !cleanedPrompt.contains("never break character")) {
-      cleanedPrompt +=
-          "\n\nStay in character at all times. Never break character or admit you are an AI.";
-    }
-
-    return cleanedPrompt;
-  }
-
-  // Parse the system prompt into sections
-  List<_PromptSection> _parseSystemPrompt(String systemPrompt) {
-    final List<_PromptSection> sections = [];
-
-    // Try to extract sections from the prompt
-    final RegExp sectionRegex = RegExp(
-      r'#+\s*([^#\n]+)\n+([\s\S]*?)(?=\n#+\s*[^#\n]+\n+|$)',
-    );
-    final matches = sectionRegex.allMatches(systemPrompt);
-
-    if (matches.isNotEmpty) {
-      for (final match in matches) {
-        if (match.groupCount >= 2) {
-          final title = match.group(1)?.trim() ?? 'Unnamed Section';
-          final content = match.group(2)?.trim() ?? '';
-          sections.add(_PromptSection(title: title, content: content));
-        }
-      }
-    } else {
-      // If no sections found, create a single "Description" section
-      sections.add(_PromptSection(title: 'Description', content: systemPrompt));
-    }
-
-    return sections;
   }
 
   Widget _buildEditMode() {
@@ -1422,7 +1243,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   void _copyFullCharacterCard() {
     Clipboard.setData(ClipboardData(text: _formatCharacterCard()));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Full character card copied to clipboard')),
+      SnackBar(
+        content: Text('Character card for "${_character!.name}" copied to clipboard'),
+        backgroundColor: AppTheme.warmGold.withValues(alpha: 0.9),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
@@ -1599,5 +1425,125 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     };
 
     return modelDescriptions[modelId] ?? 'Advanced language model';
+  }
+
+  // Essential helper methods
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    bool enabled = true,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      maxLines: maxLines,
+      style: TextStyle(color: AppTheme.silverMist, fontSize: 15, height: 1.5),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          color: AppTheme.silverMist.withValues(alpha: 0.8),
+          fontWeight: FontWeight.w500,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.warmGold, width: 2),
+        ),
+        filled: true,
+        fillColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+      ),
+    );
+  }
+
+  // Format date for display
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays < 1) {
+      if (difference.inHours < 1) {
+        return 'Just now';
+      } else {
+        return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+      }
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  // Helper method to clean system prompts
+  String _cleanSystemPrompt(String prompt, String characterName) {
+    // Remove any ## markers if they somehow got included
+    String cleanedPrompt = prompt;
+
+    // Check if the prompt still contains markdown markers
+    if (prompt.contains('## CHARACTER CARD SUMMARY ##') &&
+        prompt.contains('## END OF CHARACTER CARD ##')) {
+      final startMarker = '## CHARACTER CARD SUMMARY ##';
+      final endMarker = '## END OF CHARACTER CARD ##';
+
+      final startIndex = prompt.indexOf(startMarker);
+      final cleanStart = startIndex + startMarker.length;
+      final endIndex = prompt.indexOf(endMarker);
+
+      if (startIndex >= 0 && endIndex > startIndex) {
+        cleanedPrompt = prompt.substring(cleanStart, endIndex).trim();
+      }
+    }
+
+    // Remove any remaining markdown markers
+    cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
+
+    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
+    if (!cleanedPrompt.contains("You are")) {
+      cleanedPrompt =
+          "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
+    }
+
+    // Add clear instructions to stay in character if not already present
+    if (!cleanedPrompt.contains("stay in character") &&
+        !cleanedPrompt.contains("never break character")) {
+      cleanedPrompt +=
+          "\n\nStay in character at all times. Never break character or admit you are an AI.";
+    }
+
+    return cleanedPrompt;
+  }
+
+  // Parse the system prompt into sections (kept for compatibility)
+  List<_PromptSection> _parseSystemPrompt(String systemPrompt) {
+    final List<_PromptSection> sections = [];
+
+    // Try to extract sections from the prompt
+    final RegExp sectionRegex = RegExp(
+      r'#+\s*([^#\n]+)\n+([\s\S]*?)(?=\n#+\s*[^#\n]+\n+|$)',
+    );
+    final matches = sectionRegex.allMatches(systemPrompt);
+
+    if (matches.isNotEmpty) {
+      for (final match in matches) {
+        if (match.groupCount >= 2) {
+          final title = match.group(1)?.trim() ?? 'Unnamed Section';
+          final content = match.group(2)?.trim() ?? '';
+          sections.add(_PromptSection(title: title, content: content));
+        }
+      }
+    } else {
+      // If no sections found, create a single "Description" section
+      sections.add(_PromptSection(title: 'Description', content: systemPrompt));
+    }
+
+    return sections;
   }
 }
