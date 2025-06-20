@@ -9,6 +9,7 @@ import '../providers/characters_provider.dart';
 import '../character_interview/interview_screen.dart';
 import '../../core/widgets/model_selection_dialog.dart';
 import '../character_chat/chat_screen.dart';
+import '../../core/utils/responsive_utils.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -733,6 +734,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildCharacterHeader() {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    
     return Column(
       children: [
         // Character avatar with glow
@@ -741,23 +744,23 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           children: [
             // Outer glow effect
             Container(
-              width: 140,
-              height: 140,
+              width: 140 * fontScale,
+              height: 140 * fontScale,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: AppTheme.warmGold.withValues(alpha: 0.4),
-                    blurRadius: 20,
-                    spreadRadius: 5,
+                    blurRadius: 20 * fontScale,
+                    spreadRadius: 5 * fontScale,
                   ),
                 ],
               ),
             ),
             // Character avatar
             Container(
-              width: 130,
-              height: 130,
+              width: 130 * fontScale,
+              height: 130 * fontScale,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -778,8 +781,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   _character!.name.isNotEmpty
                       ? _character!.name[0].toUpperCase()
                       : '?',
-                  style: const TextStyle(
-                    fontSize: 52,
+                  style: TextStyle(
+                    fontSize: 52 * fontScale,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
@@ -803,7 +806,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             _character!.name,
             style: UkrainianFontUtils.cinzelWithUkrainianSupport(
               text: _character!.name,
-              fontSize: 28,
+              fontSize: 28 * fontScale,
               fontWeight: FontWeight.bold,
               color: AppTheme.silverMist,
               letterSpacing: 1.5,
@@ -830,19 +833,22 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 ),
               );
             },
-            icon: const Icon(Icons.chat_bubble_outline, size: 20),
+            icon: Icon(Icons.chat_bubble_outline, size: 20 * fontScale),
             label: Text(
               'Start Chat',
               style: UkrainianFontUtils.latoWithUkrainianSupport(
                 text: 'Start Chat',
-                fontSize: 16,
+                fontSize: 16 * fontScale,
                 fontWeight: FontWeight.bold,
               ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.warmGold,
               foregroundColor: AppTheme.midnightPurple,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: 24 * fontScale, 
+                vertical: 12 * fontScale,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),

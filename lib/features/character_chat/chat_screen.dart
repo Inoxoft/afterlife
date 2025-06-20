@@ -14,6 +14,7 @@ import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../models/leading_question_detector.dart';
 import '../widgets/leading_question_warning.dart';
+import '../../core/utils/responsive_utils.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -230,16 +231,11 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         isUser: false,
       );
     } finally {
-      // Update UI
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
-        
-        // Reload character to get the latest chat history
         await _loadCharacter();
-
-        // Scroll to bottom to show new messages
         _scrollToBottom();
       }
     }
@@ -374,34 +370,42 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
   Widget _buildChatList(AppLocalizations localizations) {
     if (_character!.chatHistory.isEmpty) {
+      final fontScale = ResponsiveUtils.getFontSizeScale(context);
+      
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.chat_bubble_outline,
-              size: 48,
+              size: 48 * fontScale,
               color: AppTheme.warmGold.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              localizations.startChattingWith.replaceAll('{name}', _character!.name),
-              style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: localizations.startChattingWith.replaceAll('{name}', _character!.name),
-                color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 16,
+            Padding(
+              padding: ResponsiveUtils.getScreenPadding(context),
+              child: Text(
+                localizations.startChattingWith.replaceAll('{name}', _character!.name),
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.startChattingWith.replaceAll('{name}', _character!.name),
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 16 * fontScale,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              localizations.sendMessageToBegin,
-              style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: localizations.sendMessageToBegin,
-                color: Colors.white.withValues(alpha: 0.5),
-                fontSize: 14,
+            Padding(
+              padding: ResponsiveUtils.getScreenPadding(context),
+              child: Text(
+                localizations.sendMessageToBegin,
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.sendMessageToBegin,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 14 * fontScale,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -410,7 +414,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16),
+      padding: ResponsiveUtils.getChatListPadding(context),
       itemCount: _character!.chatHistory.length,
       itemBuilder: (context, index) {
         final message = _character!.chatHistory[index];
@@ -427,8 +431,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   }
 
   Widget _buildInputArea(AppLocalizations localizations) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: ResponsiveUtils.getChatInputPadding(context),
       decoration: BoxDecoration(
         color: AppTheme.backgroundStart.withValues(alpha: 0.8),
         border: Border(
@@ -450,6 +456,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                 hintStyle: UkrainianFontUtils.latoWithUkrainianSupport(
                   text: localizations.typeMessage,
                   color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 14 * fontScale,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -469,27 +476,28 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                     color: AppTheme.warmGold.withValues(alpha: 0.5),
                   ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16 * fontScale,
+                  vertical: 12 * fontScale,
                 ),
               ),
               style: UkrainianFontUtils.latoWithUkrainianSupport(
                 text: "Sample text", // Placeholder for style detection
                 color: Colors.white,
+                fontSize: 14 * fontScale,
               ),
               maxLines: null,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8 * fontScale),
           // Send button
           IconButton(
             icon: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
+                ? SizedBox(
+                    width: 24 * fontScale,
+                    height: 24 * fontScale,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -497,7 +505,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
                       ),
                     ),
                   )
-                : const Icon(Icons.send),
+                : Icon(Icons.send, size: 24 * fontScale),
             color: AppTheme.warmGold,
             onPressed: _isLoading ? null : _sendMessage,
           ),

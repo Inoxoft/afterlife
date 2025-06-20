@@ -288,6 +288,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
   // Explore tab with famous digital twins
   Widget _buildExploreTab(AppLocalizations localizations, List<Map<String, dynamic>> famousPeople) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = screenWidth > 900; // Desktop/tablet landscape
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -304,28 +307,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: GridView.builder(
-              key: const PageStorageKey('exploreTab'),
-              padding: const EdgeInsets.only(top: 12, bottom: 24),
-              physics: const BouncingScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-              ),
-              itemCount: famousPeople.length,
-              itemBuilder: (context, index) {
-                final person = famousPeople[index];
-                return _FamousPersonCard(
-                  key: ValueKey('famous_person_${person['name']}'),
-                  name: person['name'] as String,
-                  years: person['years'] as String,
-                  profession: person['profession'] as String,
-                  imageUrl: person['imageUrl'] as String?,
-                );
-              },
-            ),
+            child: isWideScreen 
+              ? _buildHorizontalGallery(famousPeople, isExploreTab: true)
+              : _buildGridGallery(famousPeople, isExploreTab: true),
           ),
         ],
       ),
@@ -373,51 +357,135 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           return _buildEmptyState(context, localizations);
         }
 
-        // Grid of user-created character cards
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isWideScreen = screenWidth > 900; // Desktop/tablet landscape
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: GridView.builder(
-            key: const PageStorageKey('yourTwinsTab'),
-            padding: const EdgeInsets.only(top: 12, bottom: 24),
-            physics: const BouncingScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.7,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
+          child: isWideScreen 
+            ? _buildHorizontalGallery(characters, isExploreTab: false)
+            : _buildGridGallery(characters, isExploreTab: false),
+        );
+      },
+    );
+  }
+
+  Widget _buildHorizontalGallery(List<dynamic> items, {required bool isExploreTab}) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Calculate card dimensions based on screen width
+    double cardWidth = screenWidth > 1200 ? 320 : 280;
+    double cardHeight = cardWidth * 1.4; // Maintain aspect ratio
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Gallery title
+        if (items.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 16),
+            child: Text(
+              isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.warmGold,
+                letterSpacing: 1.5,
+              ),
             ),
-            itemCount: characters.length,
+          ),
+        ],
+        
+        // Horizontal scrolling gallery
+        Expanded(
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final character = characters[index];
-              return FutureBuilder<Widget>(
-                // Using a slight delay for staggered animation
-                future: Future.delayed(
-                  Duration(milliseconds: 100 * index),
-                  () => _CharacterCard(
-                    key: ValueKey('character_${character.id}'),
-                    character: character,
-                    onTap: () => _onCharacterSelected(context, character),
-                  ),
-                ),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppTheme.deepSpaceNavy.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    );
-                  }
-                  return AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: snapshot.hasData ? 1.0 : 0.0,
-                    child: snapshot.data!,
-                  );
-                },
+              final item = items[index];
+              
+              return Container(
+                width: cardWidth,
+                height: cardHeight,
+                margin: const EdgeInsets.only(right: 24),
+                child: isExploreTab
+                  ? _FamousPersonCard(
+                      key: ValueKey('famous_person_${item['name']}'),
+                      name: item['name'] as String,
+                      years: item['years'] as String,
+                      profession: item['profession'] as String,
+                      imageUrl: item['imageUrl'] as String?,
+                      isHorizontalLayout: true,
+                    )
+                  : _CharacterCard(
+                      key: ValueKey('character_${item.id}'),
+                      character: item as CharacterModel,
+                      onTap: () => _onCharacterSelected(context, item),
+                      isHorizontalLayout: true,
+                    ),
               );
             },
           ),
-        );
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGridGallery(List<dynamic> items, {required bool isExploreTab}) {
+    return GridView.builder(
+      key: PageStorageKey(isExploreTab ? 'exploreTab' : 'yourTwinsTab'),
+      padding: const EdgeInsets.only(top: 12, bottom: 24),
+      physics: const BouncingScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        
+        if (isExploreTab) {
+          return _FamousPersonCard(
+            key: ValueKey('famous_person_${item['name']}'),
+            name: item['name'] as String,
+            years: item['years'] as String,
+            profession: item['profession'] as String,
+            imageUrl: item['imageUrl'] as String?,
+            isHorizontalLayout: false,
+          );
+        } else {
+          final character = item as CharacterModel;
+          return FutureBuilder<Widget>(
+            future: Future.delayed(
+              Duration(milliseconds: 100 * index),
+              () => _CharacterCard(
+                key: ValueKey('character_${character.id}'),
+                character: character,
+                onTap: () => _onCharacterSelected(context, character),
+                isHorizontalLayout: false,
+              ),
+            ),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.deepSpaceNavy.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                );
+              }
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: snapshot.hasData ? 1.0 : 0.0,
+                child: snapshot.data!,
+              );
+            },
+          );
+        }
       },
     );
   }
@@ -575,6 +643,7 @@ class _FamousPersonCard extends StatefulWidget {
   final String years;
   final String profession;
   final String? imageUrl;
+  final bool isHorizontalLayout;
 
   const _FamousPersonCard({
     Key? key,
@@ -582,6 +651,7 @@ class _FamousPersonCard extends StatefulWidget {
     required this.years,
     required this.profession,
     this.imageUrl,
+    this.isHorizontalLayout = false,
   }) : super(key: key);
 
   @override
@@ -730,9 +800,9 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           child: Container(
                             width: double.infinity,
                             height: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 5,
+                            padding: EdgeInsets.symmetric(
+                              vertical: widget.isHorizontalLayout ? 20 : 10,
+                              horizontal: widget.isHorizontalLayout ? 15 : 5,
                             ),
                             child: Image.asset(
                               widget.imageUrl!,
@@ -773,7 +843,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                       child: Center(
                         child: Icon(
                           Icons.person_outline,
-                          size: 80,
+                          size: widget.isHorizontalLayout ? 120 : 80,
                           color: accentColor.withValues(alpha: 0.5),
                         ),
                       ),
@@ -804,7 +874,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                   right: 0,
                   bottom: 0,
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -813,7 +883,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           widget.name,
                           style: UkrainianFontUtils.cinzelWithUkrainianSupport(
                             text: widget.name,
-                            fontSize: 18,
+                            fontSize: widget.isHorizontalLayout ? 22 : 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
                             color: AppTheme.warmGold,
@@ -825,11 +895,11 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                               ),
                             ],
                           ),
-                          maxLines: 1,
+                          maxLines: widget.isHorizontalLayout ? 2 : 1,
                           overflow: TextOverflow.ellipsis,
                         ),
 
-                        const SizedBox(height: 6),
+                        SizedBox(height: widget.isHorizontalLayout ? 8 : 6),
 
                         // Years
                         Row(
@@ -841,7 +911,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                               widget.years,
                               style: UkrainianFontUtils.cinzelWithUkrainianSupport(
                                 text: widget.years,
-                                fontSize: 14,
+                                fontSize: widget.isHorizontalLayout ? 16 : 14,
                                 color: AppTheme.warmGold,
                                 letterSpacing: 0.5,
                                 shadows: [
@@ -856,17 +926,17 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           ],
                         ),
 
-                        const SizedBox(height: 10),
+                        SizedBox(height: widget.isHorizontalLayout ? 12 : 10),
 
                         // Profession label with elegant styling
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: widget.isHorizontalLayout ? 12 : 8,
+                            vertical: widget.isHorizontalLayout ? 6 : 3,
                           ),
                           decoration: BoxDecoration(
                             color: AppTheme.warmGold.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(widget.isHorizontalLayout ? 6 : 4),
                             border: Border.all(
                               color: AppTheme.warmGold.withValues(alpha: 0.4),
                               width: 1,
@@ -876,11 +946,13 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             widget.profession,
                             style: UkrainianFontUtils.cinzelWithUkrainianSupport(
                               text: widget.profession,
-                              fontSize: 11,
+                              fontSize: widget.isHorizontalLayout ? 13 : 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
                               color: AppTheme.warmGold,
                             ),
+                            maxLines: widget.isHorizontalLayout ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -1074,8 +1146,9 @@ class FilmGrainPainter extends CustomPainter {
 class _CharacterCard extends StatefulWidget {
   final CharacterModel character;
   final VoidCallback onTap;
+  final bool isHorizontalLayout;
 
-  const _CharacterCard({Key? key, required this.character, required this.onTap})
+  const _CharacterCard({Key? key, required this.character, required this.onTap, this.isHorizontalLayout = false})
     : super(key: key);
 
   @override
@@ -1294,7 +1367,7 @@ class _CharacterCardState extends State<_CharacterCard>
                       left: 0,
                       right: 0,
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1303,7 +1376,7 @@ class _CharacterCardState extends State<_CharacterCard>
                               widget.character.name,
                               style: UkrainianFontUtils.cinzelWithUkrainianSupport(
                                 text: widget.character.name,
-                                fontSize: 18,
+                                fontSize: widget.isHorizontalLayout ? 22 : 18,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
                                 color: AppTheme.silverMist,
@@ -1315,6 +1388,8 @@ class _CharacterCardState extends State<_CharacterCard>
                                   ),
                                 ],
                               ),
+                              maxLines: widget.isHorizontalLayout ? 2 : 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),

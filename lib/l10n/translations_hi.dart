@@ -231,4 +231,186 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get theseDigitalTwinsAllow => 'ये डिजिटल जुड़वां आपको समय और वास्तविकता के पार के दृष्टिकोणों के साथ बातचीत करने की अनुमति देते हैं।';
+  // Splash screen status messages
+  @override
+  String get initializingPreservationSystems => 'INITIALIZING PRESERVATION SYSTEMS';
+
+  @override
+  String get calibratingNeuralNetworks => 'CALIBRATING NEURAL NETWORKS';
+
+  @override
+  String get synchronizingQuantumStates => 'SYNCHRONIZING QUANTUM STATES';
+
+  @override
+  String get aligningConsciousnessMatrices => 'ALIGNING CONSCIOUSNESS MATRICES';
+
+  @override
+  String get establishingNeuralLinks => 'ESTABLISHING NEURAL LINKS';
+
+  @override
+  String get preservationSystemsReady => 'PRESERVATION SYSTEMS READY';
+
+  @override
+  String get errorInitializingSystems => 'ERROR INITIALIZING SYSTEMS';
+
+  // Error messages and user feedback
+  @override
+  String get restartApp => 'Restart App';
+
+  @override
+  String get initializationError => 'Initialization Error';
+
+  @override
+  String get apiKeyCannotBeEmpty => 'API key cannot be empty';
+
+  @override
+  String get changesSavedSuccessfully => 'Changes saved successfully';
+
+  @override
+  String get characterUpdatedSuccessfully => 'Character updated successfully';
+
+  @override
+  String get characterCardCopiedToClipboard => 'Character card copied to clipboard';
+
+  @override
+  String get charactersExportedSuccessfully => 'Characters exported successfully!';
+
+  @override
+  String get errorExportingCharacters => 'Error exporting characters';
+
+  @override
+  String get errorSavingApiKey => 'Error saving API key';
+
+  @override
+  String get errorLoadingCharacter => 'Error loading character';
+
+  @override
+  String get failedToSaveSettings => 'Failed to save settings';
+
+  @override
+  String get apiKeyUpdatedSuccessfully => 'API key updated successfully';
+
+  // Dialog boxes and confirmations
+  @override
+  String get restartInterview => 'Restart Interview';
+
+  @override
+  String get clearResponsesConfirmation => 'This will clear all your responses. Are you sure?';
+
+  @override
+  String get deleteCharacter => 'Delete Character';
+
+  @override
+  String get deleteCharacterConfirmation => 'This action cannot be undone.';
+
+  @override
+  String get characterProfile => 'Character Profile';
+
+  @override
+  String get editCharacter => 'Edit Character';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get edit => 'Edit';
+
+  // API Key Dialog
+  @override
+  String get openRouterApiKey => 'OpenRouter API Key';
+
+  @override
+  String get apiKeyRequired => 'API Key Required';
+
+  @override
+  String get updateApiKeyDescription => 'Update your OpenRouter API key for AI functionality:';
+
+  @override
+  String get apiKeyRequiredDescription => 'The application requires an OpenRouter API key to function. Please enter your API key below:';
+
+  @override
+  String get enterApiKey => 'Enter API Key (sk-...)';
+
+  @override
+  String get clearCurrentKey => 'Clear current key';
+
+  @override
+  String get getApiKeyFromOpenRouter => 'You can get an API key from openrouter.ai';
+
+  @override
+  String get usingCustomApiKey => 'Using your custom API key';
+
+  @override
+  String get replaceKeyInstructions => 'To replace with a different key, clear the field first and enter new key';
+
+  @override
+  String get apiKeyShouldStartWithSk => 'API key should start with "sk-"';
+
+  // Interview and character creation
+  @override
+  String get invalidCharacterCardFormat => 'Invalid character card format';
+
+  @override
+  String get characterDataIncomplete => 'Character data is incomplete';
+
+  @override
+  String get failedToSaveCharacter => 'Failed to save character';
+
+  @override
+  String get characterProfileNotFound => 'Character profile not found';
+
+  @override
+  String get errorSavingCharacter => 'Error saving character';
+
+  // Generic error messages with parameters
+  @override
+  String errorLoadingCharacterWithDetails(String error) => 'Error loading character: $error';
+
+  @override
+  String errorSavingApiKeyWithDetails(String error) => 'Error saving API key: $error';
+
+  @override
+  String errorRemovingApiKeyWithDetails(String error) => 'Error removing API key: $error';
+
+  @override
+  String failedToSaveSettingsWithDetails(String error) => 'Failed to save settings: $error';
+
+  @override
+  String aiModelUpdatedForCharacter(String characterName) => 'AI model updated for $characterName';
+
+  @override
+  String characterCardCopiedForCharacter(String characterName) => 'Character card for "$characterName" copied to clipboard';
+
+  @override
+  String errorUpdatingModel(String error) => 'Error updating model: $error';
+
+  @override
+  String errorSavingCharacterWithDetails(String error) => 'Error saving character: $error';
+
+  @override
+  String errorClearingDataWithDetails(String error) => 'Error clearing data: $error';
+
+  @override
+  String errorExportingCharactersWithDetails(String error) => 'Error exporting characters: $error';
+  // Additional UI strings
+  @override
+  String get skipForNow => 'Skip for now';
+
+  @override
+  String get updateKey => 'Update Key';
+
+  @override
+  String get removeKey => 'Remove Key';
+
+  @override
+  String get saveKey => 'Save Key';
+
+  @override
+  String get usingDefaultApiKey => 'Using default API key from .env file';
+  // Interview initial message
+  @override
+  String get interviewInitialMessage => 'नमस्ते! मैं आपके लिए एक विस्तृत चरित्र कार्ड बनाने के लिए तैयार हूं। आप इनमें से कोई एक चुन सकते हैं:\n\n1. आपके व्यक्तित्व और अनुभवों के बारे में मेरे प्रश्नों का उत्तर दें\n2. आपकी जानकारी वाली फ़ाइल (PDF, TXT, DOC या ईमेल) अपलोड करें\n\nआप क्या पसंद करेंगे?';
 } 

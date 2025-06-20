@@ -1,20 +1,21 @@
-import 'dart:math';
-// lib/features/character_interview/interview_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
-import 'interview_provider.dart';
-import '../models/character_model.dart';
+import 'package:path/path.dart' as path;
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../../core/widgets/animated_particles.dart';
-import 'file_processor_service.dart';
+import '../../core/utils/responsive_utils.dart';
+import '../models/character_model.dart';
+import '../providers/characters_provider.dart';
 import '../providers/language_provider.dart';
+import '../character_gallery/character_gallery_screen.dart';
 import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
-import 'package:path/path.dart' as path;
-import '../providers/characters_provider.dart';
-import '../character_gallery/character_gallery_screen.dart';
+import 'interview_provider.dart';
+import 'file_processor_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
@@ -165,6 +166,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    
     return ChangeNotifierProvider(
       create: (_) => _interviewProvider,
       child: Scaffold(
@@ -175,7 +178,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
             widget.editMode
                 ? "Editing ${widget.existingCharacter?.name ?? 'Character'}"
                 : "Creating Your Digital Twin",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 18 * fontScale, 
+              fontWeight: FontWeight.w500,
+            ),
           ),
           actions: [
             if (!widget.editMode)
@@ -283,7 +289,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
                         return ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(16.0),
+                          padding: ResponsiveUtils.getChatListPadding(context),
                           itemCount: provider.messages.length,
                           itemBuilder: (context, index) {
                             final message = provider.messages[index];
@@ -338,7 +344,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppTheme.warmGold.withOpacity(0.5),
+                                  color: AppTheme.warmGold.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   width: 2,
                                 ),
                                 boxShadow: [
@@ -382,7 +390,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       color: AppTheme.warmGold.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppTheme.warmGold.withOpacity(0.3),
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         width: 1,
                                       ),
                                     ),
@@ -402,7 +412,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       color: AppTheme.midnightPurple.withOpacity(0.3),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppTheme.warmGold.withOpacity(0.2),
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         width: 1,
                                       ),
                                     ),
@@ -417,7 +429,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                             color: AppTheme.warmGold.withOpacity(0.15),
                                             borderRadius: BorderRadius.circular(6),
                                             border: Border.all(
-                                              color: AppTheme.warmGold.withOpacity(0.5),
+                                              color: AppTheme.warmGold.withValues(
+                                                alpha: 0.5,
+                                              ),
                                               width: 1,
                                             ),
                                           ),
@@ -440,7 +454,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                             color: AppTheme.warmGold.withOpacity(0.1),
                                             borderRadius: BorderRadius.circular(6),
                                             border: Border.all(
-                                              color: AppTheme.warmGold.withOpacity(0.3),
+                                              color: AppTheme.warmGold.withValues(
+                                                alpha: 0.3,
+                                              ),
                                               width: 1,
                                             ),
                                           ),
@@ -542,7 +558,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                       }
 
                       return Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: ResponsiveUtils.getChatInputPadding(context),
                         decoration: BoxDecoration(
                           color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                           border: Border(
@@ -558,13 +574,17 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               child: TextField(
                                 controller: _messageController,
                                 focusNode: _inputFocusNode,
-                                style: TextStyle(color: AppTheme.silverMist),
+                                style: TextStyle(
+                                  color: AppTheme.silverMist,
+                                  fontSize: 14 * fontScale,
+                                ),
                                 decoration: InputDecoration(
                                   hintText: 'Type your message...',
                                   hintStyle: TextStyle(
                                     color: AppTheme.silverMist.withValues(
                                       alpha: 0.5,
                                     ),
+                                    fontSize: 14 * fontScale,
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(25),
@@ -588,22 +608,22 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       color: AppTheme.warmGold,
                                     ),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 10,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 20 * fontScale,
+                                    vertical: 10 * fontScale,
                                   ),
                                 ),
                                 onSubmitted: (_) => _sendMessage(provider),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8 * fontScale),
                             Container(
                               decoration: BoxDecoration(
                                 color: AppTheme.warmGold,
                                 borderRadius: BorderRadius.circular(25),
                               ),
                               child: IconButton(
-                                icon: const Icon(Icons.send),
+                                icon: Icon(Icons.send, size: 20 * fontScale),
                                 color: AppTheme.midnightPurple,
                                 onPressed: () => _sendMessage(provider),
                               ),

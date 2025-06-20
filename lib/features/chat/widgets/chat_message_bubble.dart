@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final String text;
@@ -21,20 +22,26 @@ class ChatMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    final maxWidthFactor = ResponsiveUtils.getChatMessageMaxWidthFactor(context);
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16.0 * fontScale, 
+        vertical: 8.0 * fontScale,
+      ),
       child: Row(
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser && showAvatar) ...[
             Container(
-              width: 32,
-              height: 32,
-              margin: const EdgeInsets.only(right: 8.0),
+              width: 32 * fontScale,
+              height: 32 * fontScale,
+              margin: EdgeInsets.only(right: 8.0 * fontScale),
               decoration: BoxDecoration(
                 color: AppTheme.warmGold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16 * fontScale),
                 border: Border.all(
                   color: AppTheme.warmGold.withOpacity(0.3),
                   width: 1,
@@ -45,7 +52,7 @@ class ChatMessageBubble extends StatelessWidget {
                   avatarText,
                   style: TextStyle(
                     color: AppTheme.warmGold,
-                    fontSize: 12,
+                    fontSize: 12 * fontScale,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -55,30 +62,30 @@ class ChatMessageBubble extends StatelessWidget {
           Flexible(
             child: Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
+                maxWidth: MediaQuery.of(context).size.width * maxWidthFactor,
               ),
               decoration: BoxDecoration(
                 color: isUser
                     ? AppTheme.warmGold.withOpacity(0.1)
                     : AppTheme.midnightPurple.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16 * fontScale),
                 border: Border.all(
                   color: AppTheme.warmGold.withOpacity(0.3),
                   width: 1,
                 ),
               ),
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12 * fontScale),
               child: _buildMessageContent(context),
             ),
           ),
           if (isUser && showAvatar) ...[
             Container(
-              width: 32,
-              height: 32,
-              margin: const EdgeInsets.only(left: 8.0),
+              width: 32 * fontScale,
+              height: 32 * fontScale,
+              margin: EdgeInsets.only(left: 8.0 * fontScale),
               decoration: BoxDecoration(
                 color: AppTheme.warmGold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16 * fontScale),
                 border: Border.all(
                   color: AppTheme.warmGold.withOpacity(0.3),
                   width: 1,
@@ -89,7 +96,7 @@ class ChatMessageBubble extends StatelessWidget {
                   avatarText,
                   style: TextStyle(
                     color: AppTheme.warmGold,
-                    fontSize: 12,
+                    fontSize: 12 * fontScale,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -102,6 +109,8 @@ class ChatMessageBubble extends StatelessWidget {
   }
 
   Widget _buildMessageContent(BuildContext context) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    
     // Check if this is a character card
     if (text.contains('## CHARACTER CARD SUMMARY ##') && text.contains('## END OF CHARACTER CARD ##')) {
       return _buildCharacterCard(context);
@@ -112,13 +121,15 @@ class ChatMessageBubble extends StatelessWidget {
       text,
       style: TextStyle(
         color: AppTheme.silverMist,
-        fontSize: 14,
+        fontSize: 14 * fontScale,
         height: 1.6,
       ),
     );
   }
 
   Widget _buildCharacterCard(BuildContext context) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    
     // Extract character name
     final nameMarkerPattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
     final nameMatch = nameMarkerPattern.firstMatch(text);
@@ -145,7 +156,7 @@ class ChatMessageBubble extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.warmGold.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12 * fontScale),
         border: Border.all(
           color: AppTheme.warmGold.withOpacity(0.3),
           width: 1,
@@ -157,10 +168,15 @@ class ChatMessageBubble extends StatelessWidget {
           // Character name header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            padding: EdgeInsets.symmetric(
+              vertical: 12 * fontScale, 
+              horizontal: 16 * fontScale,
+            ),
             decoration: BoxDecoration(
               color: AppTheme.warmGold.withOpacity(0.15),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(11 * fontScale),
+              ),
               border: Border(
                 bottom: BorderSide(
                   color: AppTheme.warmGold.withOpacity(0.3),
@@ -172,17 +188,17 @@ class ChatMessageBubble extends StatelessWidget {
               characterName,
               style: TextStyle(
                 color: AppTheme.warmGold,
-                fontSize: 18,
+                fontSize: 18 * fontScale,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           // Card sections
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16 * fontScale),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: sections.map((section) => _buildSection(section)).toList(),
+              children: sections.map((section) => _buildSection(section, fontScale)).toList(),
             ),
           ),
         ],
@@ -239,12 +255,12 @@ class ChatMessageBubble extends StatelessWidget {
     return sections;
   }
 
-  Widget _buildSection(Map<String, String> section) {
+  Widget _buildSection(Map<String, String> section, double fontScale) {
     final title = section['title'] ?? '';
     final content = section['content'] ?? '';
     
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16 * fontScale),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -252,11 +268,14 @@ class ChatMessageBubble extends StatelessWidget {
           if (title.isNotEmpty) ...[
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              margin: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.symmetric(
+                vertical: 8 * fontScale, 
+                horizontal: 12 * fontScale,
+              ),
+              margin: EdgeInsets.only(bottom: 8 * fontScale),
               decoration: BoxDecoration(
                 color: AppTheme.warmGold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(6 * fontScale),
                 border: Border.all(
                   color: AppTheme.warmGold.withOpacity(0.2),
                   width: 1,
@@ -266,7 +285,7 @@ class ChatMessageBubble extends StatelessWidget {
                 title,
                 style: TextStyle(
                   color: AppTheme.warmGold,
-                  fontSize: 15,
+                  fontSize: 15 * fontScale,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -274,12 +293,12 @@ class ChatMessageBubble extends StatelessWidget {
           ],
           // Section content
           Padding(
-            padding: const EdgeInsets.only(left: 8),
+            padding: EdgeInsets.only(left: 8 * fontScale),
             child: SelectableText(
               _formatContent(content),
               style: TextStyle(
                 color: AppTheme.silverMist,
-                fontSize: 14,
+                fontSize: 14 * fontScale,
                 height: 1.5,
               ),
             ),
