@@ -1,11 +1,10 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 /// AppTheme defines the visual styling for the entire Afterlife application.
 /// This includes colors, text styles, decorations, and other visual elements.
 class AppTheme {
   // Primary colors
-  static Color primaryColor = const Color(0xFF00E5FF);
+  static const Color primaryColor = Color(0xFF6200EE);
   static Color secondaryColor = const Color(0xFFAE00FF);
   static Color accentColor = const Color(0xFFFFD500);
 
@@ -70,39 +69,37 @@ class AppTheme {
   );
 
   // Text styles
-  static TextStyle get headingStyle => GoogleFonts.spaceMono(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: lightColor,
-    letterSpacing: 0.5,
+  static TextStyle get headingStyle => const TextStyle(
+    fontFamily: 'SpaceMono',
+    fontSize: 24.0,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.2,
   );
 
-  static TextStyle get subheadingStyle => GoogleFonts.spaceMono(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    color: lightColor,
-    letterSpacing: 0.3,
+  static TextStyle get subheadingStyle => const TextStyle(
+    fontFamily: 'SpaceMono',
+    fontSize: 18.0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 1.1,
   );
 
-  static TextStyle get bodyStyle => GoogleFonts.roboto(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    color: lightColor,
-    letterSpacing: 0.2,
+  static TextStyle get bodyStyle => const TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 16.0,
+    height: 1.5,
   );
 
-  static TextStyle get captionStyle => GoogleFonts.roboto(
-    fontSize: 14,
-    fontWeight: FontWeight.w300,
-    color: greyColor,
-    letterSpacing: 0.1,
+  static TextStyle get captionStyle => TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 12.0,
+    color: AppTheme.lightColor,
   );
 
-  static TextStyle get buttonStyle => GoogleFonts.roboto(
-    fontSize: 16,
+  static TextStyle get buttonStyle => const TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 16.0,
     fontWeight: FontWeight.w500,
-    color: darkColor,
-    letterSpacing: 0.3,
+    letterSpacing: 1.1,
   );
 
   // Decorations

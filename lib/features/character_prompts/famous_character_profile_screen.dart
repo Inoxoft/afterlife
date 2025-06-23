@@ -6,6 +6,7 @@ import 'famous_character_prompts.dart';
 import 'famous_character_chat_screen.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:afterlife/features/widgets/background_painters.dart';
 
 class FamousCharacterProfileScreen extends StatefulWidget {
   final String name;

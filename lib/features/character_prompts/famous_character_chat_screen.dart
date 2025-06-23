@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
-import '../widgets/leading_question_warning.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
 import '../chat/models/chat_message.dart';
@@ -34,10 +32,6 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   bool _isLoading = false;
   List<Map<String, dynamic>> _messages = [];
   late String _selectedModel;
-  
-  // Leading question detection state
-  Map<String, dynamic>? _leadingQuestionWarning;
-  String? _pendingMessage;
 
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
@@ -111,36 +105,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     }
   }
 
-  Future<void> _sendMessage({bool bypassWarning = false}) async {
+  Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
     if (message.isEmpty || _isLoading) return;
 
     final localizations = AppLocalizations.of(context);
 
-    // If we're not bypassing the warning, check for leading questions first
-    if (!bypassWarning) {
-      try {
-        final leadingQuestionResult = await FamousCharacterService.checkForLeadingQuestion(message);
-        if (leadingQuestionResult != null) {
-          // Show warning instead of sending message
-          setState(() {
-            _leadingQuestionWarning = leadingQuestionResult;
-            _pendingMessage = message;
-          });
-          return;
-        }
-      } catch (e) {
-        // If detection fails, proceed with sending the message
-        print('Leading question detection failed: $e');
-      }
-    }
-
-    // Clear the input field and any warnings
+    // Clear the input field
     _messageController.clear();
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
 
     // Add user message to chat locally for immediate UI update
     setState(() {
@@ -156,11 +128,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     _scrollToBottom();
 
     try {
-      // Send the message to the character (bypass leading question check since we already did it)
+      // Send the message to the character
       final response = await FamousCharacterService.sendMessage(
         characterName: widget.characterName,
         message: message,
-        bypassLeadingQuestionCheck: true,
       );
 
       // Add AI response to chat history if not null
@@ -204,82 +175,6 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     }
   }
 
-  void _handleContinueAnyway() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-      _sendMessage(bypassWarning: true);
-    }
-  }
-
-  void _handleRephrase() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-    }
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
-    _inputFocusNode.requestFocus();
-  }
-
-  void _showClearChatDialog() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(localizations.clearChatHistoryTitle),
-            content: Text(localizations.clearChatHistoryConfirm),
-            backgroundColor: AppTheme.deepIndigo,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(localizations.cancel),
-              ),
-              TextButton(
-                onPressed: () => _clearChatHistory(context),
-                child: Text(localizations.clear),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _clearChatHistory(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    // Clear chat history
-    FamousCharacterService.clearChatHistory(widget.characterName);
-    setState(() {
-      _messages = [];
-    });
-
-    // Close the dialog
-    Navigator.pop(context);
-
-    // Show a confirmation
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(localizations.chatHistoryCleared)));
-  }
-
-  void _changeModel(String newModel) {
-    setState(() {
-      _selectedModel = newModel;
-      FamousCharacterPrompts.setSelectedModel(widget.characterName, newModel);
-    });
-
-    // Show a confirmation to the user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('AI model updated for ${widget.characterName}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
@@ -296,15 +191,6 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               children: [
                 // Chat messages
                 Expanded(child: _buildChatList(localizations)),
-
-                // Leading question warning
-                if (_leadingQuestionWarning != null)
-                  LeadingQuestionWarning(
-                    warningMessage: _leadingQuestionWarning!['message'] as String,
-                    confidence: _leadingQuestionWarning!['confidence'] as double,
-                    onContinueAnyway: _handleContinueAnyway,
-                    onRephrase: _handleRephrase,
-                  ),
 
                 // Input area
                 _buildInputArea(localizations),
@@ -492,7 +378,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               const SizedBox(height: 16),
               Text(
                 localizations.startChattingWith.replaceAll('{name}', widget.characterName),
-                style: GoogleFonts.lato(
+                style: TextStyle(
+                  fontFamily: 'Lato',
                   fontSize: 18,
                   color: AppTheme.silverMist.withValues(alpha: 0.8),
                 ),
@@ -501,7 +388,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               const SizedBox(height: 8),
               Text(
                 localizations.sendMessageToBegin,
-                style: GoogleFonts.lato(
+                style: TextStyle(
+                  fontFamily: 'Lato',
                   fontSize: 14,
                   color: AppTheme.silverMist.withValues(alpha: 0.5),
                 ),
@@ -596,176 +484,62 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       ),
     );
   }
-}
 
-// Extracted as a separate stateless widget for better performance
-class _MessageBubble extends StatelessWidget {
-  final String message;
-  final bool isUser;
+  void _changeModel(String newModel) {
+    setState(() {
+      _selectedModel = newModel;
+      FamousCharacterPrompts.setSelectedModel(widget.characterName, newModel);
+    });
 
-  const _MessageBubble({Key? key, required this.message, required this.isUser})
-    : super(key: key);
+    // Show a confirmation to the user
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('AI model updated for ${widget.characterName}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final bubbleColor =
-        isUser
-            ? AppTheme.accentPurple.withValues(alpha: 0.6)
-            : Colors.black.withValues(alpha: 0.4);
-    final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
-
-    // Check if message is very long (over 1000 characters)
-    final bool isVeryLong = message.length > 1000;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment:
-            isUser
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // AI avatar (only shown for AI messages)
-          if (!isUser) _buildAvatar(context),
-          if (!isUser) const SizedBox(width: 8),
-
-          // Message bubble
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-                maxHeight:
-                    isVeryLong
-                        ? MediaQuery.of(context).size.height * 0.4
-                        : double.infinity,
-              ),
-              decoration: BoxDecoration(
-                color: bubbleColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft:
-                      isUser
-                          ? const Radius.circular(16)
-                          : const Radius.circular(4),
-                  bottomRight:
-                      isUser
-                          ? const Radius.circular(4)
-                          : const Radius.circular(16),
-                ),
-                border: Border.all(
-                  color:
-                      isUser
-                          ? AppTheme.accentPurple.withValues(alpha: 0.7)
-                          : AppTheme.etherealCyan.withValues(alpha: 0.5),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child:
-                  isVeryLong
-                      ? SingleChildScrollView(child: _buildMessageText())
-                      : _buildMessageText(),
+  void _showClearChatDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(localizations.clearChatHistoryTitle),
+            content: Text(localizations.clearChatHistoryConfirm),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(localizations.cancel),
+              ),
+              TextButton(
+                onPressed: () => _clearChatHistory(context),
+                child: Text(localizations.clear),
+              ),
+            ],
           ),
-
-          // User avatar (only shown for user messages)
-          if (isUser) const SizedBox(width: 8),
-          if (isUser) _buildAvatar(context),
-        ],
-      ),
     );
   }
 
-  Widget _buildAvatar(BuildContext context) {
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor:
-          isUser
-              ? AppTheme.accentPurple.withValues(alpha: 0.8)
-              : AppTheme.etherealCyan.withValues(alpha: 0.8),
-      child: Text(
-        isUser ? 'You' : 'AI',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
-        ),
-      ),
-    );
-  }
+  void _clearChatHistory(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    // Clear chat history
+    FamousCharacterService.clearChatHistory(widget.characterName);
+    setState(() {
+      _messages = [];
+    });
 
-  // Extracted method to build the message text with proper styling
-  Widget _buildMessageText() {
-    return Text(
-      message,
-      style: const TextStyle(
-        color: Colors.white,
-        height: 1.4, // Improve line spacing
-      ),
-      softWrap: true, // Ensure text wraps properly
-      textWidthBasis:
-          TextWidthBasis.longestLine, // Better handling of long content
-    );
-  }
-}
+    // Close the dialog
+    Navigator.pop(context);
 
-// Extracted as a separate stateless widget for better performance
-class _SendButton extends StatelessWidget {
-  final bool isLoading;
-  final VoidCallback? onPressed;
-
-  const _SendButton({Key? key, required this.isLoading, this.onPressed})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color:
-            isLoading
-                ? AppTheme.etherealCyan.withValues(alpha: 0.3)
-                : AppTheme.etherealCyan,
-        shape: BoxShape.circle,
-        boxShadow: [
-          if (!isLoading)
-            BoxShadow(
-              color: AppTheme.etherealCyan.withValues(alpha: 0.3),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-        ],
-      ),
-      child: IconButton(
-        icon: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return ScaleTransition(scale: animation, child: child);
-          },
-          child:
-              isLoading
-                  ? const Icon(
-                    Icons.hourglass_top,
-                    key: ValueKey('loading'),
-                    color: Colors.white60,
-                  )
-                  : const Icon(
-                    Icons.send,
-                    key: ValueKey('send'),
-                    color: Colors.black87,
-                  ),
-        ),
-        onPressed: onPressed,
-      ),
-    );
+    // Show a confirmation
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(localizations.chatHistoryCleared)));
   }
 }

@@ -12,6 +12,8 @@ import '../character_interview/interview_screen.dart';
 import '../character_prompts/famous_character_profile_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
+import '../../core/utils/responsive_utils.dart';
+import '../widgets/background_painters.dart';
 
 class PulseRingPainter extends CustomPainter {
   final double progress;
@@ -72,10 +74,6 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
   // Cached bottom navigation items for better performance
   List<BottomNavigationBarItem> _getNavigationItems(AppLocalizations localizations) {
-    // Debug Ukrainian text detection
-    UkrainianFontUtils.debugUkrainianDetection(localizations.explore);
-    UkrainianFontUtils.debugUkrainianDetection(localizations.yourTwins);
-    
     return [
       BottomNavigationBarItem(
         icon: const Icon(Icons.explore, size: 24),
@@ -155,7 +153,12 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               children: [
                 // Header section with enhanced styling
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    ResponsiveUtils.getScreenPadding(context).left,
+                    32,
+                    ResponsiveUtils.getScreenPadding(context).right,
+                    24,
+                  ),
                   child: Text(
                     _selectedIndex == 0
                         ? localizations.exploreDigitalTwins
@@ -164,7 +167,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                       text: _selectedIndex == 0
                           ? localizations.exploreDigitalTwins
                           : localizations.yourDigitalTwins,
-                      fontSize: 24,
+                      fontSize: 24 * ResponsiveUtils.getFontSizeScale(context),
                       fontWeight: FontWeight.bold,
                       letterSpacing: 3.0,
                       color: AppTheme.silverMist,
@@ -288,9 +291,6 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
   // Explore tab with famous digital twins
   Widget _buildExploreTab(AppLocalizations localizations, List<Map<String, dynamic>> famousPeople) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 900; // Desktop/tablet landscape
-    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -307,7 +307,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: isWideScreen 
+            child: ResponsiveUtils.shouldUseWideLayout(context)
               ? _buildHorizontalGallery(famousPeople, isExploreTab: true)
               : _buildGridGallery(famousPeople, isExploreTab: true),
           ),
@@ -357,12 +357,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           return _buildEmptyState(context, localizations);
         }
 
-        final screenWidth = MediaQuery.of(context).size.width;
-        final isWideScreen = screenWidth > 900; // Desktop/tablet landscape
-
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: isWideScreen 
+          child: ResponsiveUtils.shouldUseWideLayout(context)
             ? _buildHorizontalGallery(characters, isExploreTab: false)
             : _buildGridGallery(characters, isExploreTab: false),
         );
@@ -370,120 +367,40 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     );
   }
 
-  Widget _buildHorizontalGallery(List<dynamic> items, {required bool isExploreTab}) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    
-    // Calculate card dimensions based on screen width
-    double cardWidth = screenWidth > 1200 ? 320 : 280;
-    double cardHeight = cardWidth * 1.4; // Maintain aspect ratio
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Gallery title
-        if (items.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 16),
-            child: Text(
-              isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
-              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                text: isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.warmGold,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ),
-        ],
-        
-        // Horizontal scrolling gallery
-        Expanded(
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              
-              return Container(
-                width: cardWidth,
-                height: cardHeight,
-                margin: const EdgeInsets.only(right: 24),
-                child: isExploreTab
-                  ? _FamousPersonCard(
-                      key: ValueKey('famous_person_${item['name']}'),
-                      name: item['name'] as String,
-                      years: item['years'] as String,
-                      profession: item['profession'] as String,
-                      imageUrl: item['imageUrl'] as String?,
-                      isHorizontalLayout: true,
-                    )
-                  : _CharacterCard(
-                      key: ValueKey('character_${item.id}'),
-                      character: item as CharacterModel,
-                      onTap: () => _onCharacterSelected(context, item),
-                      isHorizontalLayout: true,
-                    ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildGridGallery(List<dynamic> items, {required bool isExploreTab}) {
     return GridView.builder(
       key: PageStorageKey(isExploreTab ? 'exploreTab' : 'yourTwinsTab'),
-      padding: const EdgeInsets.only(top: 12, bottom: 24),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.getGridSpacing(context),
+        vertical: 24,
+      ),
       physics: const BouncingScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveUtils.getGridCrossAxisCount(context),
+        childAspectRatio: ResponsiveUtils.getGridChildAspectRatio(context),
+        crossAxisSpacing: ResponsiveUtils.getGridSpacing(context),
+        mainAxisSpacing: ResponsiveUtils.getGridSpacing(context),
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        
+
         if (isExploreTab) {
+          final famousPerson = item as Map<String, dynamic>;
           return _FamousPersonCard(
-            key: ValueKey('famous_person_${item['name']}'),
-            name: item['name'] as String,
-            years: item['years'] as String,
-            profession: item['profession'] as String,
-            imageUrl: item['imageUrl'] as String?,
+            key: ValueKey('famous_person_${famousPerson['name']}'),
+            name: famousPerson['name'] as String,
+            years: famousPerson['years'] as String,
+            profession: famousPerson['profession'] as String,
+            imageUrl: famousPerson['imageUrl'] as String?,
             isHorizontalLayout: false,
           );
         } else {
           final character = item as CharacterModel;
-          return FutureBuilder<Widget>(
-            future: Future.delayed(
-              Duration(milliseconds: 100 * index),
-              () => _CharacterCard(
-                key: ValueKey('character_${character.id}'),
-                character: character,
-                onTap: () => _onCharacterSelected(context, character),
-                isHorizontalLayout: false,
-              ),
-            ),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.deepSpaceNavy.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                );
-              }
-              return AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
-                opacity: snapshot.hasData ? 1.0 : 0.0,
-                child: snapshot.data!,
-              );
-            },
+          return _YourTwinCard(
+            key: ValueKey(character.id),
+            character: character,
+            isHorizontalLayout: false,
           );
         }
       },
@@ -634,6 +551,85 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     if (difference.inDays == 1) return 'yesterday';
     if (difference.inDays < 7) return '${difference.inDays} days ago';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+  }
+
+  // Card for displaying a user-created character
+  Widget _YourTwinCard({
+    required Key key,
+    required CharacterModel character,
+    required bool isHorizontalLayout,
+  }) {
+    final localizations = AppLocalizations.of(context);
+
+    return GestureDetector(
+      key: key,
+      onTap: () => _onCharacterSelected(context, character),
+      child: Card(
+        // ...
+      ),
+    );
+  }
+
+  Widget _buildHorizontalGallery(List<dynamic> items, {required bool isExploreTab}) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Calculate card dimensions based on screen width
+    double cardWidth = screenWidth > 1200 ? 320 : 280;
+    double cardHeight = cardWidth * 1.4; // Maintain aspect ratio
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Gallery title
+        if (items.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 16),
+            child: Text(
+              isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.warmGold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+        ],
+        
+        // Horizontal scrolling gallery
+        Expanded(
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              
+              return Container(
+                width: cardWidth,
+                height: cardHeight,
+                margin: const EdgeInsets.only(right: 24),
+                child: isExploreTab
+                  ? _FamousPersonCard(
+                      key: ValueKey('famous_person_${item['name']}'),
+                      name: item['name'] as String,
+                      years: item['years'] as String,
+                      profession: item['profession'] as String,
+                      imageUrl: item['imageUrl'] as String?,
+                      isHorizontalLayout: true,
+                    )
+                  : _YourTwinCard(
+                      key: ValueKey('character_${item.id}'),
+                      character: item as CharacterModel,
+                      isHorizontalLayout: true,
+                    ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -1050,1105 +1046,6 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
             ),
       ),
     );
-  }
-}
-
-// Custom painter for ethereal particle effect with subtle movement
-class EtherealParticlePainter extends CustomPainter {
-  final int particleCount;
-  final Color color;
-  final double pulsePhase;
-  final double opacity;
-
-  EtherealParticlePainter({
-    required this.particleCount,
-    required this.color,
-    this.pulsePhase = 0.0,
-    this.opacity = 0.1,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(42); // Fixed seed for deterministic pattern
-    final width = size.width;
-    final height = size.height;
-
-    for (int i = 0; i < particleCount; i++) {
-      final x = random.nextDouble() * width;
-      final y = random.nextDouble() * height;
-      final baseSize = 0.5 + random.nextDouble() * 1.5;
-      final particlePulse = (sin((pulsePhase * pi * 2) + (i * 0.2)) + 1) / 2;
-      final particleSize = baseSize * (0.5 + (particlePulse * 0.5));
-
-      // Vary opacity based on pulse
-      final particleOpacity = opacity * (0.5 + particlePulse * 0.5);
-
-      final paint =
-          Paint()
-            ..color = color.withOpacity(particleOpacity)
-            ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x, y), particleSize, paint);
-
-      // Add subtle glow
-      final glowPaint =
-          Paint()
-            ..color = color.withOpacity(particleOpacity * 0.5)
-            ..style = PaintingStyle.fill
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-
-      canvas.drawCircle(Offset(x, y), particleSize * 2, glowPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(EtherealParticlePainter oldDelegate) {
-    return oldDelegate.particleCount != particleCount ||
-        oldDelegate.color != color ||
-        oldDelegate.pulsePhase != pulsePhase ||
-        oldDelegate.opacity != opacity;
-  }
-}
-
-// Custom painter for film grain texture
-class FilmGrainPainter extends CustomPainter {
-  final double density;
-  final double opacity;
-  final Random random = Random(42);
-
-  FilmGrainPainter({this.density = 0.5, this.opacity = 0.1});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.white.withOpacity(opacity)
-          ..style = PaintingStyle.fill;
-
-    final numPoints = (size.width * size.height * density / 30).round();
-
-    for (int i = 0; i < numPoints; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final pointSize = random.nextDouble() * 1.0;
-
-      canvas.drawCircle(Offset(x, y), pointSize, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(FilmGrainPainter oldDelegate) {
-    return oldDelegate.density != density || oldDelegate.opacity != opacity;
-  }
-}
-
-// Extracted as a separate stateful widget for better performance through memoization
-class _CharacterCard extends StatefulWidget {
-  final CharacterModel character;
-  final VoidCallback onTap;
-  final bool isHorizontalLayout;
-
-  const _CharacterCard({Key? key, required this.character, required this.onTap, this.isHorizontalLayout = false})
-    : super(key: key);
-
-  @override
-  State<_CharacterCard> createState() => _CharacterCardState();
-}
-
-class _CharacterCardState extends State<_CharacterCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _glowAnimation;
-
-  // Cache image widget for performance
-  late final ImageProvider? _characterImageProvider =
-      widget.character.imageUrl != null
-          ? ResizeImage.resizeIfNeeded(
-            500,
-            null,
-            NetworkImage(widget.character.imageUrl!),
-          )
-          : null;
-
-  // Pre-calculate accent color
-  late final Color _accentColor = _getAccentColor();
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Set up subtle pulsing animation for the card
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-
-    _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  Color _getAccentColor() {
-    // Choose accent color based on character name's first letter
-    final letter =
-        widget.character.name.isNotEmpty
-            ? widget.character.name[0].toLowerCase()
-            : 'a';
-
-    if ('abcde'.contains(letter)) {
-      return AppTheme.etherealCyan;
-    } else if ('fghij'.contains(letter)) {
-      return AppTheme.accentPurple;
-    } else if ('klmno'.contains(letter)) {
-      return AppTheme.starlight;
-    } else if ('pqrst'.contains(letter)) {
-      return AppTheme.accentPurple;
-    } else {
-      return AppTheme.warmGold;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _deleteCharacter() {
-    // Show confirmation dialog
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppTheme.midnightPurple,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: AppTheme.warmGold.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            title: Text(
-              'Delete Character',
-              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                text: 'Delete Character',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.silverMist,
-              ),
-            ),
-            content: Text(
-              'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
-              style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: 'Are you sure you want to delete ${widget.character.name}? This action cannot be undone.',
-                fontSize: 16,
-                color: AppTheme.silverMist.withValues(alpha: 0.7),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  'Cancel',
-                  style: UkrainianFontUtils.latoWithUkrainianSupport(
-                    text: 'Cancel',
-                    fontSize: 14,
-                    color: AppTheme.silverMist.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // Delete the character
-                  final provider = Provider.of<CharactersProvider>(
-                    context,
-                    listen: false,
-                  );
-                  provider.deleteCharacter(widget.character.id);
-                },
-                child: Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.redAccent),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _glowAnimation,
-        builder: (context, child) {
-          return GestureDetector(
-            onTap: widget.onTap,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              height: 160,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.warmGold.withOpacity(
-                      0.2 + _glowAnimation.value * 0.1,
-                    ),
-                    blurRadius: 8 + _glowAnimation.value * 4,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  children: [
-                    // Character image or background pattern
-                    Positioned.fill(
-                      child:
-                          widget.character.imageUrl != null
-                              ? Image(
-                                image: _characterImageProvider!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return _buildBackgroundPattern();
-                                },
-                              )
-                              : _buildBackgroundPattern(),
-                    ),
-
-                    // Gradient overlay
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              AppTheme.midnightPurple.withValues(alpha: 0.3),
-                              AppTheme.deepNavy.withValues(alpha: 0.85),
-                            ],
-                            stops: const [0.5, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Delete button
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: _deleteCharacter,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.midnightPurple.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppTheme.warmGold.withValues(alpha: 0.3),
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: AppTheme.silverMist,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Character info content
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Padding(
-                        padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Character name
-                            Text(
-                              widget.character.name,
-                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                text: widget.character.name,
-                                fontSize: widget.isHorizontalLayout ? 22 : 18,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                                color: AppTheme.silverMist,
-                                shadows: [
-                                  Shadow(
-                                    color: AppTheme.warmGold.withValues(alpha: 0.5),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              maxLines: widget.isHorizontalLayout ? 2 : 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // Build a background pattern based on character properties
-  Widget _buildBackgroundPattern() {
-    // Get a consistent background based on the character's name or ID
-    final hashValue = widget.character.id.hashCode;
-    final patternIndex = hashValue % 6; // 6 different patterns
-
-    // Background pattern options
-    switch (patternIndex) {
-      case 0:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppTheme.warmGold.withValues(alpha: 0.3),
-                AppTheme.midnightPurple,
-              ],
-            ),
-          ),
-          child: CustomPaint(
-            painter: GeometricBackgroundPainter(color: AppTheme.warmGold),
-          ),
-        );
-      case 1:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppTheme.deepNavy, AppTheme.cosmicBlack],
-            ),
-          ),
-          child: CustomPaint(
-            painter: CosmicBackgroundPainter(starColor: AppTheme.warmGold),
-          ),
-        );
-      case 2:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              colors: [
-                AppTheme.deepSpaceNavy,
-                AppTheme.deepNavy.withValues(alpha: 0.7),
-              ],
-            ),
-          ),
-          child: CustomPaint(
-            painter: NeuralBackgroundPainter(lineColor: AppTheme.warmGold),
-          ),
-        );
-      case 3:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppTheme.deepIndigo.withValues(alpha: 0.8),
-                AppTheme.cosmicBlack,
-              ],
-            ),
-          ),
-          child: CustomPaint(
-            painter: WaveBackgroundPainter(
-              waveColor: AppTheme.warmGold.withValues(alpha: 0.5),
-            ),
-          ),
-        );
-      case 4:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [AppTheme.cosmicBlack, AppTheme.deepSpaceNavy],
-            ),
-          ),
-          child: CustomPaint(
-            painter: DigitalBackgroundPainter(lineColor: AppTheme.warmGold),
-          ),
-        );
-      default:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppTheme.deepSpaceNavy, AppTheme.deepIndigo],
-            ),
-          ),
-          child: CustomPaint(
-            painter: LightBackgroundPainter(lightColor: AppTheme.warmGold),
-          ),
-        );
-    }
-  }
-}
-
-// Background painter classes
-class GeometricBackgroundPainter extends CustomPainter {
-  final Color color;
-
-  GeometricBackgroundPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color.withValues(alpha: 0.15)
-          ..strokeWidth = 1.5
-          ..style = PaintingStyle.stroke;
-
-    final random = Random(42); // Fixed seed for consistent pattern
-
-    // Draw some triangles and circles
-    for (int i = 0; i < 15; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final radius = 10 + random.nextDouble() * 30;
-
-      if (i % 2 == 0) {
-        // Draw triangles
-        final path = Path();
-        path.moveTo(x, y - radius);
-        path.lineTo(x + radius, y + radius);
-        path.lineTo(x - radius, y + radius);
-        path.close();
-        canvas.drawPath(path, paint);
-      } else {
-        // Draw circles
-        canvas.drawCircle(Offset(x, y), radius, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class CosmicBackgroundPainter extends CustomPainter {
-  final Color starColor;
-
-  CosmicBackgroundPainter({required this.starColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(100); // Fixed seed for consistent stars
-
-    // Draw stars
-    for (int i = 0; i < 100; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final radius = 0.5 + random.nextDouble() * 1.5;
-      final opacity = 0.3 + random.nextDouble() * 0.7;
-
-      final paint =
-          Paint()
-            ..color = starColor.withOpacity(opacity)
-            ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-
-    // Draw a few larger glowing stars
-    for (int i = 0; i < 5; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final radius = 1.5 + random.nextDouble() * 2.0;
-
-      final paint =
-          Paint()
-            ..color = starColor.withValues(alpha: 0.8)
-            ..style = PaintingStyle.fill;
-
-      // Inner glow
-      final glowPaint =
-          Paint()
-            ..color = starColor.withValues(alpha: 0.2)
-            ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x, y), radius * 3, glowPaint);
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class NeuralBackgroundPainter extends CustomPainter {
-  final Color lineColor;
-
-  NeuralBackgroundPainter({required this.lineColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(25); // Fixed seed for consistency
-    final paint =
-        Paint()
-          ..color = lineColor.withValues(alpha: 0.2)
-          ..strokeWidth = 0.8
-          ..style = PaintingStyle.stroke;
-
-    final nodePaint =
-        Paint()
-          ..color = lineColor.withValues(alpha: 0.3)
-          ..style = PaintingStyle.fill;
-
-    // Create a network of nodes and connections
-    final nodes = <Offset>[];
-
-    // Generate node positions
-    for (int i = 0; i < 12; i++) {
-      nodes.add(
-        Offset(
-          random.nextDouble() * size.width,
-          random.nextDouble() * size.height,
-        ),
-      );
-    }
-
-    // Draw connections between some nodes
-    for (int i = 0; i < nodes.length; i++) {
-      for (int j = i + 1; j < nodes.length; j++) {
-        if (random.nextDouble() < 0.3) {
-          canvas.drawLine(nodes[i], nodes[j], paint);
-        }
-      }
-    }
-
-    // Draw nodes
-    for (final node in nodes) {
-      canvas.drawCircle(node, 2.5, nodePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class WaveBackgroundPainter extends CustomPainter {
-  final Color waveColor;
-
-  WaveBackgroundPainter({required this.waveColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = waveColor.withValues(alpha: 0.2)
-          ..strokeWidth = 1.2
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
-
-    // Draw several wave patterns
-    for (int w = 0; w < 5; w++) {
-      final path = Path();
-      final amplitude = 5.0 + (w * 3);
-      final frequency = 0.02 + (w * 0.005);
-      final verticalShift = (w * 30) + (size.height * 0.2);
-
-      path.moveTo(0, size.height / 2);
-
-      for (double x = 0; x <= size.width; x += 1) {
-        double y = sin(x * frequency) * amplitude + verticalShift;
-        path.lineTo(x, y);
-      }
-
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class DigitalBackgroundPainter extends CustomPainter {
-  final Color lineColor;
-
-  DigitalBackgroundPainter({required this.lineColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = lineColor.withValues(alpha: 0.25)
-          ..strokeWidth = 1.0
-          ..style = PaintingStyle.stroke;
-
-    final random = Random(55);
-
-    // Draw digital circuit-like patterns
-    for (int i = 0; i < 8; i++) {
-      final startX = random.nextDouble() * size.width * 0.2;
-      final startY = (i * size.height / 8) + random.nextDouble() * 20;
-
-      final path = Path();
-      path.moveTo(startX, startY);
-
-      double currentX = startX;
-      double currentY = startY;
-
-      // Create a path with horizontal and vertical lines only
-      for (int j = 0; j < 5; j++) {
-        // Horizontal line
-        final horizontalLength = 20 + random.nextDouble() * (size.width / 3);
-        currentX += horizontalLength;
-        path.lineTo(currentX, currentY);
-
-        // Sometimes add a vertical segment
-        if (random.nextDouble() > 0.3) {
-          final verticalLength = (random.nextDouble() - 0.5) * 40;
-          currentY += verticalLength;
-          path.lineTo(currentX, currentY);
-        }
-      }
-
-      canvas.drawPath(path, paint);
-
-      // Add some circuit nodes/connection points
-      final nodePaint =
-          Paint()
-            ..color = lineColor.withValues(alpha: 0.4)
-            ..style = PaintingStyle.fill;
-
-      currentX = startX;
-      currentY = startY;
-      canvas.drawCircle(Offset(currentX, currentY), 2, nodePaint);
-
-      for (int j = 0; j < 3; j++) {
-        currentX += 40 + random.nextDouble() * 60;
-        canvas.drawCircle(Offset(currentX, currentY), 2, nodePaint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class LightBackgroundPainter extends CustomPainter {
-  final Color lightColor;
-
-  LightBackgroundPainter({required this.lightColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(42);
-
-    // Draw light rays or beams
-    for (int i = 0; i < 15; i++) {
-      final startX = random.nextDouble() * size.width;
-      final startY = random.nextDouble() * size.height;
-      final angle = random.nextDouble() * pi * 2;
-      final length = 30 + random.nextDouble() * 100;
-      final opacity = 0.1 + random.nextDouble() * 0.15;
-
-      final paint =
-          Paint()
-            ..color = lightColor.withOpacity(opacity)
-            ..strokeWidth = 1 + random.nextDouble() * 3
-            ..strokeCap = StrokeCap.round
-            ..style = PaintingStyle.stroke;
-
-      final endX = startX + cos(angle) * length;
-      final endY = startY + sin(angle) * length;
-
-      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
-
-      // Add a subtle glow at the start point
-      final glowPaint =
-          Paint()
-            ..color = lightColor.withOpacity(opacity * 0.8)
-            ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(
-        Offset(startX, startY),
-        3 + random.nextDouble() * 2,
-        glowPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-// Custom widget for dotted border
-class DottedBorderContainer extends StatelessWidget {
-  final Widget child;
-
-  const DottedBorderContainer({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black38,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Stack(
-        children: [
-          // Dotted border effect
-          CustomPaint(
-            painter: DottedBorderPainter(
-              color: Colors.white30,
-              strokeWidth: 1.5,
-              gap: 5,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              width: double.infinity,
-              height: double.infinity,
-            ),
-          ),
-          // Content
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-// Custom painter for dotted border
-class DottedBorderPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-  final double gap;
-
-  DottedBorderPainter({
-    required this.color,
-    required this.strokeWidth,
-    required this.gap,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke;
-
-    final path =
-        Path()..addRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(0, 0, size.width, size.height),
-            const Radius.circular(16),
-          ),
-        );
-
-    // Create dotted effect
-    final dashPath = Path();
-    const dashWidth = 5.0;
-
-    for (
-      var i = 0.0;
-      i < path.computeMetrics().first.length;
-      i += dashWidth + gap
-    ) {
-      final metric = path.computeMetrics().first;
-      final start = i;
-      final end =
-          (i + dashWidth) < metric.length ? i + dashWidth : metric.length;
-      dashPath.addPath(metric.extractPath(start, end), Offset.zero);
-    }
-
-    canvas.drawPath(dashPath, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Custom painter for bubble effect
-class BubblePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Base bubble paint
-    final bubblePaint =
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.25)
-          ..style = PaintingStyle.fill;
-
-    // Highlight paint for bubble shine
-    final highlightPaint =
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.6)
-          ..style = PaintingStyle.fill;
-
-    // Draw different sized bubbles in a natural pattern
-    final random = DateTime.now().millisecondsSinceEpoch;
-    final bubblePositions = [
-      // Left side bubbles
-      Offset(size.width * 0.15, size.height * 0.25),
-      Offset(size.width * 0.10, size.height * 0.45),
-      Offset(size.width * 0.12, size.height * 0.65),
-      Offset(size.width * 0.20, size.height * 0.80),
-      // Middle bubbles
-      Offset(size.width * 0.35, size.height * 0.35),
-      Offset(size.width * 0.40, size.height * 0.15),
-      Offset(size.width * 0.45, size.height * 0.70),
-      // Right side bubbles
-      Offset(size.width * 0.70, size.height * 0.25),
-      Offset(size.width * 0.75, size.height * 0.50),
-      Offset(size.width * 0.65, size.height * 0.80),
-    ];
-
-    // Bubble sizes
-    final bubbleSizes = [2.5, 3.0, 2.0, 3.5, 2.0, 3.0, 2.5, 2.0, 3.5, 3.0];
-
-    // Draw each bubble
-    for (int i = 0; i < bubblePositions.length; i++) {
-      final position = bubblePositions[i];
-      final radius = bubbleSizes[i];
-
-      // Draw bubble
-      canvas.drawCircle(position, radius, bubblePaint);
-
-      // Draw highlight in top-left of bubble
-      canvas.drawCircle(
-        Offset(position.dx - radius * 0.3, position.dy - radius * 0.3),
-        radius * 0.3,
-        highlightPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Cyberpunk grid overlay painter
-class GridOverlayPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.cyanAccent.withValues(alpha: 0.15)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.5;
-
-    // Horizontal lines
-    const double gridSpacing = 35.0;
-    for (double y = 0; y <= size.height; y += gridSpacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    // Vertical lines
-    for (double x = 0; x <= size.width; x += gridSpacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Custom painter for hexagonal grid effect
-class HexGridPainter extends CustomPainter {
-  final Color color;
-  final double lineWidth;
-  final double opacity;
-
-  HexGridPainter({
-    required this.color,
-    this.lineWidth = 0.5,
-    this.opacity = 0.2,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color.withOpacity(opacity)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = lineWidth;
-
-    final hexSize = size.width / 12; // Size of each hexagon
-    final height = size.height;
-    final width = size.width;
-    final sqrt3 = 1.732; // sqrt(3)
-
-    // Horizontal distance between hex centers
-    final hStep = hexSize * 2;
-    // Vertical distance between hex centers
-    final vStep = hexSize * sqrt3;
-
-    // Calculate offset to center the grid
-    final rows = (height / vStep).ceil() + 1;
-    final cols = (width / hStep).ceil() + 1;
-
-    // Draw hexagonal grid
-    for (int r = -1; r < rows; r++) {
-      for (int c = -1; c < cols; c++) {
-        // Stagger odd rows
-        final xOffset = c * hStep + (r % 2 == 0 ? 0 : hexSize);
-        final yOffset = r * vStep;
-
-        _drawHexagon(canvas, paint, xOffset, yOffset, hexSize);
-      }
-    }
-  }
-
-  void _drawHexagon(
-    Canvas canvas,
-    Paint paint,
-    double xCenter,
-    double yCenter,
-    double size,
-  ) {
-    final path = Path();
-    const double rotationOffset = 30 * (3.14159 / 180); // 30 degrees in radians
-
-    for (int i = 0; i < 6; i++) {
-      final angle =
-          rotationOffset + (i * 60) * (3.14159 / 180); // Convert to radians
-      final x = xCenter + size * cos(angle);
-      final y = yCenter + size * sin(angle);
-
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(HexGridPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.lineWidth != lineWidth ||
-        oldDelegate.opacity != opacity;
-  }
-}
-
-// Custom painter for energy particles
-class EnergyParticlePainter extends CustomPainter {
-  final int particleCount;
-  final Color color;
-  final double pulsePhase;
-  final double particleScale;
-
-  EnergyParticlePainter({
-    required this.particleCount,
-    required this.color,
-    this.pulsePhase = 0.0,
-    this.particleScale = 1.0,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(42); // Fixed seed for deterministic pattern
-    final width = size.width;
-    final height = size.height;
-
-    // Generate particles
-    for (int i = 0; i < particleCount; i++) {
-      final x = random.nextDouble() * width;
-      final y = random.nextDouble() * height;
-      final baseSize = 1.0 + random.nextDouble() * 2.0;
-      final particlePulse =
-          (sin((pulsePhase * 3.14159 * 2) + (i * 0.2)) + 1) / 2;
-      final particleSize =
-          baseSize * particleScale * (0.5 + (particlePulse * 0.5));
-
-      // Vary opacity based on particle size and position
-      final opacity = 0.2 + (particlePulse * 0.6);
-
-      final paint =
-          Paint()
-            ..color = color.withOpacity(opacity)
-            ..style = PaintingStyle.fill;
-
-      // Draw the particle
-      canvas.drawCircle(Offset(x, y), particleSize, paint);
-
-      // Add a glow effect
-      final glowPaint =
-          Paint()
-            ..color = color.withOpacity(opacity * 0.3)
-            ..style = PaintingStyle.fill
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-
-      canvas.drawCircle(Offset(x, y), particleSize * 1.8, glowPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(EnergyParticlePainter oldDelegate) {
-    return oldDelegate.particleCount != particleCount ||
-        oldDelegate.color != color ||
-        oldDelegate.pulsePhase != pulsePhase ||
-        oldDelegate.particleScale != particleScale;
-  }
-}
-
-// Custom painter for CRT/digital scan lines
-class ScanLinePainter extends CustomPainter {
-  final double lineSpacing;
-  final double lineOpacity;
-
-  ScanLinePainter({this.lineSpacing = 4.0, this.lineOpacity = 0.1});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = AppTheme.midnightPurple.withOpacity(lineOpacity)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.5;
-
-    // Draw horizontal scan lines
-    for (double y = 0; y < size.height; y += lineSpacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    // Add some faint vertical distortion lines occasionally
-    final distortionPaint =
-        Paint()
-          ..color = AppTheme.warmGold.withOpacity(lineOpacity * 0.3)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.5;
-
-    final random = Random(12345); // Fixed seed for deterministic pattern
-
-    for (int i = 0; i < 5; i++) {
-      final x = random.nextDouble() * size.width;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), distortionPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(ScanLinePainter oldDelegate) {
-    return oldDelegate.lineSpacing != lineSpacing ||
-        oldDelegate.lineOpacity != lineOpacity;
   }
 }
 

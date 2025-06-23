@@ -12,8 +12,6 @@ import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
-import '../models/leading_question_detector.dart';
-import '../widgets/leading_question_warning.dart';
 import '../../core/utils/responsive_utils.dart';
 
 class CharacterChatScreen extends StatefulWidget {
@@ -34,10 +32,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   CharacterModel? _character;
   bool _isLoading = false;
 
-  // Leading question detection state
-  Map<String, dynamic>? _leadingQuestionWarning;
-  String? _pendingMessage;
-
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
     opacity: 0.5,
@@ -56,7 +50,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   void initState() {
     super.initState();
     _loadCharacter();
-    _initializeLeadingQuestionDetector();
   }
 
   @override
@@ -65,14 +58,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     _scrollController.dispose();
     _inputFocusNode.dispose();
     super.dispose();
-  }
-
-  Future<void> _initializeLeadingQuestionDetector() async {
-    try {
-      await LeadingQuestionDetector.initialize();
-    } catch (e) {
-      print('Error initializing leading question detector: $e');
-    }
   }
 
   Future<void> _loadCharacter() async {
@@ -118,27 +103,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     }
   }
 
-  /// Check if a message contains leading questions
-  Future<Map<String, dynamic>?> _checkForLeadingQuestion(String message) async {
-    try {
-      print('🔍 Checking for leading question: "$message"');
-      
-      final result = await LeadingQuestionDetector.detectLeadingQuestion(message);
-      
-      if (result['isLeading'] == true) {
-        print('⚠️ Leading question detected with confidence: ${result['confidence']}');
-        return result;
-      } else {
-        print('✅ No leading question detected (confidence: ${result['confidence']})');
-        return null;
-      }
-    } catch (e) {
-      print('❌ Leading question detection failed: $e');
-      return null;
-    }
-  }
-
-  Future<void> _sendMessage({bool bypassWarning = false}) async {
+  Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
     if (message.isEmpty || _isLoading) return;
 
@@ -148,30 +113,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     );
     final localizations = AppLocalizations.of(context);
 
-    // If we're not bypassing the warning, check for leading questions first
-    if (!bypassWarning) {
-      try {
-        final leadingQuestionResult = await _checkForLeadingQuestion(message);
-        if (leadingQuestionResult != null) {
-          // Show warning instead of sending message
-          setState(() {
-            _leadingQuestionWarning = leadingQuestionResult;
-            _pendingMessage = message;
-          });
-          return;
-        }
-      } catch (e) {
-        // If detection fails, proceed with sending the message
-        print('Leading question detection failed: $e');
-      }
-    }
-
-    // Clear the input field and any warnings
+    // Clear the input field
     _messageController.clear();
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
 
     // Add user message to chat history
     await charactersProvider.addMessageToCharacter(
@@ -241,24 +184,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     }
   }
 
-  void _handleContinueAnyway() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-      _sendMessage(bypassWarning: true);
-    }
-  }
-
-  void _handleRephrase() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-    }
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
-    _inputFocusNode.requestFocus();
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
@@ -290,15 +215,6 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
               children: [
                 // Chat messages
                 Expanded(child: _buildChatList(localizations)),
-
-                // Leading question warning
-                if (_leadingQuestionWarning != null)
-                  LeadingQuestionWarning(
-                    warningMessage: _leadingQuestionWarning!['message'] as String,
-                    confidence: _leadingQuestionWarning!['confidence'] as double,
-                    onContinueAnyway: _handleContinueAnyway,
-                    onRephrase: _handleRephrase,
-                  ),
 
                 // Input area
                 _buildInputArea(localizations),
@@ -373,41 +289,29 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       final fontScale = ResponsiveUtils.getFontSizeScale(context);
       
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.chat_bubble_outline,
-              size: 48 * fontScale,
-              color: AppTheme.warmGold.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: ResponsiveUtils.getScreenPadding(context),
-              child: Text(
-                localizations.startChattingWith.replaceAll('{name}', _character!.name),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.chat_bubble_outline,
+                size: 64 * fontScale,
+                color: Colors.white54,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                localizations.startConversation,
                 style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: localizations.startChattingWith.replaceAll('{name}', _character!.name),
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 16 * fontScale,
+                  text: localizations.startConversation,
+                  fontSize: 18 * fontScale,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: ResponsiveUtils.getScreenPadding(context),
-              child: Text(
-                localizations.sendMessageToBegin,
-                style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: localizations.sendMessageToBegin,
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: 14 * fontScale,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -420,7 +324,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         final message = _character!.chatHistory[index];
         return ChatMessageBubble(
           text: message['content'] as String,
-            isUser: message['isUser'] as bool,
+          isUser: message['isUser'] as bool,
           showAvatar: true,
           avatarText: message['isUser'] as bool
               ? localizations.you

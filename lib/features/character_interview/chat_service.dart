@@ -4,12 +4,13 @@ import 'dart:math';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../../core/utils/env_config.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatService {
   static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
   static const Duration _requestTimeout = Duration(seconds: 120);
-  static const String _defaultModel = 'google/gemini-2.5-flash-preview-05-20';
+  static const String _defaultModel = 'anthropic/claude-3.5-sonnet';
   static const double _defaultTemperature = 0.7;
   static const int _defaultMaxTokens = 25000;
 
@@ -31,16 +32,20 @@ class ChatService {
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        print(
-          'Warning: No OpenRouter API key found. The application will not function properly.',
-        );
-        print(
-          'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
-        );
+        if (kDebugMode) {
+          print(
+            'Warning: No OpenRouter API key found. The application will not function properly.',
+          );
+          print(
+            'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
+          );
+        }
       } else {
-        print(
-          'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-        );
+        if (kDebugMode) {
+          print(
+            'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+          );
+        }
       }
 
       _isInitialized = true;
@@ -61,16 +66,22 @@ class ChatService {
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        print(
-          'Warning: API key refresh failed - No key found',
-        );
+        if (kDebugMode) {
+          print(
+            'Warning: API key refresh failed - No key found',
+          );
+        }
       } else {
-        print(
-          'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-        );
+        if (kDebugMode) {
+          print(
+            'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+          );
+        }
       }
     } catch (e) {
-      print('Error refreshing API key: $e');
+      if (kDebugMode) {
+        print('Error refreshing API key: $e');
+      }
     }
   }
 
@@ -117,7 +128,7 @@ class ChatService {
             headers: {
               'Content-Type': 'application/json; charset=utf-8',
               'Authorization': 'Bearer $_apiKey',
-              'HTTP-Referer': 'https://afterlife.app',
+              // 'HTTP-Referer': 'https://afterlife.app',
               'X-Title': 'Afterlife AI',
               'Accept': 'application/json; charset=utf-8',
             },
@@ -128,36 +139,48 @@ class ChatService {
       if (response.statusCode != 200) {
         final errorMessage =
             'API error (${response.statusCode}): ${response.body}';
-        throw ChatServiceException(errorMessage);
+        if (kDebugMode) {
+          print('Error in character_interview: $errorMessage');
+        }
+        return 'I apologize, I encountered a server error. Please try again.';
       }
 
       // Explicitly decode response body as UTF-8
       final responseBody = utf8.decode(response.bodyBytes);
       final data = jsonDecode(responseBody);
       return data['choices'][0]['message']['content'] as String;
+    } on TimeoutException catch (e) {
+      if (kDebugMode) {
+        print('TimeoutException in character_interview: $e');
+      }
+      return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
     } on http.ClientException catch (e) {
-      throw ChatServiceException('Network error: ${e.message}');
+      if (kDebugMode) {
+        print('ClientException in character_interview: $e');
+      }
+      return 'It seems there is a network issue. Please check your internet connection.';
     } on FormatException catch (e) {
-      throw ChatServiceException('Invalid response format');
-    } catch (e) {
-      throw ChatServiceException('Unexpected error occurred: $e');
+      if (kDebugMode) {
+        print('FormatException in character_interview: $e');
+      }
+      return 'I received an invalid response from the server. Please try again.';
+    } catch (e, s) {
+      if (kDebugMode) {
+        print('Unexpected error in character_interview: $e');
+        print(s);
+      }
+      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
 
   // Method for logging diagnostic info
   static void logDiagnostics() {
-    print(
-      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(8, _apiKey!.length))}...)")}',
-    );
+    if (kDebugMode) {
+      print(
+        'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(8, _apiKey!.length))}...)")}',
+      );
+    }
   }
-}
-
-class ChatServiceException implements Exception {
-  final String message;
-  ChatServiceException(this.message);
-
-  @override
-  String toString() => 'ChatServiceException: $message';
 }
 
 int min(int a, int b) => a < b ? a : b;

@@ -36,7 +36,7 @@ class ResponsiveUtils {
       case DeviceType.mobile:
         return isLandscapeMode ? 3 : 2;
       case DeviceType.tablet:
-        return isLandscapeMode ? 4 : 3;
+        return isLandscapeMode ? 3 : 2;
       case DeviceType.desktop:
         return isLandscapeMode ? 6 : 4;
       case DeviceType.tv:
@@ -102,7 +102,7 @@ class ResponsiveUtils {
       case DeviceType.mobile:
         return isLandscapeMode ? 0.8 : 0.7;
       case DeviceType.tablet:
-        return isLandscapeMode ? 0.75 : 0.7;
+        return isLandscapeMode ? 0.9 : 0.75;
       case DeviceType.desktop:
         return 0.7;
       case DeviceType.tv:

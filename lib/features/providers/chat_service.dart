@@ -9,7 +9,7 @@ class ChatService {
   static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
   static const String _openAiUrl = 'https://api.openai.com/v1/chat/completions';
-  static const String _defaultModel = 'google/gemini-2.0-flash-001';
+  static const String _defaultModel = 'anthropic/claude-3.5-sonnet';
   static const Duration _requestTimeout = Duration(
     seconds: 120,
   ); // 2 minutes timeout
@@ -32,21 +32,27 @@ class ChatService {
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        debugPrint(
-          'Warning: No OpenRouter API key found. The application will not function properly.',
-        );
-        debugPrint(
-          'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
-        );
+        if (kDebugMode) {
+          print(
+            'Warning: No OpenRouter API key found. The application will not function properly.',
+          );
+          print(
+            'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
+          );
+        }
       } else {
-        debugPrint(
-          'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-        );
+        if (kDebugMode) {
+          print(
+            'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+          );
+        }
       }
 
       _isInitialized = true;
     } catch (e) {
-      debugPrint('Error initializing chat service: $e');
+      if (kDebugMode) {
+        print('Error initializing chat service: $e');
+      }
       _isInitialized = true; // Mark as initialized to prevent repeated attempts
     }
   }
@@ -54,7 +60,9 @@ class ChatService {
   // Method to refresh API key from the latest source
   static Future<void> refreshApiKey() async {
     try {
-      debugPrint('Provider Chat Service: Refreshing API key...');
+      if (kDebugMode) {
+        print('Provider Chat Service: Refreshing API key...');
+      }
 
       // Get the latest key directly
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
@@ -63,14 +71,20 @@ class ChatService {
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
       if (_apiKey == null || _apiKey!.isEmpty) {
-        debugPrint('Warning: No API key found after refresh');
+        if (kDebugMode) {
+          print('Warning: No API key found after refresh');
+        }
       } else {
-        debugPrint(
-          'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-        );
+        if (kDebugMode) {
+          print(
+            'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+          );
+        }
       }
     } catch (e) {
-      debugPrint('Error refreshing API key: $e');
+      if (kDebugMode) {
+        print('Error refreshing API key: $e');
+      }
     }
   }
 
@@ -90,7 +104,9 @@ class ChatService {
 
     // Validate API key
     if (_apiKey == null || _apiKey!.isEmpty) {
-      debugPrint('Error: API key is missing. Cannot send message.');
+      if (kDebugMode) {
+        print('Error: API key is missing. Cannot send message.');
+      }
       return 'Error: Unable to connect to AI service. Please check your API key configuration.';
     }
 
@@ -126,7 +142,7 @@ class ChatService {
             headers: {
               'Content-Type': 'application/json; charset=utf-8',
               'Authorization': 'Bearer $_apiKey',
-              'HTTP-Referer': 'https://afterlife.app',
+              // 'HTTP-Referer': 'https://afterlife.app',
               'X-Title': 'Afterlife AI',
               'Accept': 'application/json; charset=utf-8',
             },
@@ -142,16 +158,26 @@ class ChatService {
         final content = jsonResponse['choices'][0]['message']['content'];
         return content;
       } else {
-        debugPrint('API Error: ${response.statusCode}: ${response.body}');
-        throw Exception('Failed to get response: ${response.reasonPhrase}');
+        if (kDebugMode) {
+          print('API Error in providers: ${response.statusCode}: ${response.body}');
+        }
+        return 'I apologize, I encountered a server error. Please try again.';
       }
     } on TimeoutException catch (e) {
-      debugPrint(
-        'Request timed out after ${_requestTimeout.inSeconds} seconds: $e',
-      );
+      if (kDebugMode) {
+        print('TimeoutException in providers: $e');
+      }
       return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
-    } catch (e) {
-      debugPrint('Error sending message: $e');
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        print('ClientException in providers: $e');
+      }
+      return 'It seems there is a network issue. Please check your internet connection.';
+    } catch (e, s) {
+      if (kDebugMode) {
+        print('Generic Exception in providers: $e');
+        print(s);
+      }
       return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
@@ -173,20 +199,24 @@ class ChatService {
         model: model,
       );
     } catch (e) {
-      debugPrint('Error sending message to character: $e');
+      if (kDebugMode) {
+        print('Error sending message to character: $e');
+      }
       return 'Failed to communicate with the character';
     }
   }
 
   // Method for logging diagnostic info
   static void logDiagnostics() {
-    debugPrint('=== Provider Chat Service Diagnostics ===');
-    debugPrint('Is initialized: $_isInitialized');
-    debugPrint('Is using default key: $_isUsingDefaultKey');
-    debugPrint(
-      'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
-    );
-    debugPrint('=============================');
+    if (kDebugMode) {
+      print('=== Provider Chat Service Diagnostics ===');
+      print('Is initialized: $_isInitialized');
+      print('Is using default key: $_isUsingDefaultKey');
+      print(
+        'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
+      );
+      print('=============================');
+    }
   }
 
   static int min(int a, int b) => a < b ? a : b;

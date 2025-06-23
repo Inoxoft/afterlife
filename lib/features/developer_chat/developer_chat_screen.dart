@@ -1,11 +1,12 @@
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
-import '../chat/widgets/chat_message_bubble.dart';
+import '../../core/widgets/animated_particles.dart';
+import '../providers/language_provider.dart';
+import '../character_prompts/famous_character_service.dart';
 import '../chat/models/chat_message.dart';
-import '../models/leading_question_detector.dart';
-import '../widgets/leading_question_warning.dart';
+import '../chat/widgets/chat_message_bubble.dart';
+import '../../l10n/app_localizations.dart';
 
 class DeveloperChatScreen extends StatefulWidget {
   const DeveloperChatScreen({Key? key}) : super(key: key);
@@ -18,17 +19,15 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
-  final List<ChatMessage> _messages = [];
   bool _isLoading = false;
-
-  // Leading question detection state
-  Map<String, dynamic>? _leadingQuestionWarning;
-  String? _pendingMessage;
+  List<Map<String, dynamic>> _messages = [];
 
   @override
   void initState() {
     super.initState();
-    _initializeLeadingQuestionDetector();
+    final languageProvider = context.read<LanguageProvider>();
+    FamousCharacterService.setLanguageProvider(languageProvider);
+    _initializeChat();
   }
 
   @override
@@ -39,11 +38,29 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
     super.dispose();
   }
 
-  Future<void> _initializeLeadingQuestionDetector() async {
+  Future<void> _initializeChat() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      await LeadingQuestionDetector.initialize();
+      await FamousCharacterService.initializeChat('Developer');
+      setState(() {
+        _messages = FamousCharacterService.getFormattedChatHistory('Developer');
+        _isLoading = false;
+      });
     } catch (e) {
-      print('Error initializing leading question detector: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error initializing chat: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -57,103 +74,72 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
     }
   }
 
-  /// Check if a message contains leading questions
-  Future<Map<String, dynamic>?> _checkForLeadingQuestion(String message) async {
+  Future<void> _sendMessage() async {
+    final message = _messageController.text.trim();
+    if (message.isEmpty || _isLoading) return;
+
+    final localizations = AppLocalizations.of(context);
+
+    // Clear the input field
+    _messageController.clear();
+
+    // Add user message to chat locally for immediate UI update
+    setState(() {
+      _isLoading = true;
+      _messages.add({
+        'content': message,
+        'isUser': true,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    });
+
+    // Scroll to the bottom after state update
+    _scrollToBottom();
+
     try {
-      print('🔍 Checking for leading question: "$message"');
-      
-      final result = await LeadingQuestionDetector.detectLeadingQuestion(message);
-      
-      if (result['isLeading'] == true) {
-        print('⚠️ Leading question detected with confidence: ${result['confidence']}');
-        return result;
+      // Send the message to the developer character
+      final response = await FamousCharacterService.sendMessage(
+        characterName: 'Developer',
+        message: message,
+      );
+
+      // Add AI response to chat history if not null
+      if (response != null) {
+        setState(() {
+          _messages = FamousCharacterService.getFormattedChatHistory('Developer');
+        });
       } else {
-        print('✅ No leading question detected (confidence: ${result['confidence']})');
-        return null;
+        // Handle null response by showing a fallback message
+        _messages.add({
+          'content': localizations.errorProcessingMessage,
+          'isUser': false,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
       }
     } catch (e) {
-      print('❌ Leading question detection failed: $e');
-      return null;
-    }
-  }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
 
-  Future<void> _sendMessage({bool bypassWarning = false}) async {
-    if (_messageController.text.trim().isEmpty || _isLoading) return;
+      // Add error message to chat history
+      _messages.add({
+        'content': localizations.errorConnecting,
+        'isUser': false,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    } finally {
+      // Update UI
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
 
-    final userMessage = _messageController.text.trim();
-
-    // If we're not bypassing the warning, check for leading questions first
-    if (!bypassWarning) {
-      try {
-        final leadingQuestionResult = await _checkForLeadingQuestion(userMessage);
-        if (leadingQuestionResult != null) {
-          // Show warning instead of sending message
-          setState(() {
-            _leadingQuestionWarning = leadingQuestionResult;
-            _pendingMessage = userMessage;
-          });
-          return;
-        }
-      } catch (e) {
-        // If detection fails, proceed with sending the message
-        print('Leading question detection failed: $e');
+        // Scroll to bottom to show new messages
+        _scrollToBottom();
       }
     }
-
-    // Clear the input field and any warnings
-    _messageController.clear();
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
-
-    setState(() {
-      _messages.add(ChatMessage(
-        content: userMessage,
-        isUser: true,
-        timestamp: DateTime.now(),
-      ));
-      _isLoading = true;
-    });
-
-    // Scroll to show the new message
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-
-    // TODO: Implement actual developer chat logic here
-    // For now, just add a placeholder response
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() {
-        _messages.add(ChatMessage(
-          content: "Thanks for reaching out! The developer chat feature is coming soon. For now, you can find us on GitHub or Discord. Your message has been noted and the API provider has been informed that your message contains user data.",
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
-        _isLoading = false;
-      });
-
-      // Scroll to show the response
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    }
-  }
-
-  void _handleContinueAnyway() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-      _sendMessage(bypassWarning: true);
-    }
-  }
-
-  void _handleRephrase() {
-    if (_pendingMessage != null) {
-      _messageController.text = _pendingMessage!;
-    }
-    setState(() {
-      _leadingQuestionWarning = null;
-      _pendingMessage = null;
-    });
-    _inputFocusNode.requestFocus();
   }
 
   @override
@@ -178,10 +164,11 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
             const SizedBox(width: 12),
             Text(
               'Developer Chat',
-              style: GoogleFonts.lato(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.silverMist,
+                fontFamily: 'Lato',
               ),
             ),
           ],
@@ -210,18 +197,20 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                 children: [
                   Text(
                     '🚀 Developer Support',
-                    style: GoogleFonts.lato(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.warmGold,
+                      fontFamily: 'Lato',
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Get help with technical issues or share feedback directly with our development team.',
-                    style: GoogleFonts.lato(
+                    style: TextStyle(
                       fontSize: 14,
                       color: AppTheme.silverMist.withValues(alpha: 0.8),
+                      fontFamily: 'Lato',
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -241,10 +230,10 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                 itemBuilder: (context, index) {
                   final message = _messages[index];
                   return ChatMessageBubble(
-                    text: message.content,
-                    isUser: message.isUser,
+                    text: message['content'] as String,
+                    isUser: message['isUser'] as bool,
                     showAvatar: true,
-                    avatarText: message.isUser ? 'You' : 'AI',
+                    avatarText: message['isUser'] as bool ? 'You' : 'AI',
                   );
                 },
               ),
@@ -273,19 +262,11 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                       style: TextStyle(
                         color: AppTheme.silverMist.withValues(alpha: 0.7),
                         fontSize: 14,
+                        fontFamily: 'Lato',
                       ),
                     ),
                   ],
                 ),
-              ),
-
-            // Leading question warning
-            if (_leadingQuestionWarning != null)
-              LeadingQuestionWarning(
-                warningMessage: _leadingQuestionWarning!['message'] as String,
-                confidence: _leadingQuestionWarning!['confidence'] as double,
-                onContinueAnyway: _handleContinueAnyway,
-                onRephrase: _handleRephrase,
               ),
 
             // Message input
@@ -307,11 +288,12 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                     child: TextField(
                       controller: _messageController,
                       focusNode: _inputFocusNode,
-                      style: TextStyle(color: AppTheme.silverMist),
+                      style: TextStyle(color: AppTheme.silverMist, fontFamily: 'Lato'),
                       decoration: InputDecoration(
                         hintText: 'Type your message...',
                         hintStyle: TextStyle(
                           color: AppTheme.silverMist.withValues(alpha: 0.5),
+                          fontFamily: 'Lato',
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),

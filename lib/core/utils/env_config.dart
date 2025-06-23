@@ -264,6 +264,8 @@ OPENROUTER_API_KEY=your_api_key_here
                 ? '${value.substring(0, 4)}...${value.substring(value.length - 4)}'
                 : '****';
       } else {
+        if (kDebugMode) {
+        }
       }
     });
     
@@ -277,6 +279,8 @@ OPENROUTER_API_KEY=your_api_key_here
                 ? '${value.substring(0, 4)}...${value.substring(value.length - 4)}'
                 : '****';
       } else {
+        if (kDebugMode) {
+        }
       }
     });
   }
@@ -306,18 +310,20 @@ OPENROUTER_API_KEY=your_api_key_here
     final defaultKey = getDefaultValue('OPENROUTER_API_KEY');
     final hasUserKey = await hasUserApiKey();
 
-    print(
-      'Current Key from get(): ${currentKey != null ? (currentKey.isEmpty ? "EMPTY" : "${currentKey.substring(0, min(4, currentKey.length))}...") : "NULL"}',
-    );
-    print(
-      'Default Key from .env: ${defaultKey != null ? (defaultKey.isEmpty ? "EMPTY" : "${defaultKey.substring(0, min(4, defaultKey.length))}...") : "NULL"}',
-    );
-    print(
-      'Cached User Key: ${_cachedUserApiKey != null ? ((_cachedUserApiKey!.isEmpty) ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...") : "NULL"}',
-    );
-    print(
-      'In-Memory User Key: ${_envVars['OPENROUTER_API_KEY'] != null ? (_envVars['OPENROUTER_API_KEY']!.isEmpty ? "EMPTY" : "${_envVars['OPENROUTER_API_KEY']!.substring(0, min(4, _envVars['OPENROUTER_API_KEY']!.length))}...") : "NULL"}',
-    );
+    if (kDebugMode) {
+      print(
+        'Current Key from get(): ${currentKey != null ? (currentKey.isEmpty ? "EMPTY" : "${currentKey.substring(0, min(4, currentKey.length))}...") : "NULL"}',
+      );
+      print(
+        'Default Key from .env: ${defaultKey != null ? (defaultKey.isEmpty ? "EMPTY" : "${defaultKey.substring(0, min(4, defaultKey.length))}...") : "NULL"}',
+      );
+      print(
+        'Cached User Key: ${_cachedUserApiKey != null ? ((_cachedUserApiKey!.isEmpty) ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...") : "NULL"}',
+      );
+      print(
+        'In-Memory User Key: ${_envVars['OPENROUTER_API_KEY'] != null ? (_envVars['OPENROUTER_API_KEY']!.isEmpty ? "EMPTY" : "${_envVars['OPENROUTER_API_KEY']!.substring(0, min(4, _envVars['OPENROUTER_API_KEY']!.length))}...") : "NULL"}',
+      );
+    }
   }
 
   static int min(int a, int b) => a < b ? a : b;

@@ -1,14 +1,26 @@
 // lib/features/character_prompts/famous_character_service.dart
 
-import '../character_chat/chat_service.dart';
+import 'dart:convert';
+import 'dart:async';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import '../../core/utils/env_config.dart';
 import '../providers/language_provider.dart';
-import '../models/leading_question_detector.dart';
 import 'famous_character_prompts.dart';
 
 /// Service for interacting with famous characters
 class FamousCharacterService {
-  static final Map<String, List<Map<String, dynamic>>> _chatHistories = {};
+  static final String _openRouterUrl =
+      'https://openrouter.ai/api/v1/chat/completions';
+  static const Duration _requestTimeout = Duration(seconds: 120);
+  static String? _apiKey;
+  static bool _isInitialized = false;
+  static bool _isUsingDefaultKey = false;
   static LanguageProvider? _languageProvider;
+
+  /// Chat histories for each character
+  static final Map<String, List<Map<String, dynamic>>> _chatHistories = {};
 
   /// Set the language provider for language support
   static void setLanguageProvider(LanguageProvider languageProvider) {
@@ -19,29 +31,6 @@ class FamousCharacterService {
   static Future<void> initializeChat(String characterName) async {
     if (!_chatHistories.containsKey(characterName)) {
       _chatHistories[characterName] = [];
-      await ChatService.initialize();
-      // Initialize the leading question detector
-      await LeadingQuestionDetector.initialize();
-    }
-  }
-
-  /// Check if a message contains leading questions
-  /// Returns null if no leading question detected, otherwise returns detection result
-  static Future<Map<String, dynamic>?> checkForLeadingQuestion(String message) async {
-    print('🔍 Checking for leading question: "$message"');
-    try {
-      final result = await LeadingQuestionDetector.detectLeadingQuestion(message);
-      print('🎯 Detection result: $result');
-      if (result['isLeading'] == true) {
-        print('⚠️ Leading question detected with confidence: ${result['confidence']}');
-        return result;
-      }
-      print('✅ No leading question detected (confidence: ${result['confidence']})');
-      return null;
-    } catch (e) {
-      // If detection fails, allow the message to proceed
-      print('❌ Leading question detection failed: $e');
-      return null;
     }
   }
 
@@ -49,75 +38,116 @@ class FamousCharacterService {
   static Future<String?> sendMessage({
     required String characterName,
     required String message,
-    bool bypassLeadingQuestionCheck = false,
   }) async {
+    /// Ensure service is initialized
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    /// Always refresh the API key before sending a message
+    await refreshApiKey();
+
+    /// Validate API key exists
+    if (_apiKey == null || _apiKey!.isEmpty) {
+      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
+    }
+
+    /// Get the character's system prompt
+    final systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
+    final model = FamousCharacterPrompts.getSelectedModel(characterName);
+
+    if (systemPrompt == null) {
+      return "Error: Character profile not found.";
+    }
+
+    /// Get current chat history
+    final chatHistory = _chatHistories[characterName] ?? [];
+
+    /// Add language instruction if language provider is available
+    String finalSystemPrompt = systemPrompt;
+    if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+      final languageName = _languageProvider!.currentLanguageName;
+      final languageInstruction = '\n\nIMPORTANT: Please always respond in $languageName unless the user explicitly asks you to change languages. Your responses should be natural and fluent in $languageName.';
+      finalSystemPrompt = '$systemPrompt$languageInstruction';
+    }
+
+    /// Prepare messages for API
+    final messages = <Map<String, dynamic>>[
+      {'role': 'system', 'content': finalSystemPrompt},
+      ...chatHistory.map((msg) => {
+        'role': msg['isUser'] ? 'user' : 'assistant',
+        'content': msg['content'],
+      }),
+      {'role': 'user', 'content': message},
+    ];
+
+    /// Prepare request body
+    final body = jsonEncode({
+      'model': model,
+      'messages': messages,
+      'temperature': 0.7,
+      'max_tokens': 25000,
+    });
+
     try {
-      // Initialize chat if not already done
-      if (!_chatHistories.containsKey(characterName)) {
-        await initializeChat(characterName);
-      }
+      /// Send request
+      final response = await http
+          .post(
+            Uri.parse(_openRouterUrl),
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Authorization': 'Bearer $_apiKey',
+              'X-Title': 'Afterlife AI',
+              'Accept': 'application/json; charset=utf-8',
+            },
+            body: body,
+          )
+          .timeout(_requestTimeout);
 
-      // Check for leading questions unless bypassed
-      if (!bypassLeadingQuestionCheck) {
-        final leadingQuestionResult = await checkForLeadingQuestion(message);
-        if (leadingQuestionResult != null) {
-          // Return a special response indicating leading question detected
-          // The UI will handle showing the warning
-          return null;
+      if (response.statusCode != 200) {
+        if (kDebugMode) {
+          print(
+              'API Error in famous_character_service: ${response.statusCode}: ${response.body}');
         }
+        return 'I apologize, but I encountered a server error. Please try again.';
       }
 
-      // Get system prompt for the character
-      String? systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
-      if (systemPrompt == null) {
-        return "Error: Character profile not found.";
+      /// Parse response with explicit UTF-8 decoding
+      final responseBody = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(responseBody);
+      final aiResponse = data['choices'][0]['message']['content'] as String;
+
+      /// Add both user message and AI response to chat history
+      _chatHistories[characterName]!.addAll([
+        {
+          'content': message,
+          'isUser': true,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+        {
+          'content': aiResponse,
+          'isUser': false,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      ]);
+
+      return aiResponse;
+    } on TimeoutException catch (e) {
+      if (kDebugMode) {
+        print('TimeoutException in famous_character_service: $e');
       }
-
-      // Add language instructions if not English
-      if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
-        final languageName = _languageProvider!.currentLanguageName;
-        final languageInstruction = '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language. Stay in character while responding in $languageName.\n';
-        systemPrompt = systemPrompt + languageInstruction;
+      return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        print('ClientException in famous_character_service: $e');
       }
-
-      // Get the selected model for this character
-      final selectedModel = FamousCharacterPrompts.getSelectedModel(
-        characterName,
-      );
-
-      // Add user message to chat history
-      _chatHistories[characterName]!.add({'role': 'user', 'content': message});
-
-      // Prepare the chat history for the API - limit to last 10 messages for performance
-      final List<Map<String, dynamic>> recentMessages = [];
-      final history = _chatHistories[characterName]!;
-
-      if (history.length > 10) {
-        recentMessages.addAll(history.sublist(history.length - 10));
-      } else {
-        recentMessages.addAll(history);
+      return 'It seems there is a network issue. Please check your internet connection.';
+    } catch (e, s) {
+      if (kDebugMode) {
+        print('Generic Exception in famous_character_service: $e');
+        print(s);
       }
-
-      // Send the message to the character
-      final response = await ChatService.sendMessageToCharacter(
-        characterId: characterName,
-        message: message,
-        systemPrompt: systemPrompt,
-        chatHistory: recentMessages,
-        model: selectedModel,
-      );
-
-      // Add AI response to chat history
-      if (response != null) {
-        _chatHistories[characterName]!.add({
-          'role': 'assistant',
-          'content': response,
-        });
-      }
-
-      return response;
-    } catch (e) {
-      return "I'm sorry, but I'm having trouble connecting at the moment. Please try again later.";
+      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
 
@@ -135,13 +165,78 @@ class FamousCharacterService {
   static List<Map<String, dynamic>> getFormattedChatHistory(
     String characterName,
   ) {
-    final history = _chatHistories[characterName] ?? [];
-    return history.map((message) {
-      return {
-        'content': message['content'],
-        'isUser': message['role'] == 'user',
-        'timestamp': DateTime.now().toIso8601String(),
-      };
-    }).toList();
+    return _chatHistories[characterName] ?? [];
   }
+
+  /// Initialize the service
+  static Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    try {
+      /// Initialize environment configuration
+      await EnvConfig.initialize();
+
+      /// Get API key from environment
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      /// Check if we're using a default key or a user key
+      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        if (kDebugMode) {
+          print(
+            'Warning: No OpenRouter API key found. The application will not function properly.',
+          );
+          print(
+            'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
+          );
+        }
+      } else {
+        if (kDebugMode) {
+          print(
+            'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+          );
+        }
+      }
+
+      _isInitialized = true;
+    } catch (e) {
+      _isInitialized = true; // Mark as initialized to prevent repeated attempts
+    }
+  }
+
+  /// Method to refresh API key from the latest source
+  static Future<void> refreshApiKey() async {
+    try {
+      /// Get the latest key directly
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+
+      /// Check if we're using a default key or a user key
+      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
+
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        /// Silent handling for missing key
+      } else {
+        if (kDebugMode) {
+          print(
+            'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+          );
+        }
+      }
+    } catch (e) {
+      /// Silent error handling
+    }
+  }
+
+  /// Method for logging diagnostic info
+  static void logDiagnostics() {
+    if (kDebugMode) {
+      print(
+        'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
+      );
+    }
+  }
+
+  static int min(int a, int b) => a < b ? a : b;
 }
+
