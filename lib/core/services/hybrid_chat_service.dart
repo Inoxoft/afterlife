@@ -106,9 +106,10 @@ class HybridChatService {
     required List<Map<String, dynamic>> chatHistory,
     String? model,
     LLMProvider? preferredProvider,
+    String? localPrompt, // Add local prompt parameter
   }) async {
     // Check if the model is a local model
-    bool isLocalModel = model != null && model.startsWith('local/');
+    bool isLocalModel = model != null && (model.startsWith('local/') || model.contains('deepseek') || model.contains('gemma'));
     
     // Determine the provider based on the model
     LLMProvider actualProvider;
@@ -120,6 +121,14 @@ class HybridChatService {
       actualProvider = _preferredProvider;
     }
     
+    // Select the appropriate prompt based on provider
+    String promptToUse;
+    if (actualProvider == LLMProvider.local && localPrompt != null) {
+      promptToUse = localPrompt;
+    } else {
+      promptToUse = systemPrompt;
+    }
+    
     // Convert the message format for hybrid service
     final messages = [
       ...chatHistory,
@@ -128,7 +137,7 @@ class HybridChatService {
     
     return await sendMessage(
       messages: messages,
-      systemPrompt: systemPrompt,
+      systemPrompt: promptToUse,
       model: isLocalModel ? null : model, // Don't pass local model ID to cloud service
       preferredProvider: actualProvider,
     );

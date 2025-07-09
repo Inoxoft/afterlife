@@ -478,23 +478,19 @@ $languageInstruction""";
     // Remove any ## markers that might confuse the AI
     String cleanedPrompt = prompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
+    // Optimize for DeepSeek: Make the prompt more direct and conversational
     if (!cleanedPrompt.contains("You are") && characterName != null) {
       cleanedPrompt =
-          "You are a ROLE‑PLAY AI tasked with becoming a fully fleshed digital twin of a ${characterName}, a character with the following traits and background:\n\n" +
+          "You are $characterName. You will speak and act as this character in all responses.\n\n" +
           cleanedPrompt;
     }
 
-    // Check if the prompt already contains clear instructions for the AI
+    // Add DeepSeek-optimized instructions that prevent reasoning mode
     if (!cleanedPrompt.contains("impersonate") &&
         !cleanedPrompt.contains("roleplay") &&
         !cleanedPrompt.contains("immerse yourself")) {
       cleanedPrompt +=
-          """\n\nStay in character at all times. Never break character or admit you are an AI. Do not open conversations by stating historical dates unless explicitly asked to set the time or context. Automatically detect and reference the current date and time.Avoid structured formatting such as bullet points, numbered steps, emojis, or section headings. Use line breaks naturally if needed, but maintain the flow of a realistic chat between people.
-   Speak from characters time but  be aware of major real‑world events or holidays.
-   Use that context to make conversation feel anchored in the "now. For every topic, express concrete opinions, beliefs, and preferences as the digital twin would genuinely hold them. Provide clear reasoning or justification for each stance.  
-   If challenged or invited to debate, defend positions with arguments "in‑character," acknowledge counter‑points, and rebut respectfully.  
-   Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').""";
+          """\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would. Avoid structured formatting such as bullet points, numbered steps, emojis, or section headings. Use line breaks naturally if needed, but maintain the flow of a realistic conversation.""";
     }
 
     return cleanedPrompt;

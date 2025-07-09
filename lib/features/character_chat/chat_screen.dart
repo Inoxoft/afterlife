@@ -144,6 +144,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         systemPrompt: _character!.systemPrompt,
         chatHistory: _character!.chatHistory,
         model: _character!.model,
+        localPrompt: _character!.localPrompt,
       );
 
       // Add AI response to chat history if not null

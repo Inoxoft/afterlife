@@ -8,7 +8,8 @@ class CharacterModel {
 
   final String id;
   final String name;
-  final String systemPrompt;
+  final String systemPrompt; // Full detailed prompt for API models
+  final String localPrompt; // Short optimized prompt for local models
   final String? imageUrl;
   final DateTime createdAt;
   final Color accentColor;
@@ -20,6 +21,7 @@ class CharacterModel {
     required this.id,
     required this.name,
     required this.systemPrompt,
+    String? localPrompt,
     this.imageUrl,
     required this.createdAt,
     Color? accentColor,
@@ -29,6 +31,7 @@ class CharacterModel {
   }) : accentColor = accentColor ?? Color(int.parse(_defaultAccentColor)),
        chatHistory = chatHistory ?? [],
        model = model ?? _defaultModel,
+       localPrompt = localPrompt ?? _generateLocalPrompt(systemPrompt, name),
        assert(id.isNotEmpty, 'Character ID cannot be empty'),
        assert(name.isNotEmpty, 'Character name cannot be empty'),
        assert(systemPrompt.isNotEmpty, 'System prompt cannot be empty');
@@ -76,20 +79,82 @@ class CharacterModel {
     // Remove any remaining markdown markers
     cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Ensure proper instruction format
+    // Optimize for DeepSeek: Make the prompt more direct and conversational
     if (!cleanedPrompt.contains("You are")) {
       cleanedPrompt =
-          "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
+          "You are $characterName. You will speak and act as this character in all responses.\n\n$cleanedPrompt";
     }
 
-    // Add character persistence instruction if not present
+    // Add DeepSeek-optimized character persistence instructions
     if (!cleanedPrompt.contains("stay in character") &&
         !cleanedPrompt.contains("never break character")) {
       cleanedPrompt +=
-          "\n\nStay in character at all times. Never break character or admit you are an AI.";
+          "\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would.";
     }
 
     return cleanedPrompt;
+  }
+
+  // Get the appropriate prompt based on model type
+  String getPromptForModel() {
+    return isLocalModel(model) ? localPrompt : systemPrompt;
+  }
+
+  // Check if a model is a local model
+  static bool isLocalModel(String modelId) {
+    return modelId.startsWith('local/') || modelId.contains('deepseek') || modelId.contains('gemma');
+  }
+
+  // Generate optimized local prompt from full prompt
+  static String _generateLocalPrompt(String fullPrompt, String characterName) {
+    // Remove markdown markers if present
+    String cleanedPrompt = fullPrompt;
+    if (fullPrompt.contains('## CHARACTER CARD SUMMARY ##') &&
+        fullPrompt.contains('## END OF CHARACTER CARD ##')) {
+      final startMarker = '## CHARACTER CARD SUMMARY ##';
+      final endMarker = '## END OF CHARACTER CARD ##';
+
+      final startIndex = fullPrompt.indexOf(startMarker);
+      final cleanStart = startIndex + startMarker.length;
+      final endIndex = fullPrompt.indexOf(endMarker);
+
+      if (startIndex >= 0 && endIndex > startIndex) {
+        cleanedPrompt = fullPrompt.substring(cleanStart, endIndex).trim();
+      }
+    }
+
+    // Remove any remaining markdown markers
+    cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
+
+    // Extract key information for local prompt
+    final lines = cleanedPrompt.split('\n');
+    final keyInfo = <String>[];
+    
+    // Look for important sections
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty) continue;
+      
+      // Skip "You are" lines as we'll add our own
+      if (line.startsWith('You are')) continue;
+      
+      // Add important descriptive lines (first few non-empty lines)
+      if (keyInfo.length < 3 && line.length > 10) {
+        keyInfo.add(line);
+      }
+    }
+
+    // Create concise local prompt
+    String localPrompt = "You are $characterName.";
+    
+    if (keyInfo.isNotEmpty) {
+      localPrompt += " ${keyInfo.join(' ')}";
+    }
+    
+    // Add DeepSeek-specific instructions
+    localPrompt += "\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would.";
+
+    return localPrompt;
   }
 
   // Convert to JSON for storage
@@ -98,6 +163,7 @@ class CharacterModel {
       'id': id,
       'name': name,
       'systemPrompt': systemPrompt,
+      'localPrompt': localPrompt,
       'imageUrl': imageUrl,
       'createdAt': createdAt.toIso8601String(),
       'accentColor': accentColor.toARGB32(),
@@ -143,10 +209,24 @@ class CharacterModel {
         // Use empty list as fallback
       }
 
+      // Get system prompt
+      final systemPrompt = json['systemPrompt'] as String;
+      final characterName = json['name'] as String;
+      
+      // Handle local prompt - generate if not present (backwards compatibility)
+      String localPrompt;
+      if (json['localPrompt'] != null) {
+        localPrompt = json['localPrompt'] as String;
+      } else {
+        // Generate local prompt for existing characters
+        localPrompt = _generateLocalPrompt(systemPrompt, characterName);
+      }
+
       return CharacterModel(
         id: json['id'] as String,
-        name: json['name'] as String,
-        systemPrompt: json['systemPrompt'] as String,
+        name: characterName,
+        systemPrompt: systemPrompt,
+        localPrompt: localPrompt,
         imageUrl: json['imageUrl'] as String?,
         createdAt: createdAt,
         accentColor: accentColor,
@@ -175,6 +255,7 @@ class CharacterModel {
       id: id,
       name: name,
       systemPrompt: systemPrompt,
+      localPrompt: localPrompt,
       imageUrl: imageUrl,
       createdAt: createdAt,
       accentColor: accentColor,

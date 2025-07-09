@@ -39,6 +39,7 @@ class CharacterProfileScreen extends StatefulWidget {
 class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _systemPromptController;
+  late TextEditingController _localPromptController;
   CharacterModel? _character;
   bool _isEditing = false;
 
@@ -52,6 +53,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _systemPromptController.dispose();
+    _localPromptController.dispose();
     super.dispose();
   }
 
@@ -72,6 +74,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         _nameController = TextEditingController(text: character.name);
         _systemPromptController = TextEditingController(
           text: character.systemPrompt,
+        );
+        _localPromptController = TextEditingController(
+          text: character.localPrompt,
         );
       });
     } catch (e) {
@@ -106,6 +111,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         id: _character!.id,
         name: _nameController.text.trim(),
         systemPrompt: cleanedPrompt,
+        localPrompt: _localPromptController.text.trim(),
         imageUrl: _character!.imageUrl,
         createdAt: _character!.createdAt,
         accentColor: _character!.accentColor,
@@ -312,9 +318,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'CHARACTER CARD',
+                    'CHARACTER PROMPTS',
                     style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                      text: 'CHARACTER CARD',
+                      text: 'CHARACTER PROMPTS',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.warmGold,
@@ -329,31 +335,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     ),
                   ),
                 ),
-                // Copy button
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.warmGold.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppTheme.warmGold.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: IconButton(
-                    onPressed: _copyFullCharacterCard,
-                    icon: Icon(
-                      Icons.copy,
-                      color: AppTheme.warmGold,
-                      size: 18,
-                    ),
-                    tooltip: 'Copy Character Card',
-                    padding: const EdgeInsets.all(6),
-                    constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
-                    ),
-                  ),
-                ),
               ],
             ),
             Divider(
@@ -361,35 +342,162 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               thickness: 1,
               height: 20,
             ),
-            // Compact scrollable character card content
-            Container(
-              width: double.infinity,
-              height: 200, // Fixed height to make it compact
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.warmGold.withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  child: Text(
-                    _character!.systemPrompt,
-                    style: TextStyle(
-                      color: AppTheme.silverMist,
-                      fontSize: 14,
-                      height: 1.4,
+            
+            // Prompt tabs/sections
+            DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  // Tab bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TabBar(
+                      labelColor: AppTheme.warmGold,
+                      unselectedLabelColor: AppTheme.silverMist.withValues(alpha: 0.6),
+                      indicatorColor: AppTheme.warmGold,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      tabs: [
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.cloud, size: 16),
+                              SizedBox(width: 4),
+                              Text('API Models', style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.phone_android, size: 16),
+                              SizedBox(width: 4),
+                              Text('Local Model', style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                  SizedBox(height: 12),
+                  
+                  // Tab content
+                  Container(
+                    height: 200,
+                    child: TabBarView(
+                      children: [
+                        // Full prompt for API models
+                        _buildPromptContainer(
+                          title: 'Full Detailed Prompt',
+                          subtitle: 'Used for cloud AI models (GPT, Claude, Gemini, etc.)',
+                          content: _character!.systemPrompt,
+                          onCopy: () => _copyPrompt(_character!.systemPrompt, 'full prompt'),
+                        ),
+                        // Local prompt for DeepSeek
+                        _buildPromptContainer(
+                          title: 'Optimized Local Prompt',
+                          subtitle: 'Used for local models (DeepSeek, Gemma, etc.)',
+                          content: _character!.localPrompt,
+                          onCopy: () => _copyPrompt(_character!.localPrompt, 'local prompt'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPromptContainer({
+    required String title,
+    required String subtitle,
+    required String content,
+    required VoidCallback onCopy,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: AppTheme.warmGold,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: AppTheme.silverMist.withValues(alpha: 0.7),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: onCopy,
+                icon: Icon(Icons.copy, color: AppTheme.warmGold, size: 16),
+                padding: EdgeInsets.all(4),
+                constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                tooltip: 'Copy prompt',
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Expanded(
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                child: Text(
+                  content,
+                  style: TextStyle(
+                    color: AppTheme.silverMist,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyPrompt(String prompt, String promptType) {
+    Clipboard.setData(ClipboardData(text: prompt));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${promptType.capitalize()} copied to clipboard'),
+        backgroundColor: AppTheme.warmGold.withValues(alpha: 0.9),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -1525,17 +1633,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Remove any remaining markdown markers
     cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
+    // Optimize for DeepSeek: Make the prompt more direct and conversational
     if (!cleanedPrompt.contains("You are")) {
       cleanedPrompt =
-          "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
+          "You are $characterName. You will speak and act as this character in all responses.\n\n$cleanedPrompt";
     }
 
-    // Add clear instructions to stay in character if not already present
+    // Add DeepSeek-optimized character persistence instructions
     if (!cleanedPrompt.contains("stay in character") &&
         !cleanedPrompt.contains("never break character")) {
       cleanedPrompt +=
-          "\n\nStay in character at all times. Never break character or admit you are an AI.";
+          "\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would.";
     }
 
     return cleanedPrompt;

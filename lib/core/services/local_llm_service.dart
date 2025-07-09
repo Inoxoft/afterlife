@@ -21,10 +21,10 @@ enum ModelDownloadStatus {
 
 // Model configuration for DeepSeek
 class ModelConfig {
-  static const String url = 'https://huggingface.co/litert-community/DeepSeek-R1-Distill-Qwen-1.5B/resolve/main/deepseek_q8_ekv1280.task';
-  static const String filename = 'deepseek_q8_ekv1280.task';
-  static const String displayName = 'DeepSeek Q8 EKV1280 (CPU) 1.7Gb';
-  static const int fileSizeBytes = 1860686856;
+  static const String url = 'https://huggingface.co/litert-community/Hammer2.1-1.5b/resolve/main/Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
+  static const String filename = 'Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
+  static const String displayName = 'Hammer2.1-1.5b (CPU) 1.6Gb';
+  static const int fileSizeBytes = 1597556473;
   static const int maxTokens = 1024;
   static const double temperature = 0.7;
   static const int topK = 40;
