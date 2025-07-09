@@ -10,6 +10,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:afterlife/features/providers/characters_provider.dart';
 import '../models/character_model.dart';
+import '../../core/services/hybrid_chat_service.dart';
 
 /// Manages the interview process for creating or editing a character.
 ///
@@ -50,7 +51,7 @@ class InterviewProvider with ChangeNotifier {
   }
 
   Future<void> _initialize() async {
-    await ChatService.initialize();
+    await HybridChatService.initialize();
     await _addInitialMessage();
   }
 
@@ -132,9 +133,8 @@ What specific edits would you like me to make?
       );
       notifyListeners();
 
-      final response = await ChatService.sendMessage(
-        messages:
-            _convertMessagesToAPI(), // Use all messages including the initial one
+      final response = await HybridChatService.sendMessage(
+        messages: _convertMessagesToAPI(), // Use all messages including the initial one
         systemPrompt: systemPrompt,
       );
 
@@ -314,7 +314,7 @@ $languageInstruction""";
         // We have a character card but user wants to make changes
         final systemPrompt = _getSystemPromptForEditing();
 
-        final response = await ChatService.sendMessage(
+        final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
         );
@@ -349,7 +349,7 @@ $languageInstruction""";
         }
       } else if (isComplete && isSuccess) {
         // We're in chat mode with the character
-        final response = await ChatService.sendMessage(
+        final response = await HybridChatService.sendMessage(
           messages: [
             {"role": "user", "content": text},
           ],
@@ -365,7 +365,7 @@ $languageInstruction""";
         // We're still in interview mode
         final systemPrompt = _getSystemPrompt();
 
-        final response = await ChatService.sendMessage(
+        final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
         );

@@ -511,6 +511,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Define the models for user-created twins
     final models = [
       {
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'provider': 'Local Device',
+        'recommended': true,
+        'isLocal': true,
+      },
+      {
         'id': 'google/gemini-2.0-flash-001',
         'name': 'Gemini 2.0 Flash',
         'description': 'Speed, multimodal support, and 1M token context window',
@@ -555,6 +563,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 provider: model['provider'] as String,
                 isRecommended: model['recommended'] == true,
                 isFree: model['free'] == true,
+                isLocal: model['isLocal'] == true,
                 isSelected: _character!.model == model['id'],
               ),
             ),
@@ -569,6 +578,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     required String provider,
     required bool isRecommended,
     bool isFree = false,
+    bool isLocal = false,
     required bool isSelected,
   }) {
     return Container(
@@ -618,113 +628,115 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color:
-                        isSelected
-                            ? AppTheme.warmGold.withValues(alpha: 0.2)
-                            : Colors.black26,
-                    border: Border.all(
-                      color:
-                          isSelected
-                              ? AppTheme.warmGold
-                              : AppTheme.warmGold.withValues(alpha: 0.3),
-                      width: 1.5,
+                Row(
+                  children: [
+                    // Model icon based on type
+                    Icon(
+                      isLocal ? Icons.phone_android : Icons.cloud,
+                      size: 20,
+                      color: isLocal ? Colors.green : AppTheme.warmGold,
                     ),
-                  ),
-                  child: Icon(
-                    isSelected ? Icons.check : Icons.psychology_outlined,
-                    color: AppTheme.warmGold,
-                    size: 16,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          if (isRecommended)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.warmGold.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'RECOMMENDED',
-                                style: TextStyle(
-                                  color: AppTheme.warmGold,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          if (isFree)
-                            Container(
-                              margin: const EdgeInsets.only(left: 4),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.gentlePurple.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'FREE',
-                                style: TextStyle(
-                                  color: AppTheme.gentlePurple,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        provider,
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
+                    ),
+                    if (isRecommended)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.warmGold.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'RECOMMENDED',
+                          style: TextStyle(
+                            color: AppTheme.warmGold,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    if (isFree)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'FREE',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    if (isLocal)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'PRIVATE',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
                   ),
                 ),
-                Icon(
-                  Icons.radio_button_checked,
-                  color: isSelected ? AppTheme.warmGold : Colors.transparent,
-                  size: 18,
+                const SizedBox(height: 4),
+                Text(
+                  'Provider: $provider',
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
                 ),
+                if (isLocal) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Requires model download • No internet needed',
+                    style: TextStyle(
+                      color: Colors.blue.withValues(alpha: 0.8),
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1376,6 +1388,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
+      'local/gemma-3n-e2b-it': {
+        'name': 'Local Gemma 3n E2B IT',
+        'provider': 'Local Device',
+      },
       'google/gemini-2.0-flash-001': {
         'name': 'Gemini 2.0 Flash',
         'provider': 'Google',
@@ -1419,18 +1435,16 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'google/gemini-2.0-flash-001': 'Fast responses with good quality',
-      'anthropic/claude-3-5-sonnet':
-          'High quality responses with strong reasoning',
-      'google/gemini-2.0-pro-001': 'Higher quality responses than Flash',
-      'anthropic/claude-3-opus':
-          'Top-tier intelligence, slower and more expensive',
-      'meta-llama/llama-3-70b-instruct':
-          'Open-source model with good capabilities',
-      'openai/gpt-4o': 'Powerful model with excellent language understanding',
+      'local/gemma-3n-e2b-it': 'Privacy-first local AI with multimodal support',
+      'google/gemini-2.0-flash-001': 'Fast responses with multimodal capabilities',
+      'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',
+      'google/gemini-2.0-pro-001': 'Advanced multimodal understanding',
+      'anthropic/claude-3-opus': 'Top-tier intelligence and creativity',
+      'meta-llama/llama-3-70b-instruct': 'Open-source conversational AI',
+      'openai/gpt-4o': 'Powerful language understanding and generation',
     };
 
-    return modelDescriptions[modelId] ?? 'Advanced language model';
+    return modelDescriptions[modelId] ?? 'Advanced AI language model';
   }
 
   // Essential helper methods

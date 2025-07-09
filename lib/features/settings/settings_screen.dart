@@ -14,6 +14,7 @@ import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
 import '../character_interview/chat_service.dart' as interview_chat;
 import '../developer_chat/developer_chat_screen.dart';
+import 'local_llm_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -355,6 +356,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: localizations.customApiKeyDescription,
                       icon: Icons.vpn_key,
                       onTap: () => _showApiKeyDialog(context),
+                    ),
+
+                    _buildSettingCard(
+                      title: 'Local AI Settings',
+                      subtitle: 'Configure local AI model for offline usage',
+                      icon: Icons.offline_bolt,
+                      onTap: () => _navigateToLocalLLMSettings(context),
                     ),
 
                     Padding(
@@ -743,6 +751,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
+    );
+  }
+
+  void _navigateToLocalLLMSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LocalLLMSettingsScreen()),
     );
   }
 }

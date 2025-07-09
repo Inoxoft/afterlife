@@ -13,6 +13,7 @@ import '../chat/widgets/chat_message_bubble.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../../core/utils/responsive_utils.dart';
+import '../../core/services/hybrid_chat_service.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -26,8 +27,8 @@ class CharacterChatScreen extends StatefulWidget {
 
 class _CharacterChatScreenState extends State<CharacterChatScreen>
     with AutomaticKeepAliveClientMixin {
-  final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _messageController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
   CharacterModel? _character;
   bool _isLoading = false;
@@ -137,7 +138,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
     try {
       // Send the message to the character
-      final response = await ChatService.sendMessageToCharacter(
+      final response = await HybridChatService.sendMessageToCharacter(
         characterId: widget.characterId,
         message: message,
         systemPrompt: _character!.systemPrompt,

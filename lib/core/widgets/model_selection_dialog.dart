@@ -39,6 +39,14 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
   // You can expand this list as needed
   final List<Map<String, dynamic>> _availableModels = [
     {
+      'id': 'local/gemma-3n-e2b-it',
+      'name': 'Local Gemma 3n E2B IT',
+      'provider': 'Local Device',
+      'description': 'Privacy-first local AI with multimodal support (3.1GB).',
+      'recommended': true,
+      'isLocal': true,
+    },
+    {
       'id': 'google/gemini-2.0-flash-001',
       'name': 'Gemini 2.0 Flash',
       'provider': 'Google',
@@ -158,15 +166,23 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(
-                                        model['name'],
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
+                                      // Model icon based on type
+                                      Icon(
+                                        model['isLocal'] == true ? Icons.phone_android : Icons.cloud,
+                                        size: 16,
+                                        color: model['isLocal'] == true ? Colors.green : AppTheme.warmGold,
                                       ),
                                       const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          model['name'],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
                                       if (model['recommended'] == true)
                                         Container(
                                           padding: const EdgeInsets.symmetric(
@@ -184,6 +200,26 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
                                             'RECOMMENDED',
                                             style: TextStyle(
                                               color: AppTheme.warmGold,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      if (model['isLocal'] == true)
+                                        Container(
+                                          margin: const EdgeInsets.only(left: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withValues(alpha: 0.2),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            'PRIVATE',
+                                            style: TextStyle(
+                                              color: Colors.blue,
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -207,6 +243,17 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
                                       fontSize: 14,
                                     ),
                                   ),
+                                  if (model['isLocal'] == true) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Requires model download • No internet needed',
+                                      style: TextStyle(
+                                        color: Colors.blue.withValues(alpha: 0.8),
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

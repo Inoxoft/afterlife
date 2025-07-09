@@ -14,6 +14,7 @@ import 'features/character_interview/chat_service.dart' as interview_chat;
 import 'features/providers/chat_service.dart' as providers_chat;
 import 'features/character_prompts/famous_character_prompts.dart';
 import 'l10n/app_localizations.dart';
+import 'core/services/hybrid_chat_service.dart';
 
 class AppInitializationError extends Error {
   final String message;
@@ -32,6 +33,9 @@ Future<void> _initializeApp() async {
 
   // Initialize services
   try {
+    // Initialize hybrid chat service (this will initialize LocalLLMService)
+    await HybridChatService.initialize();
+    
     // Initialize character interview chat service
     await interview_chat.ChatService.initialize();
     interview_chat.ChatService.logDiagnostics();
@@ -52,6 +56,11 @@ Future<void> _initializeApp() async {
 }
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize the hybrid chat service
+  await HybridChatService.initialize();
+  
   runZonedGuarded(
     () async {
       try {

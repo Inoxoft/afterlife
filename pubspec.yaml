@@ -32,17 +32,21 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  cupertino_icons: ^1.0.2
-  provider: ^6.1.1
+  cupertino_icons: ^1.0.6
+  provider: ^6.0.5
   shared_preferences: ^2.2.2
   intl: ^0.20.2
-  http: ^1.1.0
+  http: ^1.2.0
   flutter_dotenv: ^5.1.0
   file_selector: ^1.0.0
   path: ^1.8.3
   path_provider: ^2.1.2
   syncfusion_flutter_pdf: ^24.1.41
   flutter_markdown: ^0.6.18
+  file_picker: ^8.0.6
+  flutter_gemma: ^0.9.0
+  url_launcher: ^6.2.4
+  wakelock_plus: ^1.2.1
 
 dev_dependencies:
   flutter_test:
