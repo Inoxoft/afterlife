@@ -10,7 +10,10 @@ class CharacterModel {
   final String name;
   final String systemPrompt; // Full detailed prompt for API models
   final String localPrompt; // Short optimized prompt for local models
-  final String? imageUrl;
+  final String? imageUrl; // Asset image URL (for famous characters)
+  final String? userImagePath; // User-uploaded image path
+  final String? iconImagePath; // User-uploaded icon image path
+  final IconData? icon; // Character icon
   final DateTime createdAt;
   final Color accentColor;
   final List<Map<String, dynamic>> chatHistory;
@@ -23,6 +26,9 @@ class CharacterModel {
     required this.systemPrompt,
     String? localPrompt,
     this.imageUrl,
+    this.userImagePath,
+    this.iconImagePath,
+    this.icon,
     required this.createdAt,
     Color? accentColor,
     List<Map<String, dynamic>>? chatHistory,
@@ -41,6 +47,9 @@ class CharacterModel {
     required String name,
     required String cardContent,
     String? imageUrl,
+    String? userImagePath,
+    String? iconImagePath,
+    IconData? icon,
     String? model,
   }) {
     final id = '${_characterIdPrefix}${DateTime.now().millisecondsSinceEpoch}';
@@ -52,6 +61,9 @@ class CharacterModel {
       name: name,
       systemPrompt: cleanSystemPrompt,
       imageUrl: imageUrl,
+      userImagePath: userImagePath,
+      iconImagePath: iconImagePath,
+      icon: icon,
       createdAt: createdAt,
       model: model,
     );
@@ -165,6 +177,11 @@ class CharacterModel {
       'systemPrompt': systemPrompt,
       'localPrompt': localPrompt,
       'imageUrl': imageUrl,
+      'userImagePath': userImagePath,
+      'iconImagePath': iconImagePath,
+      'iconCodePoint': icon?.codePoint,
+      'iconFontFamily': icon?.fontFamily,
+      'iconFontPackage': icon?.fontPackage,
       'createdAt': createdAt.toIso8601String(),
       'accentColor': accentColor.toARGB32(),
       'chatHistory': chatHistory,
@@ -199,6 +216,21 @@ class CharacterModel {
         accentColor = Color(int.parse(_defaultAccentColor));
       }
 
+      // Parse the icon safely
+      IconData? icon;
+      try {
+        if (json['iconCodePoint'] != null) {
+          icon = IconData(
+            json['iconCodePoint'] as int,
+            fontFamily: json['iconFontFamily'] as String?,
+            fontPackage: json['iconFontPackage'] as String?,
+          );
+        }
+      } catch (e) {
+        // Icon parsing failed, use null
+        icon = null;
+      }
+
       // Parse chat history safely
       List<Map<String, dynamic>> chatHistory = [];
       try {
@@ -228,6 +260,9 @@ class CharacterModel {
         systemPrompt: systemPrompt,
         localPrompt: localPrompt,
         imageUrl: json['imageUrl'] as String?,
+        userImagePath: json['userImagePath'] as String?,
+        iconImagePath: json['iconImagePath'] as String?,
+        icon: icon,
         createdAt: createdAt,
         accentColor: accentColor,
         chatHistory: chatHistory,
@@ -257,6 +292,9 @@ class CharacterModel {
       systemPrompt: systemPrompt,
       localPrompt: localPrompt,
       imageUrl: imageUrl,
+      userImagePath: userImagePath,
+      iconImagePath: iconImagePath,
+      icon: icon,
       createdAt: createdAt,
       accentColor: accentColor,
       chatHistory: newChatHistory,
@@ -274,6 +312,9 @@ class CharacterModel {
           name == other.name &&
           systemPrompt == other.systemPrompt &&
           imageUrl == other.imageUrl &&
+          userImagePath == other.userImagePath &&
+          iconImagePath == other.iconImagePath &&
+          icon == other.icon &&
           createdAt == other.createdAt &&
           accentColor == other.accentColor &&
           chatHistory.length == other.chatHistory.length &&
@@ -286,6 +327,9 @@ class CharacterModel {
       name.hashCode ^
       systemPrompt.hashCode ^
       imageUrl.hashCode ^
+      userImagePath.hashCode ^
+      iconImagePath.hashCode ^
+      icon.hashCode ^
       createdAt.hashCode ^
       accentColor.hashCode ^
       chatHistory.length.hashCode ^

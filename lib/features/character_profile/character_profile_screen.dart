@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
+import '../../core/utils/image_utils.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_interview/interview_screen.dart';
@@ -113,6 +114,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         systemPrompt: cleanedPrompt,
         localPrompt: _localPromptController.text.trim(),
         imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath, // Preserve user image
+        iconImagePath: _character!.iconImagePath, // Preserve icon image
+        icon: _character!.icon, // Preserve the icon
         createdAt: _character!.createdAt,
         accentColor: _character!.accentColor,
         chatHistory: _character!.chatHistory,
@@ -182,6 +186,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             name: characterName,
             systemPrompt: cleanedPrompt,
             imageUrl: originalCharacter.imageUrl,
+            userImagePath: originalCharacter.userImagePath, // Preserve user image
+            iconImagePath: originalCharacter.iconImagePath, // Preserve icon image
+            icon: originalCharacter.icon, // Preserve the icon
             createdAt: originalCharacter.createdAt,
             accentColor: originalCharacter.accentColor,
             chatHistory: originalCharacter.chatHistory,
@@ -234,25 +241,39 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         title: Text(_isEditing ? 'Edit Character' : 'Character Profile'),
         actions: [
           if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit, color: AppTheme.silverMist),
-              tooltip: 'Edit Character',
-              onPressed: () {
-                setState(() {
-                  _isEditing = true;
-                  _nameController.text = _character!.name;
-                  _systemPromptController.text = _character!.systemPrompt;
-                });
-              },
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.warmGold.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.edit, color: AppTheme.warmGold),
+                tooltip: 'Edit Character',
+                onPressed: () {
+                  setState(() {
+                    _isEditing = true;
+                    _nameController.text = _character!.name;
+                    _systemPromptController.text = _character!.systemPrompt;
+                  });
+                },
+              ),
             ),
           if (_isEditing)
-            TextButton(
-              onPressed: _saveChanges,
-              child: Text(
-                'SAVE',
-                style: TextStyle(
-                  color: AppTheme.warmGold,
-                  fontWeight: FontWeight.bold,
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: TextButton(
+                onPressed: _saveChanges,
+                child: Text(
+                  'SAVE',
+                  style: TextStyle(
+                    color: AppTheme.warmGold,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -547,6 +568,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   name: _character!.name,
                   systemPrompt: _character!.systemPrompt,
                   imageUrl: _character!.imageUrl,
+                  icon: _character!.icon, // Preserve the icon
                   createdAt: _character!.createdAt,
                   accentColor: _character!.accentColor,
                   chatHistory: _character!.chatHistory,
@@ -718,6 +740,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               name: _character!.name,
               systemPrompt: _character!.systemPrompt,
               imageUrl: _character!.imageUrl,
+              icon: _character!.icon, // Preserve the icon
               createdAt: _character!.createdAt,
               accentColor: _character!.accentColor,
               chatHistory: _character!.chatHistory,
@@ -882,37 +905,175 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               width: 130 * fontScale,
               height: 130 * fontScale,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppTheme.midnightPurple.withValues(alpha: 0.7),
-                    AppTheme.deepNavy.withValues(alpha: 0.5),
-                  ],
-                ),
+                gradient: _character!.userImagePath != null
+                    ? null
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.midnightPurple.withValues(alpha: 0.7),
+                          AppTheme.deepNavy.withValues(alpha: 0.5),
+                        ],
+                      ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: AppTheme.warmGold.withValues(alpha: 0.6),
                   width: 3,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  _character!.name.isNotEmpty
-                      ? _character!.name[0].toUpperCase()
-                      : '?',
-                  style: TextStyle(
-                    fontSize: 52 * fontScale,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 4,
-                        color: Colors.black26,
-                        offset: Offset(2, 2),
+              child: ClipOval(
+                child: _character!.userImagePath != null
+                    ? ImageUtils.buildCharacterAvatar(
+                        imagePath: _character!.userImagePath,
+                        size: 130 * fontScale,
+                        fallbackIcon: _character!.icon,
+                        fallbackText: _character!.name,
+                        backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.7),
+                        foregroundColor: AppTheme.warmGold,
+                      )
+                    : Center(
+                        child: _character!.iconImagePath != null
+                            ? ImageUtils.buildIconAvatar(
+                                iconImagePath: _character!.iconImagePath,
+                                size: 130 * fontScale,
+                                fallbackIcon: _character!.icon,
+                                fallbackText: _character!.name,
+                                backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.7),
+                                foregroundColor: AppTheme.warmGold,
+                              )
+                            : _character!.icon != null
+                                ? Icon(
+                                    _character!.icon!,
+                                    size: 60 * fontScale,
+                                    color: AppTheme.warmGold,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 4,
+                                        color: Colors.black26,
+                                        offset: Offset(2, 2),
+                                      ),
+                                    ],
+                                  )
+                                : Text(
+                                    _character!.name.isNotEmpty
+                                        ? _character!.name[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                      fontSize: 52 * fontScale,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 4,
+                                          color: Colors.black26,
+                                          offset: Offset(2, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                       ),
-                    ],
+              ),
+            ),
+            // Action buttons in profile view mode (always visible)
+            // Icon selection button
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 40 * fontScale,
+                height: 40 * fontScale,
+                decoration: BoxDecoration(
+                  color: AppTheme.warmGold,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppTheme.midnightPurple,
+                    width: 2,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    size: 20 * fontScale,
+                    color: AppTheme.midnightPurple,
+                  ),
+                  onPressed: _showIconSelectionDialog,
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Change Icon',
+                ),
+              ),
+            ),
+            // Image upload button
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: Container(
+                width: 40 * fontScale,
+                height: 40 * fontScale,
+                decoration: BoxDecoration(
+                  color: AppTheme.silverMist,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppTheme.midnightPurple,
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.camera_alt,
+                    size: 20 * fontScale,
+                    color: AppTheme.midnightPurple,
+                  ),
+                  onPressed: _showImageSelectionDialog,
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Upload Image',
+                ),
+              ),
+            ),
+            // Icon image upload button
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 40 * fontScale,
+                height: 40 * fontScale,
+                decoration: BoxDecoration(
+                  color: AppTheme.deepIndigo,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppTheme.midnightPurple,
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.face,
+                    size: 20 * fontScale,
+                    color: AppTheme.warmGold,
+                  ),
+                  onPressed: _showIconImageSelectionDialog,
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Upload Icon Image',
                 ),
               ),
             ),
@@ -978,6 +1139,813 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           ),
       ],
     );
+  }
+
+  // Icon selection dialog
+  void _showIconSelectionDialog() {
+    final List<IconData> availableIcons = [
+      Icons.person,
+      Icons.face,
+      Icons.emoji_emotions,
+      Icons.account_circle,
+      Icons.sentiment_satisfied,
+      Icons.psychology,
+      Icons.auto_awesome,
+      Icons.star,
+      Icons.favorite,
+      Icons.lightbulb,
+      Icons.science,
+      Icons.school,
+      Icons.work,
+      Icons.sports_esports,
+      Icons.music_note,
+      Icons.palette,
+      Icons.camera_alt,
+      Icons.pets,
+      Icons.nature,
+      Icons.local_florist,
+      Icons.wb_sunny,
+      Icons.nightlight,
+      Icons.rocket_launch,
+      Icons.explore,
+      Icons.travel_explore,
+      Icons.home,
+      Icons.restaurant,
+      Icons.coffee,
+      Icons.book,
+      Icons.library_books,
+      Icons.brush,
+      Icons.code,
+      Icons.build,
+      Icons.fitness_center,
+      Icons.directions_bike,
+      Icons.flight,
+      Icons.sailing,
+      Icons.theater_comedy,
+      Icons.celebration,
+      Icons.cake,
+      Icons.diamond,
+      Icons.spa,
+      Icons.self_improvement,
+      Icons.volunteer_activism,
+      Icons.handshake,
+      Icons.group,
+      Icons.family_restroom,
+      Icons.child_friendly,
+      Icons.elderly,
+      Icons.accessibility,
+      Icons.healing,
+      Icons.medical_services,
+      Icons.local_hospital,
+      Icons.psychology_alt,
+      Icons.mood,
+      Icons.sentiment_very_satisfied,
+      Icons.sentiment_neutral,
+      Icons.sentiment_dissatisfied,
+      Icons.sentiment_very_dissatisfied,
+      Icons.tag_faces,
+      Icons.insert_emoticon,
+      Icons.emoji_people,
+      Icons.emoji_nature,
+      Icons.emoji_food_beverage,
+      Icons.emoji_transportation,
+      Icons.emoji_symbols,
+      Icons.emoji_flags,
+      Icons.emoji_objects,
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.backgroundStart,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        title: Text(
+          'Select Character Icon',
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: 'Select Character Icon',
+            color: AppTheme.warmGold,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Container(
+          width: double.maxFinite,
+          height: 400,
+          child: Column(
+            children: [
+              // Remove icon option
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: 16),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _updateCharacterIcon(null);
+                  },
+                  icon: Icon(Icons.clear, color: AppTheme.midnightPurple),
+                  label: Text(
+                    'Remove Icon (Use First Letter)',
+                    style: TextStyle(color: AppTheme.midnightPurple),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.silverMist,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              // Icon grid
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 6,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: availableIcons.length,
+                  itemBuilder: (context, index) {
+                    final icon = availableIcons[index];
+                    final isSelected = _character!.icon == icon;
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _updateCharacterIcon(icon);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? AppTheme.warmGold.withValues(alpha: 0.3)
+                              : AppTheme.midnightPurple.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected 
+                                ? AppTheme.warmGold
+                                : AppTheme.warmGold.withValues(alpha: 0.3),
+                            width: isSelected ? 2 : 1,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            icon,
+                            size: 28,
+                            color: isSelected 
+                                ? AppTheme.warmGold
+                                : AppTheme.silverMist,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.silverMist),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Image selection dialog
+  void _showImageSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.backgroundStart,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        title: Text(
+          'Character Image',
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: 'Character Image',
+            color: AppTheme.warmGold,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Upload from gallery
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(bottom: 12),
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _uploadImageFromGallery();
+                },
+                icon: Icon(Icons.photo_library, color: AppTheme.midnightPurple),
+                label: Text(
+                  'Choose from Gallery',
+                  style: TextStyle(color: AppTheme.midnightPurple),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.warmGold,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            // Remove current image
+            if (_character!.userImagePath != null)
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: 12),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _removeCharacterImage();
+                  },
+                  icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
+                  label: Text(
+                    'Remove Current Image',
+                    style: TextStyle(color: AppTheme.midnightPurple),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.silverMist,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            // Image guidelines
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Image Guidelines:',
+                    style: TextStyle(
+                      color: AppTheme.warmGold,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '• Square images work best\n'
+                    '• Maximum size: 512x512 pixels\n'
+                    '• Supported formats: JPG, PNG\n'
+                    '• Images will be optimized automatically',
+                    style: TextStyle(
+                      color: AppTheme.silverMist,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.silverMist),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Icon image selection dialog
+  void _showIconImageSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.backgroundStart,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        title: Text(
+          'Character Icon Image',
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: 'Character Icon Image',
+            color: AppTheme.warmGold,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Upload from gallery
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(bottom: 12),
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _uploadIconImageFromGallery();
+                },
+                icon: Icon(Icons.photo_library, color: AppTheme.midnightPurple),
+                label: Text(
+                  'Choose Icon from Gallery',
+                  style: TextStyle(color: AppTheme.midnightPurple),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.warmGold,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            // Remove current icon image
+            if (_character!.iconImagePath != null)
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: 12),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _removeCharacterIconImage();
+                  },
+                  icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
+                  label: Text(
+                    'Remove Icon Image',
+                    style: TextStyle(color: AppTheme.midnightPurple),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.silverMist,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            // Icon image guidelines
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Icon Image Guidelines:',
+                    style: TextStyle(
+                      color: AppTheme.warmGold,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '• Square images work best for icons\n'
+                    '• Maximum size: 256x256 pixels\n'
+                    '• Supported formats: JPG, PNG\n'
+                    '• Images will be optimized for icon use\n'
+                    '• This will be used as the character icon',
+                    style: TextStyle(
+                      color: AppTheme.silverMist,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.silverMist),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Upload image from gallery
+  Future<void> _uploadImageFromGallery() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundStart,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: AppTheme.warmGold),
+                SizedBox(height: 16),
+                Text(
+                  'Optimizing image...',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final String? imagePath = await ImageUtils.pickAndOptimizeImage();
+      
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      if (imagePath != null && mounted) {
+        await _updateCharacterImage(imagePath);
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (mounted) Navigator.of(context).pop();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Upload icon image from gallery
+  Future<void> _uploadIconImageFromGallery() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundStart,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: AppTheme.warmGold),
+                SizedBox(height: 16),
+                Text(
+                  'Optimizing icon image...',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final String? iconImagePath = await ImageUtils.pickAndOptimizeIconImage();
+      
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      if (iconImagePath != null && mounted) {
+        await _updateCharacterIconImage(iconImagePath);
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (mounted) Navigator.of(context).pop();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading icon image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Remove character image
+  Future<void> _removeCharacterImage() async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old image file if it exists
+      if (_character!.userImagePath != null) {
+        await ImageUtils.deleteCharacterImage(_character!.userImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: null, // Remove user image
+        iconImagePath: _character!.iconImagePath,
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Character image removed successfully'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error removing image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Update character image
+  Future<void> _updateCharacterImage(String imagePath) async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old image file if it exists
+      if (_character!.userImagePath != null) {
+        await ImageUtils.deleteCharacterImage(_character!.userImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: imagePath,
+        iconImagePath: _character!.iconImagePath,
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Character image updated successfully'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Update character icon image
+  Future<void> _updateCharacterIconImage(String iconImagePath) async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old icon image file if it exists
+      if (_character!.iconImagePath != null) {
+        await ImageUtils.deleteCharacterIconImage(_character!.iconImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath,
+        iconImagePath: iconImagePath,
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Character icon image updated successfully'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating icon image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Update character icon
+  Future<void> _updateCharacterIcon(IconData? icon) async {
+    if (_character == null) return;
+
+    try {
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath,
+        iconImagePath: _character!.iconImagePath,
+        icon: icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              icon != null 
+                  ? 'Character icon updated successfully'
+                  : 'Character icon removed successfully',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating icon: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Remove character icon image
+  Future<void> _removeCharacterIconImage() async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old icon image file if it exists
+      if (_character!.iconImagePath != null) {
+        await ImageUtils.deleteCharacterIconImage(_character!.iconImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath,
+        iconImagePath: null, // Remove icon image
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Character icon image removed successfully'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error removing icon image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildEditMode() {
@@ -1460,6 +2428,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           name: _character!.name,
           systemPrompt: _character!.systemPrompt,
           imageUrl: _character!.imageUrl,
+          icon: _character!.icon, // Preserve the icon
           createdAt: _character!.createdAt,
           accentColor: _character!.accentColor,
           chatHistory: _character!.chatHistory,

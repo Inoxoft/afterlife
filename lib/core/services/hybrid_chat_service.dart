@@ -108,8 +108,21 @@ class HybridChatService {
     LLMProvider? preferredProvider,
     String? localPrompt, // Add local prompt parameter
   }) async {
-    // Check if the model is a local model
-    bool isLocalModel = model != null && (model.startsWith('local/') || model.contains('deepseek') || model.contains('gemma'));
+    // Check if the model is a local model - be more specific about local model patterns
+    bool isLocalModel = model != null && (
+      model.startsWith('local/') || 
+      model == 'local' ||
+      model.contains('hammer') ||
+      model.contains('deepseek') && model.startsWith('local/') ||
+      model.contains('gemma') && model.startsWith('local/')
+    );
+    
+    if (kDebugMode) {
+      print('HybridChatService: Model selection debug');
+      print('  - Model: $model');
+      print('  - Is local model: $isLocalModel');
+      print('  - Preferred provider: $preferredProvider');
+    }
     
     // Determine the provider based on the model
     LLMProvider actualProvider;
@@ -118,7 +131,12 @@ class HybridChatService {
     } else if (preferredProvider != null) {
       actualProvider = preferredProvider;
     } else {
-      actualProvider = _preferredProvider;
+      // For API models, always use OpenRouter
+      actualProvider = LLMProvider.openRouter;
+    }
+    
+    if (kDebugMode) {
+      print('  - Actual provider: $actualProvider');
     }
     
     // Select the appropriate prompt based on provider

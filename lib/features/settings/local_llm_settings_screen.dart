@@ -142,31 +142,33 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
   Future<void> _downloadModel() async {
     try {
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-          _errorMessage = null;
-        });
-      }
+      // Don't set global loading state - just handle download progress
+      setState(() {
+        _errorMessage = null;
+      });
 
-      await LocalLLMService.downloadModel(
-        acceptGoogleAgreement: true, // Always true for DeepSeek
+      final success = await LocalLLMService.downloadModel(
+        acceptGoogleAgreement: true, // Always true for Hammer2.1
       );
       
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Model downloaded successfully!')),
-        );
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Model downloaded successfully!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to download model. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _errorMessage = 'Failed to download model: $e';
-          _isLoading = false;
         });
       }
     }
@@ -177,7 +179,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Model'),
-        content: const Text('Are you sure you want to delete the downloaded DeepSeek model? This will free up 1.7GB of storage.'),
+        content: const Text('Are you sure you want to delete the downloaded Hammer2.1 model? This will free up 1.6GB of storage.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -284,7 +286,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    modelConfig['displayName'] ?? 'Gemma 3n E2B IT',
+                    modelConfig['displayName'] ?? 'Hammer2.1-1.5b (CPU) 1.6Gb',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -296,11 +298,11 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
             const SizedBox(height: 12),
             _buildStatusRow('Status', _getStatusText(), _getStatusColor()),
             const SizedBox(height: 8),
-            _buildStatusRow('Size', '${modelConfig['fileSizeGB'] ?? '3.1'} GB', Colors.grey[600]),
+            _buildStatusRow('Size', '${modelConfig['fileSizeGB'] ?? '1.6'} GB', Colors.grey[600]),
             const SizedBox(height: 8),
             _buildStatusRow('Supports Images', modelConfig['supportImage'] == true ? 'Yes' : 'No', Colors.grey[600]),
             const SizedBox(height: 8),
-            _buildStatusRow('Max Tokens', '${modelConfig['maxTokens'] ?? '4096'}', Colors.grey[600]),
+            _buildStatusRow('Max Tokens', '${modelConfig['maxTokens'] ?? '1024'}', Colors.grey[600]),
             if (_modelStatus == ModelDownloadStatus.downloading) ...[
               const SizedBox(height: 12),
               LinearProgressIndicator(
@@ -449,7 +451,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('The DeepSeek model is ready to use!'),
+              const Text('The Hammer2.1 model is ready to use!'),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _deleteModel,
@@ -481,13 +483,14 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'To use local AI, you need to download the DeepSeek model:',
+              'To use local AI, you need to download the Hammer2.1 model:',
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 8),
-            const Text('• DeepSeek is an open-source model (no authentication required)'),
-            const Text('• 1.7GB of free storage space needed'),
+            const Text('• Hammer2.1 is an open-source model (no authentication required)'),
+            const Text('• 1.6GB of free storage space needed'),
             const Text('• Runs locally on your device for privacy'),
+            const Text('• Optimized for mobile devices with fast inference'),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -525,7 +528,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                   : ElevatedButton.icon(
                       onPressed: _downloadModel,
                       icon: const Icon(Icons.download),
-                      label: const Text('Download DeepSeek Model (1.7GB)'),
+                      label: const Text('Download Hammer2.1 Model (1.6GB)'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.midnightPurple,
                         foregroundColor: AppTheme.silverMist,

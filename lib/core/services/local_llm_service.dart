@@ -19,7 +19,7 @@ enum ModelDownloadStatus {
   error,
 }
 
-// Model configuration for DeepSeek
+// Model configuration for Hammer2.1
 class ModelConfig {
   static const String url = 'https://huggingface.co/litert-community/Hammer2.1-1.5b/resolve/main/Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
   static const String filename = 'Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
@@ -150,7 +150,7 @@ class LocalLLMService {
     }
 
     try {
-      print('Initializing DeepSeek model at: $_modelPath');
+      print('Initializing Hammer2.1 model at: $_modelPath');
       
       // Set model path in the model manager
       await _gemmaPlugin.modelManager.setModelPath(_modelPath!);
@@ -160,7 +160,7 @@ class LocalLLMService {
         modelType: ModelConfig.modelType,
         maxTokens: ModelConfig.maxTokens,
         preferredBackend: ModelConfig.preferredBackend,
-        supportImage: false, // DeepSeek doesn't support images
+        supportImage: false, // Hammer2.1 doesn't support images
       );
 
       // Create chat session
@@ -174,7 +174,7 @@ class LocalLLMService {
       );
 
       _isInitialized = true;
-      print('DeepSeek model initialized successfully');
+      print('Hammer2.1 model initialized successfully');
     } catch (e) {
       print('Model initialization error: $e');
       _isInitialized = false;

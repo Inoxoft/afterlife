@@ -237,13 +237,19 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           // Character avatar
           CircleAvatar(
             backgroundColor: AppTheme.midnightPurple,
-            child: Text(
-              _character!.name[0].toUpperCase(),
-              style: TextStyle(
-                color: AppTheme.warmGold,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: _character!.icon != null
+                ? Icon(
+                    _character!.icon!,
+                    color: AppTheme.warmGold,
+                    size: 20,
+                  )
+                : Text(
+                    _character!.name[0].toUpperCase(),
+                    style: TextStyle(
+                      color: AppTheme.warmGold,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           // Character name

@@ -1,17 +1,17 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:flutter/services.dart';
+import '../../l10n/app_localizations.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../../core/theme/app_theme.dart';
-import '../character_profile/character_profile_screen.dart';
-import '../settings/settings_screen.dart';
-import '../character_chat/chat_screen.dart';
-import '../character_interview/interview_screen.dart';
-import '../character_prompts/famous_character_profile_screen.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
+import '../../core/utils/image_utils.dart';
+import '../settings/settings_screen.dart';
+import '../character_interview/interview_screen.dart';
+import '../character_chat/chat_screen.dart';
+import '../character_prompts/famous_character_profile_screen.dart';
 import '../../core/utils/responsive_utils.dart';
 import '../widgets/background_painters.dart';
 
@@ -561,12 +561,11 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   }) {
     final localizations = AppLocalizations.of(context);
 
-    return GestureDetector(
+    return _YourTwinCardWidget(
       key: key,
+      character: character,
+      isHorizontalLayout: isHorizontalLayout,
       onTap: () => _onCharacterSelected(context, character),
-      child: Card(
-        // ...
-      ),
     );
   }
 
@@ -1046,6 +1045,372 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
             ),
       ),
     );
+  }
+}
+
+// Character card widget for user-created characters
+class _YourTwinCardWidget extends StatefulWidget {
+  final CharacterModel character;
+  final bool isHorizontalLayout;
+  final VoidCallback onTap;
+
+  const _YourTwinCardWidget({
+    Key? key,
+    required this.character,
+    required this.isHorizontalLayout,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<_YourTwinCardWidget> createState() => _YourTwinCardWidgetState();
+}
+
+class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
+    with SingleTickerProviderStateMixin {
+  
+  late AnimationController _controller;
+  late Animation<double> _glowAnimation;
+  late Animation<double> _scaleAnimation;
+  bool _isHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _glowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.03,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuad));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accentColor = widget.character.accentColor ?? AppTheme.warmGold;
+    final String formattedDate = _formatDate(widget.character.createdAt);
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: MouseRegion(
+        onEnter: (_) => setState(() {
+          _isHovering = true;
+          _controller.forward();
+        }),
+        onExit: (_) => setState(() {
+          _isHovering = false;
+          _controller.reverse();
+        }),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _isHovering ? _scaleAnimation.value : 1.0,
+              child: Stack(
+                children: [
+                  // Main card with glowing effect
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppTheme.midnightPurple, AppTheme.deepNavy],
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _isHovering
+                              ? accentColor.withValues(alpha: 0.6)
+                              : AppTheme.midnightPurple.withValues(alpha: 0.3),
+                          blurRadius: _isHovering ? 15 : 8,
+                          spreadRadius: _isHovering ? 2 : 0,
+                          offset: Offset(0, 5 * _glowAnimation.value),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: _isHovering
+                            ? accentColor.withValues(alpha: 0.7)
+                            : accentColor.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: child,
+                    ),
+                  ),
+
+                  // Pulse ring animation when hovering
+                  if (_isHovering)
+                    AnimatedBuilder(
+                      animation: _glowAnimation,
+                      builder: (context, _) {
+                        return Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: CustomPaint(
+                              painter: PulseRingPainter(
+                                progress: _glowAnimation.value,
+                                color: accentColor,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(
+              children: [
+                // Background gradient
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppTheme.deepNavy, AppTheme.midnightPurple],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Character icon/avatar in the center
+                Positioned.fill(
+                  child: Container(
+                    padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
+                    child: Center(
+                      child: ImageUtils.buildCharacterAvatar(
+                        imagePath: widget.character.userImagePath,
+                        size: widget.isHorizontalLayout ? 80 : 60,
+                        fallbackIcon: widget.character.icon,
+                        fallbackText: widget.character.name,
+                        backgroundColor: accentColor.withValues(alpha: 0.2),
+                        foregroundColor: accentColor,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Gradient overlay for better text contrast
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          AppTheme.deepNavy.withValues(alpha: 0.7),
+                          AppTheme.deepNavy.withValues(alpha: 0.9),
+                        ],
+                        stops: const [0.6, 0.85, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Card content
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Character name
+                        Text(
+                          widget.character.name,
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: widget.character.name,
+                            fontSize: widget.isHorizontalLayout ? 22 : 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            color: AppTheme.warmGold,
+                            shadows: [
+                              Shadow(
+                                color: AppTheme.warmGold.withValues(alpha: 0.5),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          maxLines: widget.isHorizontalLayout ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        SizedBox(height: widget.isHorizontalLayout ? 8 : 6),
+
+                        // Created date
+                        Row(
+                          children: [
+                            // Pulsing indicator
+                            _buildPulsingDot(accentColor),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Created $formattedDate',
+                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                text: 'Created $formattedDate',
+                                fontSize: widget.isHorizontalLayout ? 14 : 12,
+                                color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: widget.isHorizontalLayout ? 12 : 10),
+
+                        // AI Model label
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: widget.isHorizontalLayout ? 12 : 8,
+                            vertical: widget.isHorizontalLayout ? 6 : 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(widget.isHorizontalLayout ? 6 : 4),
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            _getModelDisplayName(widget.character.model),
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: _getModelDisplayName(widget.character.model),
+                              fontSize: widget.isHorizontalLayout ? 12 : 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: accentColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // View indicator when hovering
+                if (_isHovering)
+                  Positioned(
+                    right: 16,
+                    top: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.deepNavy.withValues(alpha: 0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            color: AppTheme.midnightPurple,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Chat',
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: 'Chat',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.midnightPurple,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPulsingDot(Color color) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.5 * _glowAnimation.value),
+                blurRadius: 4 * _glowAnimation.value,
+                spreadRadius: 1 * _glowAnimation.value,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _getModelDisplayName(String modelId) {
+    final Map<String, String> modelNames = {
+      'local/gemma-3n-e2b-it': 'Gemma 3 (Local)',
+      'local/deepseek-r1-distill-qwen-1.5b': 'DeepSeek R1 (Local)',
+      'local/hammer2.1-1.5b': 'Hammer2.1 (Local)',
+      'google/gemini-2.0-flash-001': 'Gemini 2.0 Flash',
+      'anthropic/claude-3-5-sonnet': 'Claude 3.5 Sonnet',
+      'google/gemini-2.0-pro-001': 'Gemini 2.0 Pro',
+      'anthropic/claude-3-opus': 'Claude 3 Opus',
+      'meta-llama/llama-3-70b-instruct': 'Llama 3 70B',
+      'openai/gpt-4o': 'GPT-4o',
+    };
+
+    return modelNames[modelId] ?? 'AI Model';
+  }
+
+  String _formatDate(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays == 0) return 'today';
+    if (difference.inDays == 1) return 'yesterday';
+    if (difference.inDays < 7) return '${difference.inDays} days ago';
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }
 
