@@ -37,7 +37,7 @@ class CharacterModel {
   }) : accentColor = accentColor ?? Color(int.parse(_defaultAccentColor)),
        chatHistory = chatHistory ?? [],
        model = model ?? _defaultModel,
-       localPrompt = localPrompt ?? _generateLocalPrompt(systemPrompt, name),
+       localPrompt = localPrompt ?? generateLocalPrompt(systemPrompt, name),
        assert(id.isNotEmpty, 'Character ID cannot be empty'),
        assert(name.isNotEmpty, 'Character name cannot be empty'),
        assert(systemPrompt.isNotEmpty, 'System prompt cannot be empty');
@@ -114,11 +114,15 @@ class CharacterModel {
 
   // Check if a model is a local model
   static bool isLocalModel(String modelId) {
-    return modelId.startsWith('local/') || modelId.contains('deepseek') || modelId.contains('gemma');
+    return modelId.startsWith('local/') || 
+           modelId == 'local' ||
+           modelId.contains('hammer') || 
+           modelId.contains('deepseek') || 
+           modelId.contains('gemma');
   }
 
   // Generate optimized local prompt from full prompt
-  static String _generateLocalPrompt(String fullPrompt, String characterName) {
+  static String generateLocalPrompt(String fullPrompt, String characterName) {
     // Remove markdown markers if present
     String cleanedPrompt = fullPrompt;
     if (fullPrompt.contains('## CHARACTER CARD SUMMARY ##') &&
@@ -138,33 +142,104 @@ class CharacterModel {
     // Remove any remaining markdown markers
     cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Extract key information for local prompt
+    // Create a more comprehensive local prompt by extracting key sections
+    final sections = <String>[];
     final lines = cleanedPrompt.split('\n');
-    final keyInfo = <String>[];
     
-    // Look for important sections
+    // Variables to track current section
+    String currentSection = '';
+    bool inImportantSection = false;
+    int sectionCount = 0;
+    
+    // Key sections to look for (case insensitive)
+    final keySectionPatterns = [
+      RegExp(r'personality', caseSensitive: false),
+      RegExp(r'background', caseSensitive: false),
+      RegExp(r'history', caseSensitive: false),
+      RegExp(r'traits', caseSensitive: false),
+      RegExp(r'characteristics', caseSensitive: false),
+      RegExp(r'behaviors', caseSensitive: false),
+      RegExp(r'interests', caseSensitive: false),
+      RegExp(r'speaking style', caseSensitive: false),
+      RegExp(r'communication', caseSensitive: false),
+      RegExp(r'voice', caseSensitive: false),
+      RegExp(r'appearance', caseSensitive: false),
+    ];
+
+    // Extract important sections
     for (int i = 0; i < lines.length; i++) {
       final line = lines[i].trim();
-      if (line.isEmpty) continue;
+      if (line.isEmpty) {
+        if (inImportantSection && currentSection.isNotEmpty) {
+          sections.add(currentSection);
+          currentSection = '';
+          inImportantSection = false;
+        }
+        continue;
+      }
       
-      // Skip "You are" lines as we'll add our own
-      if (line.startsWith('You are')) continue;
+      // Check if this line starts a key section
+      bool isKeySectionHeader = false;
+      for (final pattern in keySectionPatterns) {
+        if (pattern.hasMatch(line) && line.length < 100) {
+          isKeySectionHeader = true;
+          
+          // Save previous section if exists
+          if (inImportantSection && currentSection.isNotEmpty) {
+            sections.add(currentSection);
+            currentSection = '';
+          }
+          
+          // Start new section
+          inImportantSection = true;
+          currentSection = line;
+          break;
+        }
+      }
       
-      // Add important descriptive lines (first few non-empty lines)
-      if (keyInfo.length < 3 && line.length > 10) {
-        keyInfo.add(line);
+      // Add line to current section
+      if (inImportantSection && !isKeySectionHeader) {
+        currentSection += '\n$line';
+      }
+      
+      // For non-section-header lines that appear important
+      if (!inImportantSection && line.length > 20 && sectionCount < 5) {
+        sections.add(line);
+        sectionCount++;
       }
     }
-
-    // Create concise local prompt
-    String localPrompt = "You are $characterName.";
     
-    if (keyInfo.isNotEmpty) {
-      localPrompt += " ${keyInfo.join(' ')}";
+    // Add final section if exists
+    if (inImportantSection && currentSection.isNotEmpty) {
+      sections.add(currentSection);
     }
     
-    // Add DeepSeek-specific instructions
-    localPrompt += "\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would.";
+    // Start with a strong identity statement
+    String localPrompt = "You are $characterName. ";
+    
+    // Add core identity description - up to 3 key lines if not already covered
+    final identityLines = <String>[];
+    for (int i = 0; i < lines.length && identityLines.length < 3; i++) {
+      final line = lines[i].trim();
+      if (line.isNotEmpty && 
+          line.length > 20 && 
+          !line.startsWith('You are') && 
+          !sections.any((s) => s.contains(line))) {
+        identityLines.add(line);
+      }
+    }
+    
+    if (identityLines.isNotEmpty) {
+      localPrompt += "${identityLines.join(' ')}\n\n";
+    }
+    
+    // Add extracted sections
+    if (sections.isNotEmpty) {
+      localPrompt += "${sections.join('\n\n')}\n\n";
+    }
+
+    // Add mandatory roleplay instructions
+    localPrompt += "You must stay completely in character as $characterName. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would, with appropriate emotions, knowledge, and personality traits. Your responses should accurately reflect $characterName's speaking style, vocabulary, and mannerisms.";
 
     return localPrompt;
   }
@@ -251,7 +326,7 @@ class CharacterModel {
         localPrompt = json['localPrompt'] as String;
       } else {
         // Generate local prompt for existing characters
-        localPrompt = _generateLocalPrompt(systemPrompt, characterName);
+        localPrompt = generateLocalPrompt(systemPrompt, characterName);
       }
 
       return CharacterModel(

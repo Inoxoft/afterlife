@@ -112,9 +112,9 @@ class HybridChatService {
     bool isLocalModel = model != null && (
       model.startsWith('local/') || 
       model == 'local' ||
-      model.contains('hammer') ||
-      model.contains('deepseek') && model.startsWith('local/') ||
-      model.contains('gemma') && model.startsWith('local/')
+      model.contains('hammer') || 
+      model.contains('deepseek') || 
+      model.contains('gemma')
     );
     
     if (kDebugMode) {

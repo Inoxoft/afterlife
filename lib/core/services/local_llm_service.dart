@@ -25,7 +25,7 @@ class ModelConfig {
   static const String filename = 'Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
   static const String displayName = 'Hammer2.1-1.5b (CPU) 1.6Gb';
   static const int fileSizeBytes = 1597556473;
-  static const int maxTokens = 1024;
+  static const int maxTokens = 4096;
   static const double temperature = 0.7;
   static const int topK = 40;
   static const double topP = 0.95;

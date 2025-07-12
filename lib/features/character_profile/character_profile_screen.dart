@@ -259,6 +259,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     _isEditing = true;
                     _nameController.text = _character!.name;
                     _systemPromptController.text = _character!.systemPrompt;
+                    _localPromptController.text = _character!.localPrompt;
                   });
                 },
               ),
@@ -1952,40 +1953,224 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // Name field
-        _buildTextField(
-          label: 'Character Name',
-          controller: _nameController,
-          enabled: true,
+        // Name field with consistent styling
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Character Name',
+              style: TextStyle(
+                color: AppTheme.warmGold,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _nameController,
+              enabled: true,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black26,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold,
+                    width: 1,
+                  ),
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
 
-        // System prompt field
-        _buildTextField(
-          label: 'System Prompt',
-          controller: _systemPromptController,
-          enabled: true,
-          maxLines: 15,
+        // System prompt field with consistent styling
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Full Detailed Prompt (API Models)',
+              style: TextStyle(
+                color: AppTheme.warmGold,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _systemPromptController,
+              enabled: true,
+              maxLines: 15,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black26,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold,
+                    width: 1,
+                  ),
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Local prompt field with generate button
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Local Prompt (Local Models)',
+                  style: TextStyle(
+                    color: AppTheme.warmGold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    // Generate local prompt from system prompt
+                    final generatedLocalPrompt = CharacterModel.generateLocalPrompt(
+                      _systemPromptController.text.trim(),
+                      _nameController.text.trim(),
+                    );
+                    setState(() {
+                      _localPromptController.text = generatedLocalPrompt;
+                    });
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Local prompt regenerated')),
+                    );
+                  },
+                  icon: Icon(Icons.auto_fix_high, color: AppTheme.warmGold, size: 16),
+                  label: Text(
+                    'Generate',
+                    style: TextStyle(
+                      color: AppTheme.warmGold,
+                      fontSize: 12,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _localPromptController,
+              enabled: true,
+              maxLines: 15,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black26,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold,
+                    width: 1,
+                  ),
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+            ),
+          ],
         ),
 
         const SizedBox(height: 24),
 
-        // Cancel button
-        Center(
-          child: TextButton(
-            onPressed: () {
-              setState(() {
-                _isEditing = false;
-              });
-            },
-            child: Text(
-              'CANCEL',
-              style: TextStyle(
-                color: AppTheme.silverMist.withValues(alpha: 0.8),
-                fontWeight: FontWeight.bold,
+        // Save and Cancel buttons in a row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Save button
+            ElevatedButton(
+              onPressed: _saveChanges,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.warmGold.withValues(alpha: 0.8),
+                foregroundColor: AppTheme.midnightPurple,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'SAVE',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 16),
+            // Cancel button
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isEditing = false;
+                });
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(
+                    color: AppTheme.silverMist.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Text(
+                'CANCEL',
+                style: TextStyle(
+                  color: AppTheme.silverMist.withValues(alpha: 0.8),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
