@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'app_localizations.dart';
 
 class AppLocalizationsKo extends AppLocalizations {
@@ -60,14 +59,9 @@ class AppLocalizationsKo extends AppLocalizations {
   @override String get languageSpanish => 'Español';
   @override String get languageFrench => 'Français';
   @override String get languageGerman => 'Deutsch';
+  @override String get languageItalian => 'Italiano';
   @override String get languageJapanese => '日本語';
   @override String get languageKorean => '한국어';
-  @override String get languageChinese => '中文';
-  @override String get languagePortuguese => 'Português';
-  @override String get languageRussian => 'Русский';
-  @override String get languageHindi => 'हिन्दी';
-  @override String get languageItalian => 'Italiano';
-  @override String get languageUkrainian => 'Українська';
   @override String get accessingDataStorage => '데이터 저장소 접근 중';
   @override String get physicist => '물리학자';
   @override String get presidentActor => '대통령, 배우';
@@ -231,185 +225,327 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get theseDigitalTwinsAllow => '이러한 디지털 트윈은 시간과 현실을 넘나드는 관점과 상호작용할 수 있게 해줍니다.';
+
+  // Character Profile screen strings
+  @override
+  String get characterProfile => '캐릭터 프로필';
+
+  @override
+  String get editCharacter => '캐릭터 편집';
+
+  @override
+  String get characterPrompts => '캐릭터 프롬프트';
+
+  @override
+  String get fullDetailedPrompt => '전체 상세 프롬프트';
+
+  @override
+  String get usedForCloudAiModels => '클라우드 AI 모델용 (GPT, Claude, Gemini 등)';
+
+  @override
+  String get optimizedLocalPrompt => '최적화된 로컬 프롬프트';
+
+  @override
+  String get usedForLocalModels => '로컬 모델용 (DeepSeek, Gemma 등)';
+
+  @override
+  String get apiModels => 'API 모델';
+
+  @override
+  String get localModel => '로컬 모델';
+
+  @override
+  String get copyPrompt => '프롬프트 복사';
+
+  @override
+  String get promptCopiedToClipboard => '프롬프트가 클립보드에 복사되었습니다';
+
+  @override
+  String get startChat => '채팅 시작';
+
+  @override
+  String get selectCharacterIcon => '캐릭터 아이콘 선택';
+
+  @override
+  String get removeIcon => '아이콘 제거 (첫 글자 사용)';
+
+  @override
+  String get useFirstLetter => '아이콘 제거 (첫 글자 사용)';
+
+  @override
+  String get characterImage => '캐릭터 이미지';
+
+  @override
+  String get chooseFromGallery => '갤러리에서 선택';
+
+  @override
+  String get removeCurrentImage => '현재 이미지 제거';
+
+  @override
+  String get imageGuidelines => '이미지 가이드라인:';
+
+  @override
+  String get imageGuidelinesText => '• 정사각형 이미지가 가장 좋습니다\n• 최대 크기: 512x512 픽셀\n• 지원 형식: JPG, PNG\n• 이미지는 자동으로 최적화됩니다';
+
+  @override
+  String get characterIconImage => '캐릭터 아이콘 이미지';
+
+  @override
+  String get chooseIconFromGallery => '갤러리에서 아이콘 선택';
+
+  @override
+  String get removeIconImage => '아이콘 이미지 제거';
+
+  @override
+  String get changesSavedSuccessfully => '변경사항이 성공적으로 저장되었습니다';
+
+  @override
+  String get errorSavingChanges => '변경사항 저장 중 오류: {error}';
+
+  @override
+  String get characterUpdatedSuccessfully => '캐릭터가 성공적으로 업데이트되었습니다';
+
+  @override
+  String get errorUpdatingCharacter => '캐릭터 업데이트 중 오류: {error}';
+
+  @override
+  String get viewAllAvailableModels => '사용 가능한 모든 모델 보기';
+
+  @override
+  String get exploreMoreAiOptions => '더 많은 AI 옵션 탐색';
+
+  @override
+  String get privacyFirstLocalAi => '개인정보 우선 로컬 AI, 멀티모달 지원 (3.1GB)';
+
+  @override
+  String get speedMultimodalSupport => '속도, 멀티모달 지원 및 1M 토큰 컨텍스트 창';
+
+  @override
+  String get lightweightInstructionTuned => '대화형 창의성을 위한 경량 명령어 튜닝 모델';
+
+  @override
+  String get requiresModelDownload => '모델 다운로드 필요 • 인터넷 불필요';
+
+  @override
+  String get noInternetNeeded => '인터넷 불필요';
+
+  @override
+  String get selectAiModel => 'AI 모델 선택';
+
+  @override
+  String get chooseAiModelThatWillPower => '이 캐릭터를 구동할 AI 모델을 선택하세요:';
+
+  @override
+  String get aiModelUpdatedSuccessfully => 'AI 모델이 성공적으로 업데이트되었습니다';
+
+  @override
+  String get reinterview => '캐릭터 재인터뷰';
+
+  @override
+  String get reinterviewDescription => '새로운 인터뷰 과정을 통해 캐릭터의 성격과 기억을 업데이트합니다';
+
+  @override
+  String get selectIcon => '아이콘 선택';
+
+  @override
+  String get selectImage => '이미지 선택';
+
+  @override
+  String get selectImageFromGallery => '갤러리에서 선택';
+
+  @override
+  String get selectCharacterImage => '캐릭터 이미지 선택';
+
+  @override
+  String get openRouterGpt4o => '고급 추론, 코드 생성 및 멀티모달 이해를 결합합니다';
+
+  @override
+  String get openRouterClaude35Sonnet => '글쓰기, 수학, 코딩 및 시각적 분석에 뛰어납니다';
+
+  @override
+  String get openRouterGpt4Turbo => '속도와 효율성을 위해 최적화된 GPT-4 모델, 이미지 기능 포함';
+
+  @override
+  String get openRouterGeminiPro => '강력한 멀티모달 추론 기능을 가진 Google의 다목적 모델';
+
+  @override
+  String get mistralLarge => '뛰어난 추론 능력을 가진 Mistral AI의 플래그십 모델';
+
+  @override
+  String get localGemma2b => '개인정보 보호를 위해 기기에서 로컬로 실행되는 컴팩트 모델';
+
+  @override
+  String get private => '비공개';
+
   // Splash screen status messages
   @override
-  String get initializingPreservationSystems => 'INITIALIZING PRESERVATION SYSTEMS';
+  String get initializingPreservationSystems => '보존 시스템 초기화 중';
 
   @override
-  String get calibratingNeuralNetworks => 'CALIBRATING NEURAL NETWORKS';
+  String get calibratingNeuralNetworks => '신경망 조정 중';
 
   @override
-  String get synchronizingQuantumStates => 'SYNCHRONIZING QUANTUM STATES';
+  String get synchronizingQuantumStates => '양자 상태 동기화 중';
 
   @override
-  String get aligningConsciousnessMatrices => 'ALIGNING CONSCIOUSNESS MATRICES';
+  String get aligningConsciousnessMatrices => '의식 행렬 정렬 중';
 
   @override
-  String get establishingNeuralLinks => 'ESTABLISHING NEURAL LINKS';
+  String get establishingNeuralLinks => '신경 연결 설정 중';
 
   @override
-  String get preservationSystemsReady => 'PRESERVATION SYSTEMS READY';
+  String get preservationSystemsReady => '보존 시스템 준비 완료';
 
   @override
-  String get errorInitializingSystems => 'ERROR INITIALIZING SYSTEMS';
+  String get errorInitializingSystems => '시스템 초기화 오류';
 
   // Error messages and user feedback
   @override
-  String get restartApp => 'Restart App';
+  String get restartApp => '앱 재시작';
 
   @override
-  String get initializationError => 'Initialization Error';
+  String get initializationError => '초기화 오류';
 
   @override
-  String get apiKeyCannotBeEmpty => 'API key cannot be empty';
+  String get apiKeyCannotBeEmpty => 'API 키는 비워둘 수 없습니다';
 
   @override
-  String get changesSavedSuccessfully => 'Changes saved successfully';
+  String get characterCardCopiedToClipboard => '캐릭터 카드가 클립보드에 복사되었습니다';
 
   @override
-  String get characterUpdatedSuccessfully => 'Character updated successfully';
+  String get charactersExportedSuccessfully => '캐릭터가 성공적으로 내보내졌습니다!';
 
   @override
-  String get characterCardCopiedToClipboard => 'Character card copied to clipboard';
+  String get errorExportingCharacters => '캐릭터 내보내기 중 오류 발생';
 
   @override
-  String get charactersExportedSuccessfully => 'Characters exported successfully!';
+  String get errorSavingApiKey => 'API 키 저장 중 오류 발생';
 
   @override
-  String get errorExportingCharacters => 'Error exporting characters';
+  String get errorLoadingCharacter => '캐릭터 로딩 중 오류 발생';
 
   @override
-  String get errorSavingApiKey => 'Error saving API key';
+  String get failedToSaveSettings => '설정 저장에 실패했습니다';
 
   @override
-  String get errorLoadingCharacter => 'Error loading character';
-
-  @override
-  String get failedToSaveSettings => 'Failed to save settings';
-
-  @override
-  String get apiKeyUpdatedSuccessfully => 'API key updated successfully';
+  String get apiKeyUpdatedSuccessfully => 'API 키가 성공적으로 업데이트되었습니다';
 
   // Dialog boxes and confirmations
   @override
-  String get restartInterview => 'Restart Interview';
+  String get restartInterview => '인터뷰 재시작';
 
   @override
-  String get clearResponsesConfirmation => 'This will clear all your responses. Are you sure?';
+  String get clearResponsesConfirmation => '모든 응답이 지워집니다. 확실합니까?';
 
   @override
-  String get deleteCharacter => 'Delete Character';
+  String get deleteCharacter => '캐릭터 삭제';
 
   @override
-  String get deleteCharacterConfirmation => 'This action cannot be undone.';
+  String get deleteCharacterConfirmation => '이 작업은 취소할 수 없습니다.';
 
   @override
-  String get characterProfile => 'Character Profile';
+  String get delete => '삭제';
 
   @override
-  String get editCharacter => 'Edit Character';
+  String get save => '저장';
 
   @override
-  String get delete => 'Delete';
-
-  @override
-  String get save => 'Save';
-
-  @override
-  String get edit => 'Edit';
+  String get edit => '편집';
 
   // API Key Dialog
   @override
-  String get openRouterApiKey => 'OpenRouter API Key';
+  String get openRouterApiKey => 'OpenRouter API 키';
 
   @override
-  String get apiKeyRequired => 'API Key Required';
+  String get apiKeyRequired => 'API 키 필요';
 
   @override
-  String get updateApiKeyDescription => 'Update your OpenRouter API key for AI functionality:';
+  String get updateApiKeyDescription => 'AI 기능을 위해 OpenRouter API 키를 업데이트하세요:';
 
   @override
-  String get apiKeyRequiredDescription => 'The application requires an OpenRouter API key to function. Please enter your API key below:';
+  String get apiKeyRequiredDescription => '애플리케이션이 작동하려면 OpenRouter API 키가 필요합니다. 아래에 API 키를 입력해 주세요:';
 
   @override
-  String get enterApiKey => 'Enter API Key (sk-...)';
+  String get enterApiKey => 'API 키 입력 (sk-...)';
 
   @override
-  String get clearCurrentKey => 'Clear current key';
+  String get clearCurrentKey => '현재 키 지우기';
 
   @override
-  String get getApiKeyFromOpenRouter => 'You can get an API key from openrouter.ai';
+  String get getApiKeyFromOpenRouter => 'openrouter.ai에서 API 키를 얻을 수 있습니다';
 
   @override
-  String get usingCustomApiKey => 'Using your custom API key';
+  String get usingCustomApiKey => '사용자 지정 API 키 사용 중';
 
   @override
-  String get replaceKeyInstructions => 'To replace with a different key, clear the field first and enter new key';
+  String get replaceKeyInstructions => '다른 키로 교체하려면 먼저 필드를 지우고 새 키를 입력하세요';
 
   @override
-  String get apiKeyShouldStartWithSk => 'API key should start with "sk-"';
+  String get apiKeyShouldStartWithSk => 'API 키는 "sk-"로 시작해야 합니다';
 
   // Interview and character creation
   @override
-  String get invalidCharacterCardFormat => 'Invalid character card format';
+  String get invalidCharacterCardFormat => '유효하지 않은 캐릭터 카드 형식';
 
   @override
-  String get characterDataIncomplete => 'Character data is incomplete';
+  String get characterDataIncomplete => '캐릭터 데이터가 불완전합니다';
 
   @override
-  String get failedToSaveCharacter => 'Failed to save character';
+  String get failedToSaveCharacter => '캐릭터 저장에 실패했습니다';
 
   @override
-  String get characterProfileNotFound => 'Character profile not found';
+  String get characterProfileNotFound => '캐릭터 프로필을 찾을 수 없습니다';
 
   @override
-  String get errorSavingCharacter => 'Error saving character';
+  String get errorSavingCharacter => '캐릭터 저장 중 오류 발생';
 
   // Generic error messages with parameters
   @override
-  String errorLoadingCharacterWithDetails(String error) => 'Error loading character: $error';
+  String errorLoadingCharacterWithDetails(String error) => '캐릭터 로딩 중 오류: $error';
 
   @override
-  String errorSavingApiKeyWithDetails(String error) => 'Error saving API key: $error';
+  String errorSavingApiKeyWithDetails(String error) => 'API 키 저장 중 오류: $error';
 
   @override
-  String errorRemovingApiKeyWithDetails(String error) => 'Error removing API key: $error';
+  String errorRemovingApiKeyWithDetails(String error) => 'API 키 제거 중 오류: $error';
 
   @override
-  String failedToSaveSettingsWithDetails(String error) => 'Failed to save settings: $error';
+  String failedToSaveSettingsWithDetails(String error) => '설정 저장 실패: $error';
 
   @override
-  String aiModelUpdatedForCharacter(String characterName) => 'AI model updated for $characterName';
+  String aiModelUpdatedForCharacter(String characterName) => '$characterName의 AI 모델이 업데이트되었습니다';
 
   @override
-  String characterCardCopiedForCharacter(String characterName) => 'Character card for "$characterName" copied to clipboard';
+  String characterCardCopiedForCharacter(String characterName) => '"$characterName"의 캐릭터 카드가 클립보드에 복사되었습니다';
 
   @override
-  String errorUpdatingModel(String error) => 'Error updating model: $error';
+  String errorUpdatingModel(String error) => '모델 업데이트 중 오류: $error';
 
   @override
-  String errorSavingCharacterWithDetails(String error) => 'Error saving character: $error';
+  String errorSavingCharacterWithDetails(String error) => '캐릭터 저장 중 오류: $error';
 
   @override
-  String errorClearingDataWithDetails(String error) => 'Error clearing data: $error';
+  String errorClearingDataWithDetails(String error) => '데이터 지우기 중 오류: $error';
 
   @override
-  String errorExportingCharactersWithDetails(String error) => 'Error exporting characters: $error';
+  String errorExportingCharactersWithDetails(String error) => '캐릭터 내보내기 중 오류: $error';
+
   // Additional UI strings
   @override
-  String get skipForNow => 'Skip for now';
+  String get skipForNow => '지금은 건너뛰기';
 
   @override
-  String get updateKey => 'Update Key';
+  String get updateKey => '키 업데이트';
 
   @override
-  String get removeKey => 'Remove Key';
+  String get removeKey => '키 제거';
 
   @override
-  String get saveKey => 'Save Key';
+  String get saveKey => '키 저장';
 
   @override
-  String get usingDefaultApiKey => 'Using default API key from .env file';
+  String get usingDefaultApiKey => '.env 파일의 기본 API 키 사용 중';
+
   // Interview initial message
   @override
   String get interviewInitialMessage => '안녕하세요! 상세한 캐릭터 카드를 만들 준비가 되었습니다. 다음 중 하나를 선택할 수 있습니다:\n\n1. 당신의 성격과 경험에 대한 질문에 답하기\n2. 당신의 정보가 포함된 파일(PDF, TXT, DOC 또는 이메일) 업로드하기\n\n어떤 것을 선호하시나요?';

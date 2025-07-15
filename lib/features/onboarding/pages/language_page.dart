@@ -81,14 +81,9 @@ class _LanguagePageState extends State<LanguagePage>
       {'code': 'es', 'name': localizations.languageSpanish},
       {'code': 'fr', 'name': localizations.languageFrench},
       {'code': 'de', 'name': localizations.languageGerman},
+      {'code': 'it', 'name': localizations.languageItalian},
       {'code': 'ja', 'name': localizations.languageJapanese},
       {'code': 'ko', 'name': localizations.languageKorean},
-      {'code': 'zh', 'name': localizations.languageChinese},
-      {'code': 'pt', 'name': localizations.languagePortuguese},
-      {'code': 'ru', 'name': localizations.languageRussian},
-      {'code': 'hi', 'name': localizations.languageHindi},
-      {'code': 'it', 'name': localizations.languageItalian},
-      {'code': 'uk', 'name': localizations.languageUkrainian},
     ];
 
     return SafeArea(

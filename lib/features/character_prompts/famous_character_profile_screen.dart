@@ -317,9 +317,9 @@ class _FamousCharacterProfileScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Biography',
+                      localizations.biography,
                       style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                        text: 'Biography',
+                        text: localizations.biography,
                         color: AppTheme.warmGold,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -357,9 +357,9 @@ class _FamousCharacterProfileScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AI MODEL',
+                      localizations.aiModel,
                       style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                        text: 'AI MODEL',
+                        text: localizations.aiModel,
                         color: AppTheme.warmGold,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -375,9 +375,9 @@ class _FamousCharacterProfileScreenState
                       onTap: () {
                         // This will be implemented later
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'This feature will be available soon',
+                              localizations.featureAvailableSoon,
                             ),
                             duration: Duration(seconds: 2),
                           ),
@@ -405,7 +405,7 @@ class _FamousCharacterProfileScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'View all available models',
+                                  localizations.viewAllAvailableModels,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -413,7 +413,7 @@ class _FamousCharacterProfileScreenState
                                   ),
                                 ),
                                 Text(
-                                  'Explore more AI options',
+                                  localizations.exploreMoreAiOptions,
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 13,
@@ -454,13 +454,13 @@ class _FamousCharacterProfileScreenState
                   child: ElevatedButton.icon(
                     onPressed: () => _navigateToChat(context),
                     icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                    label: const Padding(
+                    label: Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
                       ),
                       child: Text(
-                        'Start Conversation',
+                        localizations.startConversation,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -491,13 +491,31 @@ class _FamousCharacterProfileScreenState
     required String label,
     required String value,
   }) {
+    final localizations = AppLocalizations.of(context);
+    
+    // Get localized label
+    String localizedLabel;
+    switch (label) {
+      case 'Name':
+        localizedLabel = localizations.name;
+        break;
+      case 'Years':
+        localizedLabel = localizations.years;
+        break;
+      case 'Profession':
+        localizedLabel = localizations.profession;
+        break;
+      default:
+        localizedLabel = label;
+    }
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: 100,
           child: Text(
-            label,
+            localizedLabel,
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ),
@@ -537,10 +555,12 @@ class _FamousCharacterProfileScreenState
         ...models
             .map(
               (model) => _buildModelOption(
+                context: context,
                 id: model['id'] as String,
                 name: model['name'] as String,
                 description: model['description'] as String,
                 isRecommended: model['recommended'] == true,
+                isLocal: model['isLocal'] == true,
                 isSelected: _selectedModel == model['id'],
               ),
             ),
@@ -549,12 +569,16 @@ class _FamousCharacterProfileScreenState
   }
 
   Widget _buildModelOption({
+    required BuildContext context,
     required String id,
     required String name,
     required String description,
     required bool isRecommended,
+    bool isLocal = false,
     required bool isSelected,
   }) {
+    final localizations = AppLocalizations.of(context);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -573,6 +597,7 @@ class _FamousCharacterProfileScreenState
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            final localizations = AppLocalizations.of(context);
             setState(() {
               _selectedModel = id;
               FamousCharacterPrompts.setSelectedModel(widget.name, id);
@@ -580,7 +605,7 @@ class _FamousCharacterProfileScreenState
             // Show a confirmation to the user
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('AI model updated for ${widget.name}'),
+                content: Text(localizations.aiModelUpdatedForCharacter(widget.name)),
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -608,8 +633,8 @@ class _FamousCharacterProfileScreenState
                     ),
                   ),
                   child: Icon(
-                    isSelected ? Icons.check : Icons.psychology_outlined,
-                    color: AppTheme.warmGold,
+                    isSelected ? Icons.check : (isLocal ? Icons.phone_android : Icons.psychology_outlined),
+                    color: isLocal ? Colors.blue : AppTheme.warmGold,
                     size: 16,
                   ),
                 ),
@@ -640,9 +665,30 @@ class _FamousCharacterProfileScreenState
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                'RECOMMENDED',
+                                localizations.recommended,
                                 style: TextStyle(
                                   color: AppTheme.warmGold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          if (isLocal)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              margin: const EdgeInsets.only(left: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                localizations.private,
+                                style: TextStyle(
+                                  color: Colors.blue,
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.5,

@@ -106,14 +106,13 @@ class HybridChatService {
     required List<Map<String, dynamic>> chatHistory,
     String? model,
     LLMProvider? preferredProvider,
-    String? localPrompt, // Add local prompt parameter
+    String? localPrompt,
   }) async {
     // Check if the model is a local model - be more specific about local model patterns
     bool isLocalModel = model != null && (
       model.startsWith('local/') || 
       model == 'local' ||
       model.contains('hammer') || 
-      model.contains('deepseek') || 
       model.contains('gemma')
     );
     
@@ -148,10 +147,27 @@ class HybridChatService {
     }
     
     // Convert the message format for hybrid service
-    final messages = [
-      ...chatHistory,
-      {'role': 'user', 'content': message},
-    ];
+    // Ensure each message has a valid 'role' field for OpenRouter API
+    final messages = chatHistory.map((msg) {
+      // Make a copy of the message to avoid modifying the original
+      final Map<String, dynamic> formattedMsg = Map.from(msg);
+      
+      // Ensure the message has a role field
+      if (!formattedMsg.containsKey('role')) {
+        // If it has an 'isUser' field, use that to determine role
+        if (formattedMsg.containsKey('isUser')) {
+          formattedMsg['role'] = formattedMsg['isUser'] == true ? 'user' : 'assistant';
+        } else {
+          // Default to 'user' if we can't determine
+          formattedMsg['role'] = 'user';
+        }
+      }
+      
+      return formattedMsg;
+    }).toList();
+    
+    // Add the new user message with proper role
+    messages.add({'role': 'user', 'content': message});
     
     return await sendMessage(
       messages: messages,

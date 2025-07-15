@@ -98,7 +98,25 @@ class ChatService {
       'model': model ?? 'anthropic/claude-3.5-sonnet',
       'messages': [
         {'role': 'system', 'content': systemPrompt},
-        ...chatHistory,
+        ...chatHistory.map((msg) {
+          // Ensure each message has a proper role field
+          if (msg.containsKey('role')) {
+            return {
+              'role': msg['role'],
+              'content': msg['content'],
+            };
+          } else if (msg.containsKey('isUser')) {
+            return {
+              'role': msg['isUser'] == true ? 'user' : 'assistant',
+              'content': msg['content'],
+            };
+          } else {
+            return {
+              'role': 'user', // Default to user
+              'content': msg['content'],
+            };
+          }
+        }),
         {'role': 'user', 'content': message},
       ],
       'temperature': 0.7,
@@ -132,6 +150,19 @@ class ChatService {
       // Parse response with explicit UTF-8 decoding
       final responseBody = utf8.decode(response.bodyBytes);
       final data = jsonDecode(responseBody);
+      
+      // Add null checks to prevent "The method '[]' was called on null" error
+      if (data == null || 
+          data['choices'] == null || 
+          data['choices'].isEmpty ||
+          data['choices'][0] == null ||
+          data['choices'][0]['message'] == null) {
+        if (kDebugMode) {
+          print('Error in character_chat: Invalid response format: $data');
+        }
+        return 'I apologize, I received an invalid response format. Please try again.';
+      }
+      
       return data['choices'][0]['message']['content'] as String;
     } on TimeoutException catch (e) {
       if (kDebugMode) {

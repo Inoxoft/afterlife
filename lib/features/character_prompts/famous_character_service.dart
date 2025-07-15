@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import '../../core/utils/env_config.dart';
 import '../providers/language_provider.dart';
 import 'famous_character_prompts.dart';
+import '../../core/services/hybrid_chat_service.dart';
+import '../models/character_model.dart';
 
 /// Service for interacting with famous characters
 class FamousCharacterService {
@@ -47,11 +49,6 @@ class FamousCharacterService {
     /// Always refresh the API key before sending a message
     await refreshApiKey();
 
-    /// Validate API key exists
-    if (_apiKey == null || _apiKey!.isEmpty) {
-      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
-    }
-
     /// Get the character's system prompt
     final systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
     final model = FamousCharacterPrompts.getSelectedModel(characterName);
@@ -71,83 +68,177 @@ class FamousCharacterService {
       finalSystemPrompt = '$systemPrompt$languageInstruction';
     }
 
-    /// Prepare messages for API
-    final messages = <Map<String, dynamic>>[
-      {'role': 'system', 'content': finalSystemPrompt},
-      ...chatHistory.map((msg) => {
-        'role': msg['isUser'] ? 'user' : 'assistant',
-        'content': msg['content'],
-      }),
-      {'role': 'user', 'content': message},
-    ];
-
-    /// Prepare request body
-    final body = jsonEncode({
-      'model': model,
-      'messages': messages,
-      'temperature': 0.7,
-      'max_tokens': 25000,
-    });
-
-    try {
-      /// Send request
-      final response = await http
-          .post(
-            Uri.parse(_openRouterUrl),
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',
-              'Authorization': 'Bearer $_apiKey',
-              'X-Title': 'Afterlife AI',
-              'Accept': 'application/json; charset=utf-8',
+    /// Check if using a local model
+    final bool isLocalModel = CharacterModel.isLocalModel(model);
+    
+    if (isLocalModel) {
+      /// Use HybridChatService for local models
+      try {
+        // Convert chat history to the format expected by HybridChatService
+        final formattedChatHistory = chatHistory.map((msg) {
+          // Ensure each message has proper fields
+          return {
+            'role': msg['isUser'] == true ? 'user' : 'assistant',
+            'content': msg['content'],
+            'isUser': msg['isUser'],
+          };
+        }).toList();
+        
+        // Generate a local-optimized prompt if needed
+        final localPrompt = CharacterModel.generateLocalPrompt(finalSystemPrompt, characterName);
+        
+        // Use HybridChatService with local model
+        final response = await HybridChatService.sendMessageToCharacter(
+          characterId: 'famous_$characterName', // Create a virtual ID
+          message: message,
+          systemPrompt: finalSystemPrompt,
+          chatHistory: formattedChatHistory,
+          model: model,
+          localPrompt: localPrompt,
+        );
+        
+        if (response != null) {
+          /// Add both user message and AI response to chat history
+          _chatHistories[characterName]!.addAll([
+            {
+              'content': message,
+              'isUser': true,
+              'timestamp': DateTime.now().toIso8601String(),
             },
-            body: body,
-          )
-          .timeout(_requestTimeout);
-
-      if (response.statusCode != 200) {
-        if (kDebugMode) {
-          print(
-              'API Error in famous_character_service: ${response.statusCode}: ${response.body}');
+            {
+              'content': response,
+              'isUser': false,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          ]);
         }
-        return 'I apologize, but I encountered a server error. Please try again.';
+        
+        return response;
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error using local model for famous character: $e');
+        }
+        return 'I apologize, but I encountered an issue with the local AI model. Please try again or select a different model.';
       }
+    } else {
+      /// Use OpenRouter API for cloud models
+      /// Validate API key exists for cloud models
+      if (_apiKey == null || _apiKey!.isEmpty) {
+        return 'Error: Unable to connect to AI service. Please check your API key configuration.';
+      }
+      
+      /// Prepare messages for API
+      final messages = <Map<String, dynamic>>[
+        {'role': 'system', 'content': finalSystemPrompt},
+      ];
+      
+      // Add chat history with proper role fields
+      for (final msg in chatHistory) {
+        // Ensure each message has a proper role field
+        if (msg.containsKey('isUser')) {
+          messages.add({
+            'role': msg['isUser'] == true ? 'user' : 'assistant',
+            'content': msg['content'],
+          });
+        } else if (msg.containsKey('role')) {
+          // If it already has a role, use it directly
+          messages.add({
+            'role': msg['role'],
+            'content': msg['content'],
+          });
+        } else {
+          // Default fallback if we can't determine the role
+          messages.add({
+            'role': 'user', // Default to user
+            'content': msg['content'],
+          });
+        }
+      }
+      
+      // Add the new user message
+      messages.add({'role': 'user', 'content': message});
 
-      /// Parse response with explicit UTF-8 decoding
-      final responseBody = utf8.decode(response.bodyBytes);
-      final data = jsonDecode(responseBody);
-      final aiResponse = data['choices'][0]['message']['content'] as String;
+      /// Prepare request body
+      final body = jsonEncode({
+        'model': model,
+        'messages': messages,
+        'temperature': 0.7,
+        'max_tokens': 25000,
+      });
 
-      /// Add both user message and AI response to chat history
-      _chatHistories[characterName]!.addAll([
-        {
-          'content': message,
-          'isUser': true,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-        {
-          'content': aiResponse,
-          'isUser': false,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      ]);
+      try {
+        /// Send request
+        final response = await http
+            .post(
+              Uri.parse(_openRouterUrl),
+              headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Authorization': 'Bearer $_apiKey',
+                'X-Title': 'Afterlife AI',
+                'Accept': 'application/json; charset=utf-8',
+              },
+              body: body,
+            )
+            .timeout(_requestTimeout);
 
-      return aiResponse;
-    } on TimeoutException catch (e) {
-      if (kDebugMode) {
-        print('TimeoutException in famous_character_service: $e');
+        if (response.statusCode != 200) {
+          if (kDebugMode) {
+            print(
+                'API Error in famous_character_service: ${response.statusCode}: ${response.body}');
+          }
+          return 'I apologize, but I encountered a server error. Please try again.';
+        }
+
+        /// Parse response with explicit UTF-8 decoding
+        final responseBody = utf8.decode(response.bodyBytes);
+        final data = jsonDecode(responseBody);
+        
+        /// Add null checks to prevent "The method '[]' was called on null" error
+        if (data == null || 
+            data['choices'] == null || 
+            data['choices'].isEmpty ||
+            data['choices'][0] == null ||
+            data['choices'][0]['message'] == null) {
+          if (kDebugMode) {
+            print('Error in famous_character_service: Invalid response format: $data');
+          }
+          return 'I apologize, I received an invalid response format. Please try again.';
+        }
+        
+        final aiResponse = data['choices'][0]['message']['content'] as String;
+
+        /// Add both user message and AI response to chat history
+        _chatHistories[characterName]!.addAll([
+          {
+            'content': message,
+            'isUser': true,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+          {
+            'content': aiResponse,
+            'isUser': false,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        ]);
+
+        return aiResponse;
+      } on TimeoutException catch (e) {
+        if (kDebugMode) {
+          print('TimeoutException in famous_character_service: $e');
+        }
+        return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
+      } on http.ClientException catch (e) {
+        if (kDebugMode) {
+          print('ClientException in famous_character_service: $e');
+        }
+        return 'It seems there is a network issue. Please check your internet connection.';
+      } catch (e, s) {
+        if (kDebugMode) {
+          print('Generic Exception in famous_character_service: $e');
+          print(s);
+        }
+        return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
       }
-      return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
-    } on http.ClientException catch (e) {
-      if (kDebugMode) {
-        print('ClientException in famous_character_service: $e');
-      }
-      return 'It seems there is a network issue. Please check your internet connection.';
-    } catch (e, s) {
-      if (kDebugMode) {
-        print('Generic Exception in famous_character_service: $e');
-        print(s);
-      }
-      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
   }
 

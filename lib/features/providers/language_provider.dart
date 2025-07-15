@@ -20,24 +20,12 @@ class LanguageProvider with ChangeNotifier {
         return 'French';
       case 'de':
         return 'German';
+      case 'it':
+        return 'Italian';
       case 'ja':
         return 'Japanese';
       case 'ko':
         return 'Korean';
-      case 'zh':
-        return 'Chinese';
-      case 'pt':
-        return 'Portuguese';
-      case 'ru':
-        return 'Russian';
-      case 'ar':
-        return 'Arabic';
-      case 'hi':
-        return 'Hindi';
-      case 'it':
-        return 'Italian';
-      case 'uk':
-        return 'Ukrainian';
       default:
         return 'English';
     }
@@ -80,15 +68,9 @@ class LanguageProvider with ChangeNotifier {
     Locale('es'),
     Locale('fr'),
     Locale('de'),
+    Locale('it'),
     Locale('ja'),
     Locale('ko'),
-    Locale('zh'),
-    Locale('pt'),
-    Locale('ru'),
-    Locale('ar'),
-    Locale('hi'),
-    Locale('it'),
-    Locale('uk'),
   ];
 
   static List<String> get supportedLanguageCodes => 

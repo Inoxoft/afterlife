@@ -117,7 +117,6 @@ class CharacterModel {
     return modelId.startsWith('local/') || 
            modelId == 'local' ||
            modelId.contains('hammer') || 
-           modelId.contains('deepseek') || 
            modelId.contains('gemma');
   }
 
@@ -283,7 +282,6 @@ class CharacterModel {
         createdAt = DateTime.now();
       }
 
-      // Parse the accent color safely
       Color accentColor;
       try {
         accentColor = Color(json['accentColor'] as int);

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'app_localizations.dart';
 
 class AppLocalizationsIt extends AppLocalizations {
@@ -62,12 +61,7 @@ class AppLocalizationsIt extends AppLocalizations {
   @override String get languageGerman => 'Deutsch';
   @override String get languageJapanese => '日本語';
   @override String get languageKorean => '한국어';
-  @override String get languageChinese => '中文';
-  @override String get languagePortuguese => 'Português';
-  @override String get languageRussian => 'Русский';
-  @override String get languageHindi => 'हिन्दी';
   @override String get languageItalian => 'Italiano';
-  @override String get languageUkrainian => 'Українська';
   @override String get accessingDataStorage => 'ACCESSO AL DEPOSITO DATI';
   @override String get physicist => 'FISICO';
   @override String get presidentActor => 'PRESIDENTE, ATTORE';
@@ -231,185 +225,327 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get theseDigitalTwinsAllow => 'Questi gemelli digitali ti permettono di interagire con prospettive attraverso il tempo e la realtà.';
+
+  // Character Profile screen strings
+  @override
+  String get characterProfile => 'Profilo del Personaggio';
+
+  @override
+  String get editCharacter => 'Modifica Personaggio';
+
+  @override
+  String get characterPrompts => 'PROMPT DEL PERSONAGGIO';
+
+  @override
+  String get fullDetailedPrompt => 'Prompt Dettagliato Completo';
+
+  @override
+  String get usedForCloudAiModels => 'Utilizzato per modelli IA cloud (GPT, Claude, Gemini, ecc.)';
+
+  @override
+  String get optimizedLocalPrompt => 'Prompt Locale Ottimizzato';
+
+  @override
+  String get usedForLocalModels => 'Utilizzato per modelli locali (DeepSeek, Gemma, ecc.)';
+
+  @override
+  String get apiModels => 'Modelli API';
+
+  @override
+  String get localModel => 'Modello Locale';
+
+  @override
+  String get copyPrompt => 'Copia prompt';
+
+  @override
+  String get promptCopiedToClipboard => 'Prompt copiato negli appunti';
+
+  @override
+  String get startChat => 'Inizia Chat';
+
+  @override
+  String get selectCharacterIcon => 'Seleziona Icona del Personaggio';
+
+  @override
+  String get removeIcon => 'Rimuovi Icona (Usa Prima Lettera)';
+
+  @override
+  String get useFirstLetter => 'Rimuovi Icona (Usa Prima Lettera)';
+
+  @override
+  String get characterImage => 'Immagine del Personaggio';
+
+  @override
+  String get chooseFromGallery => 'Scegli dalla Galleria';
+
+  @override
+  String get removeCurrentImage => 'Rimuovi Immagine Attuale';
+
+  @override
+  String get imageGuidelines => 'Linee Guida Immagine:';
+
+  @override
+  String get imageGuidelinesText => '• Le immagini quadrate funzionano meglio\n• Dimensione massima: 512x512 pixel\n• Formati supportati: JPG, PNG\n• Le immagini saranno ottimizzate automaticamente';
+
+  @override
+  String get characterIconImage => 'Immagine Icona del Personaggio';
+
+  @override
+  String get chooseIconFromGallery => 'Scegli Icona dalla Galleria';
+
+  @override
+  String get removeIconImage => 'Rimuovi Immagine Icona';
+
+  @override
+  String get changesSavedSuccessfully => 'Modifiche salvate con successo';
+
+  @override
+  String get errorSavingChanges => 'Errore nel salvare le modifiche: {error}';
+
+  @override
+  String get characterUpdatedSuccessfully => 'Personaggio aggiornato con successo';
+
+  @override
+  String get errorUpdatingCharacter => 'Errore nell\'aggiornamento del personaggio: {error}';
+
+  @override
+  String get viewAllAvailableModels => 'Visualizza tutti i modelli disponibili';
+
+  @override
+  String get exploreMoreAiOptions => 'Esplora più opzioni IA';
+
+  @override
+  String get privacyFirstLocalAi => 'IA locale orientata alla privacy con supporto multimodale (3.1GB)';
+
+  @override
+  String get speedMultimodalSupport => 'Velocità, supporto multimodale e finestra di contesto da 1M token';
+
+  @override
+  String get lightweightInstructionTuned => 'Modello leggero e ottimizzato per istruzioni per la creatività conversazionale';
+
+  @override
+  String get requiresModelDownload => 'Richiede download del modello • Nessun internet necessario';
+
+  @override
+  String get noInternetNeeded => 'Nessun internet necessario';
+
+  @override
+  String get selectAiModel => 'Seleziona Modello IA';
+
+  @override
+  String get chooseAiModelThatWillPower => 'Scegli il modello IA che alimenterà questo personaggio:';
+
+  @override
+  String get aiModelUpdatedSuccessfully => 'Modello IA aggiornato con successo';
+
+  @override
+  String get reinterview => 'Ri-intervista Personaggio';
+
+  @override
+  String get reinterviewDescription => 'Aggiorna la personalità e i ricordi del tuo personaggio attraverso un nuovo processo di intervista';
+
+  @override
+  String get selectIcon => 'Seleziona Icona';
+
+  @override
+  String get selectImage => 'Seleziona Immagine';
+
+  @override
+  String get selectImageFromGallery => 'Seleziona dalla galleria';
+
+  @override
+  String get selectCharacterImage => 'Seleziona immagine del personaggio';
+
+  @override
+  String get openRouterGpt4o => 'Combina ragionamento avanzato, generazione di codice e comprensione multimodale';
+
+  @override
+  String get openRouterClaude35Sonnet => 'Eccelle nella scrittura, matematica, codifica e analisi visiva';
+
+  @override
+  String get openRouterGpt4Turbo => 'Modello GPT-4 ottimizzato per velocità ed efficienza con capacità di immagine';
+
+  @override
+  String get openRouterGeminiPro => 'Modello versatile di Google con solide capacità di ragionamento multimodale';
+
+  @override
+  String get mistralLarge => 'Modello di punta di Mistral AI con capacità di ragionamento superiori';
+
+  @override
+  String get localGemma2b => 'Modello compatto che funziona localmente sul dispositivo per la privacy';
+
+  @override
+  String get private => 'PRIVATO';
+
   // Splash screen status messages
   @override
-  String get initializingPreservationSystems => 'INITIALIZING PRESERVATION SYSTEMS';
+  String get initializingPreservationSystems => 'INIZIALIZZAZIONE SISTEMI DI CONSERVAZIONE';
 
   @override
-  String get calibratingNeuralNetworks => 'CALIBRATING NEURAL NETWORKS';
+  String get calibratingNeuralNetworks => 'CALIBRAZIONE RETI NEURALI';
 
   @override
-  String get synchronizingQuantumStates => 'SYNCHRONIZING QUANTUM STATES';
+  String get synchronizingQuantumStates => 'SINCRONIZZAZIONE STATI QUANTICI';
 
   @override
-  String get aligningConsciousnessMatrices => 'ALIGNING CONSCIOUSNESS MATRICES';
+  String get aligningConsciousnessMatrices => 'ALLINEAMENTO MATRICI DI COSCIENZA';
 
   @override
-  String get establishingNeuralLinks => 'ESTABLISHING NEURAL LINKS';
+  String get establishingNeuralLinks => 'STABILIMENTO COLLEGAMENTI NEURALI';
 
   @override
-  String get preservationSystemsReady => 'PRESERVATION SYSTEMS READY';
+  String get preservationSystemsReady => 'SISTEMI DI CONSERVAZIONE PRONTI';
 
   @override
-  String get errorInitializingSystems => 'ERROR INITIALIZING SYSTEMS';
+  String get errorInitializingSystems => 'ERRORE INIZIALIZZAZIONE SISTEMI';
 
   // Error messages and user feedback
   @override
-  String get restartApp => 'Restart App';
+  String get restartApp => 'Riavvia App';
 
   @override
-  String get initializationError => 'Initialization Error';
+  String get initializationError => 'Errore di Inizializzazione';
 
   @override
-  String get apiKeyCannotBeEmpty => 'API key cannot be empty';
+  String get apiKeyCannotBeEmpty => 'La chiave API non può essere vuota';
 
   @override
-  String get changesSavedSuccessfully => 'Changes saved successfully';
+  String get characterCardCopiedToClipboard => 'Scheda personaggio copiata negli appunti';
 
   @override
-  String get characterUpdatedSuccessfully => 'Character updated successfully';
+  String get charactersExportedSuccessfully => 'Personaggi esportati con successo!';
 
   @override
-  String get characterCardCopiedToClipboard => 'Character card copied to clipboard';
+  String get errorExportingCharacters => 'Errore nell\'esportazione dei personaggi';
 
   @override
-  String get charactersExportedSuccessfully => 'Characters exported successfully!';
+  String get errorSavingApiKey => 'Errore nel salvare la chiave API';
 
   @override
-  String get errorExportingCharacters => 'Error exporting characters';
+  String get errorLoadingCharacter => 'Errore nel caricamento del personaggio';
 
   @override
-  String get errorSavingApiKey => 'Error saving API key';
+  String get failedToSaveSettings => 'Impossibile salvare le impostazioni';
 
   @override
-  String get errorLoadingCharacter => 'Error loading character';
-
-  @override
-  String get failedToSaveSettings => 'Failed to save settings';
-
-  @override
-  String get apiKeyUpdatedSuccessfully => 'API key updated successfully';
+  String get apiKeyUpdatedSuccessfully => 'Chiave API aggiornata con successo';
 
   // Dialog boxes and confirmations
   @override
-  String get restartInterview => 'Restart Interview';
+  String get restartInterview => 'Ricomincia Intervista';
 
   @override
-  String get clearResponsesConfirmation => 'This will clear all your responses. Are you sure?';
+  String get clearResponsesConfirmation => 'Questo cancellerà tutte le tue risposte. Sei sicuro?';
 
   @override
-  String get deleteCharacter => 'Delete Character';
+  String get deleteCharacter => 'Elimina Personaggio';
 
   @override
-  String get deleteCharacterConfirmation => 'This action cannot be undone.';
+  String get deleteCharacterConfirmation => 'Questa azione non può essere annullata.';
 
   @override
-  String get characterProfile => 'Character Profile';
+  String get delete => 'Elimina';
 
   @override
-  String get editCharacter => 'Edit Character';
+  String get save => 'Salva';
 
   @override
-  String get delete => 'Delete';
-
-  @override
-  String get save => 'Save';
-
-  @override
-  String get edit => 'Edit';
+  String get edit => 'Modifica';
 
   // API Key Dialog
   @override
-  String get openRouterApiKey => 'OpenRouter API Key';
+  String get openRouterApiKey => 'Chiave API OpenRouter';
 
   @override
-  String get apiKeyRequired => 'API Key Required';
+  String get apiKeyRequired => 'Chiave API Richiesta';
 
   @override
-  String get updateApiKeyDescription => 'Update your OpenRouter API key for AI functionality:';
+  String get updateApiKeyDescription => 'Aggiorna la tua chiave API OpenRouter per la funzionalità AI:';
 
   @override
-  String get apiKeyRequiredDescription => 'The application requires an OpenRouter API key to function. Please enter your API key below:';
+  String get apiKeyRequiredDescription => 'L\'applicazione richiede una chiave API OpenRouter per funzionare. Inserisci la tua chiave API qui sotto:';
 
   @override
-  String get enterApiKey => 'Enter API Key (sk-...)';
+  String get enterApiKey => 'Inserisci Chiave API (sk-...)';
 
   @override
-  String get clearCurrentKey => 'Clear current key';
+  String get clearCurrentKey => 'Cancella chiave attuale';
 
   @override
-  String get getApiKeyFromOpenRouter => 'You can get an API key from openrouter.ai';
+  String get getApiKeyFromOpenRouter => 'Puoi ottenere una chiave API da openrouter.ai';
 
   @override
-  String get usingCustomApiKey => 'Using your custom API key';
+  String get usingCustomApiKey => 'Utilizzando la tua chiave API personalizzata';
 
   @override
-  String get replaceKeyInstructions => 'To replace with a different key, clear the field first and enter new key';
+  String get replaceKeyInstructions => 'Per sostituire con una chiave diversa, prima cancella il campo e inserisci la nuova chiave';
 
   @override
-  String get apiKeyShouldStartWithSk => 'API key should start with "sk-"';
+  String get apiKeyShouldStartWithSk => 'La chiave API dovrebbe iniziare con "sk-"';
 
   // Interview and character creation
   @override
-  String get invalidCharacterCardFormat => 'Invalid character card format';
+  String get invalidCharacterCardFormat => 'Formato scheda personaggio non valido';
 
   @override
-  String get characterDataIncomplete => 'Character data is incomplete';
+  String get characterDataIncomplete => 'Dati del personaggio incompleti';
 
   @override
-  String get failedToSaveCharacter => 'Failed to save character';
+  String get failedToSaveCharacter => 'Impossibile salvare il personaggio';
 
   @override
-  String get characterProfileNotFound => 'Character profile not found';
+  String get characterProfileNotFound => 'Profilo del personaggio non trovato';
 
   @override
-  String get errorSavingCharacter => 'Error saving character';
+  String get errorSavingCharacter => 'Errore nel salvare il personaggio';
 
   // Generic error messages with parameters
   @override
-  String errorLoadingCharacterWithDetails(String error) => 'Error loading character: $error';
+  String errorLoadingCharacterWithDetails(String error) => 'Errore nel caricamento del personaggio: $error';
 
   @override
-  String errorSavingApiKeyWithDetails(String error) => 'Error saving API key: $error';
+  String errorSavingApiKeyWithDetails(String error) => 'Errore nel salvare la chiave API: $error';
 
   @override
-  String errorRemovingApiKeyWithDetails(String error) => 'Error removing API key: $error';
+  String errorRemovingApiKeyWithDetails(String error) => 'Errore nella rimozione della chiave API: $error';
 
   @override
-  String failedToSaveSettingsWithDetails(String error) => 'Failed to save settings: $error';
+  String failedToSaveSettingsWithDetails(String error) => 'Impossibile salvare le impostazioni: $error';
 
   @override
-  String aiModelUpdatedForCharacter(String characterName) => 'AI model updated for $characterName';
+  String aiModelUpdatedForCharacter(String characterName) => 'Modello AI aggiornato per $characterName';
 
   @override
-  String characterCardCopiedForCharacter(String characterName) => 'Character card for "$characterName" copied to clipboard';
+  String characterCardCopiedForCharacter(String characterName) => 'Scheda personaggio per "$characterName" copiata negli appunti';
 
   @override
-  String errorUpdatingModel(String error) => 'Error updating model: $error';
+  String errorUpdatingModel(String error) => 'Errore nell\'aggiornamento del modello: $error';
 
   @override
-  String errorSavingCharacterWithDetails(String error) => 'Error saving character: $error';
+  String errorSavingCharacterWithDetails(String error) => 'Errore nel salvare il personaggio: $error';
 
   @override
-  String errorClearingDataWithDetails(String error) => 'Error clearing data: $error';
+  String errorClearingDataWithDetails(String error) => 'Errore nella cancellazione dei dati: $error';
 
   @override
-  String errorExportingCharactersWithDetails(String error) => 'Error exporting characters: $error';
+  String errorExportingCharactersWithDetails(String error) => 'Errore nell\'esportazione dei personaggi: $error';
+
   // Additional UI strings
   @override
-  String get skipForNow => 'Skip for now';
+  String get skipForNow => 'Salta per ora';
 
   @override
-  String get updateKey => 'Update Key';
+  String get updateKey => 'Aggiorna Chiave';
 
   @override
-  String get removeKey => 'Remove Key';
+  String get removeKey => 'Rimuovi Chiave';
 
   @override
-  String get saveKey => 'Save Key';
+  String get saveKey => 'Salva Chiave';
 
   @override
-  String get usingDefaultApiKey => 'Using default API key from .env file';
+  String get usingDefaultApiKey => 'Utilizzando la chiave API predefinita dal file .env';
+
   // Interview initial message
   @override
   String get interviewInitialMessage => 'Ciao! Sono pronto a creare una scheda personaggio dettagliata per te. Puoi scegliere:\n\n1. Rispondere alle mie domande sulla tua personalità ed esperienze\n2. Caricare un file (PDF, TXT, DOC o email) contenente le tue informazioni\n\nCosa preferiresti?';

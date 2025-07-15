@@ -761,8 +761,15 @@ Stay in character at all times. Never break character or admit you are an AI.'''
   static final Map<String, List<Map<String, dynamic>>> characterModels = {
     'Albert Einstein': [
       {
-        'id': 'openai/gpt-4.5-orion',
-        'name': 'GPT-4.5 (Orion)',
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -780,13 +787,20 @@ Stay in character at all times. Never break character or admit you are an AI.'''
         'recommended': false,
       },
       {
-        'id': 'meta-llama/llama-4-maverick:free',
-        'name': 'Llama 4 Maverick (Free)',
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
     ],
     'Alan Turing': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
       {
         'id': 'openai/gpt-4o',
         'name': 'GPT-4o',
@@ -814,6 +828,13 @@ Stay in character at all times. Never break character or admit you are an AI.'''
     ],
     'Marilyn Monroe': [
       {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
         'id': 'openai/gpt-4.5-orion',
         'name': 'GPT-4.5 (Orion)',
         'description': 'Expressive, emotionally rich responses',
@@ -840,6 +861,13 @@ Stay in character at all times. Never break character or admit you are an AI.'''
       },
     ],
     'Ronald Reagan': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
       {
         'id': 'anthropic/claude-3.7-sonnet',
         'name': 'Claude 3.7 Sonnet',

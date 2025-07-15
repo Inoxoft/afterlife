@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'translations_en.dart';
@@ -7,12 +6,7 @@ import 'translations_fr.dart';
 import 'translations_de.dart';
 import 'translations_ja.dart';
 import 'translations_ko.dart';
-import 'translations_zh.dart';
-import 'translations_pt.dart';
-import 'translations_ru.dart';
-import 'translations_hi.dart';
 import 'translations_it.dart';
-import 'translations_uk.dart';
 
 abstract class AppLocalizations {
   static AppLocalizations of(BuildContext context) {
@@ -26,14 +20,9 @@ abstract class AppLocalizations {
     Locale('es', ''), // Spanish
     Locale('fr', ''), // French
     Locale('de', ''), // German
+    Locale('it', ''), // Italian
     Locale('ja', ''), // Japanese
     Locale('ko', ''), // Korean
-    Locale('zh', ''), // Chinese
-    Locale('pt', ''), // Portuguese
-    Locale('ru', ''), // Russian
-    Locale('hi', ''), // Hindi
-    Locale('it', ''), // Italian
-    Locale('uk', ''), // Ukrainian
   ];
 
   // Common UI strings
@@ -103,14 +92,9 @@ abstract class AppLocalizations {
   String get languageSpanish;
   String get languageFrench;
   String get languageGerman;
+  String get languageItalian;
   String get languageJapanese;
   String get languageKorean;
-  String get languageChinese;
-  String get languagePortuguese;
-  String get languageRussian;
-  String get languageHindi;
-  String get languageItalian;
-  String get languageUkrainian;
 
   // System prompt language instruction
   String systemPromptLanguageInstruction(String language);
@@ -209,6 +193,131 @@ abstract class AppLocalizations {
   String get masksAreAIPersonas;
   String get eachMaskTriesToEmbody;
   String get theseDigitalTwinsAllow;
+
+  // Character Profile screen strings
+  String get characterProfile;
+  String get editCharacter;
+  String get characterPrompts;
+  String get fullDetailedPrompt;
+  String get usedForCloudAiModels;
+  String get optimizedLocalPrompt;
+  String get usedForLocalModels;
+  String get apiModels;
+  String get localModel;
+  String get copyPrompt;
+  String get promptCopiedToClipboard;
+  String get startChat;
+  String get selectCharacterIcon;
+  String get removeIcon;
+  String get useFirstLetter;
+  String get characterImage;
+  String get chooseFromGallery;
+  String get removeCurrentImage;
+  String get imageGuidelines;
+  String get imageGuidelinesText;
+  String get characterIconImage;
+  String get chooseIconFromGallery;
+  String get removeIconImage;
+  String get changesSavedSuccessfully;
+  String get errorSavingChanges;
+  String get characterUpdatedSuccessfully;
+  String get errorUpdatingCharacter;
+  String get viewAllAvailableModels;
+  String get exploreMoreAiOptions;
+  String get privacyFirstLocalAi;
+  String get speedMultimodalSupport;
+  String get lightweightInstructionTuned;
+  String get requiresModelDownload;
+  String get noInternetNeeded;
+  String get selectAiModel;
+  String get chooseAiModelThatWillPower;
+  String get aiModelUpdatedSuccessfully;
+  String get reinterview;
+  String get reinterviewDescription;
+
+  // Splash screen status messages
+  String get initializingPreservationSystems;
+  String get calibratingNeuralNetworks;
+  String get synchronizingQuantumStates;
+  String get aligningConsciousnessMatrices;
+  String get establishingNeuralLinks;
+  String get preservationSystemsReady;
+  String get errorInitializingSystems;
+
+  // Error messages and user feedback
+  String get restartApp;
+  String get initializationError;
+  String get apiKeyCannotBeEmpty;
+  String get characterCardCopiedToClipboard;
+  String get charactersExportedSuccessfully;
+  String get errorExportingCharacters;
+  String get errorSavingApiKey;
+  String get errorLoadingCharacter;
+  String get failedToSaveSettings;
+  String get apiKeyUpdatedSuccessfully;
+
+  // Dialog boxes and confirmations
+  String get restartInterview;
+  String get clearResponsesConfirmation;
+  String get deleteCharacter;
+  String get deleteCharacterConfirmation;
+  String get delete;
+  String get save;
+  String get edit;
+
+  // API Key Dialog
+  String get openRouterApiKey;
+  String get apiKeyRequired;
+  String get updateApiKeyDescription;
+  String get apiKeyRequiredDescription;
+  String get enterApiKey;
+  String get clearCurrentKey;
+  String get getApiKeyFromOpenRouter;
+  String get usingCustomApiKey;
+  String get replaceKeyInstructions;
+  String get apiKeyShouldStartWithSk;
+
+  // Interview and character creation
+  String get invalidCharacterCardFormat;
+  String get characterDataIncomplete;
+  String get failedToSaveCharacter;
+  String get characterProfileNotFound;
+  String get errorSavingCharacter;
+
+  // Generic error messages with parameters
+  String errorLoadingCharacterWithDetails(String error);
+  String errorSavingApiKeyWithDetails(String error);
+  String errorRemovingApiKeyWithDetails(String error);
+  String failedToSaveSettingsWithDetails(String error);
+  String aiModelUpdatedForCharacter(String characterName);
+  String characterCardCopiedForCharacter(String characterName);
+  String errorUpdatingModel(String error);
+  String errorSavingCharacterWithDetails(String error);
+  String errorClearingDataWithDetails(String error);
+  String errorExportingCharactersWithDetails(String error);
+
+  // Additional UI strings
+  String get skipForNow;
+  String get updateKey;
+  String get removeKey;
+  String get saveKey;
+  String get usingDefaultApiKey;
+
+  // Interview initial message
+  String get interviewInitialMessage;
+
+  // Additional methods from Spanish translation that need to be in base class
+  String get selectIcon;
+  String get selectImage;
+  String get selectImageFromGallery;
+  String get selectCharacterImage;
+  String get openRouterGpt4o;
+  String get openRouterClaude35Sonnet;
+  String get openRouterGpt4Turbo;
+  String get openRouterGeminiPro;
+  String get mistralLarge;
+  String get localGemma2b;
+  String get private;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -240,18 +349,8 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
         return AppLocalizationsJa();
       case 'ko':
         return AppLocalizationsKo();
-      case 'zh':
-        return AppLocalizationsZh();
-      case 'pt':
-        return AppLocalizationsPt();
-      case 'ru':
-        return AppLocalizationsRu();
-      case 'hi':
-        return AppLocalizationsHi();
       case 'it':
         return AppLocalizationsIt();
-      case 'uk':
-        return AppLocalizationsUk();
       default:
         return AppLocalizationsEn();
     }

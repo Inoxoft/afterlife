@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'app_localizations.dart';
 
 class AppLocalizationsEs extends AppLocalizations {
@@ -183,22 +182,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get languageKorean => '한국어';
 
   @override
-  String get languageChinese => '中文';
-
-  @override
-  String get languagePortuguese => 'Português';
-
-  @override
-  String get languageRussian => 'Русский';
-
-  @override
-  String get languageHindi => 'हिन्दी';
-
-  @override
   String get languageItalian => 'Italiano';
-
-  @override
-  String get languageUkrainian => 'Українська';
 
   @override
   String get accessingDataStorage => 'ACCEDIENDO AL ALMACENAMIENTO DE DATOS';
@@ -434,4 +418,321 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get theseDigitalTwinsAllow => 'Estos gemelos digitales te permiten interactuar con perspectivas de diferentes épocas y realidades.';
+
+  // Character Profile Screen Localizations
+  @override
+  String get characterProfile => 'Perfil del Personaje';
+
+  @override
+  String get editCharacter => 'Editar Personaje';
+
+  @override
+  String get characterPrompts => 'PROMPTS DEL PERSONAJE';
+
+  @override
+  String get fullDetailedPrompt => 'Prompt Detallado Completo';
+
+  @override
+  String get usedForCloudAiModels => 'Usado para modelos de IA en la nube (GPT, Claude, Gemini, etc.)';
+
+  @override
+  String get optimizedLocalPrompt => 'Prompt Local Optimizado';
+
+  @override
+  String get usedForLocalModels => 'Usado para modelos locales (DeepSeek, Gemma, etc.)';
+
+  @override
+  String get apiModels => 'Modelos API';
+
+  @override
+  String get localModel => 'Modelo Local';
+
+  @override
+  String get copyPrompt => 'Copiar prompt';
+
+  @override
+  String get promptCopiedToClipboard => 'Prompt copiado al portapapeles';
+
+  @override
+  String get startChat => 'Iniciar Chat';
+
+  @override
+  String get selectCharacterIcon => 'Seleccionar Icono del Personaje';
+
+  @override
+  String get removeIcon => 'Eliminar Icono (Usar Primera Letra)';
+
+  @override
+  String get useFirstLetter => 'Eliminar Icono (Usar Primera Letra)';
+
+  @override
+  String get characterImage => 'Imagen del Personaje';
+
+  @override
+  String get chooseFromGallery => 'Elegir de la Galería';
+
+  @override
+  String get removeCurrentImage => 'Eliminar Imagen Actual';
+
+  @override
+  String get imageGuidelines => 'Pautas de Imagen:';
+
+  @override
+  String get imageGuidelinesText => '• Las imágenes cuadradas funcionan mejor\n• Tamaño máximo: 512x512 píxeles\n• Formatos soportados: JPG, PNG\n• Las imágenes se optimizarán automáticamente';
+
+  @override
+  String get characterIconImage => 'Imagen del Icono del Personaje';
+
+  @override
+  String get chooseIconFromGallery => 'Elegir Icono de la Galería';
+
+  @override
+  String get removeIconImage => 'Eliminar Imagen del Icono';
+
+  @override
+  String get changesSavedSuccessfully => 'Cambios guardados exitosamente';
+
+  @override
+  String get errorSavingChanges => 'Error al guardar cambios: {error}';
+
+  @override
+  String get characterUpdatedSuccessfully => 'Personaje actualizado exitosamente';
+
+  @override
+  String get errorUpdatingCharacter => 'Error al actualizar personaje: {error}';
+
+  @override
+  String get viewAllAvailableModels => 'Ver todos los modelos disponibles';
+
+  @override
+  String get exploreMoreAiOptions => 'Explorar más opciones de IA';
+
+  @override
+  String get privacyFirstLocalAi => 'IA local con privacidad primero y soporte multimodal (3.1GB)';
+
+  @override
+  String get speedMultimodalSupport => 'Velocidad, soporte multimodal y ventana de contexto de 1M tokens';
+
+  @override
+  String get lightweightInstructionTuned => 'Modelo ligero y optimizado por instrucciones para creatividad conversacional';
+
+  @override
+  String get requiresModelDownload => 'Requiere descarga de modelo • No se necesita internet';
+
+  @override
+  String get noInternetNeeded => 'No se necesita internet';
+
+  @override
+  String get selectAiModel => 'Seleccionar Modelo de IA';
+
+  @override
+  String get chooseAiModelThatWillPower => 'Elige el modelo de IA que potenciará este personaje:';
+
+  @override
+  String get aiModelUpdatedSuccessfully => 'Modelo de IA actualizado exitosamente';
+
+  @override
+  String get reinterview => 'Re-entrevistar Personaje';
+
+  @override
+  String get reinterviewDescription => 'Actualiza la personalidad y memorias de tu personaje a través de un nuevo proceso de entrevista';
+
+  @override
+  String get selectIcon => 'Seleccionar Icono';
+
+  @override
+  String get selectImage => 'Seleccionar Imagen';
+
+  @override
+  String get selectImageFromGallery => 'Seleccionar de la galería';
+
+  @override
+  String get selectCharacterImage => 'Seleccionar imagen del personaje';
+
+  @override
+  String get openRouterGpt4o => 'Combina razonamiento avanzado, generación de código y comprensión multimodal';
+
+  @override
+  String get openRouterClaude35Sonnet => 'Excelente en escritura, matemáticas, codificación y análisis visual';
+
+  @override
+  String get openRouterGpt4Turbo => 'Modelo GPT-4 optimizado para velocidad y eficiencia con capacidades de imagen';
+
+  @override
+  String get openRouterGeminiPro => 'Modelo versátil de Google con sólidas capacidades de razonamiento multimodal';
+
+  @override
+  String get mistralLarge => 'Modelo insignia de Mistral AI con capacidades superiores de razonamiento';
+
+  @override
+  String get localGemma2b => 'Modelo compacto que se ejecuta localmente en el dispositivo para privacidad';
+
+  @override
+  String get private => 'PRIVADO';
+
+  @override
+  String get errorLoadingCharacter => 'Error al cargar personaje';
+
+  @override
+  String get failedToSaveSettings => 'Error al guardar configuración';
+
+  @override
+  String get apiKeyUpdatedSuccessfully => 'Clave API actualizada exitosamente';
+
+  @override
+  String get restartInterview => 'Reiniciar Entrevista';
+
+  @override
+  String get clearResponsesConfirmation => 'Esto borrará todas tus respuestas. ¿Estás seguro?';
+
+  @override
+  String get deleteCharacter => 'Eliminar Personaje';
+
+  @override
+  String get deleteCharacterConfirmation => 'Esta acción no se puede deshacer.';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get save => 'Guardar';
+
+  @override
+  String get edit => 'Editar';
+
+  @override
+  String get openRouterApiKey => 'Clave API OpenRouter';
+
+  @override
+  String get apiKeyRequired => 'Clave API Requerida';
+
+  @override
+  String get updateApiKeyDescription => 'Actualiza tu clave API de OpenRouter para la funcionalidad de IA:';
+
+  @override
+  String get apiKeyRequiredDescription => 'La aplicación requiere una clave API de OpenRouter para funcionar. Por favor ingresa tu clave API a continuación:';
+
+  @override
+  String get enterApiKey => 'Ingresa Clave API (sk-...)';
+
+  @override
+  String get clearCurrentKey => 'Limpiar clave actual';
+
+  @override
+  String get getApiKeyFromOpenRouter => 'Puedes obtener una clave API desde openrouter.ai';
+
+  @override
+  String get usingCustomApiKey => 'Usando tu clave API personalizada';
+
+  @override
+  String get replaceKeyInstructions => 'Para reemplazar con una clave diferente, primero limpia el campo e ingresa la nueva clave';
+
+  @override
+  String get apiKeyShouldStartWithSk => 'La clave API debe empezar con "sk-"';
+
+  @override
+  String get invalidCharacterCardFormat => 'Formato de tarjeta de personaje inválido';
+
+  @override
+  String get characterDataIncomplete => 'Los datos del personaje están incompletos';
+
+  @override
+  String get failedToSaveCharacter => 'Error al guardar personaje';
+
+  @override
+  String get characterProfileNotFound => 'Perfil del personaje no encontrado';
+
+  @override
+  String get errorSavingCharacter => 'Error al guardar personaje';
+
+  @override
+  String errorLoadingCharacterWithDetails(String error) => 'Error al cargar personaje: $error';
+
+  @override
+  String errorSavingApiKeyWithDetails(String error) => 'Error al guardar clave API: $error';
+
+  @override
+  String errorRemovingApiKeyWithDetails(String error) => 'Error al eliminar clave API: $error';
+
+  @override
+  String failedToSaveSettingsWithDetails(String error) => 'Error al guardar configuración: $error';
+
+  @override
+  String aiModelUpdatedForCharacter(String characterName) => 'Modelo de IA actualizado para $characterName';
+
+  @override
+  String characterCardCopiedForCharacter(String characterName) => 'Tarjeta de personaje para "$characterName" copiada al portapapeles';
+
+  @override
+  String errorUpdatingModel(String error) => 'Error al actualizar modelo: $error';
+
+  @override
+  String errorSavingCharacterWithDetails(String error) => 'Error al guardar personaje: $error';
+
+  @override
+  String errorClearingDataWithDetails(String error) => 'Error al limpiar datos: $error';
+
+  @override
+  String errorExportingCharactersWithDetails(String error) => 'Error al exportar personajes: $error';
+
+  @override
+  String get skipForNow => 'Omitir por ahora';
+
+  @override
+  String get updateKey => 'Actualizar Clave';
+
+  @override
+  String get removeKey => 'Eliminar Clave';
+
+  @override
+  String get saveKey => 'Guardar Clave';
+
+  @override
+  String get usingDefaultApiKey => 'Usando clave API predeterminada del archivo .env';
+
+  @override
+  String get interviewInitialMessage => '¡Hola! Estoy listo para crear una tarjeta de personaje detallada para ti. Puedes elegir:\n\n1. Responder mis preguntas sobre tu personalidad y experiencias\n2. Subir un archivo (PDF, TXT, DOC o email) que contenga tu información\n\n¿Qué preferirías?';
+
+  // Splash screen status messages
+  @override
+  String get initializingPreservationSystems => 'INICIALIZANDO SISTEMAS DE PRESERVACIÓN';
+
+  @override
+  String get calibratingNeuralNetworks => 'CALIBRANDO REDES NEURONALES';
+
+  @override
+  String get synchronizingQuantumStates => 'SINCRONIZANDO ESTADOS CUÁNTICOS';
+
+  @override
+  String get aligningConsciousnessMatrices => 'ALINEANDO MATRICES DE CONCIENCIA';
+
+  @override
+  String get establishingNeuralLinks => 'ESTABLECIENDO ENLACES NEURONALES';
+
+  @override
+  String get preservationSystemsReady => 'SISTEMAS DE PRESERVACIÓN LISTOS';
+
+  @override
+  String get errorInitializingSystems => 'ERROR INICIALIZANDO SISTEMAS';
+
+  @override
+  String get restartApp => 'Reiniciar App';
+
+  @override
+  String get initializationError => 'Error de Inicialización';
+
+  @override
+  String get apiKeyCannotBeEmpty => 'La clave API no puede estar vacía';
+
+  @override
+  String get characterCardCopiedToClipboard => 'Tarjeta de personaje copiada al portapapeles';
+
+  @override
+  String get charactersExportedSuccessfully => '¡Personajes exportados exitosamente!';
+
+  @override
+  String get errorExportingCharacters => 'Error al exportar personajes';
+
+  @override
+  String get errorSavingApiKey => 'Error al guardar clave API';
 } 

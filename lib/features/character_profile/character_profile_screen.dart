@@ -11,6 +11,7 @@ import '../character_interview/interview_screen.dart';
 import '../../core/widgets/model_selection_dialog.dart';
 import '../character_chat/chat_screen.dart';
 import '../../core/utils/responsive_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -227,18 +228,19 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Character not loaded yet
     if (_character == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Character Profile')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).characterProfile)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     // Build sections from prompt
     final sections = _parseSystemPrompt(_character!.systemPrompt);
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.midnightPurple,
-        title: Text(_isEditing ? 'Edit Character' : 'Character Profile'),
+        title: Text(_isEditing ? localizations.editCharacter : localizations.characterProfile),
         actions: [
           if (!_isEditing)
             Container(
@@ -253,7 +255,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.edit, color: AppTheme.warmGold),
-                tooltip: 'Edit Character',
+                tooltip: localizations.editCharacter,
                 onPressed: () {
                   setState(() {
                     _isEditing = true;
@@ -311,6 +313,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   // New simplified character card section
   Widget _buildCharacterCardSection() {
+    final localizations = AppLocalizations.of(context);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
@@ -340,9 +344,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'CHARACTER PROMPTS',
+                    localizations.characterPrompts,
                     style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                      text: 'CHARACTER PROMPTS',
+                      text: localizations.characterPrompts,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.warmGold,
@@ -388,7 +392,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             children: [
                               Icon(Icons.cloud, size: 16),
                               SizedBox(width: 4),
-                              Text('API Models', style: TextStyle(fontSize: 12)),
+                              Text(localizations.apiModels, style: TextStyle(fontSize: 12)),
                             ],
                           ),
                         ),
@@ -398,7 +402,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             children: [
                               Icon(Icons.phone_android, size: 16),
                               SizedBox(width: 4),
-                              Text('Local Model', style: TextStyle(fontSize: 12)),
+                              Text(localizations.localModel, style: TextStyle(fontSize: 12)),
                             ],
                           ),
                         ),
@@ -414,17 +418,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       children: [
                         // Full prompt for API models
                         _buildPromptContainer(
-                          title: 'Full Detailed Prompt',
-                          subtitle: 'Used for cloud AI models (GPT, Claude, Gemini, etc.)',
+                          title: localizations.fullDetailedPrompt,
+                          subtitle: localizations.usedForCloudAiModels,
                           content: _character!.systemPrompt,
-                          onCopy: () => _copyPrompt(_character!.systemPrompt, 'full prompt'),
+                          onCopy: () => _copyPrompt(_character!.systemPrompt, localizations.fullDetailedPrompt),
                         ),
                         // Local prompt for DeepSeek
                         _buildPromptContainer(
-                          title: 'Optimized Local Prompt',
-                          subtitle: 'Used for local models (DeepSeek, Gemma, etc.)',
+                          title: localizations.optimizedLocalPrompt,
+                          subtitle: localizations.usedForLocalModels,
                           content: _character!.localPrompt,
-                          onCopy: () => _copyPrompt(_character!.localPrompt, 'local prompt'),
+                          onCopy: () => _copyPrompt(_character!.localPrompt, localizations.optimizedLocalPrompt),
                         ),
                       ],
                     ),
@@ -487,7 +491,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 icon: Icon(Icons.copy, color: AppTheme.warmGold, size: 16),
                 padding: EdgeInsets.all(4),
                 constraints: BoxConstraints(minWidth: 24, minHeight: 24),
-                tooltip: 'Copy prompt',
+                tooltip: AppLocalizations.of(context).copyPrompt,
               ),
             ],
           ),
@@ -516,7 +520,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     Clipboard.setData(ClipboardData(text: prompt));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${promptType.capitalize()} copied to clipboard'),
+        content: Text(AppLocalizations.of(context).promptCopiedToClipboard),
         backgroundColor: AppTheme.warmGold.withValues(alpha: 0.9),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -525,6 +529,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildAIModelSection() {
+    final localizations = AppLocalizations.of(context);
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -537,9 +543,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'AI MODEL',
+            localizations.aiModel,
             style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-              text: 'AI MODEL',
+              text: localizations.aiModel,
               color: AppTheme.warmGold,
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -582,7 +588,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('AI model updated for ${_character!.name}'),
+                    content: Text(AppLocalizations.of(context).aiModelUpdatedFor.replaceAll('{name}', _character!.name)),
                   ),
                 );
               }
@@ -606,18 +612,18 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'View all available models',
+                        localizations.viewAllAvailableModels,
                         style: UkrainianFontUtils.latoWithUkrainianSupport(
-                          text: 'View all available models',
+                          text: localizations.viewAllAvailableModels,
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
-                        'Explore more AI options',
+                        localizations.exploreMoreAiOptions,
                         style: UkrainianFontUtils.latoWithUkrainianSupport(
-                          text: 'Explore more AI options',
+                          text: localizations.exploreMoreAiOptions,
                           color: Colors.white70,
                           fontSize: 13,
                         ),
@@ -639,12 +645,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildModelOptions() {
+    final localizations = AppLocalizations.of(context);
+    
     // Define the models for user-created twins
     final models = [
       {
         'id': 'local/gemma-3n-e2b-it',
         'name': 'Local Gemma 3n E2B IT',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': localizations.privacyFirstLocalAi,
         'provider': 'Local Device',
         'recommended': true,
         'isLocal': true,
@@ -652,15 +660,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       {
         'id': 'google/gemini-2.0-flash-001',
         'name': 'Gemini 2.0 Flash',
-        'description': 'Speed, multimodal support, and 1M token context window',
+        'description': localizations.speedMultimodalSupport,
         'provider': 'Google Cloud',
         'recommended': true,
       },
       {
         'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
         'name': 'Mistral Small 3.1',
-        'description':
-            'Lightweight, instruction-tuned model for conversational creativity',
+        'description': localizations.lightweightInstructionTuned,
         'provider': 'apidog',
         'free': true,
         'recommended': false,
@@ -668,17 +675,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       {
         'id': 'openai/gpt-4o',
         'name': 'GPT-4o',
-        'description':
-            'Superior multilingual and vision capabilities via OpenRouter',
+        'description': 'Superior multilingual and vision capabilities via OpenRouter',
         'provider': 'OpenRouter',
-        'recommended': false,
-      },
-      {
-        'id': 'deepseek/deepseek-r1',
-        'name': 'DeepSeek R1',
-        'description':
-            'MoE-based specialist for scientific and logical reasoning',
-        'provider': 'apidog',
         'recommended': false,
       },
     ];
@@ -1117,9 +1115,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             },
             icon: Icon(Icons.chat_bubble_outline, size: 20 * fontScale),
             label: Text(
-              'Start Chat',
+              AppLocalizations.of(context).startChat,
               style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: 'Start Chat',
+                text: AppLocalizations.of(context).startChat,
                 fontSize: 16 * fontScale,
                 fontWeight: FontWeight.bold,
               ),
@@ -1144,6 +1142,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   // Icon selection dialog
   void _showIconSelectionDialog() {
+    final localizations = AppLocalizations.of(context);
+    
     final List<IconData> availableIcons = [
       Icons.person,
       Icons.face,
@@ -1227,9 +1227,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           ),
         ),
         title: Text(
-          'Select Character Icon',
+          localizations.selectCharacterIcon,
           style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-            text: 'Select Character Icon',
+            text: localizations.selectCharacterIcon,
             color: AppTheme.warmGold,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -1251,7 +1251,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   },
                   icon: Icon(Icons.clear, color: AppTheme.midnightPurple),
                   label: Text(
-                    'Remove Icon (Use First Letter)',
+                    localizations.useFirstLetter,
                     style: TextStyle(color: AppTheme.midnightPurple),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -1327,6 +1327,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   // Image selection dialog
   void _showImageSelectionDialog() {
+    final localizations = AppLocalizations.of(context);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1339,9 +1341,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           ),
         ),
         title: Text(
-          'Character Image',
+          localizations.characterImage,
           style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-            text: 'Character Image',
+            text: localizations.characterImage,
             color: AppTheme.warmGold,
             fontWeight: FontWeight.bold,
             fontSize: 18,

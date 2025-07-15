@@ -10,7 +10,7 @@ class ChatService {
   static const String _openRouterUrl =
       'https://openrouter.ai/api/v1/chat/completions';
   static const Duration _requestTimeout = Duration(seconds: 120);
-  static const String _defaultModel = 'anthropic/claude-3.5-sonnet';
+  static const String _defaultModel = 'google/gemini-2.5-flash';
   static const double _defaultTemperature = 0.7;
   static const int _defaultMaxTokens = 25000;
 
@@ -109,7 +109,25 @@ class ChatService {
     if (systemPrompt?.isNotEmpty ?? false) {
       messagesList.add({'role': 'system', 'content': systemPrompt});
     }
-    messagesList.addAll(messages);
+    
+    // Ensure each message has a valid 'role' field
+    for (final msg in messages) {
+      // Make a copy of the message to avoid modifying the original
+      final Map<String, dynamic> formattedMsg = Map.from(msg);
+      
+      // Ensure the message has a role field
+      if (!formattedMsg.containsKey('role')) {
+        // If it has an 'isUser' field, use that to determine role
+        if (formattedMsg.containsKey('isUser')) {
+          formattedMsg['role'] = formattedMsg['isUser'] == true ? 'user' : 'assistant';
+        } else {
+          // Default to 'user' if we can't determine
+          formattedMsg['role'] = 'user';
+        }
+      }
+      
+      messagesList.add(formattedMsg);
+    }
 
     final body = jsonEncode({
       'model': model ?? _defaultModel,
@@ -148,6 +166,19 @@ class ChatService {
       // Explicitly decode response body as UTF-8
       final responseBody = utf8.decode(response.bodyBytes);
       final data = jsonDecode(responseBody);
+      
+      // Add null checks to prevent "The method '[]' was called on null" error
+      if (data == null || 
+          data['choices'] == null || 
+          data['choices'].isEmpty ||
+          data['choices'][0] == null ||
+          data['choices'][0]['message'] == null) {
+        if (kDebugMode) {
+          print('Error in character_interview: Invalid response format: $data');
+        }
+        return 'I apologize, I received an invalid response format. Please try again.';
+      }
+      
       return data['choices'][0]['message']['content'] as String;
     } on TimeoutException catch (e) {
       if (kDebugMode) {

@@ -24,51 +24,18 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkModeEnabled = true;
-  bool _isNotificationsEnabled = true;
-  bool _isAnimationsEnabled = true;
-  double _chatFontSize = 15.0;
-
-  // We'll use these keys for shared preferences
-  static const String _darkModeKey = 'dark_mode_enabled';
-  static const String _notificationsKey = 'notifications_enabled';
-  static const String _animationsKey = 'animations_enabled';
-  static const String _fontSizeKey = 'chat_font_size';
+  // Remove the _chatFontSize variable and _fontSizeKey
+  // Remove all code related to chat font size loading, saving, and UI
+  // Remove the _buildSettingCard for chatFontSize
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    // Remove the _loadSettings() call
   }
 
-  Future<void> _loadSettings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _isDarkModeEnabled = prefs.getBool(_darkModeKey) ?? true;
-        _isNotificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
-        _isAnimationsEnabled = prefs.getBool(_animationsKey) ?? true;
-        _chatFontSize = prefs.getDouble(_fontSizeKey) ?? 15.0;
-      });
-    } catch (e) {}
-  }
-
-  Future<void> _saveSettings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_darkModeKey, _isDarkModeEnabled);
-      await prefs.setBool(_notificationsKey, _isNotificationsEnabled);
-      await prefs.setBool(_animationsKey, _isAnimationsEnabled);
-      await prefs.setDouble(_fontSizeKey, _chatFontSize);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save settings: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  // Remove the _loadSettings() function
+  // Remove the _saveSettings() function
 
   @override
   Widget build(BuildContext context) {
@@ -164,153 +131,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     ),
 
-                    _buildSettingCard(
-                      title: localizations.darkMode,
-                      subtitle: localizations.darkModeDescription,
-                      icon: Icons.dark_mode,
-                      trailing: Switch(
-                        value: _isDarkModeEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isDarkModeEnabled = value;
-                          });
-                          _saveSettings();
-                        },
-                        thumbColor: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.selected)) {
-                            return AppTheme.warmGold;
-                          }
-                          return null; // Use default
-                        }),
-                        trackColor: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.selected)) {
-                            return AppTheme.warmGold.withValues(alpha: 0.5);
-                          }
-                          return null; // Use default
-                        }),
-                      ),
-                    ),
-
-                    _buildSettingCard(
-                      title: localizations.chatFontSize,
-                      subtitle: localizations.chatFontSizeDescription,
-                      icon: Icons.text_fields,
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${_chatFontSize.toInt()}',
-                            style: TextStyle(
-                              color: AppTheme.silverMist,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 150,
-                            child: Slider(
-                              value: _chatFontSize,
-                              min: 12.0,
-                              max: 20.0,
-                              divisions: 8,
-                              thumbColor: AppTheme.warmGold,
-                              activeColor: AppTheme.warmGold,
-                              inactiveColor: AppTheme.warmGold.withValues(
-                                alpha: 0.3,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _chatFontSize = value;
-                                });
-                              },
-                              onChangeEnd: (value) {
-                                _saveSettings();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    _buildSettingCard(
-                      title: localizations.enableAnimations,
-                      subtitle: localizations.enableAnimationsDescription,
-                      icon: Icons.animation,
-                      trailing: Switch(
-                        value: _isAnimationsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAnimationsEnabled = value;
-                          });
-                          _saveSettings();
-                        },
-                        thumbColor: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.selected)) {
-                            return AppTheme.warmGold;
-                          }
-                          return null; // Use default
-                        }),
-                        trackColor: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.selected)) {
-                            return AppTheme.warmGold.withValues(alpha: 0.5);
-                          }
-                          return null; // Use default
-                        }),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Notifications section
-                    _buildSectionHeader(localizations.notifications),
-                    _buildSettingCard(
-                      title: localizations.enableNotifications,
-                      subtitle: localizations.enableNotificationsDescription,
-                      icon: Icons.notifications,
-                      trailing: Switch(
-                        value: _isNotificationsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isNotificationsEnabled = value;
-                          });
-                          _saveSettings();
-                        },
-                        thumbColor: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.selected)) {
-                            return AppTheme.warmGold;
-                          }
-                          return null; // Use default
-                        }),
-                        trackColor: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.selected)) {
-                            return AppTheme.warmGold.withValues(alpha: 0.5);
-                          }
-                          return null; // Use default
-                        }),
-                      ),
-                    ),
+                    // Remove the _buildSettingCard for chatFontSize
 
                     const SizedBox(height: 16),
 
                     // Data management section
                     _buildSectionHeader(localizations.dataManagement),
-                    _buildSettingCard(
-                      title: localizations.exportAllCharacters,
-                      subtitle: localizations.exportAllCharactersDescription,
-                      icon: Icons.download,
-                      onTap: () => _exportAllCharacters(context),
-                    ),
 
                     _buildSettingCard(
                       title: localizations.clearAllData,
@@ -481,52 +307,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _exportAllCharacters(BuildContext context) async {
-    try {
-      final charactersProvider = Provider.of<CharactersProvider>(
-        context,
-        listen: false,
-      );
-
-      if (charactersProvider.characters.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("No characters to export"),
-            backgroundColor: AppTheme.deepIndigo,
-          ),
-        );
-        return;
-      }
-
-      // In a real app, we would implement export functionality here
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Exporting ${charactersProvider.characters.length} characters...',
-          ),
-          backgroundColor: AppTheme.deepIndigo,
-        ),
-      );
-
-      // Simulate export delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Characters exported successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error exporting characters: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   void _showClearDataDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     showDialog(
@@ -581,7 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await prefs.clear();
 
                     // Reload settings after clearing
-                    _loadSettings();
+                    // _loadSettings(); // This line is removed
 
                     Navigator.pop(context);
 
@@ -668,14 +448,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       {'code': 'es', 'name': localizations.languageSpanish},
       {'code': 'fr', 'name': localizations.languageFrench},
       {'code': 'de', 'name': localizations.languageGerman},
+      {'code': 'it', 'name': localizations.languageItalian},
       {'code': 'ja', 'name': localizations.languageJapanese},
       {'code': 'ko', 'name': localizations.languageKorean},
-      {'code': 'zh', 'name': localizations.languageChinese},
-      {'code': 'pt', 'name': localizations.languagePortuguese},
-      {'code': 'ru', 'name': localizations.languageRussian},
-      {'code': 'hi', 'name': localizations.languageHindi},
-      {'code': 'it', 'name': localizations.languageItalian},
-      {'code': 'uk', 'name': localizations.languageUkrainian},
     ];
 
     showDialog(
