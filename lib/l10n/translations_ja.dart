@@ -549,4 +549,30 @@ class AppLocalizationsJa extends AppLocalizations {
   // Interview initial message
   @override
   String get interviewInitialMessage => 'こんにちは！あなたの詳細なキャラクターカードを作成する準備ができています。次のいずれかを選択できます：\n\n1. あなたの性格と経験に関する私の質問に答える\n2. あなたの情報を含むファイル（PDF、TXT、DOC、またはメール）をアップロードする\n\nどちらがお好みですか？';
+
+  // Famous character bios
+  @override
+  String get einsteinBio => '相対性理論を開発し、空間、時間、重力に対する私たちの理解を根本的に変えた理論物理学者。E=mc²の方程式が科学で最も有名な公式の一つとなったノーベル賞受賞者。';
+
+  @override
+  String get reaganBio => '第40代アメリカ合衆国大統領（1981-1989年）、元ハリウッド俳優、カリフォルニア州知事。経済政策（「レーガノミクス」）、冷戦終結での役割、「偉大なコミュニケーター」の愛称で知られる優れたコミュニケーション能力で有名。';
+
+  @override
+  String get turingBio => '第二次世界大戦中にドイツのエニグマ暗号の解読を支援し、戦争を数年短縮する可能性があった優秀な数学者および暗号解読者。計算の数学的モデルであるチューリング機械の概念を開発したコンピュータサイエンスと人工知能の先駆者。';
+
+  @override
+  String get monroeBio => '映画の興行収入が2億ドルを超えた伝説的なハリウッド女優、モデル、文化的アイコン。「お熱いのがお好き」と「紳士は金髪がお好き」での象徴的な演技とコメディ才能で知られる。彼女の象徴的なルックスとカリスマは、20世紀で最も永続的なスターの一人にした。';
+
+  // Date and time strings
+  @override
+  String get created => '作成済み';
+
+  @override
+  String get today => '今日';
+
+  @override
+  String get yesterday => '昨日';
+
+  @override
+  String get daysAgo => '日前';
 } 

@@ -318,6 +318,18 @@ abstract class AppLocalizations {
   String get mistralLarge;
   String get localGemma2b;
   String get private;
+
+  // Famous character bios
+  String get einsteinBio;
+  String get reaganBio;
+  String get turingBio;
+  String get monroeBio;
+
+  // Date and time strings
+  String get created;
+  String get today;
+  String get yesterday;
+  String get daysAgo;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

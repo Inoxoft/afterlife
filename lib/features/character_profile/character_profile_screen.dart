@@ -2304,7 +2304,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       content: [
                         _buildInfoItem(label: 'Name', value: _character!.name),
                         _buildInfoItem(
-                          label: 'Created',
+                          label: AppLocalizations.of(context).created,
                           value: _formatDate(_character!.createdAt),
                         ),
                       ],

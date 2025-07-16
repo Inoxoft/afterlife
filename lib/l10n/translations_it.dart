@@ -377,6 +377,32 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get private => 'PRIVATO';
 
+  // Famous character bios
+  @override
+  String get einsteinBio => 'Fisico teorico che sviluppò la teoria della relatività, cambiando fondamentalmente la nostra comprensione dello spazio, del tempo e della gravità. Vincitore del Premio Nobel la cui equazione E=mc² divenne una delle formule più famose della scienza.';
+
+  @override
+  String get reaganBio => '40º Presidente degli Stati Uniti (1981-1989), ex attore di Hollywood e Governatore della California. Conosciuto per le sue politiche economiche ("Reaganomics"), il suo ruolo nella fine della Guerra Fredda e le sue eccezionali capacità comunicative che gli valsero il soprannome di "Il Grande Comunicatore."';
+
+  @override
+  String get turingBio => 'Brillante matematico e crittoanalista che aiutò a decifrare il codice Enigma tedesco durante la Seconda Guerra Mondiale, potenzialmente accorciando la guerra di anni. Pioniere dell\'informatica e dell\'intelligenza artificiale che sviluppò il concetto della macchina di Turing, un modello matematico di computazione.';
+
+  @override
+  String get monroeBio => 'Leggendaria attrice di Hollywood, modella e icona culturale i cui film incassarono oltre 200 milioni di dollari. Conosciuta per il suo talento comico e le performance iconiche in "A qualcuno piace caldo" e "Gli uomini preferiscono le bionde." Il suo look caratteristico e il carisma la resero una delle star più durature del 20º secolo.';
+
+  // Date and time strings
+  @override
+  String get created => 'Creato';
+
+  @override
+  String get today => 'oggi';
+
+  @override
+  String get yesterday => 'ieri';
+
+  @override
+  String get daysAgo => 'giorni fa';
+
   // Splash screen status messages
   @override
   String get initializingPreservationSystems => 'INIZIALIZZAZIONE SISTEMI DI CONSERVAZIONE';

@@ -83,6 +83,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
@@ -168,9 +170,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ),
                         ),
                         child: Text(
-                          "BACK",
+                          localizations.backButton,
                           style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                            text: "BACK",
+                            text: localizations.backButton,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.0,
@@ -219,9 +221,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         shadowColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                       child: Text(
-                        _currentPage == 3 ? "BEGIN" : "NEXT",
+                        _currentPage == 3 ? localizations.getStarted : localizations.nextButton,
                         style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                          text: _currentPage == 3 ? "BEGIN" : "NEXT",
+                          text: _currentPage == 3 ? localizations.getStarted : localizations.nextButton,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.0,

@@ -377,6 +377,32 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get private => '비공개';
 
+  // Famous character bios
+  @override
+  String get einsteinBio => '상대성이론을 개발하여 공간, 시간, 중력에 대한 우리의 이해를 근본적으로 바꾼 이론물리학자. E=mc² 방정식이 과학에서 가장 유명한 공식 중 하나가 된 노벨상 수상자.';
+
+  @override
+  String get reaganBio => '제40대 미국 대통령(1981-1989), 전 할리우드 배우, 캘리포니아 주지사. 경제 정책("레이거노믹스"), 냉전 종식에서의 역할, "위대한 소통가"라는 별명을 얻은 뛰어난 소통 능력으로 유명.';
+
+  @override
+  String get turingBio => '제2차 세계대전 중 독일 에니그마 암호 해독을 도와 전쟁을 수년 단축시킬 수 있었던 뛰어난 수학자이자 암호해독가. 계산의 수학적 모델인 튜링 머신 개념을 개발한 컴퓨터 과학과 인공지능의 선구자.';
+
+  @override
+  String get monroeBio => '영화가 2억 달러 이상의 수익을 올린 전설적인 할리우드 여배우, 모델, 문화 아이콘. "뜨거운 것이 좋아"와 "신사는 금발을 좋아해"에서의 코믹한 재능과 상징적인 연기로 유명. 그녀의 독특한 외모와 카리스마는 20세기에서 가장 지속적인 스타 중 한 명으로 만들었다.';
+
+  // Date and time strings
+  @override
+  String get created => '생성됨';
+
+  @override
+  String get today => '오늘';
+
+  @override
+  String get yesterday => '어제';
+
+  @override
+  String get daysAgo => '일 전';
+
   // Splash screen status messages
   @override
   String get initializingPreservationSystems => '보존 시스템 초기화 중';

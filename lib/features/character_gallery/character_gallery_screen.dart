@@ -546,10 +546,11 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   String _formatDate(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
+    final localizations = AppLocalizations.of(context);
 
-    if (difference.inDays == 0) return 'today';
-    if (difference.inDays == 1) return 'yesterday';
-    if (difference.inDays < 7) return '${difference.inDays} days ago';
+    if (difference.inDays == 0) return localizations.today;
+    if (difference.inDays == 1) return localizations.yesterday;
+    if (difference.inDays < 7) return '${difference.inDays} ${localizations.daysAgo}';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
@@ -1268,9 +1269,9 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                             _buildPulsingDot(accentColor),
                             const SizedBox(width: 8),
                             Text(
-                              'Created $formattedDate',
+                              '${AppLocalizations.of(context).created} $formattedDate',
                               style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                text: 'Created $formattedDate',
+                                text: '${AppLocalizations.of(context).created} $formattedDate',
                                 fontSize: widget.isHorizontalLayout ? 14 : 12,
                                 color: AppTheme.silverMist.withValues(alpha: 0.8),
                                 letterSpacing: 0.5,
@@ -1406,10 +1407,11 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
   String _formatDate(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
+    final localizations = AppLocalizations.of(context);
 
-    if (difference.inDays == 0) return 'today';
-    if (difference.inDays == 1) return 'yesterday';
-    if (difference.inDays < 7) return '${difference.inDays} days ago';
+    if (difference.inDays == 0) return localizations.today;
+    if (difference.inDays == 1) return localizations.yesterday;
+    if (difference.inDays < 7) return '${difference.inDays} ${localizations.daysAgo}';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'text_cleaner.dart';
+import 'package:flutter/material.dart';
+import 'package:afterlife/l10n/app_localizations.dart';
 
 class FamousCharacterPrompts {
   static final Map<String, Map<String, String>> prompts = {
@@ -195,8 +197,7 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
-      'shortBio':
-          'Theoretical physicist who developed the theory of relativity, fundamentally changing our understanding of space, time, and gravity. Nobel Prize winner whose equation E=mc² became one of the most famous formulas in science.',
+      'bioKey': 'einsteinBio',
     },
     'Ronald Reagan': {
       'systemPrompt': '''
@@ -414,8 +415,7 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
-      'shortBio':
-          '40th President of the United States (1981-1989), former Hollywood actor, and Governor of California. Known for his economic policies ("Reaganomics"), role in ending the Cold War, and exceptional communication skills that earned him the nickname "The Great Communicator."',
+      'bioKey': 'reaganBio',
     },
     'Alan Turing': {
       'systemPrompt': '''
@@ -603,8 +603,7 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
-      'shortBio':
-          'Brilliant mathematician and cryptanalyst who helped break the German Enigma code during World War II, potentially shortening the war by years. Pioneer of computer science and artificial intelligence who developed the concept of the Turing machine, a mathematical model of computation.',
+      'bioKey': 'turingBio',
     },
     'Marilyn Monroe': {
       'systemPrompt': '''
@@ -752,8 +751,7 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
-      'shortBio':
-          'Legendary Hollywood actress, model, and cultural icon whose films grossed over 200 million dollars. Known for her comedic talent and iconic performances in "Some Like It Hot" and "Gentlemen Prefer Blondes." Her signature look and charisma made her one of the most enduring stars of the 20th century.',
+      'bioKey': 'monroeBio',
     },
   };
 
@@ -913,9 +911,22 @@ Stay in character at all times. Never break character or admit you are an AI.'''
   }
 
   /// Get short bio for a character by name
-  static String? getShortBio(String characterName) {
+  static String? getShortBio(BuildContext context, String characterName) {
     if (prompts.containsKey(characterName)) {
-      return prompts[characterName]?['shortBio'];
+      final bioKey = prompts[characterName]!['bioKey']!;
+      final localizations = AppLocalizations.of(context);
+      switch (bioKey) {
+        case 'einsteinBio':
+          return localizations.einsteinBio;
+        case 'reaganBio':
+          return localizations.reaganBio;
+        case 'turingBio':
+          return localizations.turingBio;
+        case 'monroeBio':
+          return localizations.monroeBio;
+        default:
+          return null;
+      }
     }
     return null;
   }

@@ -62,7 +62,7 @@ class _FamousCharacterProfileScreenState
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     final shortBio =
-        FamousCharacterPrompts.getShortBio(widget.name) ??
+        FamousCharacterPrompts.getShortBio(context, widget.name) ??
         localizations.noBiographyAvailable;
 
     return Scaffold(

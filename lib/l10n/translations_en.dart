@@ -572,6 +572,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get private => 'PRIVATE';
 
+  // Famous character bios
+  @override
+  String get einsteinBio => 'Theoretical physicist who developed the theory of relativity, fundamentally changing our understanding of space, time, and gravity. Nobel Prize winner whose equation E=mc² became one of the most famous formulas in science.';
+
+  @override
+  String get reaganBio => '40th President of the United States (1981-1989), former Hollywood actor, and Governor of California. Known for his economic policies ("Reaganomics"), role in ending the Cold War, and exceptional communication skills that earned him the nickname "The Great Communicator."';
+
+  @override
+  String get turingBio => 'Brilliant mathematician and cryptanalyst who helped break the German Enigma code during World War II, potentially shortening the war by years. Pioneer of computer science and artificial intelligence who developed the concept of the Turing machine, a mathematical model of computation.';
+
+  @override
+  String get monroeBio => 'Legendary Hollywood actress, model, and cultural icon whose films grossed over 200 million dollars. Known for her comedic talent and iconic performances in "Some Like It Hot" and "Gentlemen Prefer Blondes." Her signature look and charisma made her one of the most enduring stars of the 20th century.';
+
+  // Date and time strings
+  @override
+  String get created => 'Created';
+
+  @override
+  String get today => 'today';
+
+  @override
+  String get yesterday => 'yesterday';
+
+  @override
+  String get daysAgo => 'days ago';
+
   @override
   String get errorLoadingCharacter => 'Error loading character';
 

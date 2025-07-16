@@ -570,6 +570,32 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get private => 'PRIVÉ';
 
+  // Famous character bios
+  @override
+  String get einsteinBio => 'Physicien théoricien qui a développé la théorie de la relativité, changeant fondamentalement notre compréhension de l\'espace, du temps et de la gravité. Lauréat du prix Nobel dont l\'équation E=mc² est devenue l\'une des formules les plus célèbres de la science.';
+
+  @override
+  String get reaganBio => '40e Président des États-Unis (1981-1989), ancien acteur hollywoodien et Gouverneur de Californie. Connu pour ses politiques économiques ("Reaganomics"), son rôle dans la fin de la Guerre froide, et ses compétences exceptionnelles en communication qui lui ont valu le surnom de "Grand Communicateur."';
+
+  @override
+  String get turingBio => 'Brillant mathématicien et cryptanalyste qui a aidé à casser le code Enigma allemand pendant la Seconde Guerre mondiale, raccourcissant potentiellement la guerre de plusieurs années. Pionnier de l\'informatique et de l\'intelligence artificielle qui a développé le concept de la machine de Turing, un modèle mathématique de calcul.';
+
+  @override
+  String get monroeBio => 'Légendaire actrice hollywoodienne, mannequin et icône culturelle dont les films ont rapporté plus de 200 millions de dollars. Connue pour son talent comique et ses performances iconiques dans "Certains l\'aiment chaud" et "Les hommes préfèrent les blondes." Son look caractéristique et son charisme ont fait d\'elle l\'une des stars les plus durables du 20e siècle.';
+
+  // Date and time strings
+  @override
+  String get created => 'Créé';
+
+  @override
+  String get today => 'aujourd\'hui';
+
+  @override
+  String get yesterday => 'hier';
+
+  @override
+  String get daysAgo => 'jours auparavant';
+
   @override
   String get errorLoadingCharacter => 'Erreur lors du chargement du personnage';
 
