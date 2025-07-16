@@ -7,6 +7,8 @@ import 'translations_de.dart';
 import 'translations_ja.dart';
 import 'translations_ko.dart';
 import 'translations_it.dart';
+import 'translation_uk.dart';
+import 'translations_ru.dart';
 
 abstract class AppLocalizations {
   static AppLocalizations of(BuildContext context) {
@@ -23,6 +25,8 @@ abstract class AppLocalizations {
     Locale('it', ''), // Italian
     Locale('ja', ''), // Japanese
     Locale('ko', ''), // Korean
+    Locale('uk', ''), // Ukrainian
+    Locale('ru', ''), // Russian
   ];
 
   // Common UI strings
@@ -95,6 +99,8 @@ abstract class AppLocalizations {
   String get languageItalian;
   String get languageJapanese;
   String get languageKorean;
+  String get languageUkrainian;
+  String get languageRussian;
 
   // System prompt language instruction
   String systemPromptLanguageInstruction(String language);
@@ -363,6 +369,10 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
         return AppLocalizationsKo();
       case 'it':
         return AppLocalizationsIt();
+      case 'uk':
+        return AppLocalizationsUk();
+      case 'ru':
+        return AppLocalizationsRu();
       default:
         return AppLocalizationsEn();
     }

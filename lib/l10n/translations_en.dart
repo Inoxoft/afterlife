@@ -185,6 +185,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageItalian => 'Italiano';
 
   @override
+  String get languageUkrainian => 'Українська';
+
+  @override
+  String get languageRussian => 'Русский';
+
+  @override
   String systemPromptLanguageInstruction(String language) {
     return "\n\nIMPORTANT: Please always respond in $language unless the user explicitly asks you to change languages. Your responses should be natural and fluent in $language.";
   }

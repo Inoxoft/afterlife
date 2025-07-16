@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 
-/// A utility class for handling Ukrainian character rendering issues
+/// A utility class for handling Ukrainian and Russian Cyrillic character rendering issues
 class UkrainianFontUtils {
-  // A set of Ukrainian characters for quick look-up
+  // A set of Ukrainian and Russian Cyrillic characters for quick look-up
   static const String ukrainianCharacters =
       'АаБбВвГгҐґДдЕеЄєЖжЗзИиІіЇїЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщьЮюЯя';
+  
+  // Russian specific characters (some overlap with Ukrainian)
+  static const String russianCharacters =
+      'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя';
+  
+  // Combined Cyrillic character set
+  static const String cyrillicCharacters =
+      'АаБбВвГгҐґДдЕеЁёЄєЖжЗзИиІіЇїЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя';
 
   /// Checks if a string contains any Ukrainian characters
   static bool hasUkrainianCharacters(String text) {
@@ -18,22 +26,63 @@ class UkrainianFontUtils {
     return false;
   }
 
-  /// Selects the appropriate font family based on character set
-  static String _getFontFamilyForText(String text, String preferredFamily) {
-    return hasUkrainianCharacters(text) ? 'Roboto' : preferredFamily;
+  /// Checks if a string contains any Russian characters
+  static bool hasRussianCharacters(String text) {
+    for (int i = 0; i < text.length; i++) {
+      if (russianCharacters.contains(text[i])) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  /// Debug function to check if text is being detected as Ukrainian
-  static void debugUkrainianDetection(String text) {
+  /// Checks if a string contains any Cyrillic characters (Ukrainian or Russian)
+  static bool hasCyrillicCharacters(String text) {
+    for (int i = 0; i < text.length; i++) {
+      if (cyrillicCharacters.contains(text[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Selects the appropriate font family based on character set
+  static String _getFontFamilyForText(String text, String preferredFamily) {
+    if (hasCyrillicCharacters(text)) {
+      // Use mobile-specific fonts with better Cyrillic support
+      if (kIsWeb) {
+        return 'system-ui';
+      }
+      
+      if (Platform.isAndroid) {
+        return 'Noto Sans';  // Android's Noto fonts have excellent Cyrillic support
+      } else if (Platform.isIOS) {
+        return '.SF UI Text';  // iOS system font with good Unicode support
+      }
+      
+      return 'system-ui';
+    }
+    return preferredFamily;
+  }
+
+  /// Debug function to check if text is being detected as Cyrillic
+  static void debugCyrillicDetection(String text) {
     if (kDebugMode) {
+      final isCyrillic = hasCyrillicCharacters(text);
       final isUkrainian = hasUkrainianCharacters(text);
+      final isRussian = hasRussianCharacters(text);
       print(
-        'Text: "$text" - Ukrainian detected: $isUkrainian',
+        'Text: "$text" - Cyrillic: $isCyrillic, Ukrainian: $isUkrainian, Russian: $isRussian',
       );
     }
   }
 
-  /// Returns a Lato TextStyle with Ukrainian font support if needed
+  /// Legacy debug function for backwards compatibility
+  static void debugUkrainianDetection(String text) {
+    debugCyrillicDetection(text);
+  }
+
+  /// Returns a Lato TextStyle with Cyrillic font support if needed
   static TextStyle latoWithUkrainianSupport({
     required String text,
     TextStyle? textStyle,
@@ -45,8 +94,12 @@ class UkrainianFontUtils {
     List<Shadow>? shadows,
     double? height,
   }) {
+    final fontFamily = _getFontFamilyForText(text, 'Lato');
+    final fontFallbacks = hasCyrillicCharacters(text) ? getMobileFontFallbacks() : null;
+    
     return TextStyle(
-      fontFamily: _getFontFamilyForText(text, 'Lato'),
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFallbacks,
       color: color,
       fontSize: fontSize,
       fontWeight: fontWeight,
@@ -57,7 +110,7 @@ class UkrainianFontUtils {
     ).merge(textStyle);
   }
 
-  /// Returns a Cinzel TextStyle with Ukrainian font support if needed
+  /// Returns a Cinzel TextStyle with Cyrillic font support if needed
   static TextStyle cinzelWithUkrainianSupport({
     required String text,
     TextStyle? textStyle,
@@ -69,8 +122,12 @@ class UkrainianFontUtils {
     List<Shadow>? shadows,
     double? height,
   }) {
+    final fontFamily = _getFontFamilyForText(text, 'Cinzel');
+    final fontFallbacks = hasCyrillicCharacters(text) ? getMobileSerifFontFallbacks() : null;
+    
     return TextStyle(
-      fontFamily: _getFontFamilyForText(text, 'Cinzel'),
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFallbacks,
       color: color,
       fontSize: fontSize,
       fontWeight: fontWeight,
@@ -81,7 +138,7 @@ class UkrainianFontUtils {
     ).merge(textStyle);
   }
 
-  /// A utility for getting a text style with proper Ukrainian font support
+  /// A utility for getting a text style with proper Cyrillic font support
   static TextStyle getTextStyleWithUkrainianSupport({
     required String text,
     required TextStyle originalStyle,
@@ -94,14 +151,14 @@ class UkrainianFontUtils {
     return originalStyle.copyWith(fontFamily: fontFamily);
   }
 
-  /// Get the best font family for Ukrainian text on mobile
-  static String _getMobileFontFamily() {
+  /// Get the best font family for Cyrillic text on mobile
+  static String getMobileFontFamily() {
     if (kIsWeb) {
       return 'system-ui';
     }
     
     if (Platform.isAndroid) {
-      return 'Noto Sans';  // Android's Noto fonts have excellent Ukrainian support
+      return 'Noto Sans';  // Android's Noto fonts have excellent Cyrillic support
     } else if (Platform.isIOS) {
       return '.SF UI Text';  // iOS system font with good Unicode support
     }
@@ -109,7 +166,7 @@ class UkrainianFontUtils {
     return 'system-ui';
   }
 
-  static List<String> _getMobileFontFallbacks() {
+  static List<String> getMobileFontFallbacks() {
     if (kIsWeb) {
       return ['system-ui', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'];
     }
@@ -139,7 +196,7 @@ class UkrainianFontUtils {
     return ['system-ui', 'sans-serif'];
   }
 
-  static List<String> _getMobileSerifFontFallbacks() {
+  static List<String> getMobileSerifFontFallbacks() {
     if (kIsWeb) {
       return ['system-ui', 'Georgia', 'Times New Roman', 'serif'];
     }
@@ -166,5 +223,64 @@ class UkrainianFontUtils {
     }
     
     return ['system-ui', 'serif'];
+  }
+
+  /// Creates a TextStyle with automatic Cyrillic font detection and fallback
+  /// This method can be used globally throughout the app
+  static TextStyle createGlobalTextStyle({
+    String? text,
+    String? fontFamily,
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    TextDecoration? decoration,
+    double? letterSpacing,
+    List<Shadow>? shadows,
+    double? height,
+    bool isSerif = false,
+  }) {
+    // Determine if we need Cyrillic font support
+    final needsCyrillicSupport = text != null && hasCyrillicCharacters(text);
+    
+    List<String>? fallbacks;
+    String? finalFontFamily = fontFamily;
+    
+    if (needsCyrillicSupport) {
+      // Use system fonts that support Cyrillic
+      finalFontFamily = getMobileFontFamily();
+      fallbacks = isSerif ? getMobileSerifFontFallbacks() : getMobileFontFallbacks();
+    } else {
+      // For non-Cyrillic text, still provide fallbacks for safety
+      fallbacks = isSerif ? getMobileSerifFontFallbacks() : getMobileFontFallbacks();
+    }
+    
+    return TextStyle(
+      fontFamily: finalFontFamily,
+      fontFamilyFallback: fallbacks,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      decoration: decoration,
+      letterSpacing: letterSpacing,
+      shadows: shadows,
+      height: height,
+    );
+  }
+
+  /// Enhances an existing TextStyle with Cyrillic font support
+  static TextStyle enhanceTextStyleForUkrainian(TextStyle original, {String? text}) {
+    if (text != null && hasCyrillicCharacters(text)) {
+      final fontFallbacks = getMobileFontFallbacks();
+      return original.copyWith(
+        fontFamily: getMobileFontFamily(),
+        fontFamilyFallback: fontFallbacks,
+      );
+    }
+    
+    // Even for non-Cyrillic text, add fallbacks for better rendering
+    final fontFallbacks = getMobileFontFallbacks();
+    return original.copyWith(
+      fontFamilyFallback: original.fontFamilyFallback ?? fontFallbacks,
+    );
   }
 } 

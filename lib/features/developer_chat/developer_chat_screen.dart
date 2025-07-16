@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 import '../providers/language_provider.dart';
 import '../character_prompts/famous_character_service.dart';
 import '../chat/models/chat_message.dart';
@@ -164,10 +165,10 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
             const SizedBox(width: 12),
             Text(
               'Developer Chat',
-              style: TextStyle(
+              style: UkrainianFontUtils.createGlobalTextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.silverMist,
+                color: AppTheme.silverMist, 
                 fontFamily: 'Lato',
               ),
             ),
@@ -197,7 +198,7 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                 children: [
                   Text(
                     '🚀 Developer Support',
-                    style: TextStyle(
+                    style: UkrainianFontUtils.createGlobalTextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.warmGold,
@@ -207,7 +208,7 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Get help with technical issues or share feedback directly with our development team.',
-                    style: TextStyle(
+                    style: UkrainianFontUtils.createGlobalTextStyle(
                       fontSize: 14,
                       color: AppTheme.silverMist.withValues(alpha: 0.8),
                       fontFamily: 'Lato',
@@ -259,7 +260,7 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                     const SizedBox(width: 12),
                     Text(
                       'Developer is typing...',
-                      style: TextStyle(
+                      style: UkrainianFontUtils.createGlobalTextStyle(
                         color: AppTheme.silverMist.withValues(alpha: 0.7),
                         fontSize: 14,
                         fontFamily: 'Lato',
@@ -288,10 +289,13 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                     child: TextField(
                       controller: _messageController,
                       focusNode: _inputFocusNode,
-                      style: TextStyle(color: AppTheme.silverMist, fontFamily: 'Lato'),
+                      style: UkrainianFontUtils.createGlobalTextStyle(
+                        color: AppTheme.silverMist,
+                        fontFamily: 'Lato',
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Type your message...',
-                        hintStyle: TextStyle(
+                        hintStyle: UkrainianFontUtils.createGlobalTextStyle(
                           color: AppTheme.silverMist.withValues(alpha: 0.5),
                           fontFamily: 'Lato',
                         ),

@@ -451,6 +451,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       {'code': 'it', 'name': localizations.languageItalian},
       {'code': 'ja', 'name': localizations.languageJapanese},
       {'code': 'ko', 'name': localizations.languageKorean},
+      {'code': 'uk', 'name': localizations.languageUkrainian},
+      {'code': 'ru', 'name': localizations.languageRussian},
     ];
 
     showDialog(

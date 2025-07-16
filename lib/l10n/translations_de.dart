@@ -62,6 +62,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override String get languageItalian => 'Italiano';
   @override String get languageJapanese => '日本語';
   @override String get languageKorean => '한국어';
+  @override String get languageUkrainian => 'Українська';
+  @override String get languageRussian => 'Русский';
   @override String get accessingDataStorage => 'ZUGRIFF AUF DATENSPEICHER';
   @override String get physicist => 'PHYSIKER';
   @override String get presidentActor => 'PRÄSIDENT, SCHAUSPIELER';

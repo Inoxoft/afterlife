@@ -62,6 +62,8 @@ class AppLocalizationsKo extends AppLocalizations {
   @override String get languageItalian => 'Italiano';
   @override String get languageJapanese => '日本語';
   @override String get languageKorean => '한국어';
+  @override String get languageUkrainian => 'Українська';
+  @override String get languageRussian => 'Русский';
   @override String get accessingDataStorage => '데이터 저장소 접근 중';
   @override String get physicist => '물리학자';
   @override String get presidentActor => '대통령, 배우';

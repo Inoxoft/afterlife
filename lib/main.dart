@@ -15,6 +15,7 @@ import 'features/providers/chat_service.dart' as providers_chat;
 import 'features/character_prompts/famous_character_prompts.dart';
 import 'l10n/app_localizations.dart';
 import 'core/services/hybrid_chat_service.dart';
+import 'core/utils/ukrainian_font_utils.dart';
 
 class AppInitializationError extends Error {
   final String message;
@@ -103,6 +104,70 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  /// Creates a TextTheme with Cyrillic font support (Ukrainian and Russian)
+  TextTheme _buildTextThemeWithUkrainianSupport(TextTheme baseTheme) {
+    // Get platform-appropriate font fallbacks for Cyrillic text
+    final fontFallbacks = UkrainianFontUtils.getMobileFontFallbacks();
+    final serifFontFallbacks = UkrainianFontUtils.getMobileSerifFontFallbacks();
+    
+    return baseTheme.copyWith(
+      // Display styles (large text)
+      displayLarge: baseTheme.displayLarge?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      displayMedium: baseTheme.displayMedium?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      displaySmall: baseTheme.displaySmall?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      
+      // Headline styles
+      headlineLarge: baseTheme.headlineLarge?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      headlineMedium: baseTheme.headlineMedium?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      headlineSmall: baseTheme.headlineSmall?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      
+      // Title styles
+      titleLarge: baseTheme.titleLarge?.copyWith(
+        fontFamilyFallback: serifFontFallbacks,
+      ),
+      titleMedium: baseTheme.titleMedium?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      titleSmall: baseTheme.titleSmall?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      
+      // Body text styles
+      bodyLarge: baseTheme.bodyLarge?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      bodyMedium: baseTheme.bodyMedium?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      bodySmall: baseTheme.bodySmall?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      
+      // Label styles (buttons, tabs, etc.)
+      labelLarge: baseTheme.labelLarge?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      labelMedium: baseTheme.labelMedium?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+      labelSmall: baseTheme.labelSmall?.copyWith(
+        fontFamilyFallback: fontFallbacks,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<LanguageProvider>(
@@ -129,6 +194,12 @@ class _MyAppState extends State<MyApp> {
               brightness: Brightness.dark,
             ),
             scaffoldBackgroundColor: AppTheme.backgroundStart,
+            
+            // Global text theme with Cyrillic font support (Ukrainian and Russian)
+            textTheme: _buildTextThemeWithUkrainianSupport(
+              ThemeData.dark().textTheme,
+            ),
+            
             dialogTheme: DialogThemeData(
               backgroundColor: AppTheme.deepIndigo,
               shape: RoundedRectangleBorder(

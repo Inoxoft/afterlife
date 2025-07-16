@@ -185,6 +185,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get languageItalian => 'Italiano';
 
   @override
+  String get languageUkrainian => 'Українська';
+
+  @override
+  String get languageRussian => 'Русский';
+
+  @override
   String get accessingDataStorage => 'ACCEDIENDO AL ALMACENAMIENTO DE DATOS';
 
   @override

@@ -26,6 +26,10 @@ class LanguageProvider with ChangeNotifier {
         return 'Japanese';
       case 'ko':
         return 'Korean';
+      case 'uk':
+        return 'Ukrainian';
+      case 'ru':
+        return 'Russian';
       default:
         return 'English';
     }
@@ -47,9 +51,9 @@ class LanguageProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       
-      // Ensure proper UTF-8 encoding for Ukrainian language
-      if (languageCode == 'uk') {
-        // Use explicit UTF-8 encoding for Ukrainian
+      // Ensure proper UTF-8 encoding for Cyrillic languages (Ukrainian and Russian)
+      if (languageCode == 'uk' || languageCode == 'ru') {
+        // Use explicit UTF-8 encoding for Cyrillic languages
         final encodedCode = utf8.encode(languageCode);
         final decodedCode = utf8.decode(encodedCode);
         await prefs.setString(_languageKey, decodedCode);
@@ -71,6 +75,8 @@ class LanguageProvider with ChangeNotifier {
     Locale('it'),
     Locale('ja'),
     Locale('ko'),
+    Locale('uk'),
+    Locale('ru'),
   ];
 
   static List<String> get supportedLanguageCodes => 
