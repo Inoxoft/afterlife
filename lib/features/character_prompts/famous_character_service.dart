@@ -1,28 +1,21 @@
 // lib/features/character_prompts/famous_character_service.dart
 
-import 'dart:convert';
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import '../../core/utils/env_config.dart';
 import '../providers/language_provider.dart';
 import 'famous_character_prompts.dart';
 import '../../core/services/hybrid_chat_service.dart';
 import '../models/character_model.dart';
 
-/// Service for interacting with famous characters
+/// Service for interacting with famous characters using the same architecture as regular character chat
 class FamousCharacterService {
-  static final String _openRouterUrl =
-      'https://openrouter.ai/api/v1/chat/completions';
-  static const Duration _requestTimeout = Duration(seconds: 120);
-  static String? _apiKey;
-  static bool _isInitialized = false;
-  static bool _isUsingDefaultKey = false;
   static LanguageProvider? _languageProvider;
 
   /// Chat histories for each character
   static final Map<String, List<Map<String, dynamic>>> _chatHistories = {};
+
+  /// Virtual character models for famous characters
+  static final Map<String, CharacterModel> _virtualCharacters = {};
 
   /// Set the language provider for language support
   static void setLanguageProvider(LanguageProvider languageProvider) {
@@ -34,33 +27,23 @@ class FamousCharacterService {
     if (!_chatHistories.containsKey(characterName)) {
       _chatHistories[characterName] = [];
     }
+
+    // Create virtual character model if not exists
+    if (!_virtualCharacters.containsKey(characterName)) {
+      _createVirtualCharacter(characterName);
+    }
   }
 
-  /// Send a message to a famous character and get a response
-  static Future<String?> sendMessage({
-    required String characterName,
-    required String message,
-  }) async {
-    /// Ensure service is initialized
-    if (!_isInitialized) {
-      await initialize();
-    }
-
-    /// Always refresh the API key before sending a message
-    await refreshApiKey();
-
-    /// Get the character's system prompt
+  /// Create a virtual CharacterModel for a famous character
+  static void _createVirtualCharacter(String characterName) {
     final systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
-    final model = FamousCharacterPrompts.getSelectedModel(characterName);
+    final selectedModel = FamousCharacterPrompts.getSelectedModel(
+      characterName,
+    );
 
-    if (systemPrompt == null) {
-      return "Error: Character profile not found.";
-    }
+    if (systemPrompt == null) return;
 
-    /// Get current chat history
-    final chatHistory = _chatHistories[characterName] ?? [];
-
-    /// Add language instruction if language provider is available
+    // Add language instruction if language provider is available
     String finalSystemPrompt = systemPrompt;
     if (_languageProvider != null &&
         _languageProvider!.currentLanguageCode != 'en') {
@@ -70,181 +53,183 @@ class FamousCharacterService {
       finalSystemPrompt = '$systemPrompt$languageInstruction';
     }
 
-    /// Check if using a local model
-    final bool isLocalModel = CharacterModel.isLocalModel(model);
+    final virtualCharacter = CharacterModel(
+      id: 'famous_$characterName',
+      name: characterName,
+      systemPrompt: finalSystemPrompt,
+      createdAt: DateTime.now(),
+      chatHistory: _chatHistories[characterName] ?? [],
+      model: selectedModel,
+      // You can add imageUrl from famous character prompts if available
+      // imageUrl: FamousCharacterPrompts.getImageUrl(characterName),
+    );
 
-    if (isLocalModel) {
-      /// Use HybridChatService for local models
-      try {
-        // Convert chat history to the format expected by HybridChatService
-        final formattedChatHistory =
-            chatHistory.map((msg) {
-              // Ensure each message has proper fields
-              return {
-                'role': msg['isUser'] == true ? 'user' : 'assistant',
-                'content': msg['content'],
-                'isUser': msg['isUser'],
-              };
-            }).toList();
+    _virtualCharacters[characterName] = virtualCharacter;
+  }
 
-        // Generate a local-optimized prompt if needed
-        final localPrompt = CharacterModel.generateLocalPrompt(
-          finalSystemPrompt,
-          characterName,
+  /// Add a user message to chat history immediately
+  static void addUserMessage({
+    required String characterName,
+    required String message,
+  }) {
+    // Ensure character is initialized
+    if (!_chatHistories.containsKey(characterName)) {
+      _chatHistories[characterName] = [];
+    }
+
+    // Add user message immediately
+    _chatHistories[characterName]!.add({
+      'content': message,
+      'isUser': true,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+
+    // Update virtual character's chat history
+    final virtualCharacter = _virtualCharacters[characterName];
+    if (virtualCharacter != null) {
+      _virtualCharacters[characterName] = CharacterModel(
+        id: virtualCharacter.id,
+        name: virtualCharacter.name,
+        systemPrompt: virtualCharacter.systemPrompt,
+        localPrompt: virtualCharacter.localPrompt,
+        createdAt: virtualCharacter.createdAt,
+        chatHistory: _chatHistories[characterName]!,
+        model: virtualCharacter.model,
+        imageUrl: virtualCharacter.imageUrl,
+        userImagePath: virtualCharacter.userImagePath,
+        iconImagePath: virtualCharacter.iconImagePath,
+        icon: virtualCharacter.icon,
+        accentColor: virtualCharacter.accentColor,
+        additionalInfo: virtualCharacter.additionalInfo,
+      );
+    }
+  }
+
+  /// Add an AI response message to chat history
+  static void addAIMessage({
+    required String characterName,
+    required String message,
+  }) {
+    // Ensure character is initialized
+    if (!_chatHistories.containsKey(characterName)) {
+      _chatHistories[characterName] = [];
+    }
+
+    // Add AI message
+    _chatHistories[characterName]!.add({
+      'content': message,
+      'isUser': false,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+
+    // Update virtual character's chat history
+    final virtualCharacter = _virtualCharacters[characterName];
+    if (virtualCharacter != null) {
+      _virtualCharacters[characterName] = CharacterModel(
+        id: virtualCharacter.id,
+        name: virtualCharacter.name,
+        systemPrompt: virtualCharacter.systemPrompt,
+        localPrompt: virtualCharacter.localPrompt,
+        createdAt: virtualCharacter.createdAt,
+        chatHistory: _chatHistories[characterName]!,
+        model: virtualCharacter.model,
+        imageUrl: virtualCharacter.imageUrl,
+        userImagePath: virtualCharacter.userImagePath,
+        iconImagePath: virtualCharacter.iconImagePath,
+        icon: virtualCharacter.icon,
+        accentColor: virtualCharacter.accentColor,
+        additionalInfo: virtualCharacter.additionalInfo,
+      );
+    }
+  }
+
+  /// Send a message to a famous character and get a response
+  static Future<String?> sendMessage({
+    required String characterName,
+    required String message,
+  }) async {
+    // Ensure character is initialized
+    await initializeChat(characterName);
+
+    final virtualCharacter = _virtualCharacters[characterName];
+    if (virtualCharacter == null) {
+      return "Error: Character profile not found.";
+    }
+
+    // Get current chat history (should already include the user message)
+    final chatHistory = _chatHistories[characterName] ?? [];
+
+    try {
+      // Use HybridChatService like regular character chat
+      final response = await HybridChatService.sendMessageToCharacter(
+        characterId: virtualCharacter.id,
+        message: message,
+        systemPrompt: virtualCharacter.systemPrompt,
+        chatHistory: chatHistory,
+        model: virtualCharacter.model,
+        localPrompt: virtualCharacter.localPrompt,
+      );
+
+      if (response != null) {
+        // Add only the AI response to chat history (user message already added)
+        _chatHistories[characterName]!.add({
+          'content': response,
+          'isUser': false,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+
+        // Update virtual character's chat history
+        _virtualCharacters[characterName] = CharacterModel(
+          id: virtualCharacter.id,
+          name: virtualCharacter.name,
+          systemPrompt: virtualCharacter.systemPrompt,
+          localPrompt: virtualCharacter.localPrompt,
+          createdAt: virtualCharacter.createdAt,
+          chatHistory: _chatHistories[characterName]!,
+          model: virtualCharacter.model,
+          imageUrl: virtualCharacter.imageUrl,
+          userImagePath: virtualCharacter.userImagePath,
+          iconImagePath: virtualCharacter.iconImagePath,
+          icon: virtualCharacter.icon,
+          accentColor: virtualCharacter.accentColor,
+          additionalInfo: virtualCharacter.additionalInfo,
         );
-
-        // Use HybridChatService with local model
-        final response = await HybridChatService.sendMessageToCharacter(
-          characterId: 'famous_$characterName', // Create a virtual ID
-          message: message,
-          systemPrompt: finalSystemPrompt,
-          chatHistory: formattedChatHistory,
-          model: model,
-          localPrompt: localPrompt,
-        );
-
-        if (response != null) {
-          /// Add both user message and AI response to chat history
-          _chatHistories[characterName]!.addAll([
-            {
-              'content': message,
-              'isUser': true,
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-            {
-              'content': response,
-              'isUser': false,
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          ]);
-        }
-
-        return response;
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error using local model for famous character: $e');
-        }
-        return 'I apologize, but I encountered an issue with the local AI model. Please try again or select a different model.';
-      }
-    } else {
-      /// Use OpenRouter API for cloud models
-      /// Validate API key exists for cloud models
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        return 'Error: Unable to connect to AI service. Please check your API key configuration.';
       }
 
-      /// Prepare messages for API
-      final messages = <Map<String, dynamic>>[
-        {'role': 'system', 'content': finalSystemPrompt},
-      ];
-
-      // Add chat history with proper role fields
-      for (final msg in chatHistory) {
-        // Ensure each message has a proper role field
-        if (msg.containsKey('isUser')) {
-          messages.add({
-            'role': msg['isUser'] == true ? 'user' : 'assistant',
-            'content': msg['content'],
-          });
-        } else if (msg.containsKey('role')) {
-          // If it already has a role, use it directly
-          messages.add({'role': msg['role'], 'content': msg['content']});
-        } else {
-          // Default fallback if we can't determine the role
-          messages.add({
-            'role': 'user', // Default to user
-            'content': msg['content'],
-          });
-        }
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in FamousCharacterService.sendMessage: $e');
       }
+      return 'I apologize, but I encountered an issue. Please try again.';
+    }
+  }
 
-      // Add the new user message
-      messages.add({'role': 'user', 'content': message});
+  /// Update the model for a famous character
+  static void updateCharacterModel(String characterName, String newModel) {
+    final virtualCharacter = _virtualCharacters[characterName];
+    if (virtualCharacter != null) {
+      // Recreate the virtual character with the new model
+      final updatedCharacter = CharacterModel(
+        id: virtualCharacter.id,
+        name: virtualCharacter.name,
+        systemPrompt: virtualCharacter.systemPrompt,
+        localPrompt: virtualCharacter.localPrompt,
+        createdAt: virtualCharacter.createdAt,
+        chatHistory: virtualCharacter.chatHistory,
+        model: newModel, // Update to new model
+        imageUrl: virtualCharacter.imageUrl,
+        userImagePath: virtualCharacter.userImagePath,
+        iconImagePath: virtualCharacter.iconImagePath,
+        icon: virtualCharacter.icon,
+        accentColor: virtualCharacter.accentColor,
+        additionalInfo: virtualCharacter.additionalInfo,
+      );
 
-      /// Prepare request body
-      final body = jsonEncode({
-        'model': model,
-        'messages': messages,
-        'temperature': 0.7,
-        'max_tokens': 25000,
-      });
+      _virtualCharacters[characterName] = updatedCharacter;
 
-      try {
-        /// Send request
-        final response = await http
-            .post(
-              Uri.parse(_openRouterUrl),
-              headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'Authorization': 'Bearer $_apiKey',
-                'X-Title': 'Afterlife AI',
-                'Accept': 'application/json; charset=utf-8',
-              },
-              body: body,
-            )
-            .timeout(_requestTimeout);
-
-        if (response.statusCode != 200) {
-          if (kDebugMode) {
-            print(
-              'API Error in famous_character_service: ${response.statusCode}: ${response.body}',
-            );
-          }
-          return 'I apologize, but I encountered a server error. Please try again.';
-        }
-
-        /// Parse response with explicit UTF-8 decoding
-        final responseBody = utf8.decode(response.bodyBytes);
-        final data = jsonDecode(responseBody);
-
-        /// Add null checks to prevent "The method '[]' was called on null" error
-        if (data == null ||
-            data['choices'] == null ||
-            data['choices'].isEmpty ||
-            data['choices'][0] == null ||
-            data['choices'][0]['message'] == null) {
-          if (kDebugMode) {
-            print(
-              'Error in famous_character_service: Invalid response format: $data',
-            );
-          }
-          return 'I apologize, I received an invalid response format. Please try again.';
-        }
-
-        final aiResponse = data['choices'][0]['message']['content'] as String;
-
-        /// Add both user message and AI response to chat history
-        _chatHistories[characterName]!.addAll([
-          {
-            'content': message,
-            'isUser': true,
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-          {
-            'content': aiResponse,
-            'isUser': false,
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        ]);
-
-        return aiResponse;
-      } on TimeoutException catch (e) {
-        if (kDebugMode) {
-          print('TimeoutException in famous_character_service: $e');
-        }
-        return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
-      } on http.ClientException catch (e) {
-        if (kDebugMode) {
-          print('ClientException in famous_character_service: $e');
-        }
-        return 'It seems there is a network issue. Please check your internet connection.';
-      } catch (e, s) {
-        if (kDebugMode) {
-          print('Generic Exception in famous_character_service: $e');
-          print(s);
-        }
-        return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
-      }
+      // Update the selected model in prompts
+      FamousCharacterPrompts.setSelectedModel(characterName, newModel);
     }
   }
 
@@ -256,6 +241,26 @@ class FamousCharacterService {
   /// Clear the chat history for a character
   static void clearChatHistory(String characterName) {
     _chatHistories[characterName] = [];
+
+    // Update virtual character's chat history
+    final virtualCharacter = _virtualCharacters[characterName];
+    if (virtualCharacter != null) {
+      _virtualCharacters[characterName] = CharacterModel(
+        id: virtualCharacter.id,
+        name: virtualCharacter.name,
+        systemPrompt: virtualCharacter.systemPrompt,
+        localPrompt: virtualCharacter.localPrompt,
+        createdAt: virtualCharacter.createdAt,
+        chatHistory: [], // Clear chat history
+        model: virtualCharacter.model,
+        imageUrl: virtualCharacter.imageUrl,
+        userImagePath: virtualCharacter.userImagePath,
+        iconImagePath: virtualCharacter.iconImagePath,
+        icon: virtualCharacter.icon,
+        accentColor: virtualCharacter.accentColor,
+        additionalInfo: virtualCharacter.additionalInfo,
+      );
+    }
   }
 
   /// Convert chat history to standard format for display
@@ -265,74 +270,21 @@ class FamousCharacterService {
     return _chatHistories[characterName] ?? [];
   }
 
-  /// Initialize the service
-  static Future<void> initialize() async {
-    if (_isInitialized) return;
-
-    try {
-      /// Initialize environment configuration
-      await EnvConfig.initialize();
-
-      /// Get API key from environment
-      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
-
-      /// Check if we're using a default key or a user key
-      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
-
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        if (kDebugMode) {
-          print(
-            'Warning: No OpenRouter API key found. The application will not function properly.',
-          );
-          print(
-            'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
-          );
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-            'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-          );
-        }
-      }
-
-      _isInitialized = true;
-    } catch (e) {
-      _isInitialized = true; // Mark as initialized to prevent repeated attempts
-    }
-  }
-
-  /// Method to refresh API key from the latest source
-  static Future<void> refreshApiKey() async {
-    try {
-      /// Get the latest key directly
-      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
-
-      /// Check if we're using a default key or a user key
-      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
-
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        /// Silent handling for missing key
-      } else {
-        if (kDebugMode) {
-          print(
-            'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-          );
-        }
-      }
-    } catch (e) {
-      /// Silent error handling
-    }
+  /// Get the virtual character model (for debugging or advanced usage)
+  static CharacterModel? getVirtualCharacter(String characterName) {
+    return _virtualCharacters[characterName];
   }
 
   /// Method for logging diagnostic info
   static void logDiagnostics() {
     if (kDebugMode) {
+      print('=== Famous Character Service Diagnostics ===');
+      print('Loaded characters: ${_virtualCharacters.keys.toList()}');
+      print('Chat histories: ${_chatHistories.keys.toList()}');
       print(
-        'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
+        'Language provider: ${_languageProvider?.currentLanguageCode ?? 'not set'}',
       );
+      print('=============================');
     }
   }
-
-  static int min(int a, int b) => a < b ? a : b;
 }

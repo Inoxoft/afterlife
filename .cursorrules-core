@@ -1,0 +1,320 @@
+# Core Directory Rules (/lib/core)
+
+## Overview
+The `/lib/core` directory contains foundational, reusable components that are used across the entire application. This includes services, utilities, widgets, and theming that form the backbone of the Afterlife app.
+
+## Directory Structure
+```
+core/
+├── services/           # Application-wide services
+├── utils/             # Utility functions and helpers
+├── widgets/           # Reusable UI components
+└── theme/             # Theming and styling
+```
+
+## Core Services (/lib/core/services)
+
+### Service Architecture Patterns
+```dart
+// Standard service singleton pattern
+class ExampleService {
+  static ExampleService? _instance;
+  static ExampleService get instance => _instance ??= ExampleService._();
+  ExampleService._();
+  
+  static bool _isInitialized = false;
+  
+  static Future<void> initialize() async {
+    if (_isInitialized) return;
+    
+    try {
+      // Initialization logic
+      _isInitialized = true;
+    } catch (e) {
+      // Error handling
+    }
+  }
+}
+```
+
+### AI Service Integration Rules
+- **HybridChatService**: Central orchestrator for all AI interactions
+  - Must handle both local and cloud AI providers
+  - Implement automatic fallback mechanisms
+  - Support model-specific routing (local vs cloud)
+  - Include debug logging with `kDebugMode` guards
+
+- **LocalLLMService**: Local AI model management
+  - Use `flutter_gemma` for local inference
+  - Support Hammer2.1 model (1.6GB download)
+  - Implement streaming responses for better UX
+  - Handle model download progress and cancellation
+  - Maintain model status enumeration
+
+### Service Initialization
+```dart
+// Always implement initialization patterns
+static Future<void> initialize() async {
+  if (_isInitialized) return;
+  
+  try {
+    // Load preferences
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Initialize resources
+    // Set initialization flag
+    _isInitialized = true;
+    
+    if (kDebugMode) {
+      print('Service initialized successfully');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Service initialization error: $e');
+    }
+    _isInitialized = true; // Prevent retry loops
+  }
+}
+```
+
+## Core Utilities (/lib/core/utils)
+
+### Environment Configuration (env_config.dart)
+- Manage API keys securely
+- Support both user-provided and default keys
+- Implement key validation
+- Handle environment variable loading
+- Never expose keys in debug output
+
+### Image Processing (image_utils.dart)
+```dart
+// Standard image optimization pattern
+class ImageUtils {
+  static const int _maxImageSize = 512;
+  static const int _maxFileSizeKB = 500;
+  static const double _jpegQuality = 0.8;
+  
+  static Future<String?> pickAndOptimizeImage() async {
+    // Always implement size optimization
+    // Use proper file naming with timestamps
+    // Store in app documents directory
+    // Handle permissions gracefully
+  }
+}
+```
+
+### Responsive Design (responsive_utils.dart)
+- Implement breakpoint-based layouts
+- Provide font scaling utilities
+- Support different screen densities
+- Handle orientation changes
+- Create adaptive UI components
+
+### Font Management (ukrainian_font_utils.dart)
+- Support Cyrillic languages (Ukrainian, Russian)
+- Provide font fallback chains
+- Handle font loading and caching
+- Support custom font families (Cinzel, Lato, Space Mono)
+- Implement platform-specific font handling
+
+### Performance Optimization (app_optimizer.dart)
+```dart
+// Standard app initialization pattern
+class AppOptimizer {
+  static Future<void> initializeApp() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    // Set device orientations
+    await SystemChrome.setPreferredOrientations([...]);
+    
+    // Preload critical resources
+    await ImageOptimizer.preloadAppImages();
+    
+    // Configure system UI
+    SystemChrome.setSystemUIOverlayStyle(...);
+    
+    // Set memory limits
+    imageCache.maximumSize = 80;
+    imageCache.maximumSizeBytes = 40 * 1024 * 1024;
+  }
+}
+```
+
+## Core Widgets (/lib/core/widgets)
+
+### Dialog Patterns
+```dart
+// Standard dialog implementation
+class ExampleDialog extends StatefulWidget {
+  const ExampleDialog({
+    Key? key,
+    required this.onConfirm,
+    this.initialValue,
+  }) : super(key: key);
+  
+  final VoidCallback onConfirm;
+  final String? initialValue;
+  
+  @override
+  State<ExampleDialog> createState() => _ExampleDialogState();
+}
+
+class _ExampleDialogState extends State<ExampleDialog> {
+  late TextEditingController _controller;
+  bool _isLoading = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+  
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppTheme.deepIndigo,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      // Dialog content
+    );
+  }
+}
+```
+
+### Animation Widgets
+- Use `RepaintBoundary` for performance
+- Implement proper animation disposal
+- Support configurable particle counts
+- Use efficient drawing with `CustomPainter`
+- Provide performance controls
+
+### Reusable Component Rules
+- Always implement proper disposal
+- Support theming through `AppTheme`
+- Handle loading and error states
+- Implement accessibility features
+- Use responsive design principles
+
+## Core Theme (/lib/core/theme)
+
+### Theme Architecture
+```dart
+class AppTheme {
+  // Define color constants
+  static const Color primaryColor = Color(0xFF...);
+  
+  // Create gradient definitions
+  static const LinearGradient mainGradient = LinearGradient(...);
+  
+  // Define text styles with font support
+  static TextStyle get titleStyle => TextStyle(
+    fontFamily: 'Cinzel',
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    shadows: [...],
+  );
+}
+```
+
+### Theme Conventions
+- Use cosmic/space-inspired color palette
+- Implement dark theme throughout
+- Support dynamic color schemes
+- Provide responsive text scaling
+- Include animation-friendly styles
+
+## Error Handling Standards
+
+### Service Error Patterns
+```dart
+try {
+  final result = await someOperation();
+  return result;
+} catch (e) {
+  if (kDebugMode) {
+    print('Service error: $e');
+  }
+  
+  // Return meaningful error or throw specific exception
+  throw ServiceException('User-friendly error message');
+}
+```
+
+### Logging Guidelines
+- Use `kDebugMode` for all debug output
+- Include service name in log messages
+- Log initialization status
+- Avoid logging sensitive data
+- Use structured error messages
+
+## Performance Guidelines
+
+### Memory Management
+- Dispose of all controllers and subscriptions
+- Use singleton pattern for services
+- Implement proper caching strategies
+- Clear unused resources periodically
+- Monitor memory usage in debug builds
+
+### Optimization Patterns
+- Use `const` constructors where possible
+- Implement lazy loading for expensive operations
+- Cache frequently accessed data
+- Use `RepaintBoundary` for complex widgets
+- Optimize image loading and storage
+
+## Testing Patterns
+
+### Service Testing
+```dart
+// Mock external dependencies
+class MockHttpClient extends Mock implements http.Client {}
+
+void main() {
+  group('ServiceName', () {
+    late MockHttpClient mockClient;
+    
+    setUp(() {
+      mockClient = MockHttpClient();
+    });
+    
+    test('should handle successful response', () async {
+      // Test implementation
+    });
+    
+    test('should handle error response', () async {
+      // Error handling test
+    });
+  });
+}
+```
+
+### Utility Testing
+- Test all public methods
+- Verify edge cases and error conditions
+- Mock file system operations
+- Test platform-specific behavior
+- Validate performance characteristics
+
+## Security Considerations
+
+### API Key Management
+- Store keys in `SharedPreferences`
+- Never log API keys
+- Validate keys before use
+- Support key rotation
+- Implement secure defaults
+
+### Data Protection
+- Encrypt sensitive data when possible
+- Use secure storage for credentials
+- Implement proper input validation
+- Sanitize user inputs
+- Follow platform security guidelines 

@@ -1,0 +1,428 @@
+# Localization Directory Rules (/lib/l10n)
+
+## Overview
+The `/lib/l10n` directory contains all internationalization (i18n) files supporting 9 languages. The app uses Flutter's built-in localization framework with custom implementations for complex language support.
+
+## Directory Structure
+```
+l10n/
+├── app_localizations.dart      # Base localization class and delegates
+├── translations_en.dart        # English (primary language)
+├── translations_es.dart        # Spanish
+├── translations_fr.dart        # French
+├── translations_de.dart        # German
+├── translations_it.dart        # Italian
+├── translations_ja.dart        # Japanese
+├── translations_ko.dart        # Korean
+├── translations_ru.dart        # Russian
+└── translation_uk.dart         # Ukrainian (note: different naming)
+```
+
+## Supported Languages
+- **English (en)**: Primary language, reference implementation
+- **Spanish (es)**: Full translation with regional considerations
+- **French (fr)**: Complete localization
+- **German (de)**: Full translation
+- **Italian (it)**: Complete localization  
+- **Japanese (ja)**: Full translation with proper formatting
+- **Korean (ko)**: Complete localization
+- **Russian (ru)**: Cyrillic support with font handling
+- **Ukrainian (uk)**: Cyrillic support with special encoding
+
+## Base Localization Architecture
+
+### AppLocalizations Base Class
+```dart
+abstract class AppLocalizations {
+  const AppLocalizations();
+  
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  }
+  
+  static const AppLocalizationsDelegate delegate = AppLocalizationsDelegate();
+  
+  static const List<Locale> supportedLocales = [
+    Locale('en'), Locale('es'), Locale('fr'), Locale('de'),
+    Locale('it'), Locale('ja'), Locale('ko'), Locale('ru'),
+    Locale('uk'),
+  ];
+  
+  // Core UI strings
+  String get appTitle;
+  String get explore;
+  String get yourTwins;
+  String get create;
+  String get settings;
+  
+  // Feature-specific strings
+  String get exploreDigitalTwins;
+  String get interactWithHistoricalFigures;
+  String get createNewTwin;
+  
+  // Dynamic content methods
+  String systemPromptLanguageInstruction(String language);
+  
+  // Error messages
+  String get errorConnecting;
+  String get noApiKey;
+  String get checkApiKey;
+}
+```
+
+### Localization Delegate
+```dart
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
+  
+  @override
+  bool isSupported(Locale locale) {
+    return ['en', 'es', 'fr', 'de', 'it', 'ja', 'ko', 'ru', 'uk']
+        .contains(locale.languageCode);
+  }
+  
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    switch (locale.languageCode) {
+      case 'en': return SynchronousFuture<AppLocalizations>(AppLocalizationsEn());
+      case 'es': return SynchronousFuture<AppLocalizations>(AppLocalizationsEs());
+      case 'fr': return SynchronousFuture<AppLocalizations>(AppLocalizationsFr());
+      case 'de': return SynchronousFuture<AppLocalizations>(AppLocalizationsDe());
+      case 'it': return SynchronousFuture<AppLocalizations>(AppLocalizationsIt());
+      case 'ja': return SynchronousFuture<AppLocalizations>(AppLocalizationsJa());
+      case 'ko': return SynchronousFuture<AppLocalizations>(AppLocalizationsKo());
+      case 'ru': return SynchronousFuture<AppLocalizations>(AppLocalizationsRu());
+      case 'uk': return SynchronousFuture<AppLocalizations>(AppLocalizationsUk());
+      default: return SynchronousFuture<AppLocalizations>(AppLocalizationsEn());
+    }
+  }
+  
+  @override
+  bool shouldReload(AppLocalizationsDelegate old) => false;
+}
+```
+
+## Language Implementation Patterns
+
+### Standard Language Implementation
+```dart
+class AppLocalizationsEn extends AppLocalizations {
+  @override
+  String get appTitle => 'Afterlife';
+  
+  @override
+  String get explore => 'Explore';
+  
+  @override
+  String get yourTwins => 'Your Twins';
+  
+  @override
+  String get create => 'Create';
+  
+  @override
+  String get settings => 'Settings';
+  
+  // Feature-specific translations
+  @override
+  String get exploreDigitalTwins => 'EXPLORE DIGITAL TWINS';
+  
+  @override
+  String get interactWithHistoricalFigures =>
+      'Interact with historical figures through their masks';
+  
+  // Dynamic content with parameters
+  @override
+  String systemPromptLanguageInstruction(String language) {
+    return "\n\nIMPORTANT: Please always respond in $language unless the user explicitly asks you to change languages. Your responses should be natural and fluent in $language.";
+  }
+  
+  // Error messages
+  @override
+  String get errorConnecting =>
+      'Sorry, I am having trouble connecting. Please try again later.';
+  
+  @override
+  String get noApiKey =>
+      'Error: Unable to connect to AI service. Please check your API key configuration.';
+}
+```
+
+### Cyrillic Language Considerations
+
+#### Russian Implementation
+```dart
+class AppLocalizationsRu extends AppLocalizations {
+  @override
+  String get appTitle => 'Загробная жизнь';
+  
+  @override
+  String get explore => 'Исследовать';
+  
+  @override
+  String get yourTwins => 'Ваши двойники';
+  
+  @override
+  String get create => 'Создать';
+  
+  @override
+  String get settings => 'Настройки';
+  
+  // Ensure proper Cyrillic encoding
+  @override
+  String get exploreDigitalTwins => 'ИССЛЕДУЙТЕ ЦИФРОВЫХ ДВОЙНИКОВ';
+  
+  @override
+  String get interactWithHistoricalFigures =>
+      'Взаимодействуйте с историческими личностями через их маски';
+  
+  // Handle Russian language instruction
+  @override
+  String systemPromptLanguageInstruction(String language) {
+    return "\n\nВАЖНО: Всегда отвечайте на русском языке, если пользователь явно не просит изменить язык. Ваши ответы должны быть естественными и свободными на русском языке.";
+  }
+}
+```
+
+#### Ukrainian Implementation
+```dart
+class AppLocalizationsUk extends AppLocalizations {
+  @override
+  String get appTitle => 'Загробне життя';
+  
+  @override
+  String get explore => 'Досліджувати';
+  
+  @override
+  String get yourTwins => 'Ваші двійники';
+  
+  // Ukrainian-specific character handling
+  @override
+  String get interactWithHistoricalFigures =>
+      'Взаємодійте з історичними постатями через їхні маски';
+  
+  // Ukrainian language instruction for AI
+  @override
+  String systemPromptLanguageInstruction(String language) {
+    return "\n\nВАЖЛИВО: Завжди відповідайте українською мовою, якщо користувач явно не просить змінити мову. Ваші відповіді мають бути природними та вільними українською мовою.";
+  }
+}
+```
+
+## Translation Guidelines
+
+### Content Categories
+
+#### Core UI Elements
+- Navigation labels (explore, create, settings)
+- Action buttons (send, save, delete, cancel)
+- Status messages (loading, success, error)
+- Form labels and placeholders
+- Dialog titles and content
+
+#### Feature-Specific Content
+- Character interaction text
+- Interview flow messages
+- Settings descriptions
+- Onboarding content
+- Help and documentation
+
+#### Error Messages
+- Network connectivity issues
+- API key problems
+- File processing errors
+- Validation failures
+- System errors
+
+#### Character Biographies
+```dart
+// Famous character bios with proper localization
+@override
+String get einsteinBio => 
+    'Albert Einstein (1879-1955) was a theoretical physicist who developed the theory of relativity...';
+
+@override
+String get reaganBio => 
+    'Ronald Reagan (1911-2004) was the 40th President of the United States...';
+
+@override
+String get turingBio => 
+    'Alan Turing (1912-1954) was a British mathematician and computer scientist...';
+
+@override
+String get monroeBio => 
+    'Marilyn Monroe (1926-1962) was an American actress, model, and singer...';
+```
+
+## Localization Conventions
+
+### String Naming
+- Use camelCase for method names
+- Use descriptive names that indicate context
+- Group related strings by feature or screen
+- Include parameter information in method names
+
+### Parameter Handling
+```dart
+// Single parameter
+String welcomeMessage(String name) => 'Welcome, $name!';
+
+// Multiple parameters
+String characterInfo(String name, String profession) => 
+    '$name was a renowned $profession';
+
+// Complex formatting
+String systemPromptLanguageInstruction(String language) {
+  return "\n\nIMPORTANT: Please always respond in $language...";
+}
+```
+
+### Cultural Adaptations
+
+#### Date and Time Formatting
+- Use locale-appropriate date formats
+- Handle different calendar systems
+- Support 12/24 hour time formats
+- Consider cultural date preferences
+
+#### Text Direction
+- Support RTL languages if needed
+- Handle text alignment appropriately
+- Consider layout adjustments
+- Test with different text lengths
+
+#### Cultural Context
+- Adapt examples to local context
+- Use appropriate cultural references
+- Consider local customs and practices
+- Verify cultural sensitivity
+
+## Font Support Integration
+
+### Cyrillic Font Handling
+```dart
+// Integration with UkrainianFontUtils
+Text(
+  AppLocalizations.of(context).ukrainianText,
+  style: UkrainianFontUtils.latoWithUkrainianSupport(
+    text: AppLocalizations.of(context).ukrainianText,
+    fontSize: 16,
+    fontWeight: FontWeight.normal,
+  ),
+);
+```
+
+### Font Fallback Chains
+- Provide appropriate font fallbacks for each language
+- Handle missing characters gracefully
+- Support platform-specific fonts
+- Test rendering across platforms
+
+## AI Integration Localization
+
+### Language Instructions for AI
+```dart
+// Method to add language instruction to AI prompts
+String systemPromptLanguageInstruction(String language) {
+  switch (locale.languageCode) {
+    case 'es':
+      return "\n\nIMPORTANTE: Siempre responde en español...";
+    case 'fr':
+      return "\n\nIMPORTANT: Répondez toujours en français...";
+    case 'de':
+      return "\n\nWICHTIG: Antworten Sie immer auf Deutsch...";
+    // Add other languages
+    default:
+      return "\n\nIMPORTANT: Please always respond in $language...";
+  }
+}
+```
+
+### Character Prompt Localization
+- Translate character descriptions
+- Localize historical context
+- Adapt cultural references
+- Maintain character authenticity
+
+## Testing Localization
+
+### Translation Testing
+```dart
+void main() {
+  group('Localizations', () {
+    testWidgets('should display English text', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale('en'),
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+          ],
+          home: TestScreen(),
+        ),
+      );
+      
+      expect(find.text('Explore'), findsOneWidget);
+    });
+    
+    testWidgets('should display Spanish text', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale('es'),
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+          ],
+          home: TestScreen(),
+        ),
+      );
+      
+      expect(find.text('Explorar'), findsOneWidget);
+    });
+  });
+}
+```
+
+### Pseudo-Localization
+- Test with longer text strings
+- Verify UI layout with different text lengths
+- Check text truncation and wrapping
+- Validate formatting with parameters
+
+## Performance Considerations
+
+### Lazy Loading
+- Load translations on demand
+- Cache frequently used strings
+- Minimize memory footprint
+- Handle language switching efficiently
+
+### String Interpolation
+- Use efficient string building
+- Cache parameterized strings where possible
+- Avoid repeated concatenation
+- Optimize dynamic content generation
+
+## Maintenance Guidelines
+
+### Adding New Languages
+1. Create new translation file following naming convention
+2. Implement all required methods from base class
+3. Add language support to delegate
+4. Update supported locales list
+5. Test font rendering and layout
+6. Verify cultural appropriateness
+
+### Updating Translations
+1. Update base class with new strings
+2. Implement in English translation first
+3. Update all other language files
+4. Test UI layout with new strings
+5. Verify parameter handling
+6. Update documentation
+
+### Translation Quality
+- Use professional translators when possible
+- Review translations with native speakers
+- Test in-context usage
+- Validate technical terminology
+- Ensure consistency across features 

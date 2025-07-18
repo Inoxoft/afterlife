@@ -7,7 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
-import '../chat/models/chat_message.dart';
+
 import '../chat/widgets/chat_message_bubble.dart';
 
 class FamousCharacterChatScreen extends StatefulWidget {
@@ -15,10 +15,10 @@ class FamousCharacterChatScreen extends StatefulWidget {
   final String? imageUrl;
 
   const FamousCharacterChatScreen({
-    Key? key,
+    super.key,
     required this.characterName,
     this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   State<FamousCharacterChatScreen> createState() =>
@@ -114,17 +114,25 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     // Clear the input field
     _messageController.clear();
 
-    // Set loading state but don't add the message locally yet
-    // Let the service handle adding it to prevent duplication
+    // Add user message to chat history immediately
+    FamousCharacterService.addUserMessage(
+      characterName: widget.characterName,
+      message: message,
+    );
+
+    // Update UI to show user message immediately
     setState(() {
+      _messages = FamousCharacterService.getFormattedChatHistory(
+        widget.characterName,
+      );
       _isLoading = true;
     });
 
-    // Scroll to the bottom after state update
+    // Scroll to the bottom after adding user message
     _scrollToBottom();
 
     try {
-      // Send the message to the character
+      // Send the message using the simplified service (like regular character chat)
       final response = await FamousCharacterService.sendMessage(
         characterName: widget.characterName,
         message: message,
@@ -133,7 +141,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       // Add artificial delay to simulate natural conversation flow
       await Future.delayed(const Duration(milliseconds: 800));
 
-      // Update messages from service which includes both user message and AI response
+      // Update messages from service (will include the AI response)
       if (response != null) {
         setState(() {
           _messages = FamousCharacterService.getFormattedChatHistory(
@@ -141,19 +149,15 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
           );
         });
       } else {
-        // Handle null response by showing a fallback message
-        // First get the current history, then add the error message
+        // Handle null response by adding a fallback message
+        FamousCharacterService.addAIMessage(
+          characterName: widget.characterName,
+          message: localizations.errorProcessingMessage,
+        );
         setState(() {
           _messages = FamousCharacterService.getFormattedChatHistory(
             widget.characterName,
           );
-        });
-
-        // Add error message to the service's history
-        _messages.add({
-          'content': localizations.errorProcessingMessage,
-          'isUser': false,
-          'timestamp': DateTime.now().toIso8601String(),
         });
       }
     } catch (e) {
@@ -164,17 +168,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       }
 
       // Add error message to chat history
-      // First get the current history, then add the error message
+      FamousCharacterService.addAIMessage(
+        characterName: widget.characterName,
+        message: localizations.errorConnecting,
+      );
       setState(() {
         _messages = FamousCharacterService.getFormattedChatHistory(
           widget.characterName,
         );
-      });
-
-      _messages.add({
-        'content': localizations.errorConnecting,
-        'isUser': false,
-        'timestamp': DateTime.now().toIso8601String(),
       });
     } finally {
       // Update UI
@@ -222,11 +223,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       widget.characterName,
     );
 
-    // Find current model details
-    final selectedModel = models.firstWhere(
-      (model) => model['id'] == _selectedModel,
-      orElse: () => {'name': 'Default Model'},
-    );
+    // Current model information is available via _selectedModel
 
     return AppBar(
       backgroundColor: AppTheme.backgroundStart,
@@ -494,9 +491,21 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               borderRadius: BorderRadius.circular(25),
             ),
             child: IconButton(
-              icon: const Icon(Icons.send),
+              icon:
+                  _isLoading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.midnightPurple,
+                          ),
+                        ),
+                      )
+                      : const Icon(Icons.send),
               color: AppTheme.midnightPurple,
-              onPressed: _sendMessage,
+              onPressed: _isLoading ? null : _sendMessage,
             ),
           ),
         ],
@@ -507,7 +516,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   void _changeModel(String newModel) {
     setState(() {
       _selectedModel = newModel;
-      FamousCharacterPrompts.setSelectedModel(widget.characterName, newModel);
+      // Use the new simplified service method
+      FamousCharacterService.updateCharacterModel(
+        widget.characterName,
+        newModel,
+      );
     });
 
     // Show a confirmation to the user
@@ -547,7 +560,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
 
   void _clearChatHistory(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    // Clear chat history
+    // Clear chat history using simplified service
     FamousCharacterService.clearChatHistory(widget.characterName);
     setState(() {
       _messages = [];

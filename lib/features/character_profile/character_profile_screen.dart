@@ -187,8 +187,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             name: characterName,
             systemPrompt: cleanedPrompt,
             imageUrl: originalCharacter.imageUrl,
-            userImagePath: originalCharacter.userImagePath, // Preserve user image
-            iconImagePath: originalCharacter.iconImagePath, // Preserve icon image
+            userImagePath:
+                originalCharacter.userImagePath, // Preserve user image
+            iconImagePath:
+                originalCharacter.iconImagePath, // Preserve icon image
             icon: originalCharacter.icon, // Preserve the icon
             createdAt: originalCharacter.createdAt,
             accentColor: originalCharacter.accentColor,
@@ -228,7 +230,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Character not loaded yet
     if (_character == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).characterProfile)),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).characterProfile),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -240,7 +244,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.midnightPurple,
-        title: Text(_isEditing ? localizations.editCharacter : localizations.characterProfile),
+        title: Text(
+          _isEditing
+              ? localizations.editCharacter
+              : localizations.characterProfile,
+        ),
         actions: [
           if (!_isEditing)
             Container(
@@ -314,13 +322,16 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // New simplified character card section
   Widget _buildCharacterCardSection() {
     final localizations = AppLocalizations.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
@@ -337,10 +348,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             // Header with title and copy button
             Row(
               children: [
-                Icon(
-                  Icons.badge,
-                  color: AppTheme.warmGold,
-                ),
+                Icon(Icons.badge, color: AppTheme.warmGold),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -368,7 +376,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               thickness: 1,
               height: 20,
             ),
-            
+
             // Prompt tabs/sections
             DefaultTabController(
               length: 2,
@@ -382,7 +390,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     ),
                     child: TabBar(
                       labelColor: AppTheme.warmGold,
-                      unselectedLabelColor: AppTheme.silverMist.withValues(alpha: 0.6),
+                      unselectedLabelColor: AppTheme.silverMist.withValues(
+                        alpha: 0.6,
+                      ),
                       indicatorColor: AppTheme.warmGold,
                       indicatorSize: TabBarIndicatorSize.tab,
                       tabs: [
@@ -392,7 +402,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             children: [
                               Icon(Icons.cloud, size: 16),
                               SizedBox(width: 4),
-                              Text(localizations.apiModels, style: TextStyle(fontSize: 12)),
+                              Text(
+                                localizations.apiModels,
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ],
                           ),
                         ),
@@ -402,7 +415,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                             children: [
                               Icon(Icons.phone_android, size: 16),
                               SizedBox(width: 4),
-                              Text(localizations.localModel, style: TextStyle(fontSize: 12)),
+                              Text(
+                                localizations.localModel,
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ],
                           ),
                         ),
@@ -410,7 +426,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     ),
                   ),
                   SizedBox(height: 12),
-                  
+
                   // Tab content
                   Container(
                     height: 200,
@@ -421,14 +437,22 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                           title: localizations.fullDetailedPrompt,
                           subtitle: localizations.usedForCloudAiModels,
                           content: _character!.systemPrompt,
-                          onCopy: () => _copyPrompt(_character!.systemPrompt, localizations.fullDetailedPrompt),
+                          onCopy:
+                              () => _copyPrompt(
+                                _character!.systemPrompt,
+                                localizations.fullDetailedPrompt,
+                              ),
                         ),
                         // Local prompt for DeepSeek
                         _buildPromptContainer(
                           title: localizations.optimizedLocalPrompt,
                           subtitle: localizations.usedForLocalModels,
                           content: _character!.localPrompt,
-                          onCopy: () => _copyPrompt(_character!.localPrompt, localizations.optimizedLocalPrompt),
+                          onCopy:
+                              () => _copyPrompt(
+                                _character!.localPrompt,
+                                localizations.optimizedLocalPrompt,
+                              ),
                         ),
                       ],
                     ),
@@ -530,14 +554,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   Widget _buildAIModelSection() {
     final localizations = AppLocalizations.of(context);
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.black26,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -588,7 +615,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(AppLocalizations.of(context).aiModelUpdatedFor.replaceAll('{name}', _character!.name)),
+                    content: Text(
+                      AppLocalizations.of(context).aiModelUpdatedFor.replaceAll(
+                        '{name}',
+                        _character!.name,
+                      ),
+                    ),
                   ),
                 );
               }
@@ -646,7 +678,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   Widget _buildModelOptions() {
     final localizations = AppLocalizations.of(context);
-    
+
     // Define the models for user-created twins
     final models = [
       {
@@ -675,7 +707,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       {
         'id': 'openai/gpt-4o',
         'name': 'GPT-4o',
-        'description': 'Superior multilingual and vision capabilities via OpenRouter',
+        'description':
+            'Superior multilingual and vision capabilities via OpenRouter',
         'provider': 'OpenRouter',
         'recommended': false,
       },
@@ -683,19 +716,18 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
     return Column(
       children: [
-        ...models
-            .map(
-              (model) => _buildModelOption(
-                id: model['id'] as String,
-                name: model['name'] as String,
-                description: model['description'] as String,
-                provider: model['provider'] as String,
-                isRecommended: model['recommended'] == true,
-                isFree: model['free'] == true,
-                isLocal: model['isLocal'] == true,
-                isSelected: _character!.model == model['id'],
-              ),
-            ),
+        ...models.map(
+          (model) => _buildModelOption(
+            id: model['id'] as String,
+            name: model['name'] as String,
+            description: model['description'] as String,
+            provider: model['provider'] as String,
+            isRecommended: model['recommended'] == true,
+            isFree: model['free'] == true,
+            isLocal: model['isLocal'] == true,
+            isSelected: _character!.model == model['id'],
+          ),
+        ),
       ],
     );
   }
@@ -714,7 +746,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color:
-            isSelected ? AppTheme.deepIndigo.withValues(alpha: 0.7) : Colors.black12,
+            isSelected
+                ? AppTheme.deepIndigo.withValues(alpha: 0.7)
+                : Colors.black12,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color:
@@ -843,18 +877,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   description,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Provider: $provider',
-                  style: const TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
                 ),
                 if (isLocal) ...[
                   const SizedBox(height: 4),
@@ -877,7 +905,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   Widget _buildCharacterHeader() {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
-    
+
     return Column(
       children: [
         // Character avatar with glow
@@ -904,16 +932,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               width: 130 * fontScale,
               height: 130 * fontScale,
               decoration: BoxDecoration(
-                gradient: _character!.userImagePath != null
-                    ? null
-                    : LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppTheme.midnightPurple.withValues(alpha: 0.7),
-                          AppTheme.deepNavy.withValues(alpha: 0.5),
-                        ],
-                      ),
+                gradient:
+                    _character!.userImagePath != null
+                        ? null
+                        : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.midnightPurple.withValues(alpha: 0.7),
+                            AppTheme.deepNavy.withValues(alpha: 0.5),
+                          ],
+                        ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: AppTheme.warmGold.withValues(alpha: 0.6),
@@ -921,27 +950,32 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 ),
               ),
               child: ClipOval(
-                child: _character!.userImagePath != null
-                    ? ImageUtils.buildCharacterAvatar(
-                        imagePath: _character!.userImagePath,
-                        size: 130 * fontScale,
-                        fallbackIcon: _character!.icon,
-                        fallbackText: _character!.name,
-                        backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.7),
-                        foregroundColor: AppTheme.warmGold,
-                      )
-                    : Center(
-                        child: _character!.iconImagePath != null
-                            ? ImageUtils.buildIconAvatar(
-                                iconImagePath: _character!.iconImagePath,
-                                size: 130 * fontScale,
-                                fallbackIcon: _character!.icon,
-                                fallbackText: _character!.name,
-                                backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.7),
-                                foregroundColor: AppTheme.warmGold,
-                              )
-                            : _character!.icon != null
-                                ? Icon(
+                child:
+                    _character!.userImagePath != null
+                        ? ImageUtils.buildCharacterAvatar(
+                          imagePath: _character!.userImagePath,
+                          size: 130 * fontScale,
+                          fallbackIcon: _character!.icon,
+                          fallbackText: _character!.name,
+                          backgroundColor: AppTheme.midnightPurple.withValues(
+                            alpha: 0.7,
+                          ),
+                          foregroundColor: AppTheme.warmGold,
+                        )
+                        : Center(
+                          child:
+                              _character!.iconImagePath != null
+                                  ? ImageUtils.buildIconAvatar(
+                                    iconImagePath: _character!.iconImagePath,
+                                    size: 130 * fontScale,
+                                    fallbackIcon: _character!.icon,
+                                    fallbackText: _character!.name,
+                                    backgroundColor: AppTheme.midnightPurple
+                                        .withValues(alpha: 0.7),
+                                    foregroundColor: AppTheme.warmGold,
+                                  )
+                                  : _character!.icon != null
+                                  ? Icon(
                                     _character!.icon!,
                                     size: 60 * fontScale,
                                     color: AppTheme.warmGold,
@@ -953,7 +987,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                                       ),
                                     ],
                                   )
-                                : Text(
+                                  : Text(
                                     _character!.name.isNotEmpty
                                         ? _character!.name[0].toUpperCase()
                                         : '?',
@@ -970,7 +1004,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                                       ],
                                     ),
                                   ),
-                      ),
+                        ),
               ),
             ),
             // Action buttons in profile view mode (always visible)
@@ -984,10 +1018,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.warmGold,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.midnightPurple,
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppTheme.midnightPurple, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.3),
@@ -1018,10 +1049,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.silverMist,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.midnightPurple,
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppTheme.midnightPurple, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.3),
@@ -1052,10 +1080,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.deepIndigo,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.midnightPurple,
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppTheme.midnightPurple, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.3),
@@ -1109,7 +1134,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CharacterChatScreen(characterId: _character!.id),
+                  builder:
+                      (context) =>
+                          CharacterChatScreen(characterId: _character!.id),
                 ),
               );
             },
@@ -1126,7 +1153,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               backgroundColor: AppTheme.warmGold,
               foregroundColor: AppTheme.midnightPurple,
               padding: EdgeInsets.symmetric(
-                horizontal: 24 * fontScale, 
+                horizontal: 24 * fontScale,
                 vertical: 12 * fontScale,
               ),
               shape: RoundedRectangleBorder(
@@ -1143,7 +1170,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Icon selection dialog
   void _showIconSelectionDialog() {
     final localizations = AppLocalizations.of(context);
-    
+
     final List<IconData> availableIcons = [
       Icons.person,
       Icons.face,
@@ -1217,232 +1244,244 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundStart,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: AppTheme.warmGold.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        title: Text(
-          localizations.selectCharacterIcon,
-          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-            text: localizations.selectCharacterIcon,
-            color: AppTheme.warmGold,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        content: Container(
-          width: double.maxFinite,
-          height: 400,
-          child: Column(
-            children: [
-              // Remove icon option
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(bottom: 16),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _updateCharacterIcon(null);
-                  },
-                  icon: Icon(Icons.clear, color: AppTheme.midnightPurple),
-                  label: Text(
-                    localizations.useFirstLetter,
-                    style: TextStyle(color: AppTheme.midnightPurple),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.silverMist,
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
               ),
-              // Icon grid
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 6,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
-                  itemCount: availableIcons.length,
-                  itemBuilder: (context, index) {
-                    final icon = availableIcons[index];
-                    final isSelected = _character!.icon == icon;
-                    
-                    return GestureDetector(
-                      onTap: () {
+            ),
+            title: Text(
+              localizations.selectCharacterIcon,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: localizations.selectCharacterIcon,
+                color: AppTheme.warmGold,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            content: Container(
+              width: double.maxFinite,
+              height: 400,
+              child: Column(
+                children: [
+                  // Remove icon option
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
                         Navigator.of(context).pop();
-                        _updateCharacterIcon(icon);
+                        _updateCharacterIcon(null);
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isSelected 
-                              ? AppTheme.warmGold.withValues(alpha: 0.3)
-                              : AppTheme.midnightPurple.withValues(alpha: 0.5),
+                      icon: Icon(Icons.clear, color: AppTheme.midnightPurple),
+                      label: Text(
+                        localizations.useFirstLetter,
+                        style: TextStyle(color: AppTheme.midnightPurple),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.silverMist,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected 
-                                ? AppTheme.warmGold
-                                : AppTheme.warmGold.withValues(alpha: 0.3),
-                            width: isSelected ? 2 : 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            icon,
-                            size: 28,
-                            color: isSelected 
-                                ? AppTheme.warmGold
-                                : AppTheme.silverMist,
-                          ),
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ),
+                  // Icon grid
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6,
+                        childAspectRatio: 1,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: availableIcons.length,
+                      itemBuilder: (context, index) {
+                        final icon = availableIcons[index];
+                        final isSelected = _character!.icon == icon;
+
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            _updateCharacterIcon(icon);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected
+                                      ? AppTheme.warmGold.withValues(alpha: 0.3)
+                                      : AppTheme.midnightPurple.withValues(
+                                        alpha: 0.5,
+                                      ),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color:
+                                    isSelected
+                                        ? AppTheme.warmGold
+                                        : AppTheme.warmGold.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                icon,
+                                size: 28,
+                                color:
+                                    isSelected
+                                        ? AppTheme.warmGold
+                                        : AppTheme.silverMist,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
                 ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.silverMist),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
   // Image selection dialog
   void _showImageSelectionDialog() {
     final localizations = AppLocalizations.of(context);
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundStart,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: AppTheme.warmGold.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        title: Text(
-          localizations.characterImage,
-          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-            text: localizations.characterImage,
-            color: AppTheme.warmGold,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Upload from gallery
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(bottom: 12),
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await _uploadImageFromGallery();
-                },
-                icon: Icon(Icons.photo_library, color: AppTheme.midnightPurple),
-                label: Text(
-                  'Choose from Gallery',
-                  style: TextStyle(color: AppTheme.midnightPurple),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            title: Text(
+              localizations.characterImage,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: localizations.characterImage,
+                color: AppTheme.warmGold,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Upload from gallery
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _uploadImageFromGallery();
+                    },
+                    icon: Icon(
+                      Icons.photo_library,
+                      color: AppTheme.midnightPurple,
+                    ),
+                    label: Text(
+                      'Choose from Gallery',
+                      style: TextStyle(color: AppTheme.midnightPurple),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.warmGold,
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.warmGold,
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
+                // Remove current image
+                if (_character!.userImagePath != null)
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _removeCharacterImage();
+                      },
+                      icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
+                      label: Text(
+                        'Remove Current Image',
+                        style: TextStyle(color: AppTheme.midnightPurple),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.silverMist,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                // Image guidelines
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Image Guidelines:',
+                        style: TextStyle(
+                          color: AppTheme.warmGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '• Square images work best\n'
+                        '• Maximum size: 512x512 pixels\n'
+                        '• Supported formats: JPG, PNG\n'
+                        '• Images will be optimized automatically',
+                        style: TextStyle(
+                          color: AppTheme.silverMist,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
                 ),
               ),
-            ),
-            // Remove current image
-            if (_character!.userImagePath != null)
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(bottom: 12),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _removeCharacterImage();
-                  },
-                  icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
-                  label: Text(
-                    'Remove Current Image',
-                    style: TextStyle(color: AppTheme.midnightPurple),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.silverMist,
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            // Image guidelines
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Image Guidelines:',
-                    style: TextStyle(
-                      color: AppTheme.warmGold,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '• Square images work best\n'
-                    '• Maximum size: 512x512 pixels\n'
-                    '• Supported formats: JPG, PNG\n'
-                    '• Images will be optimized automatically',
-                    style: TextStyle(
-                      color: AppTheme.silverMist,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.silverMist),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1450,119 +1489,123 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   void _showIconImageSelectionDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundStart,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: AppTheme.warmGold.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        title: Text(
-          'Character Icon Image',
-          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-            text: 'Character Icon Image',
-            color: AppTheme.warmGold,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Upload from gallery
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(bottom: 12),
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await _uploadIconImageFromGallery();
-                },
-                icon: Icon(Icons.photo_library, color: AppTheme.midnightPurple),
-                label: Text(
-                  'Choose Icon from Gallery',
-                  style: TextStyle(color: AppTheme.midnightPurple),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            title: Text(
+              'Character Icon Image',
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: 'Character Icon Image',
+                color: AppTheme.warmGold,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Upload from gallery
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _uploadIconImageFromGallery();
+                    },
+                    icon: Icon(
+                      Icons.photo_library,
+                      color: AppTheme.midnightPurple,
+                    ),
+                    label: Text(
+                      'Choose Icon from Gallery',
+                      style: TextStyle(color: AppTheme.midnightPurple),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.warmGold,
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.warmGold,
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
+                // Remove current icon image
+                if (_character!.iconImagePath != null)
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _removeCharacterIconImage();
+                      },
+                      icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
+                      label: Text(
+                        'Remove Icon Image',
+                        style: TextStyle(color: AppTheme.midnightPurple),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.silverMist,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                // Icon image guidelines
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Icon Image Guidelines:',
+                        style: TextStyle(
+                          color: AppTheme.warmGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '• Square images work best for icons\n'
+                        '• Maximum size: 256x256 pixels\n'
+                        '• Supported formats: JPG, PNG\n'
+                        '• Images will be optimized for icon use\n'
+                        '• This will be used as the character icon',
+                        style: TextStyle(
+                          color: AppTheme.silverMist,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
                 ),
               ),
-            ),
-            // Remove current icon image
-            if (_character!.iconImagePath != null)
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(bottom: 12),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _removeCharacterIconImage();
-                  },
-                  icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
-                  label: Text(
-                    'Remove Icon Image',
-                    style: TextStyle(color: AppTheme.midnightPurple),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.silverMist,
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            // Icon image guidelines
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Icon Image Guidelines:',
-                    style: TextStyle(
-                      color: AppTheme.warmGold,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '• Square images work best for icons\n'
-                    '• Maximum size: 256x256 pixels\n'
-                    '• Supported formats: JPG, PNG\n'
-                    '• Images will be optimized for icon use\n'
-                    '• This will be used as the character icon',
-                    style: TextStyle(
-                      color: AppTheme.silverMist,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.silverMist),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1573,31 +1616,34 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.backgroundStart,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: AppTheme.warmGold),
-                SizedBox(height: 16),
-                Text(
-                  'Optimizing image...',
-                  style: TextStyle(color: AppTheme.silverMist),
+        builder:
+            (context) => Center(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundStart,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  ),
                 ),
-              ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: AppTheme.warmGold),
+                    SizedBox(height: 16),
+                    Text(
+                      'Optimizing image...',
+                      style: TextStyle(color: AppTheme.silverMist),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
       );
 
       final String? imagePath = await ImageUtils.pickAndOptimizeImage();
-      
+
       // Close loading dialog
       if (mounted) Navigator.of(context).pop();
 
@@ -1607,7 +1653,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     } catch (e) {
       // Close loading dialog if still open
       if (mounted) Navigator.of(context).pop();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1626,31 +1672,34 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.backgroundStart,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: AppTheme.warmGold),
-                SizedBox(height: 16),
-                Text(
-                  'Optimizing icon image...',
-                  style: TextStyle(color: AppTheme.silverMist),
+        builder:
+            (context) => Center(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundStart,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  ),
                 ),
-              ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: AppTheme.warmGold),
+                    SizedBox(height: 16),
+                    Text(
+                      'Optimizing icon image...',
+                      style: TextStyle(color: AppTheme.silverMist),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
       );
 
       final String? iconImagePath = await ImageUtils.pickAndOptimizeIconImage();
-      
+
       // Close loading dialog
       if (mounted) Navigator.of(context).pop();
 
@@ -1660,7 +1709,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     } catch (e) {
       // Close loading dialog if still open
       if (mounted) Navigator.of(context).pop();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1711,9 +1760,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Character image removed successfully'),
-          ),
+          SnackBar(content: Text('Character image removed successfully')),
         );
       }
     } catch (e) {
@@ -1767,9 +1814,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Character image updated successfully'),
-          ),
+          SnackBar(content: Text('Character image updated successfully')),
         );
       }
     } catch (e) {
@@ -1823,9 +1868,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Character icon image updated successfully'),
-          ),
+          SnackBar(content: Text('Character icon image updated successfully')),
         );
       }
     } catch (e) {
@@ -1876,7 +1919,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              icon != null 
+              icon != null
                   ? 'Character icon updated successfully'
                   : 'Character icon removed successfully',
             ),
@@ -1934,9 +1977,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Character icon image removed successfully'),
-          ),
+          SnackBar(content: Text('Character icon image removed successfully')),
         );
       }
     } catch (e) {
@@ -1984,10 +2025,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: AppTheme.warmGold,
-                    width: 1,
-                  ),
+                  borderSide: BorderSide(color: AppTheme.warmGold, width: 1),
                 ),
                 contentPadding: EdgeInsets.all(12),
               ),
@@ -2026,19 +2064,16 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: AppTheme.warmGold,
-                    width: 1,
-                  ),
+                  borderSide: BorderSide(color: AppTheme.warmGold, width: 1),
                 ),
                 contentPadding: EdgeInsets.all(12),
               ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Local prompt field with generate button
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2057,29 +2092,33 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 TextButton.icon(
                   onPressed: () {
                     // Generate local prompt from system prompt
-                    final generatedLocalPrompt = CharacterModel.generateLocalPrompt(
-                      _systemPromptController.text.trim(),
-                      _nameController.text.trim(),
-                    );
+                    final generatedLocalPrompt =
+                        CharacterModel.generateLocalPrompt(
+                          _systemPromptController.text.trim(),
+                          _nameController.text.trim(),
+                        );
                     setState(() {
                       _localPromptController.text = generatedLocalPrompt;
                     });
-                    
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Local prompt regenerated')),
                     );
                   },
-                  icon: Icon(Icons.auto_fix_high, color: AppTheme.warmGold, size: 16),
+                  icon: Icon(
+                    Icons.auto_fix_high,
+                    color: AppTheme.warmGold,
+                    size: 16,
+                  ),
                   label: Text(
                     'Generate',
-                    style: TextStyle(
-                      color: AppTheme.warmGold,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppTheme.warmGold, fontSize: 12),
                   ),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
+                    backgroundColor: AppTheme.midnightPurple.withValues(
+                      alpha: 0.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
@@ -2109,10 +2148,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: AppTheme.warmGold,
-                    width: 1,
-                  ),
+                  borderSide: BorderSide(color: AppTheme.warmGold, width: 1),
                 ),
                 contentPadding: EdgeInsets.all(12),
               ),
@@ -2139,10 +2175,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               ),
               child: Text(
                 'SAVE',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),
             const SizedBox(width: 16),
@@ -2190,7 +2223,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             AppTheme.deepNavy.withValues(alpha: 0.9),
           ],
         ),
-        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
@@ -2238,7 +2274,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       );
       return;
     }
-
 
     // Parse the system prompt to detect headings and sections
     final parsedSections = _parseSystemPrompt(_character!.systemPrompt);
@@ -2469,7 +2504,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       decoration: BoxDecoration(
         color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2525,7 +2563,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     Clipboard.setData(ClipboardData(text: _formatCharacterCard()));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Character card for "${_character!.name}" copied to clipboard'),
+        content: Text(
+          'Character card for "${_character!.name}" copied to clipboard',
+        ),
         backgroundColor: AppTheme.warmGold.withValues(alpha: 0.9),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -2700,7 +2740,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
       'local/gemma-3n-e2b-it': 'Privacy-first local AI with multimodal support',
-      'google/gemini-2.0-flash-001': 'Fast responses with multimodal capabilities',
+      'google/gemini-2.0-flash-001':
+          'Fast responses with multimodal capabilities',
       'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',
       'google/gemini-2.0-pro-001': 'Advanced multimodal understanding',
       'anthropic/claude-3-opus': 'Top-tier intelligence and creativity',
@@ -2731,7 +2772,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

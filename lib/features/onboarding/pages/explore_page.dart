@@ -13,16 +13,14 @@ class ExplorePage extends StatelessWidget {
   void _navigateToDeveloperChat(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const DeveloperChatScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const DeveloperChatScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    
+
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),
@@ -242,30 +240,35 @@ class ExplorePage extends StatelessWidget {
                           children: [
                             Text(
                               l10n.chatWithDeveloperTwin,
-                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                text: l10n.chatWithDeveloperTwin,
-                                color: AppTheme.silverMist,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text: l10n.chatWithDeveloperTwin,
+                                    color: AppTheme.silverMist,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               l10n.chatWithDeveloperDescription,
-                              style: UkrainianFontUtils.latoWithUkrainianSupport(
-                                text: l10n.chatWithDeveloperDescription,
-                                color: AppTheme.silverMist,
-                                fontSize: 14,
-                              ),
+                              style:
+                                  UkrainianFontUtils.latoWithUkrainianSupport(
+                                    text: l10n.chatWithDeveloperDescription,
+                                    color: AppTheme.silverMist,
+                                    fontSize: 14,
+                                  ),
                             ),
                             const SizedBox(height: 12),
                             ElevatedButton(
-                              onPressed: () => _navigateToDeveloperChat(context),
+                              onPressed:
+                                  () => _navigateToDeveloperChat(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.midnightPurple,
                                 foregroundColor: AppTheme.warmGold,
                                 elevation: 5,
-                                shadowColor: AppTheme.warmGold.withValues(alpha: 0.2),
+                                shadowColor: AppTheme.warmGold.withValues(
+                                  alpha: 0.2,
+                                ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 8,
@@ -276,12 +279,13 @@ class ExplorePage extends StatelessWidget {
                               ),
                               child: Text(
                                 l10n.chatWithDeveloperTwin,
-                                style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                  text: l10n.chatWithDeveloperTwin,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
-                                ),
+                                style:
+                                    UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                      text: l10n.chatWithDeveloperTwin,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.0,
+                                    ),
                               ),
                             ),
                           ],

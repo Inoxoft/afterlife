@@ -267,20 +267,19 @@ class CharactersProvider with ChangeNotifier {
   }) async {
     try {
       // Find the character by ID
-      final characterIndex = _characters.indexWhere((char) => char.id == characterId);
+      final characterIndex = _characters.indexWhere(
+        (char) => char.id == characterId,
+      );
       if (characterIndex == -1) {
         throw Exception('Character with ID $characterId not found');
       }
 
       final character = _characters[characterIndex];
-      final updatedCharacter = character.addMessage(
-        text: text,
-        isUser: isUser,
-      );
+      final updatedCharacter = character.addMessage(text: text, isUser: isUser);
 
       // Update the character in the list
       _characters[characterIndex] = updatedCharacter;
-      
+
       // Update the cache directly for immediate access
       _characterCache[updatedCharacter.id] = updatedCharacter;
 

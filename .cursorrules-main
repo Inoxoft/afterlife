@@ -1,0 +1,486 @@
+# Main.dart Application Entry Point Rules
+
+## Overview
+The `main.dart` file is the application entry point that handles initialization, error management, and app-wide configuration. It implements a robust startup sequence with comprehensive error handling and multi-provider state management.
+
+## Application Architecture
+
+### Initialization Sequence
+```dart
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize hybrid chat service early
+  await HybridChatService.initialize();
+  
+  runZonedGuarded(
+    () async {
+      try {
+        await _initializeApp();
+        
+        runApp(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => CharactersProvider()),
+              ChangeNotifierProvider(create: (_) => LanguageProvider()),
+            ],
+            child: const MyApp(),
+          ),
+        );
+      } catch (e, stackTrace) {
+        runApp(const ErrorApp(error: 'Initialization Error'));
+      }
+    },
+    (error, stackTrace) {
+      runApp(ErrorApp(error: error.toString()));
+    },
+  );
+}
+```
+
+### Initialization Function Pattern
+```dart
+Future<void> _initializeApp() async {
+  // 1. App optimizations first
+  await AppOptimizer.initializeApp();
+  
+  // 2. Environment configuration
+  try {
+    await EnvConfig.initialize();
+  } catch (e) {
+    // Continue even if env config fails
+  }
+  
+  // 3. Core services initialization
+  try {
+    await HybridChatService.initialize();
+    await interview_chat.ChatService.initialize();
+    interview_chat.ChatService.logDiagnostics();
+    
+    // Conditional service initialization
+    if (const bool.fromEnvironment('USE_PROVIDER_CHAT_SERVICE', defaultValue: false)) {
+      await providers_chat.ChatService.initialize();
+      providers_chat.ChatService.logDiagnostics();
+    }
+    
+    // Initialize prompts and cleanup
+    FamousCharacterPrompts.initialize();
+  } catch (e) {
+    // Log but continue - services can recover
+  }
+}
+```
+
+## Provider Configuration
+
+### Multi-Provider Setup
+```dart
+MultiProvider(
+  providers: [
+    ChangeNotifierProvider(create: (_) => CharactersProvider()),
+    ChangeNotifierProvider(create: (_) => LanguageProvider()),
+    // Add new providers here following the same pattern
+  ],
+  child: const MyApp(),
+)
+```
+
+### Provider Addition Rules
+- Always use `ChangeNotifierProvider` for state management
+- Create providers with factory functions: `create: (_) => Provider()`
+- Add providers in logical order (core providers first)
+- Consider provider dependencies when ordering
+
+## MyApp Widget Architecture
+
+### App Configuration
+```dart
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+  
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize language provider after widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LanguageProvider>().initializeLanguage();
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, child) {
+        return MaterialApp(
+          // App configuration
+        );
+      },
+    );
+  }
+}
+```
+
+### MaterialApp Configuration
+```dart
+MaterialApp(
+  title: 'Afterlife',
+  debugShowCheckedModeBanner: false,
+  
+  // Localization setup
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: languageProvider.currentLocale,
+  
+  // Theme configuration
+  theme: ThemeData(
+    useMaterial3: true,
+    primaryColor: AppTheme.etherealCyan,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppTheme.etherealCyan,
+      brightness: Brightness.dark,
+    ),
+    scaffoldBackgroundColor: AppTheme.backgroundStart,
+    textTheme: _buildTextThemeWithUkrainianSupport(
+      ThemeData.dark().textTheme,
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppTheme.deepIndigo,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppTheme.deepIndigo,
+      contentTextStyle: const TextStyle(color: Colors.white),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+  ),
+  
+  // Initial route
+  home: const SplashScreen(),
+)
+```
+
+## Font Configuration
+
+### Ukrainian/Cyrillic Font Support
+```dart
+TextTheme _buildTextThemeWithUkrainianSupport(TextTheme baseTheme) {
+  final fontFallbacks = UkrainianFontUtils.getMobileFontFallbacks();
+  final serifFontFallbacks = UkrainianFontUtils.getMobileSerifFontFallbacks();
+  
+  return baseTheme.copyWith(
+    // Display styles with serif fallbacks
+    displayLarge: baseTheme.displayLarge?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    displayMedium: baseTheme.displayMedium?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    displaySmall: baseTheme.displaySmall?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    
+    // Headline styles with serif fallbacks
+    headlineLarge: baseTheme.headlineLarge?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    headlineMedium: baseTheme.headlineMedium?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    headlineSmall: baseTheme.headlineSmall?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    
+    // Title styles (mixed font support)
+    titleLarge: baseTheme.titleLarge?.copyWith(
+      fontFamilyFallback: serifFontFallbacks,
+    ),
+    titleMedium: baseTheme.titleMedium?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    titleSmall: baseTheme.titleSmall?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    
+    // Body text with standard fallbacks
+    bodyLarge: baseTheme.bodyLarge?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    bodyMedium: baseTheme.bodyMedium?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    bodySmall: baseTheme.bodySmall?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    
+    // Label styles for UI elements
+    labelLarge: baseTheme.labelLarge?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    labelMedium: baseTheme.labelMedium?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+    labelSmall: baseTheme.labelSmall?.copyWith(
+      fontFamilyFallback: fontFallbacks,
+    ),
+  );
+}
+```
+
+## Error Handling
+
+### Global Error Handling
+```dart
+runZonedGuarded(
+  () async {
+    // App initialization and execution
+  },
+  (error, stackTrace) {
+    // Global error handler
+    runApp(ErrorApp(error: error.toString()));
+  },
+);
+```
+
+### Error App Implementation
+```dart
+class ErrorApp extends StatelessWidget {
+  final String error;
+  
+  const ErrorApp({super.key, required this.error});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Afterlife Error',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: Scaffold(
+        backgroundColor: AppTheme.backgroundStart,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const SizedBox(height: 16),
+                const Text(
+                  'Initialization Error',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  error,
+                  style: const TextStyle(color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => SystemNavigator.pop(),
+                  child: const Text('Restart App'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+## Initialization Patterns
+
+### Service Initialization Rules
+1. **Early Initialization**: Critical services (HybridChatService) before runApp
+2. **Graceful Failure**: Continue execution even if some services fail
+3. **Logging**: Include diagnostics for debug builds
+4. **Conditional Services**: Use environment flags for optional services
+5. **Dependencies**: Initialize services in dependency order
+
+### Initialization Sequence
+```dart
+// 1. Flutter binding
+WidgetsFlutterBinding.ensureInitialized();
+
+// 2. Critical services
+await HybridChatService.initialize();
+
+// 3. App optimizations
+await AppOptimizer.initializeApp();
+
+// 4. Environment configuration
+await EnvConfig.initialize();
+
+// 5. AI services
+await interview_chat.ChatService.initialize();
+await character_chat.ChatService.initialize();
+
+// 6. Data initialization
+FamousCharacterPrompts.initialize();
+```
+
+## Environment Configuration
+
+### Build-Time Configuration
+```dart
+// Use environment variables for feature flags
+if (const bool.fromEnvironment('USE_PROVIDER_CHAT_SERVICE', defaultValue: false)) {
+  await providers_chat.ChatService.initialize();
+}
+
+// Debug mode checks
+if (kDebugMode) {
+  print('Debug information...');
+}
+```
+
+### Configuration Patterns
+- Use `bool.fromEnvironment` for feature flags
+- Provide sensible defaults
+- Handle configuration failures gracefully
+- Log configuration status in debug mode
+
+## Performance Optimization
+
+### App-Level Optimizations
+```dart
+class AppOptimizer {
+  static Future<void> initializeApp() async {
+    // Device orientation
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    
+    // Image preloading
+    await ImageOptimizer.preloadAppImages();
+    
+    // System UI styling
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.black,
+      ),
+    );
+    
+    // Memory configuration
+    imageCache.maximumSize = 80;
+    imageCache.maximumSizeBytes = 40 * 1024 * 1024; // 40 MB
+  }
+}
+```
+
+## Debugging and Diagnostics
+
+### Debug Information
+```dart
+if (kDebugMode) {
+  print('=== App Initialization ===');
+  print('Services initialized successfully');
+  interview_chat.ChatService.logDiagnostics();
+  providers_chat.ChatService.logDiagnostics();
+  print('===========================');
+}
+```
+
+### Service Diagnostics
+- Include service status logging
+- Display initialization success/failure
+- Show configuration information
+- Track performance metrics
+
+## Testing Considerations
+
+### Main Function Testing
+```dart
+void main() {
+  group('App Initialization', () {
+    testWidgets('should initialize without errors', (tester) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => CharactersProvider()),
+            ChangeNotifierProvider(create: (_) => LanguageProvider()),
+          ],
+          child: const MyApp(),
+        ),
+      );
+      
+      expect(find.byType(MyApp), findsOneWidget);
+    });
+    
+    testWidgets('should handle initialization errors', (tester) async {
+      // Test error handling scenarios
+    });
+  });
+}
+```
+
+### Integration Testing
+- Test complete initialization flow
+- Verify provider configuration
+- Check service dependencies
+- Validate error recovery
+
+## Memory Management
+
+### Resource Cleanup
+- Dispose of controllers and subscriptions
+- Clear caches periodically
+- Monitor memory usage
+- Handle low memory situations
+
+### Optimization Guidelines
+- Use const constructors for static widgets
+- Implement lazy loading where appropriate
+- Cache frequently accessed data
+- Minimize object creation in build methods
+
+## Security Considerations
+
+### API Key Management
+- Never hardcode API keys in main.dart
+- Use environment configuration
+- Validate keys before use
+- Handle key rotation gracefully
+
+### Error Information
+- Don't expose sensitive information in error messages
+- Log detailed errors only in debug mode
+- Provide user-friendly error descriptions
+- Implement secure error reporting
+
+## Platform-Specific Considerations
+
+### Multi-Platform Support
+- Handle platform differences gracefully
+- Use platform checks when needed
+- Configure platform-specific settings
+- Test on all target platforms
+
+### Performance Tuning
+- Optimize for different device capabilities
+- Handle memory constraints
+- Adapt to screen sizes and densities
+- Consider battery usage 

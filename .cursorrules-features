@@ -1,0 +1,484 @@
+# Features Directory Rules (/lib/features)
+
+## Overview
+The `/lib/features` directory contains all feature-specific code organized by functionality. Each feature is self-contained with its own models, providers, services, screens, and widgets.
+
+## Directory Structure
+```
+features/
+├── models/                    # Shared data models
+├── providers/                 # Global state management
+├── chat/                     # Generic chat components
+├── character_chat/           # Character conversation feature
+├── character_interview/      # AI-guided character creation
+├── character_gallery/        # Character browsing and management
+├── character_profile/        # Character editing and viewing
+├── character_prompts/        # Famous character definitions
+├── settings/                 # App configuration
+├── splash/                   # App initialization
+├── onboarding/              # User introduction flow
+├── developer_chat/          # Developer interaction feature
+├── widgets/                 # Shared feature widgets
+└── theme/                   # Feature-specific theming
+```
+
+## Global Models (/lib/features/models)
+
+### Character Model Architecture
+```dart
+class CharacterModel {
+  // Core identity
+  final String id;              // Unique identifier with 'char_' prefix
+  final String name;            // Character display name
+  final DateTime createdAt;     // Creation timestamp
+  
+  // AI Integration
+  final String systemPrompt;    // Full detailed prompt for cloud AI
+  final String localPrompt;    // Optimized prompt for local AI
+  final String model;           // AI model identifier
+  
+  // Visual representation
+  final String? imageUrl;       // Asset path for famous characters
+  final String? userImagePath;  // User-uploaded image path
+  final String? iconImagePath;  // User-uploaded icon path
+  final IconData? icon;         // Material icon
+  final Color accentColor;      // Character theme color
+  
+  // Conversation data
+  final List<Map<String, dynamic>> chatHistory;
+  final String? additionalInfo;
+  
+  // Factory constructors
+  factory CharacterModel.fromInterviewData({
+    required String name,
+    required String cardContent,
+    // Additional parameters
+  });
+  
+  factory CharacterModel.fromJson(Map<String, dynamic> json);
+}
+```
+
+### Model Conventions
+- Use factory constructors for complex creation
+- Implement proper JSON serialization
+- Support both cloud and local AI prompts
+- Include validation in constructors
+- Use immutable design patterns
+
+## Global Providers (/lib/features/providers)
+
+### Provider Architecture
+```dart
+class ExampleProvider with ChangeNotifier {
+  // Private state
+  List<Model> _items = [];
+  bool _isLoading = false;
+  String? _lastError;
+  
+  // Cache for performance
+  final Map<String, Model> _cache = {};
+  
+  // Public getters
+  List<Model> get items => List.unmodifiable(_items);
+  bool get isLoading => _isLoading;
+  String? get lastError => _lastError;
+  bool get hasError => _lastError != null;
+  
+  // Async operations
+  Future<void> performAction() async {
+    _isLoading = true;
+    _lastError = null;
+    notifyListeners();
+    
+    try {
+      // Perform operation
+    } catch (e) {
+      _lastError = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  @override
+  void dispose() {
+    // Cleanup resources
+    super.dispose();
+  }
+}
+```
+
+### Characters Provider Patterns
+- Implement caching for character lookups
+- Support batch operations
+- Handle character persistence with SharedPreferences
+- Provide character filtering and search
+- Manage character selection state
+
+### Language Provider Patterns
+- Support 9 languages with proper encoding
+- Handle UTF-8 for Cyrillic languages
+- Persist language preferences
+- Notify listeners on language changes
+- Provide language display names
+
+## Chat System (/lib/features/chat)
+
+### Chat Message Architecture
+```dart
+class ChatMessage {
+  final String content;
+  final bool isUser;
+  final DateTime timestamp;
+  final String? characterId;
+  final MessageStatus status;
+  
+  const ChatMessage({
+    required this.content,
+    required this.isUser,
+    required this.timestamp,
+    this.characterId,
+    this.status = MessageStatus.sent,
+  });
+}
+
+enum MessageStatus { sending, sent, error, typing }
+```
+
+### Chat Widget Patterns
+```dart
+class ChatMessageBubble extends StatelessWidget {
+  final ChatMessage message;
+  final VoidCallback? onRetry;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 4,
+      ),
+      child: Row(
+        mainAxisAlignment: message.isUser 
+          ? MainAxisAlignment.end 
+          : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Message bubble implementation
+        ],
+      ),
+    );
+  }
+}
+```
+
+## Character Features
+
+### Character Chat (/lib/features/character_chat)
+```dart
+class ChatScreen extends StatefulWidget {
+  final String characterId;
+  
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _inputFocusNode = FocusNode();
+  
+  CharacterModel? _character;
+  bool _isLoading = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadCharacter();
+  }
+  
+  Future<void> _sendMessage() async {
+    final message = _messageController.text.trim();
+    if (message.isEmpty || _isLoading) return;
+    
+    // Use HybridChatService for AI interaction
+    final response = await HybridChatService.sendMessageToCharacter(
+      characterId: widget.characterId,
+      message: message,
+      systemPrompt: _character!.systemPrompt,
+      chatHistory: _character!.chatHistory,
+      model: _character!.model,
+      localPrompt: _character!.localPrompt,
+    );
+    
+    // Handle response and update UI
+  }
+}
+```
+
+### Character Interview (/lib/features/character_interview)
+- Implement AI-guided conversation flow
+- Support file upload and processing (PDF, TXT, DOC, DOCX, EML)
+- Use specific character card markers for parsing
+- Generate comprehensive character profiles (10K-25K tokens)
+- Support edit mode for existing characters
+
+#### Interview Provider Pattern
+```dart
+class InterviewProvider with ChangeNotifier {
+  final List<Message> _messages = [];
+  String? characterCardSummary;
+  String? characterName;
+  bool isComplete = false;
+  bool isSuccess = false;
+  
+  // Character card validation
+  bool get isCardReadyForFinalize {
+    final lastMessage = _messages.where((m) => !m.isUser).lastOrNull;
+    if (lastMessage == null) return false;
+    return lastMessage.text.contains('## CHARACTER CARD SUMMARY ##') &&
+           lastMessage.text.contains('## END OF CHARACTER CARD ##');
+  }
+  
+  Future<void> sendMessage(String text) async {
+    // Handle user input and AI responses
+    // Parse character cards when generated
+    // Manage conversation flow
+  }
+}
+```
+
+### Character Gallery (/lib/features/character_gallery)
+- Display both famous and custom characters
+- Implement responsive grid/list layouts
+- Support character actions (chat, edit, delete)
+- Handle navigation to other features
+- Show character status and model information
+
+### Character Profile (/lib/features/character_profile)
+- Support character editing and viewing
+- Display character information in organized sections
+- Allow model selection and prompt editing
+- Handle image management (user uploads vs assets)
+- Implement character validation and saving
+
+## Character Prompts (/lib/features/character_prompts)
+
+### Famous Character Management
+```dart
+class FamousCharacterPrompts {
+  static final Map<String, Map<String, String>> prompts = {
+    'Character Name': {
+      'systemPrompt': '...',  // Detailed character description
+      'bioKey': '...',        // Localization key
+    },
+  };
+  
+  static final Map<String, List<Map<String, dynamic>>> characterModels = {
+    'Character Name': [
+      {
+        'id': 'model-id',
+        'name': 'Model Display Name',
+        'description': 'Model description',
+        'recommended': true,
+        'isLocal': false,
+      },
+    ],
+  };
+}
+```
+
+### Character Prompt Conventions
+- Create historically accurate, detailed prompts
+- Include personality traits, background, speech patterns
+- Support multiple AI models per character
+- Implement model recommendations
+- Use localized descriptions and bios
+
+## Settings System (/lib/features/settings)
+
+### Settings Screen Architecture
+```dart
+class SettingsScreen extends StatefulWidget {
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  // Settings categories
+  Widget _buildGeneralSettings() { /* ... */ }
+  Widget _buildAISettings() { /* ... */ }
+  Widget _buildPrivacySettings() { /* ... */ }
+  Widget _buildAboutSection() { /* ... */ }
+  
+  // Settings actions
+  Future<void> _handleApiKeyUpdate() async { /* ... */ }
+  Future<void> _exportCharacters() async { /* ... */ }
+  Future<void> _clearAllData() async { /* ... */ }
+}
+```
+
+### Local LLM Settings
+- Handle model download and management
+- Support download progress tracking
+- Implement model validation
+- Provide performance configuration
+- Show model status and diagnostics
+
+## Onboarding System (/lib/features/onboarding)
+
+### Onboarding Flow
+- Multi-step introduction process
+- Language selection as first step
+- AI concept explanation with mask metaphor
+- LLM provider selection
+- Feature demonstration
+- Smooth transitions between pages
+
+## Error Handling Patterns
+
+### Feature-Level Error Handling
+```dart
+try {
+  final result = await someFeatureOperation();
+  if (mounted) {
+    setState(() {
+      // Update UI state
+    });
+  }
+} catch (e) {
+  if (kDebugMode) {
+    print('Feature error: $e');
+  }
+  
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('User-friendly error message'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+```
+
+## Navigation Patterns
+
+### Screen Navigation
+```dart
+// Standard navigation to feature screens
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => FeatureScreen(
+      requiredParameter: value,
+    ),
+  ),
+);
+
+// Replacement navigation for major transitions
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) => NewScreen(),
+  ),
+);
+```
+
+## File Processing Patterns
+
+### Document Processing Service
+```dart
+class FileProcessorService {
+  static Future<String> processFile(File file) async {
+    final extension = path.extension(file.path).toLowerCase();
+    
+    switch (extension) {
+      case '.pdf':
+        return await _processPdfFile(file);
+      case '.txt':
+        return await _processTextFile(file);
+      case '.doc':
+      case '.docx':
+        return await _processWordFile(file);
+      case '.eml':
+        return await _processEmailFile(file);
+      default:
+        throw Exception('Unsupported file type: $extension');
+    }
+  }
+  
+  static Future<String> generateCharacterCard(String content) async {
+    // Use interview chat service for character generation
+    final response = await interview_chat.ChatService.sendMessage(
+      messages: [{'role': 'user', 'content': 'Create character card...'}],
+      systemPrompt: InterviewPrompts.fileProcessingSystemPrompt,
+    );
+    
+    return response;
+  }
+}
+```
+
+## Performance Optimization
+
+### Feature-Level Optimizations
+- Use `RepaintBoundary` for complex widgets
+- Implement lazy loading for character lists
+- Cache frequently accessed data
+- Optimize image loading and display
+- Minimize rebuild cycles in providers
+
+### Memory Management
+- Dispose of controllers in dispose methods
+- Clear caches when appropriate
+- Use weak references where possible
+- Monitor memory usage in debug builds
+- Implement proper subscription cleanup
+
+## Testing Guidelines
+
+### Feature Testing
+```dart
+void main() {
+  group('FeatureName', () {
+    testWidgets('should display correctly', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FeatureScreen(),
+        ),
+      );
+      
+      expect(find.byType(FeatureScreen), findsOneWidget);
+    });
+    
+    testWidgets('should handle user interaction', (tester) async {
+      // Test user interactions
+    });
+  });
+}
+```
+
+### Provider Testing
+- Test state changes and notifications
+- Mock external dependencies
+- Verify error handling
+- Test async operations
+- Validate caching behavior
+
+## Accessibility Guidelines
+
+### Screen Reader Support
+- Provide semantic labels for all interactive elements
+- Use proper heading hierarchy
+- Implement accessible navigation
+- Support voice control
+- Test with screen readers
+
+### Visual Accessibility
+- Ensure sufficient color contrast
+- Support dynamic text sizing
+- Provide alternative text for images
+- Use focus indicators
+- Support high contrast modes 

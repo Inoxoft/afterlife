@@ -1,59 +1,32 @@
-import 'dart:convert';
-import 'dart:math';
-import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import '../../core/services/unified_chat_service.dart';
 import '../../core/utils/env_config.dart';
 
 class ChatService {
-  static const String _openRouterUrl =
-      'https://openrouter.ai/api/v1/chat/completions';
-  static const String _openAiUrl = 'https://api.openai.com/v1/chat/completions';
-  static const String _defaultModel = 'anthropic/claude-3.5-sonnet';
-  static const Duration _requestTimeout = Duration(
-    seconds: 120,
-  ); // 2 minutes timeout
   static bool _isInitialized = false;
   static String? _apiKey;
   static bool _isUsingDefaultKey = false;
 
-  // Initialize the service
+  // Initialize the service - delegates to UnifiedChatService
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      // Initialize environment configuration
-      await EnvConfig.initialize();
+      await UnifiedChatService.initialize();
+      _isInitialized = true;
 
-      // Get API key from environment
+      // Sync state from UnifiedChatService for diagnostics
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
-
-      // Check if we're using a default key or a user key
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        if (kDebugMode) {
-          print(
-            'Warning: No OpenRouter API key found. The application will not function properly.',
-          );
-          print(
-            'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
-          );
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-            'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-          );
-        }
+      if (kDebugMode) {
+        print('Provider Chat Service: Delegating to UnifiedChatService');
       }
-
-      _isInitialized = true;
     } catch (e) {
       if (kDebugMode) {
-        print('Error initializing chat service: $e');
+        print('Error initializing providers chat service: $e');
       }
-      _isInitialized = true; // Mark as initialized to prevent repeated attempts
+      _isInitialized = true;
     }
   }
 
@@ -64,22 +37,16 @@ class ChatService {
         print('Provider Chat Service: Refreshing API key...');
       }
 
-      // Get the latest key directly
-      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
+      await UnifiedChatService.refreshApiKey();
 
-      // Check if we're using a default key or a user key
+      // Sync state for diagnostics
+      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        if (kDebugMode) {
-          print('Warning: No API key found after refresh');
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-            'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-          );
-        }
+      if (kDebugMode) {
+        print(
+          'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -88,7 +55,7 @@ class ChatService {
     }
   }
 
-  // Send a message to the chat API using OpenRouter
+  // Send a message to the chat API using OpenRouter - delegates to UnifiedChatService
   static Future<String?> sendMessage({
     required String message,
     required List<Map<String, String>> history,
@@ -99,125 +66,16 @@ class ChatService {
       await initialize();
     }
 
-    // Always refresh the API key before sending a message
-    await refreshApiKey();
-
-    // Validate API key
-    if (_apiKey == null || _apiKey!.isEmpty) {
-      if (kDebugMode) {
-        print('Error: API key is missing. Cannot send message.');
-      }
-      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
-    }
-
-    try {
-      // Prepare the request payload
-      final List<Map<String, dynamic>> messages = [];
-
-      // Add system prompt if provided
-      if (systemPrompt != null && systemPrompt.isNotEmpty) {
-        messages.add({'role': 'system', 'content': systemPrompt});
-      }
-
-      // Add chat history with proper role fields
-      for (final msg in history) {
-        // Make a copy of the message to avoid modifying the original
-        final Map<String, dynamic> formattedMsg = Map.from(msg);
-
-        // Ensure the message has a role field
-        if (!formattedMsg.containsKey('role')) {
-          // If it has an 'isUser' field, use that to determine role
-          if (formattedMsg.containsKey('isUser')) {
-            formattedMsg['role'] =
-                formattedMsg['isUser'] == true ? 'user' : 'assistant';
-          } else {
-            // Default to 'user' if we can't determine
-            formattedMsg['role'] = 'user';
-          }
-        }
-
-        messages.add({
-          'role': formattedMsg['role'],
-          'content': formattedMsg['content'],
-        });
-      }
-
-      // Add the new user message
-      messages.add({'role': 'user', 'content': message});
-
-      // Create the request body
-      final body = {
-        'model': model ?? _defaultModel,
-        'messages': messages,
-        'temperature': 0.7,
-        'max_tokens': 25000,
-      };
-
-      // Send the request
-      final response = await http
-          .post(
-            Uri.parse(_openRouterUrl),
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',
-              'Authorization': 'Bearer $_apiKey',
-              // 'HTTP-Referer': 'https://afterlife.app',
-              'X-Title': 'Afterlife AI',
-              'Accept': 'application/json; charset=utf-8',
-            },
-            body: jsonEncode(body),
-          )
-          .timeout(_requestTimeout);
-
-      // Check if the request was successful
-      if (response.statusCode == 200) {
-        // Explicitly decode response body as UTF-8
-        final responseBody = utf8.decode(response.bodyBytes);
-        final jsonResponse = jsonDecode(responseBody);
-
-        // Add null checks to prevent "The method '[]' was called on null" error
-        if (jsonResponse == null ||
-            jsonResponse['choices'] == null ||
-            jsonResponse['choices'].isEmpty ||
-            jsonResponse['choices'][0] == null ||
-            jsonResponse['choices'][0]['message'] == null) {
-          if (kDebugMode) {
-            print(
-              'Error in providers/chat_service: Invalid response format: $jsonResponse',
-            );
-          }
-          return 'I apologize, I received an invalid response format. Please try again.';
-        }
-
-        final content = jsonResponse['choices'][0]['message']['content'];
-        return content;
-      } else {
-        if (kDebugMode) {
-          print(
-            'API Error in providers: ${response.statusCode}: ${response.body}',
-          );
-        }
-        return 'I apologize, I encountered a server error. Please try again.';
-      }
-    } on TimeoutException catch (e) {
-      if (kDebugMode) {
-        print('TimeoutException in providers: $e');
-      }
-      return 'I apologize, but my response is taking longer than expected. Please try again in a moment.';
-    } on http.ClientException catch (e) {
-      if (kDebugMode) {
-        print('ClientException in providers: $e');
-      }
-      return 'It seems there is a network issue. Please check your internet connection.';
-    } catch (e, s) {
-      if (kDebugMode) {
-        print('Generic Exception in providers: $e');
-        print(s);
-      }
-      return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
-    }
+    // Delegate to UnifiedChatService
+    return await UnifiedChatService.sendGeneralMessage(
+      message: message,
+      history: history,
+      systemPrompt: systemPrompt,
+      model: model,
+    );
   }
 
-  // Send a message to a specific character
+  // Send a message to a specific character - delegates to UnifiedChatService
   static Future<String?> sendMessageToCharacter({
     required String characterId,
     required String message,
@@ -226,11 +84,16 @@ class ChatService {
     String? model,
   }) async {
     try {
-      // Send the message with the character's system prompt and chat history
-      return await sendMessage(
+      // Convert List<Map<String, String>> to List<Map<String, dynamic>> for compatibility
+      final dynamicHistory =
+          chatHistory.map((msg) => Map<String, dynamic>.from(msg)).toList();
+
+      // Delegate to UnifiedChatService
+      return await UnifiedChatService.sendMessageToCharacter(
+        characterId: characterId,
         message: message,
-        history: chatHistory,
         systemPrompt: systemPrompt,
+        chatHistory: dynamicHistory,
         model: model,
       );
     } catch (e) {
@@ -241,7 +104,7 @@ class ChatService {
     }
   }
 
-  // Method for logging diagnostic info
+  // Method for logging diagnostic info - maintains original behavior
   static void logDiagnostics() {
     if (kDebugMode) {
       print('=== Provider Chat Service Diagnostics ===');
@@ -250,7 +113,11 @@ class ChatService {
       print(
         'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
       );
+      print('Delegating to: UnifiedChatService');
       print('=============================');
+
+      // Also log unified service diagnostics
+      UnifiedChatService.logDiagnostics();
     }
   }
 

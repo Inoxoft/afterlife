@@ -13,7 +13,7 @@ class MaskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),
@@ -81,7 +81,8 @@ class MaskPage extends StatelessWidget {
                       localizations.digitalPersonasWithHistoricalEssence,
                       textAlign: TextAlign.center,
                       style: UkrainianFontUtils.latoWithUkrainianSupport(
-                        text: localizations.digitalPersonasWithHistoricalEssence,
+                        text:
+                            localizations.digitalPersonasWithHistoricalEssence,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
                         color: AppTheme.silverMist.withValues(alpha: 0.9),
@@ -168,7 +169,9 @@ class MaskPage extends StatelessWidget {
                             return Container(
                               height: 280,
                               decoration: BoxDecoration(
-                                color: AppTheme.midnightPurple.withValues(alpha: 0.4),
+                                color: AppTheme.midnightPurple.withValues(
+                                  alpha: 0.4,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Center(
@@ -242,7 +245,11 @@ class MaskPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExplanationWithIcon(BuildContext context, IconData iconData, String text) {
+  Widget _buildExplanationWithIcon(
+    BuildContext context,
+    IconData iconData,
+    String text,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
