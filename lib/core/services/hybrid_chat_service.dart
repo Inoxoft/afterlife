@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:afterlife/core/services/local_llm_service.dart';
 import '../../features/character_interview/chat_service.dart' as interview_chat;
@@ -221,17 +222,62 @@ class HybridChatService {
     int? maxTokens,
   }) async {
     try {
-      // Convert messages to a single user message for now
-      // This is a simplified approach - in a real implementation you'd want to handle the full conversation
-      final userMessage =
-          messages.isNotEmpty ? messages.last['content'] ?? '' : '';
+      // Build a comprehensive prompt with conversation context for local models
+      final StringBuffer promptBuffer = StringBuffer();
+
+      // Add system prompt if provided
+      if (systemPrompt != null && systemPrompt.isNotEmpty) {
+        promptBuffer.writeln(systemPrompt);
+        promptBuffer.writeln();
+      }
+
+      // Add conversation history in a format local models can understand
+      if (messages.isNotEmpty) {
+        promptBuffer.writeln("Conversation:");
+
+        for (final message in messages) {
+          final role = message['role'] ?? 'user';
+          final content = message['content'] ?? '';
+
+          if (role == 'user') {
+            promptBuffer.writeln("Human: $content");
+          } else if (role == 'assistant') {
+            promptBuffer.writeln("Assistant: $content");
+          }
+        }
+
+        // Add the prompt for the assistant to respond
+        promptBuffer.writeln();
+        promptBuffer.write("Assistant:");
+      } else if (messages.isNotEmpty) {
+        // Fallback: just use the last message
+        final userMessage = messages.last['content'] ?? '';
+        promptBuffer.writeln("Human: $userMessage");
+        promptBuffer.writeln();
+        promptBuffer.write("Assistant:");
+      }
+
+      final fullPrompt = promptBuffer.toString();
+
+      if (kDebugMode) {
+        print('Local LLM prompt length: ${fullPrompt.length}');
+        print(
+          'Local LLM prompt preview: ${fullPrompt.substring(0, min(200, fullPrompt.length))}...',
+        );
+      }
 
       final response = await LocalLLMService.sendMessage(
-        userMessage,
-        systemPrompt: systemPrompt,
+        '', // Empty message since we're using the full prompt
+        systemPrompt: fullPrompt,
       );
 
-      return response;
+      // Clean up the response - remove any leading "Assistant:" if present
+      String cleanedResponse = response.trim();
+      if (cleanedResponse.startsWith('Assistant:')) {
+        cleanedResponse = cleanedResponse.substring(10).trim();
+      }
+
+      return cleanedResponse;
     } catch (e) {
       if (kDebugMode) {
         print('Local LLM error, falling back to OpenRouter: $e');

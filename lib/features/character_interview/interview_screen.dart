@@ -50,20 +50,18 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
   void _initializeProvider() {
     // Get the CharactersProvider first to avoid context issues
-    final charactersProvider = Provider.of<CharactersProvider>(context, listen: false);
-    
+    final charactersProvider = Provider.of<CharactersProvider>(
+      context,
+      listen: false,
+    );
+
     _interviewProvider = InterviewProvider(
       onCharacterSaved: (character) async {
         // Save the character using the CharactersProvider
         await charactersProvider.addCharacter(character);
-        
-        // Navigate to the gallery (Your Twins tab) after saving
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const CharacterGalleryScreen()),
-          );
-        }
+
+        // Don't auto-navigate - let the user navigate manually with the button
+        // The success button will handle navigation when the user is ready
       },
     );
 
@@ -167,7 +165,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
   @override
   Widget build(BuildContext context) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
-    
+
     return ChangeNotifierProvider(
       create: (_) => _interviewProvider,
       child: Scaffold(
@@ -179,7 +177,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                 ? "Editing ${widget.existingCharacter?.name ?? 'Character'}"
                 : "Creating Your Digital Twin",
             style: TextStyle(
-              fontSize: 18 * fontScale, 
+              fontSize: 18 * fontScale,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -297,16 +295,19 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               // Display a loading indicator bubble
                               return ChatMessageBubble(
                                 text: '...',
-                                  isUser: false,
+                                isUser: false,
                                 showAvatar: true,
                                 avatarText: 'AI',
                               );
                             }
                             return ChatMessageBubble(
-                              text: message.text.contains('## CHARACTER CARD SUMMARY ##') 
-                                ? _formatCharacterCard(message.text)
-                                : message.text,
-                                isUser: message.isUser,
+                              text:
+                                  message.text.contains(
+                                        '## CHARACTER CARD SUMMARY ##',
+                                      )
+                                      ? _formatCharacterCard(message.text)
+                                      : message.text,
+                              isUser: message.isUser,
                               showAvatar: true,
                               avatarText: message.isUser ? 'You' : 'AI',
                               avatarIcon: message.isUser ? Icons.person : null,
@@ -317,13 +318,25 @@ class _InterviewScreenState extends State<InterviewScreen> {
                     ),
                   ),
 
+                  // Success message when character is created
+                  Consumer<InterviewProvider>(
+                    builder: (context, provider, child) {
+                      if (provider.isSuccess) {
+                        return _buildSuccessMessage(context, provider);
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
                   // Finalize button area
                   Consumer<InterviewProvider>(
                     builder: (context, provider, child) {
                       if (provider.isCardReadyForFinalize) {
                         // Find the last message containing the character card
                         final cardMessage = provider.messages.lastWhere(
-                          (msg) => !msg.isUser && msg.text.contains('## CHARACTER CARD SUMMARY ##'),
+                          (msg) =>
+                              !msg.isUser &&
+                              msg.text.contains('## CHARACTER CARD SUMMARY ##'),
                           orElse: () => provider.messages.last,
                         );
 
@@ -356,7 +369,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                     spreadRadius: 2,
                                   ),
                                   BoxShadow(
-                                    color: AppTheme.midnightPurple.withOpacity(0.2),
+                                    color: AppTheme.midnightPurple.withOpacity(
+                                      0.2,
+                                    ),
                                     blurRadius: 15,
                                     spreadRadius: -2,
                                   ),
@@ -409,7 +424,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.midnightPurple.withOpacity(0.3),
+                                      color: AppTheme.midnightPurple
+                                          .withOpacity(0.3),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: AppTheme.warmGold.withValues(
@@ -419,27 +435,39 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       ),
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         // Name marker highlight
                                         Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                          margin: const EdgeInsets.only(bottom: 16),
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 8,
+                                            horizontal: 12,
+                                          ),
+                                          margin: const EdgeInsets.only(
+                                            bottom: 16,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold.withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(6),
+                                            color: AppTheme.warmGold
+                                                .withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                             border: Border.all(
-                                              color: AppTheme.warmGold.withValues(
-                                                alpha: 0.5,
-                                              ),
+                                              color: AppTheme.warmGold
+                                                  .withValues(alpha: 0.5),
                                               width: 1,
                                             ),
                                           ),
                                           child: Text(
-                                            cardMessage.text.split('\n').firstWhere(
-                                              (line) => line.contains('## CHARACTER NAME:'),
-                                              orElse: () => '',
-                                            ),
+                                            cardMessage.text
+                                                .split('\n')
+                                                .firstWhere(
+                                                  (line) => line.contains(
+                                                    '## CHARACTER NAME:',
+                                                  ),
+                                                  orElse: () => '',
+                                                ),
                                             style: TextStyle(
                                               color: AppTheme.warmGold,
                                               fontSize: 16,
@@ -451,25 +479,36 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                         Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(6),
+                                            color: AppTheme.warmGold
+                                                .withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                             border: Border.all(
-                                              color: AppTheme.warmGold.withValues(
-                                                alpha: 0.3,
-                                              ),
+                                              color: AppTheme.warmGold
+                                                  .withValues(alpha: 0.3),
                                               width: 1,
                                             ),
                                           ),
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               // Summary start marker
                                               Container(
-                                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                                margin: const EdgeInsets.only(bottom: 12),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 4,
+                                                      horizontal: 8,
+                                                    ),
+                                                margin: const EdgeInsets.only(
+                                                  bottom: 12,
+                                                ),
                                                 decoration: BoxDecoration(
-                                                  color: AppTheme.warmGold.withOpacity(0.15),
-                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: AppTheme.warmGold
+                                                      .withOpacity(0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
                                                 ),
                                                 child: Text(
                                                   '## CHARACTER CARD SUMMARY ##',
@@ -482,7 +521,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                               ),
                                               // Card content
                                               SelectableText(
-                                                _extractCardContent(cardMessage.text),
+                                                _extractCardContent(
+                                                  cardMessage.text,
+                                                ),
                                                 style: TextStyle(
                                                   color: AppTheme.silverMist,
                                                   fontSize: 14,
@@ -491,11 +532,19 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                               ),
                                               // Summary end marker
                                               Container(
-                                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                                margin: const EdgeInsets.only(top: 12),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 4,
+                                                      horizontal: 8,
+                                                    ),
+                                                margin: const EdgeInsets.only(
+                                                  top: 12,
+                                                ),
                                                 decoration: BoxDecoration(
-                                                  color: AppTheme.warmGold.withOpacity(0.15),
-                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: AppTheme.warmGold
+                                                      .withOpacity(0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
                                                 ),
                                                 child: Text(
                                                   '## END OF CHARACTER CARD ##',
@@ -517,31 +566,32 @@ class _InterviewScreenState extends State<InterviewScreen> {
                             ),
                             // Finalize button
                             Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              provider.sendMessage('agree');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.warmGold,
-                              foregroundColor: AppTheme.midnightPurple,
-                              minimumSize: const Size(double.infinity, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
                               ),
-                            ),
-                            child: Text(
-                              "Finalize Character",
-                                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                    text: "Finalize Character",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  provider.sendMessage('agree');
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.warmGold,
+                                  foregroundColor: AppTheme.midnightPurple,
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                            ),
-                          ),
+                                ),
+                                child: Text(
+                                  "Finalize Character",
+                                  style:
+                                      UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                        text: "Finalize Character",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ),
                             ),
                           ],
                         );
@@ -687,7 +737,12 @@ class _InterviewScreenState extends State<InterviewScreen> {
               if (provider.isEditMode) {
                 Navigator.pop(context);
               } else {
-                Navigator.pushReplacementNamed(context, '/gallery');
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CharacterGalleryScreen(),
+                  ),
+                );
               }
             },
             style: ElevatedButton.styleFrom(
@@ -728,9 +783,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
     );
   }
 
-  void _sendMessage(
-    InterviewProvider provider,
-  ) async {
+  void _sendMessage(InterviewProvider provider) async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
@@ -744,10 +797,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
   String _extractCardContent(String text) {
     final startMarker = '## CHARACTER CARD SUMMARY ##';
     final endMarker = '## END OF CHARACTER CARD ##';
-    
+
     final startIndex = text.indexOf(startMarker) + startMarker.length;
     final endIndex = text.indexOf(endMarker);
-    
+
     if (startIndex >= 0 && endIndex > startIndex) {
       return text.substring(startIndex, endIndex).trim();
     }

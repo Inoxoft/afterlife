@@ -258,12 +258,16 @@ $languageInstruction""";
         // Create and save the character
         await _saveCharacterToDevice();
 
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
         addAIMessage(
           "Perfect! Your character '$characterName' has been saved successfully. "
-          "You can now find them in your \"Your Twins\" tab and start chatting immediately!",
+          "You can now find them in your \"Your Twins\" tab and start chatting immediately!\n\n"
+          "Use the button below when you're ready to continue.",
         );
 
-        // Mark as success for navigation
+        // Mark as success for navigation (but don't auto-navigate)
         isSuccess = true;
         notifyListeners();
         return;
@@ -304,12 +308,16 @@ $languageInstruction""";
         // Create and save the character
         await _saveCharacterToDevice();
 
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
         addAIMessage(
           "Perfect! Your character '$characterName' has been saved successfully. "
-          "You can now find them in your \"Your Twins\" tab and start chatting immediately!",
+          "You can now find them in your \"Your Twins\" tab and start chatting immediately!\n\n"
+          "Use the button below when you're ready to continue.",
         );
 
-        // Mark as success for navigation
+        // Mark as success for navigation (but don't auto-navigate)
         isSuccess = true;
         notifyListeners();
         return;
@@ -324,6 +332,10 @@ $languageInstruction""";
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
         );
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
         _removeLoadingMessage();
         if (response != null) {
           // Check if response contains API key error message
@@ -361,6 +373,10 @@ $languageInstruction""";
           ],
           systemPrompt: characterCardSummary ?? "",
         );
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
         _removeLoadingMessage();
         if (response != null) {
           addAIMessage(response);
@@ -375,6 +391,10 @@ $languageInstruction""";
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
         );
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
         _removeLoadingMessage();
         if (response != null) {
           // Check if response contains API key error message
