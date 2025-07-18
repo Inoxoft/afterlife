@@ -134,7 +134,8 @@ What specific edits would you like me to make?
       notifyListeners();
 
       final response = await HybridChatService.sendMessage(
-        messages: _convertMessagesToAPI(), // Use all messages including the initial one
+        messages:
+            _convertMessagesToAPI(), // Use all messages including the initial one
         systemPrompt: systemPrompt,
       );
 
@@ -160,11 +161,13 @@ What specific edits would you like me to make?
 
   String _getSystemPrompt() {
     String languageInstruction = '';
-    if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+    if (_languageProvider != null &&
+        _languageProvider!.currentLanguageCode != 'en') {
       final languageName = _languageProvider!.currentLanguageName;
-      languageInstruction = '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
+      languageInstruction =
+          '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
     }
-    
+
     if (isEditMode) {
       return """You are helping the user edit their existing character. The user has provided their current character information and wants to make specific changes.
 
@@ -190,11 +193,13 @@ When the user types "agree", format the final prompt as:
 
   String _getSystemPromptForEditing() {
     String languageInstruction = '';
-    if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+    if (_languageProvider != null &&
+        _languageProvider!.currentLanguageCode != 'en') {
       final languageName = _languageProvider!.currentLanguageName;
-      languageInstruction = '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
+      languageInstruction =
+          '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
     }
-    
+
     return """You are helping the user modify their character card. They have a complete character card but want to make changes to it.
 
 CURRENT CHARACTER CARD:
@@ -237,26 +242,27 @@ $languageInstruction""";
       // Debug logging
       print('🔍 DEBUG: User typed: "${text.trim()}"');
       print('🔍 DEBUG: Lowercased: "${text.trim().toLowerCase()}"');
-      print('🔍 DEBUG: characterCardSummary is null: ${characterCardSummary == null}');
+      print(
+        '🔍 DEBUG: characterCardSummary is null: ${characterCardSummary == null}',
+      );
       print('🔍 DEBUG: characterName is null: ${characterName == null}');
       print('🔍 DEBUG: isComplete: $isComplete');
-      
+
       // Check if user typed "agree" and character card is ready
-      if (text.trim().toLowerCase() == 'agree' && 
-          characterCardSummary != null && 
+      if (text.trim().toLowerCase() == 'agree' &&
+          characterCardSummary != null &&
           characterName != null &&
           isComplete) {
-        
         _removeLoadingMessage();
-        
+
         // Create and save the character
         await _saveCharacterToDevice();
-        
+
         addAIMessage(
           "Perfect! Your character '$characterName' has been saved successfully. "
-          "You can now find them in your \"Your Twins\" tab and start chatting immediately!"
+          "You can now find them in your \"Your Twins\" tab and start chatting immediately!",
         );
-        
+
         // Mark as success for navigation
         isSuccess = true;
         notifyListeners();
@@ -264,10 +270,9 @@ $languageInstruction""";
       }
 
       // Alternative check for "agree" when we have character card but maybe missing name
-      if (text.trim().toLowerCase() == 'agree' && 
-          characterCardSummary != null && 
+      if (text.trim().toLowerCase() == 'agree' &&
+          characterCardSummary != null &&
           isComplete) {
-        
         // Try to extract name from character card summary if not already set
         if (characterName == null) {
           // Try multiple patterns for character name extraction
@@ -278,7 +283,7 @@ $languageInstruction""";
             RegExp(r'I am\s+([A-Z][a-zA-Z\s]+)', caseSensitive: false),
             RegExp(r'You are\s+([A-Z][a-zA-Z\s]+)', caseSensitive: false),
           ];
-          
+
           for (final pattern in namePatterns) {
             final match = pattern.firstMatch(characterCardSummary!);
             if (match != null && match.group(1) != null) {
@@ -286,23 +291,24 @@ $languageInstruction""";
               break;
             }
           }
-          
+
           // If still no name found, use a default
           if (characterName == null) {
-            characterName = "Character_${DateTime.now().millisecondsSinceEpoch}";
+            characterName =
+                "Character_${DateTime.now().millisecondsSinceEpoch}";
           }
         }
-        
+
         _removeLoadingMessage();
-        
+
         // Create and save the character
         await _saveCharacterToDevice();
-        
+
         addAIMessage(
           "Perfect! Your character '$characterName' has been saved successfully. "
-          "You can now find them in your \"Your Twins\" tab and start chatting immediately!"
+          "You can now find them in your \"Your Twins\" tab and start chatting immediately!",
         );
-        
+
         // Mark as success for navigation
         isSuccess = true;
         notifyListeners();
@@ -523,7 +529,9 @@ $languageInstruction""";
   Future<void> _saveCharacterToDevice() async {
     print('🔍 DEBUG: _saveCharacterToDevice called');
     if (characterCardSummary == null || characterName == null) {
-      print('🔍 DEBUG: Character data is incomplete - summary: ${characterCardSummary != null}, name: ${characterName != null}');
+      print(
+        '🔍 DEBUG: Character data is incomplete - summary: ${characterCardSummary != null}, name: ${characterName != null}',
+      );
       throw Exception('Character data is incomplete');
     }
 
@@ -545,13 +553,12 @@ $languageInstruction""";
         print('🔍 DEBUG: No character save callback provided');
         throw Exception('No character save callback provided');
       }
-      
     } catch (e) {
       print('🔍 DEBUG: Error in _saveCharacterToDevice: $e');
       _removeLoadingMessage();
       addAIMessage(
         "Sorry, there was an error saving your character: $e\n\n"
-        "Please try again or contact support if the problem persists."
+        "Please try again or contact support if the problem persists.",
       );
       throw Exception('Failed to save character: $e');
     }

@@ -62,31 +62,37 @@ class FamousCharacterService {
 
     /// Add language instruction if language provider is available
     String finalSystemPrompt = systemPrompt;
-    if (_languageProvider != null && _languageProvider!.currentLanguageCode != 'en') {
+    if (_languageProvider != null &&
+        _languageProvider!.currentLanguageCode != 'en') {
       final languageName = _languageProvider!.currentLanguageName;
-      final languageInstruction = '\n\nIMPORTANT: Please always respond in $languageName unless the user explicitly asks you to change languages. Your responses should be natural and fluent in $languageName.';
+      final languageInstruction =
+          '\n\nIMPORTANT: Please always respond in $languageName unless the user explicitly asks you to change languages. Your responses should be natural and fluent in $languageName.';
       finalSystemPrompt = '$systemPrompt$languageInstruction';
     }
 
     /// Check if using a local model
     final bool isLocalModel = CharacterModel.isLocalModel(model);
-    
+
     if (isLocalModel) {
       /// Use HybridChatService for local models
       try {
         // Convert chat history to the format expected by HybridChatService
-        final formattedChatHistory = chatHistory.map((msg) {
-          // Ensure each message has proper fields
-          return {
-            'role': msg['isUser'] == true ? 'user' : 'assistant',
-            'content': msg['content'],
-            'isUser': msg['isUser'],
-          };
-        }).toList();
-        
+        final formattedChatHistory =
+            chatHistory.map((msg) {
+              // Ensure each message has proper fields
+              return {
+                'role': msg['isUser'] == true ? 'user' : 'assistant',
+                'content': msg['content'],
+                'isUser': msg['isUser'],
+              };
+            }).toList();
+
         // Generate a local-optimized prompt if needed
-        final localPrompt = CharacterModel.generateLocalPrompt(finalSystemPrompt, characterName);
-        
+        final localPrompt = CharacterModel.generateLocalPrompt(
+          finalSystemPrompt,
+          characterName,
+        );
+
         // Use HybridChatService with local model
         final response = await HybridChatService.sendMessageToCharacter(
           characterId: 'famous_$characterName', // Create a virtual ID
@@ -96,7 +102,7 @@ class FamousCharacterService {
           model: model,
           localPrompt: localPrompt,
         );
-        
+
         if (response != null) {
           /// Add both user message and AI response to chat history
           _chatHistories[characterName]!.addAll([
@@ -112,7 +118,7 @@ class FamousCharacterService {
             },
           ]);
         }
-        
+
         return response;
       } catch (e) {
         if (kDebugMode) {
@@ -126,12 +132,12 @@ class FamousCharacterService {
       if (_apiKey == null || _apiKey!.isEmpty) {
         return 'Error: Unable to connect to AI service. Please check your API key configuration.';
       }
-      
+
       /// Prepare messages for API
       final messages = <Map<String, dynamic>>[
         {'role': 'system', 'content': finalSystemPrompt},
       ];
-      
+
       // Add chat history with proper role fields
       for (final msg in chatHistory) {
         // Ensure each message has a proper role field
@@ -142,10 +148,7 @@ class FamousCharacterService {
           });
         } else if (msg.containsKey('role')) {
           // If it already has a role, use it directly
-          messages.add({
-            'role': msg['role'],
-            'content': msg['content'],
-          });
+          messages.add({'role': msg['role'], 'content': msg['content']});
         } else {
           // Default fallback if we can't determine the role
           messages.add({
@@ -154,7 +157,7 @@ class FamousCharacterService {
           });
         }
       }
-      
+
       // Add the new user message
       messages.add({'role': 'user', 'content': message});
 
@@ -184,7 +187,8 @@ class FamousCharacterService {
         if (response.statusCode != 200) {
           if (kDebugMode) {
             print(
-                'API Error in famous_character_service: ${response.statusCode}: ${response.body}');
+              'API Error in famous_character_service: ${response.statusCode}: ${response.body}',
+            );
           }
           return 'I apologize, but I encountered a server error. Please try again.';
         }
@@ -192,19 +196,21 @@ class FamousCharacterService {
         /// Parse response with explicit UTF-8 decoding
         final responseBody = utf8.decode(response.bodyBytes);
         final data = jsonDecode(responseBody);
-        
+
         /// Add null checks to prevent "The method '[]' was called on null" error
-        if (data == null || 
-            data['choices'] == null || 
+        if (data == null ||
+            data['choices'] == null ||
             data['choices'].isEmpty ||
             data['choices'][0] == null ||
             data['choices'][0]['message'] == null) {
           if (kDebugMode) {
-            print('Error in famous_character_service: Invalid response format: $data');
+            print(
+              'Error in famous_character_service: Invalid response format: $data',
+            );
           }
           return 'I apologize, I received an invalid response format. Please try again.';
         }
-        
+
         final aiResponse = data['choices'][0]['message']['content'] as String;
 
         /// Add both user message and AI response to chat history
@@ -330,4 +336,3 @@ class FamousCharacterService {
 
   static int min(int a, int b) => a < b ? a : b;
 }
-

@@ -18,20 +18,20 @@ class HybridChatService {
 
   static LLMProvider _preferredProvider = LLMProvider.auto;
   static bool _isInitialized = false;
-  
+
   /// Initialize the hybrid chat service
   static Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       // Initialize all services
       await LocalLLMService.initialize();
       await interview_chat.ChatService.initialize();
       await character_chat.ChatService.initialize();
       await provider_chat.ChatService.initialize();
-      
+
       _isInitialized = true;
-      
+
       if (kDebugMode) {
         print('HybridChatService initialized successfully');
       }
@@ -41,7 +41,7 @@ class HybridChatService {
       }
     }
   }
-  
+
   /// Send a message using the optimal provider
   static Future<String?> sendMessage({
     required List<Map<String, dynamic>> messages,
@@ -54,20 +54,20 @@ class HybridChatService {
     if (!_isInitialized) {
       await initialize();
     }
-    
+
     // Use the explicitly provided provider, otherwise use the global preference
     final provider = preferredProvider ?? _preferredProvider;
-    
+
     // Determine which provider to use
     final actualProvider = await _determineProvider(provider);
-    
+
     if (kDebugMode) {
       print('Requested provider: $provider, Using provider: $actualProvider');
       if (model != null) {
         print('Model: $model');
       }
     }
-    
+
     switch (actualProvider) {
       case LLMProvider.local:
         return await _sendMessageLocal(
@@ -76,7 +76,7 @@ class HybridChatService {
           temperature: temperature,
           maxTokens: maxTokens,
         );
-      
+
       case LLMProvider.openRouter:
         return await _sendMessageOpenRouter(
           messages: messages,
@@ -85,7 +85,7 @@ class HybridChatService {
           temperature: temperature,
           maxTokens: maxTokens,
         );
-      
+
       case LLMProvider.auto:
         // This shouldn't happen after _determineProvider, but fallback to OpenRouter
         return await _sendMessageOpenRouter(
@@ -97,7 +97,7 @@ class HybridChatService {
         );
     }
   }
-  
+
   /// Send message to character using hybrid approach
   static Future<String?> sendMessageToCharacter({
     required String characterId,
@@ -109,20 +109,20 @@ class HybridChatService {
     String? localPrompt,
   }) async {
     // Check if the model is a local model - be more specific about local model patterns
-    bool isLocalModel = model != null && (
-      model.startsWith('local/') || 
-      model == 'local' ||
-      model.contains('hammer') || 
-      model.contains('gemma')
-    );
-    
+    bool isLocalModel =
+        model != null &&
+        (model.startsWith('local/') ||
+            model == 'local' ||
+            model.contains('hammer') ||
+            model.contains('gemma'));
+
     if (kDebugMode) {
       print('HybridChatService: Model selection debug');
       print('  - Model: $model');
       print('  - Is local model: $isLocalModel');
       print('  - Preferred provider: $preferredProvider');
     }
-    
+
     // Determine the provider based on the model
     LLMProvider actualProvider;
     if (isLocalModel) {
@@ -133,11 +133,11 @@ class HybridChatService {
       // For API models, always use OpenRouter
       actualProvider = LLMProvider.openRouter;
     }
-    
+
     if (kDebugMode) {
       print('  - Actual provider: $actualProvider');
     }
-    
+
     // Select the appropriate prompt based on provider
     String promptToUse;
     if (actualProvider == LLMProvider.local && localPrompt != null) {
@@ -145,43 +145,48 @@ class HybridChatService {
     } else {
       promptToUse = systemPrompt;
     }
-    
+
     // Convert the message format for hybrid service
     // Ensure each message has a valid 'role' field for OpenRouter API
-    final messages = chatHistory.map((msg) {
-      // Make a copy of the message to avoid modifying the original
-      final Map<String, dynamic> formattedMsg = Map.from(msg);
-      
-      // Ensure the message has a role field
-      if (!formattedMsg.containsKey('role')) {
-        // If it has an 'isUser' field, use that to determine role
-        if (formattedMsg.containsKey('isUser')) {
-          formattedMsg['role'] = formattedMsg['isUser'] == true ? 'user' : 'assistant';
-        } else {
-          // Default to 'user' if we can't determine
-          formattedMsg['role'] = 'user';
-        }
-      }
-      
-      return formattedMsg;
-    }).toList();
-    
+    final messages =
+        chatHistory.map((msg) {
+          // Make a copy of the message to avoid modifying the original
+          final Map<String, dynamic> formattedMsg = Map.from(msg);
+
+          // Ensure the message has a role field
+          if (!formattedMsg.containsKey('role')) {
+            // If it has an 'isUser' field, use that to determine role
+            if (formattedMsg.containsKey('isUser')) {
+              formattedMsg['role'] =
+                  formattedMsg['isUser'] == true ? 'user' : 'assistant';
+            } else {
+              // Default to 'user' if we can't determine
+              formattedMsg['role'] = 'user';
+            }
+          }
+
+          return formattedMsg;
+        }).toList();
+
     // Add the new user message with proper role
     messages.add({'role': 'user', 'content': message});
-    
+
     return await sendMessage(
       messages: messages,
       systemPrompt: promptToUse,
-      model: isLocalModel ? null : model, // Don't pass local model ID to cloud service
+      model:
+          isLocalModel
+              ? null
+              : model, // Don't pass local model ID to cloud service
       preferredProvider: actualProvider,
     );
   }
-  
+
   /// Determine which provider to actually use
   static Future<LLMProvider> _determineProvider(LLMProvider requested) async {
     final localStatus = LocalLLMService.getStatus();
     final isLocalAvailable = localStatus['isAvailable'] as bool;
-    
+
     switch (requested) {
       case LLMProvider.local:
         // Check if local LLM is available
@@ -194,10 +199,10 @@ class HybridChatService {
           }
           return LLMProvider.openRouter;
         }
-      
+
       case LLMProvider.openRouter:
         return LLMProvider.openRouter;
-      
+
       case LLMProvider.auto:
         // Prefer local if available, otherwise use OpenRouter
         if (isLocalAvailable) {
@@ -207,7 +212,7 @@ class HybridChatService {
         }
     }
   }
-  
+
   /// Send message using local LLM
   static Future<String?> _sendMessageLocal({
     required List<Map<String, dynamic>> messages,
@@ -218,13 +223,14 @@ class HybridChatService {
     try {
       // Convert messages to a single user message for now
       // This is a simplified approach - in a real implementation you'd want to handle the full conversation
-      final userMessage = messages.isNotEmpty ? messages.last['content'] ?? '' : '';
-      
+      final userMessage =
+          messages.isNotEmpty ? messages.last['content'] ?? '' : '';
+
       final response = await LocalLLMService.sendMessage(
         userMessage,
         systemPrompt: systemPrompt,
       );
-      
+
       return response;
     } catch (e) {
       if (kDebugMode) {
@@ -239,7 +245,7 @@ class HybridChatService {
       );
     }
   }
-  
+
   /// Send message using OpenRouter API
   static Future<String?> _sendMessageOpenRouter({
     required List<Map<String, dynamic>> messages,
@@ -263,7 +269,7 @@ class HybridChatService {
       return 'I apologize, but I\'m having trouble connecting to my AI services. Please try again later.';
     }
   }
-  
+
   /// Set preferred provider
   static void setPreferredProvider(LLMProvider provider) {
     _preferredProvider = provider;
@@ -271,10 +277,10 @@ class HybridChatService {
       print('Preferred provider set to: $provider');
     }
   }
-  
+
   /// Get current preferred provider
   static LLMProvider get preferredProvider => _preferredProvider;
-  
+
   /// Get provider status information
   static Map<String, dynamic> getProviderStatus() {
     final localStatus = LocalLLMService.getStatus();
@@ -287,35 +293,37 @@ class HybridChatService {
         'description': 'Privacy-focused offline AI model',
       },
       'cloud': {
-        'available': true, // Assuming cloud is always available if API key is set
+        'available':
+            true, // Assuming cloud is always available if API key is set
         'enabled': true,
         'name': 'Cloud AI (OpenRouter)',
         'description': 'Advanced cloud-based AI models',
       },
     };
   }
-  
+
   /// Check if local LLM is available
   static bool get isLocalLLMAvailable {
     final localStatus = LocalLLMService.getStatus();
     return localStatus['isAvailable'] as bool;
   }
-  
+
   /// Check if OpenRouter is available
-  static bool get isOpenRouterAvailable => true; // Always available if API key is set
-  
+  static bool get isOpenRouterAvailable =>
+      true; // Always available if API key is set
+
   /// Get recommended provider based on current status
   static Future<LLMProvider> getRecommendedProvider() async {
     final localStatus = LocalLLMService.getStatus();
     final isLocalAvailable = localStatus['isAvailable'] as bool;
-    
+
     if (isLocalAvailable) {
       return LLMProvider.local;
     } else {
       return LLMProvider.openRouter;
     }
   }
-  
+
   /// Get provider display name
   static String getProviderDisplayName(LLMProvider provider) {
     switch (provider) {
@@ -327,7 +335,7 @@ class HybridChatService {
         return 'Auto (Smart Selection)';
     }
   }
-  
+
   /// Get provider description
   static String getProviderDescription(LLMProvider provider) {
     switch (provider) {
@@ -339,7 +347,7 @@ class HybridChatService {
         return 'Automatically selects the best available AI provider';
     }
   }
-  
+
   /// Refresh all services
   static Future<void> refreshServices() async {
     try {
@@ -347,7 +355,7 @@ class HybridChatService {
       await interview_chat.ChatService.refreshApiKey();
       await character_chat.ChatService.refreshApiKey();
       await provider_chat.ChatService.refreshApiKey();
-      
+
       if (kDebugMode) {
         print('All services refreshed successfully');
       }
@@ -357,4 +365,4 @@ class HybridChatService {
       }
     }
   }
-} 
+}

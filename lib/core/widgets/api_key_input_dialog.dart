@@ -1,7 +1,5 @@
 import 'dart:math';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/env_config.dart';
 
@@ -45,7 +43,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   bool _isLoading = true;
   String? _errorText;
   String? _currentKey;
-  bool _isUserKey = false; // Track if this is a user-specified key
 
   @override
   void initState() {
@@ -62,15 +59,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
       // Make sure environment is initialized
       await EnvConfig.initialize();
 
-      // Check if there's a user-set API key and if not, don't show the default key
-      _isUserKey = await EnvConfig.hasUserApiKey();
-      
-      if (_isUserKey) {
-        _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
-      } else {
-        // Don't show the default key from .env in the input field
-        _currentKey = null;
-      }
+      _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
 
       // Don't display placeholder as a real key
       if (_currentKey == 'your_api_key_here') {
@@ -135,7 +124,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         }
         return;
       }
-
 
       // Instead of writing to .env file, save to SharedPreferences
       final success = await EnvConfig.setUserApiKey(apiKey);
@@ -219,7 +207,9 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                               ? IconButton(
                                 icon: Icon(
                                   Icons.delete_outline,
-                                  color: Colors.redAccent.withValues(alpha: 0.7),
+                                  color: Colors.redAccent.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                                 tooltip: 'Clear current key',
                                 onPressed: () async {
@@ -347,30 +337,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                         ],
                       ),
                     ),
-                    
-                  // Show if a default key exists but we're not using it
-                  if (!_isUserKey && EnvConfig.getDefaultValue('OPENROUTER_API_KEY') != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.settings_applications,
-                            size: 14,
-                            color: Colors.blue.shade300,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Using default API key from .env file',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue.shade300,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
       actions: [
@@ -425,7 +391,9 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.etherealCyan,
             foregroundColor: Colors.black87,
-            disabledBackgroundColor: AppTheme.etherealCyan.withValues(alpha: 0.3),
+            disabledBackgroundColor: AppTheme.etherealCyan.withValues(
+              alpha: 0.3,
+            ),
           ),
           child:
               _isSubmitting

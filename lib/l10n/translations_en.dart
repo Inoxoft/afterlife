@@ -23,13 +23,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourDigitalTwins => 'YOUR DIGITAL TWINS';
 
   @override
-  String get interactWithHistoricalFigures => 'Interact with historical figures through their masks';
+  String get interactWithHistoricalFigures =>
+      'Interact with historical figures through their masks';
 
   @override
   String get noDigitalTwinsDetected => 'NO DIGITAL TWINS DETECTED';
 
   @override
-  String get createNewTwinDescription => 'Create a new digital twin to begin interacting with your preserved consciousness';
+  String get createNewTwinDescription =>
+      'Create a new digital twin to begin interacting with your preserved consciousness';
 
   @override
   String get createNewTwin => 'CREATE NEW TWIN';
@@ -41,37 +43,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get darkMode => 'Dark Mode';
 
   @override
-  String get darkModeDescription => 'Enhance your viewing experience in low light conditions(soon)';
+  String get darkModeDescription =>
+      'Enhance your viewing experience in low light conditions(soon)';
 
   @override
   String get chatFontSize => 'Chat Font Size';
 
   @override
-  String get chatFontSizeDescription => 'Adjust the text size in chat conversations';
+  String get chatFontSizeDescription =>
+      'Adjust the text size in chat conversations';
 
   @override
   String get enableAnimations => 'Enable Animations';
 
   @override
-  String get enableAnimationsDescription => 'Toggle interface animations and visual effects';
+  String get enableAnimationsDescription =>
+      'Toggle interface animations and visual effects';
 
   @override
   String get enableNotifications => 'Enable Notifications';
 
   @override
-  String get enableNotificationsDescription => 'Get notified when your digital twins want to chat';
+  String get enableNotificationsDescription =>
+      'Get notified when your digital twins want to chat';
 
   @override
   String get exportAllCharacters => 'Export All Characters';
 
   @override
-  String get exportAllCharactersDescription => 'Save your digital twins to a file';
+  String get exportAllCharactersDescription =>
+      'Save your digital twins to a file';
 
   @override
   String get clearAllData => 'Clear All Data';
 
   @override
-  String get clearAllDataDescription => 'Delete all characters and reset app (caution: cannot be undone)';
+  String get clearAllDataDescription =>
+      'Delete all characters and reset app (caution: cannot be undone)';
 
   @override
   String get appVersion => 'App Version';
@@ -80,7 +88,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicy => 'Privacy Policy';
 
   @override
-  String get privacyPolicyDescription => 'Read how your data is used and protected';
+  String get privacyPolicyDescription =>
+      'Read how your data is used and protected';
 
   @override
   String get customApiKey => 'Custom OpenRouter API Key';
@@ -92,13 +101,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatWithDeveloper => 'Chat with Developer';
 
   @override
-  String get chatWithDeveloperDescription => 'Chat with the developer\'s digital twin to learn more about the app and how it works.';
+  String get chatWithDeveloperDescription =>
+      'Chat with the developer\'s digital twin to learn more about the app and how it works.';
 
   @override
   String get language => 'Choose Your Language';
 
   @override
-  String get languageDescription => 'Select your preferred language for the best experience';
+  String get languageDescription =>
+      'Select your preferred language for the best experience';
 
   @override
   String get appearance => 'Appearance';
@@ -128,7 +139,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearChat => 'Clear Chat';
 
   @override
-  String get clearChatConfirmation => 'This will delete all messages in this conversation. This action cannot be undone.';
+  String get clearChatConfirmation =>
+      'This will delete all messages in this conversation. This action cannot be undone.';
 
   @override
   String get cancel => 'Cancel';
@@ -140,25 +152,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatHistoryCleared => 'Chat history cleared successfully';
 
   @override
-  String get welcomeInterview => "Welcome! I'm here to help you craft your digital twin — a deep, vivid portrait of your personality, memories, values, and style.";
+  String get welcomeInterview =>
+      "Welcome! I'm here to help you craft your digital twin — a deep, vivid portrait of your personality, memories, values, and style.";
 
   @override
-  String get fileUploadOption => "Upload a file (PDF, TXT, DOC, or email) containing your information";
+  String get fileUploadOption =>
+      "Upload a file (PDF, TXT, DOC, or email) containing your information";
 
   @override
-  String get questionAnswerOption => "Answer my questions about your personality and experiences";
+  String get questionAnswerOption =>
+      "Answer my questions about your personality and experiences";
 
   @override
   String get agree => 'agree';
 
   @override
-  String get errorConnecting => 'Sorry, I am having trouble connecting. Please try again later.';
+  String get errorConnecting =>
+      'Sorry, I am having trouble connecting. Please try again later.';
 
   @override
-  String get errorProcessingMessage => 'Sorry, I could not process your message. Please try again.';
+  String get errorProcessingMessage =>
+      'Sorry, I could not process your message. Please try again.';
 
   @override
-  String get noApiKey => 'Error: Unable to connect to AI service. Please check your API key configuration.';
+  String get noApiKey =>
+      'Error: Unable to connect to AI service. Please check your API key configuration.';
 
   @override
   String get checkApiKey => 'Please check your API key settings.';
@@ -214,13 +232,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDescription => 'Customize your Afterlife experience';
 
   @override
-  String get privacyPolicyNotAvailable => 'Privacy Policy not available in this version';
+  String get privacyPolicyNotAvailable =>
+      'Privacy Policy not available in this version';
 
   @override
-  String get apiKeyNote => 'Note: The default API key from .env file will be used as a fallback if no custom key is provided.';
+  String get apiKeyNote =>
+      'Note: The default API key from .env file will be used as a fallback if no custom key is provided.';
 
   @override
-  String get clearAllDataConfirmation => 'This will permanently delete all your characters and reset the app to its default state. This action cannot be undone.';
+  String get clearAllDataConfirmation =>
+      'This will permanently delete all your characters and reset the app to its default state. This action cannot be undone.';
 
   @override
   String get deleteEverything => 'Delete Everything';
@@ -229,13 +250,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataCleared => 'All data has been cleared';
 
   @override
-  String get errorClearingData => 'Error clearing chat history. Please try again.';
+  String get errorClearingData =>
+      'Error clearing chat history. Please try again.';
 
   @override
   String get startChattingWith => 'Start chatting with {name}';
 
   @override
-  String get sendMessageToBegin => 'Send a message below to begin the conversation';
+  String get sendMessageToBegin =>
+      'Send a message below to begin the conversation';
 
   @override
   String get chat => 'Chat';
@@ -253,52 +276,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearChatHistoryTitle => 'Clear Chat History';
 
   @override
-  String get clearChatHistoryConfirm => 'Are you sure you want to clear the chat history? This action cannot be undone.';
+  String get clearChatHistoryConfirm =>
+      'Are you sure you want to clear the chat history? This action cannot be undone.';
 
   // Famous character profile screen
   @override
   String get noBiographyAvailable => 'No biography available.';
-  
+
   @override
   String get profileOf => '{name}\'s Profile';
-  
+
   @override
   String get name => 'Name';
-  
+
   @override
   String get years => 'Years';
-  
+
   @override
   String get profession => 'Profession';
-  
+
   @override
   String get biography => 'Biography';
-  
+
   @override
   String get aiModel => 'AI MODEL';
-  
+
   @override
   String get viewAllModels => 'View All Models';
-  
+
   @override
   String get featureAvailableSoon => 'This feature will be available soon';
-  
+
   @override
   String get startConversation => 'Start Conversation';
-  
+
   @override
   String get recommended => 'RECOMMENDED';
-  
+
   @override
   String get aiModelUpdatedFor => 'AI model updated for {name}';
 
   // Famous character model dialog
   @override
   String get selectAiModelFor => 'Select AI Model for {name}';
-  
+
   @override
   String get chooseAiModelFor => 'Choose the AI model that will power {name}:';
-  
+
   @override
   String get select => 'SELECT';
 
@@ -322,13 +346,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theMindBehindTwins => 'THE MIND BEHIND YOUR TWINS';
 
   @override
-  String get poweredByAdvancedLanguageModels => 'Powered by Advanced Language Models';
+  String get poweredByAdvancedLanguageModels =>
+      'Powered by Advanced Language Models';
 
   @override
   String get howItWorks => 'How It Works';
 
   @override
-  String get twinsPoweredByAI => 'Your digital twins are powered by sophisticated AI language models that enable them to think, reason, and interact naturally. The more advanced the model, the more authentic and knowledgeable your interactions will be.';
+  String get twinsPoweredByAI =>
+      'Your digital twins are powered by sophisticated AI language models that enable them to think, reason, and interact naturally. The more advanced the model, the more authentic and knowledgeable your interactions will be.';
 
   @override
   String get basicLLM => 'BASIC LLM';
@@ -382,25 +408,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fromPoliticsToArt => 'From politics to art, history comes alive';
 
   @override
-  String get engageWithDiverseFigures => 'Engage with diverse figures from politics, science, art, and more who shaped our world.';
+  String get engageWithDiverseFigures =>
+      'Engage with diverse figures from politics, science, art, and more who shaped our world.';
 
   @override
-  String get rememberSimulations => 'Remember that these are simulations based on available data - responses represent our best attempt at historical accuracy.';
+  String get rememberSimulations =>
+      'Remember that these are simulations based on available data - responses represent our best attempt at historical accuracy.';
 
   @override
-  String get createYourOwnTwins => 'Create your own digital twins by using the Create button in the bottom navigation.';
+  String get createYourOwnTwins =>
+      'Create your own digital twins by using the Create button in the bottom navigation.';
 
   @override
   String get exampleInteraction => 'Example Interaction';
 
   @override
-  String get whenDiscussingRelativityWithEinstein => 'When discussing relativity with Einstein:';
+  String get whenDiscussingRelativityWithEinstein =>
+      'When discussing relativity with Einstein:';
 
   @override
-  String get withAdvancedLLMExample => '"Let me explain how spacetime curvature affects gravitational lensing, and why this was crucial for the experimental verification of general relativity..."';
+  String get withAdvancedLLMExample =>
+      '"Let me explain how spacetime curvature affects gravitational lensing, and why this was crucial for the experimental verification of general relativity..."';
 
   @override
-  String get withBasicLLMExample => '"Well, E=mc² is important for relativity, but I cannot explain the deeper implications or mathematical framework..."';
+  String get withBasicLLMExample =>
+      '"Well, E=mc² is important for relativity, but I cannot explain the deeper implications or mathematical framework..."';
 
   @override
   String get withAdvancedLLMLabel => 'With Advanced LLM:';
@@ -413,19 +445,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   // Mask page strings
   @override
-  String get digitalPersonasWithHistoricalEssence => 'Digital personas with historical essence';
+  String get digitalPersonasWithHistoricalEssence =>
+      'Digital personas with historical essence';
 
   @override
   String get einsteinWithMaskAndLLMArmor => 'Einstein with mask and LLM armor';
 
   @override
-  String get masksAreAIPersonas => 'Masks are AI personas created from historical data, personal accounts, and detailed character specifications.';
+  String get masksAreAIPersonas =>
+      'Masks are AI personas created from historical data, personal accounts, and detailed character specifications.';
 
   @override
-  String get eachMaskTriesToEmbody => 'Each mask tries to embody the authentic character, personality, and knowledge of its historical figure.';
+  String get eachMaskTriesToEmbody =>
+      'Each mask tries to embody the authentic character, personality, and knowledge of its historical figure.';
 
   @override
-  String get theseDigitalTwinsAllow => 'These digital twins allow you to interact with perspectives from across time and reality.';
+  String get theseDigitalTwinsAllow =>
+      'These digital twins allow you to interact with perspectives from across time and reality.';
 
   // Character Profile screen strings
   @override
@@ -441,13 +477,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullDetailedPrompt => 'Full Detailed Prompt';
 
   @override
-  String get usedForCloudAiModels => 'Used for cloud AI models (GPT, Claude, Gemini, etc.)';
+  String get usedForCloudAiModels =>
+      'Used for cloud AI models (GPT, Claude, Gemini, etc.)';
 
   @override
   String get optimizedLocalPrompt => 'Optimized Local Prompt';
 
   @override
-  String get usedForLocalModels => 'Used for local models (DeepSeek, Gemma, etc.)';
+  String get usedForLocalModels =>
+      'Used for local models (DeepSeek, Gemma, etc.)';
 
   @override
   String get apiModels => 'API Models';
@@ -486,7 +524,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imageGuidelines => 'Image Guidelines:';
 
   @override
-  String get imageGuidelinesText => '• Square images work best\n• Maximum size: 512x512 pixels\n• Supported formats: JPG, PNG\n• Images will be optimized automatically';
+  String get imageGuidelinesText =>
+      '• Square images work best\n• Maximum size: 512x512 pixels\n• Supported formats: JPG, PNG\n• Images will be optimized automatically';
 
   @override
   String get characterIconImage => 'Character Icon Image';
@@ -516,16 +555,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreMoreAiOptions => 'Explore more AI options';
 
   @override
-  String get privacyFirstLocalAi => 'Privacy-first local AI with multimodal support (3.1GB)';
+  String get privacyFirstLocalAi =>
+      'Privacy-first local AI with multimodal support (3.1GB)';
 
   @override
-  String get speedMultimodalSupport => 'Speed, multimodal support, and 1M token context window';
+  String get speedMultimodalSupport =>
+      'Speed, multimodal support, and 1M token context window';
 
   @override
-  String get lightweightInstructionTuned => 'Lightweight, instruction-tuned model for conversational creativity';
+  String get lightweightInstructionTuned =>
+      'Lightweight, instruction-tuned model for conversational creativity';
 
   @override
-  String get requiresModelDownload => 'Requires model download • No internet needed';
+  String get requiresModelDownload =>
+      'Requires model download • No internet needed';
 
   @override
   String get noInternetNeeded => 'No internet needed';
@@ -534,7 +577,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAiModel => 'Select AI Model';
 
   @override
-  String get chooseAiModelThatWillPower => 'Choose the AI model that will power this character:';
+  String get chooseAiModelThatWillPower =>
+      'Choose the AI model that will power this character:';
 
   @override
   String get aiModelUpdatedSuccessfully => 'AI model updated successfully';
@@ -543,7 +587,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reinterview => 'Re-interview Character';
 
   @override
-  String get reinterviewDescription => 'Update your character\'s personality and memories through a new interview process';
+  String get reinterviewDescription =>
+      'Update your character\'s personality and memories through a new interview process';
 
   @override
   String get selectIcon => 'Select Icon';
@@ -558,38 +603,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCharacterImage => 'Select character image';
 
   @override
-  String get openRouterGpt4o => 'Combines advanced reasoning, code generation, and multimodal understanding';
+  String get openRouterGpt4o =>
+      'Combines advanced reasoning, code generation, and multimodal understanding';
 
   @override
-  String get openRouterClaude35Sonnet => 'Excels at writing, math, coding, and visual analysis';
+  String get openRouterClaude35Sonnet =>
+      'Excels at writing, math, coding, and visual analysis';
 
   @override
-  String get openRouterGpt4Turbo => 'Optimized GPT-4 model for speed and efficiency with image capabilities';
+  String get openRouterGpt4Turbo =>
+      'Optimized GPT-4 model for speed and efficiency with image capabilities';
 
   @override
-  String get openRouterGeminiPro => 'Google\'s versatile model with strong multimodal reasoning capabilities';
+  String get openRouterGeminiPro =>
+      'Google\'s versatile model with strong multimodal reasoning capabilities';
 
   @override
-  String get mistralLarge => 'Mistral AI\'s flagship model with superior reasoning capabilities';
+  String get mistralLarge =>
+      'Mistral AI\'s flagship model with superior reasoning capabilities';
 
   @override
-  String get localGemma2b => 'Compact model that runs locally on device for privacy';
+  String get localGemma2b =>
+      'Compact model that runs locally on device for privacy';
 
   @override
   String get private => 'PRIVATE';
 
   // Famous character bios
   @override
-  String get einsteinBio => 'Theoretical physicist who developed the theory of relativity, fundamentally changing our understanding of space, time, and gravity. Nobel Prize winner whose equation E=mc² became one of the most famous formulas in science.';
+  String get einsteinBio =>
+      'Theoretical physicist who developed the theory of relativity, fundamentally changing our understanding of space, time, and gravity. Nobel Prize winner whose equation E=mc² became one of the most famous formulas in science.';
 
   @override
-  String get reaganBio => '40th President of the United States (1981-1989), former Hollywood actor, and Governor of California. Known for his economic policies ("Reaganomics"), role in ending the Cold War, and exceptional communication skills that earned him the nickname "The Great Communicator."';
+  String get reaganBio =>
+      '40th President of the United States (1981-1989), former Hollywood actor, and Governor of California. Known for his economic policies ("Reaganomics"), role in ending the Cold War, and exceptional communication skills that earned him the nickname "The Great Communicator."';
 
   @override
-  String get turingBio => 'Brilliant mathematician and cryptanalyst who helped break the German Enigma code during World War II, potentially shortening the war by years. Pioneer of computer science and artificial intelligence who developed the concept of the Turing machine, a mathematical model of computation.';
+  String get turingBio =>
+      'Brilliant mathematician and cryptanalyst who helped break the German Enigma code during World War II, potentially shortening the war by years. Pioneer of computer science and artificial intelligence who developed the concept of the Turing machine, a mathematical model of computation.';
 
   @override
-  String get monroeBio => 'Legendary Hollywood actress, model, and cultural icon whose films grossed over 200 million dollars. Known for her comedic talent and iconic performances in "Some Like It Hot" and "Gentlemen Prefer Blondes." Her signature look and charisma made her one of the most enduring stars of the 20th century.';
+  String get monroeBio =>
+      'Legendary Hollywood actress, model, and cultural icon whose films grossed over 200 million dollars. Known for her comedic talent and iconic performances in "Some Like It Hot" and "Gentlemen Prefer Blondes." Her signature look and charisma made her one of the most enduring stars of the 20th century.';
 
   // Date and time strings
   @override
@@ -618,7 +673,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restartInterview => 'Restart Interview';
 
   @override
-  String get clearResponsesConfirmation => 'This will clear all your responses. Are you sure?';
+  String get clearResponsesConfirmation =>
+      'This will clear all your responses. Are you sure?';
 
   @override
   String get deleteCharacter => 'Delete Character';
@@ -643,10 +699,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeyRequired => 'API Key Required';
 
   @override
-  String get updateApiKeyDescription => 'Update your OpenRouter API key for AI functionality:';
+  String get updateApiKeyDescription =>
+      'Update your OpenRouter API key for AI functionality:';
 
   @override
-  String get apiKeyRequiredDescription => 'The application requires an OpenRouter API key to function. Please enter your API key below:';
+  String get apiKeyRequiredDescription =>
+      'The application requires an OpenRouter API key to function. Please enter your API key below:';
 
   @override
   String get enterApiKey => 'Enter API Key (sk-...)';
@@ -655,13 +713,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearCurrentKey => 'Clear current key';
 
   @override
-  String get getApiKeyFromOpenRouter => 'You can get an API key from openrouter.ai';
+  String get getApiKeyFromOpenRouter =>
+      'You can get an API key from openrouter.ai';
 
   @override
   String get usingCustomApiKey => 'Using your custom API key';
 
   @override
-  String get replaceKeyInstructions => 'To replace with a different key, first clear the field and enter the new key';
+  String get replaceKeyInstructions =>
+      'To replace with a different key, first clear the field and enter the new key';
 
   @override
   String get apiKeyShouldStartWithSk => 'API key should start with "sk-"';
@@ -684,34 +744,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   // Generic error messages with parameters
   @override
-  String errorLoadingCharacterWithDetails(String error) => 'Error loading character: $error';
+  String errorLoadingCharacterWithDetails(String error) =>
+      'Error loading character: $error';
 
   @override
-  String errorSavingApiKeyWithDetails(String error) => 'Error saving API key: $error';
+  String errorSavingApiKeyWithDetails(String error) =>
+      'Error saving API key: $error';
 
   @override
-  String errorRemovingApiKeyWithDetails(String error) => 'Error removing API key: $error';
+  String errorRemovingApiKeyWithDetails(String error) =>
+      'Error removing API key: $error';
 
   @override
-  String failedToSaveSettingsWithDetails(String error) => 'Failed to save settings: $error';
+  String failedToSaveSettingsWithDetails(String error) =>
+      'Failed to save settings: $error';
 
   @override
-  String aiModelUpdatedForCharacter(String characterName) => 'AI model updated for $characterName';
+  String aiModelUpdatedForCharacter(String characterName) =>
+      'AI model updated for $characterName';
 
   @override
-  String characterCardCopiedForCharacter(String characterName) => 'Character card for "$characterName" copied to clipboard';
+  String characterCardCopiedForCharacter(String characterName) =>
+      'Character card for "$characterName" copied to clipboard';
 
   @override
   String errorUpdatingModel(String error) => 'Error updating model: $error';
 
   @override
-  String errorSavingCharacterWithDetails(String error) => 'Error saving character: $error';
+  String errorSavingCharacterWithDetails(String error) =>
+      'Error saving character: $error';
 
   @override
-  String errorClearingDataWithDetails(String error) => 'Error clearing data: $error';
+  String errorClearingDataWithDetails(String error) =>
+      'Error clearing data: $error';
 
   @override
-  String errorExportingCharactersWithDetails(String error) => 'Error exporting characters: $error';
+  String errorExportingCharactersWithDetails(String error) =>
+      'Error exporting characters: $error';
 
   // Additional UI strings
   @override
@@ -731,11 +800,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   // Interview initial message
   @override
-  String get interviewInitialMessage => 'Hello! I\'m ready to create a detailed character card for you. You can choose:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhat would you prefer?';
+  String get interviewInitialMessage =>
+      'Hello! I\'m ready to create a detailed character card for you. You can choose:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhat would you prefer?';
 
   // Splash screen status messages
   @override
-  String get initializingPreservationSystems => 'INITIALIZING PRESERVATION SYSTEMS';
+  String get initializingPreservationSystems =>
+      'INITIALIZING PRESERVATION SYSTEMS';
 
   @override
   String get calibratingNeuralNetworks => 'CALIBRATING NEURAL NETWORKS';
@@ -766,14 +837,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeyCannotBeEmpty => 'API key cannot be empty';
 
   @override
-  String get characterCardCopiedToClipboard => 'Character card copied to clipboard';
+  String get characterCardCopiedToClipboard =>
+      'Character card copied to clipboard';
 
   @override
-  String get charactersExportedSuccessfully => 'Characters exported successfully!';
+  String get charactersExportedSuccessfully =>
+      'Characters exported successfully!';
 
   @override
   String get errorExportingCharacters => 'Error exporting characters';
 
   @override
   String get errorSavingApiKey => 'Error saving API key';
-} 
+}

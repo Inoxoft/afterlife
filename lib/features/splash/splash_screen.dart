@@ -226,17 +226,15 @@ class _SplashScreenState extends State<SplashScreen>
                       _statusMessage,
                       style:
                           UkrainianFontUtils.getTextStyleWithUkrainianSupport(
-                        text: _statusMessage,
-                        originalStyle: TextStyle(
-                          fontFamily: 'SpaceMono',
-                          fontSize: 14,
-                          color: AppTheme.silverMist.withValues(
-                            alpha: 0.7,
+                            text: _statusMessage,
+                            originalStyle: TextStyle(
+                              fontFamily: 'SpaceMono',
+                              fontSize: 14,
+                              color: AppTheme.silverMist.withValues(alpha: 0.7),
+                              letterSpacing: 2,
+                            ),
+                            defaultFontFamily: 'SpaceMono',
                           ),
-                          letterSpacing: 2,
-                        ),
-                        defaultFontFamily: 'SpaceMono',
-                      ),
                     ),
                     const SizedBox(height: 40),
 

@@ -75,23 +75,17 @@ This approach allows for a respectful and engaging way to explore history and th
    flutter pub get
    ```
 
-3. Create a `.env` file in the project root with your OpenRouter API key:
-   ```
-   OPENROUTER_API_KEY=your_api_key_here
-   ```
-
-4. Run the app:
+3. Run the app:
    ```bash
    flutter run
    ```
+4. When you first run the app, you will be prompted to enter your OpenRouter API key.
 
 ## 🔧 Configuration
 
 Afterlife uses OpenRouter to connect to various LLM providers. By default, the app uses Google's Gemini model, but you can configure other models in the settings.
 
-### Environment Variables
-
-- `OPENROUTER_API_KEY`: Your OpenRouter API key(paste it in app manualy)
+You can change your API key at any time in the app's settings.
 
 ## 💡 Usage
 

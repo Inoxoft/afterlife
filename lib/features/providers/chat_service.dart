@@ -123,18 +123,19 @@ class ChatService {
       for (final msg in history) {
         // Make a copy of the message to avoid modifying the original
         final Map<String, dynamic> formattedMsg = Map.from(msg);
-        
+
         // Ensure the message has a role field
         if (!formattedMsg.containsKey('role')) {
           // If it has an 'isUser' field, use that to determine role
           if (formattedMsg.containsKey('isUser')) {
-            formattedMsg['role'] = formattedMsg['isUser'] == true ? 'user' : 'assistant';
+            formattedMsg['role'] =
+                formattedMsg['isUser'] == true ? 'user' : 'assistant';
           } else {
             // Default to 'user' if we can't determine
             formattedMsg['role'] = 'user';
           }
         }
-        
+
         messages.add({
           'role': formattedMsg['role'],
           'content': formattedMsg['content'],
@@ -172,24 +173,28 @@ class ChatService {
         // Explicitly decode response body as UTF-8
         final responseBody = utf8.decode(response.bodyBytes);
         final jsonResponse = jsonDecode(responseBody);
-        
+
         // Add null checks to prevent "The method '[]' was called on null" error
-        if (jsonResponse == null || 
-            jsonResponse['choices'] == null || 
+        if (jsonResponse == null ||
+            jsonResponse['choices'] == null ||
             jsonResponse['choices'].isEmpty ||
             jsonResponse['choices'][0] == null ||
             jsonResponse['choices'][0]['message'] == null) {
           if (kDebugMode) {
-            print('Error in providers/chat_service: Invalid response format: $jsonResponse');
+            print(
+              'Error in providers/chat_service: Invalid response format: $jsonResponse',
+            );
           }
           return 'I apologize, I received an invalid response format. Please try again.';
         }
-        
+
         final content = jsonResponse['choices'][0]['message']['content'];
         return content;
       } else {
         if (kDebugMode) {
-          print('API Error in providers: ${response.statusCode}: ${response.body}');
+          print(
+            'API Error in providers: ${response.statusCode}: ${response.body}',
+          );
         }
         return 'I apologize, I encountered a server error. Please try again.';
       }

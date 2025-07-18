@@ -132,7 +132,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
 
                     // Remove the _buildSettingCard for chatFontSize
-
                     const SizedBox(height: 16),
 
                     // Data management section

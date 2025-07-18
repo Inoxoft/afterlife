@@ -29,14 +29,13 @@ Future<void> _initializeApp() async {
   // Initialize environment configuration
   try {
     await EnvConfig.initialize();
-  } catch (e) {
-  }
+  } catch (e) {}
 
   // Initialize services
   try {
     // Initialize hybrid chat service (this will initialize LocalLLMService)
     await HybridChatService.initialize();
-    
+
     // Initialize character interview chat service
     await interview_chat.ChatService.initialize();
     interview_chat.ChatService.logDiagnostics();
@@ -52,16 +51,15 @@ Future<void> _initializeApp() async {
 
     // Initialize and clean famous character prompts
     FamousCharacterPrompts.initialize();
-  } catch (e) {
-  }
+  } catch (e) {}
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize the hybrid chat service
   await HybridChatService.initialize();
-  
+
   runZonedGuarded(
     () async {
       try {
@@ -109,7 +107,7 @@ class _MyAppState extends State<MyApp> {
     // Get platform-appropriate font fallbacks for Cyrillic text
     final fontFallbacks = UkrainianFontUtils.getMobileFontFallbacks();
     final serifFontFallbacks = UkrainianFontUtils.getMobileSerifFontFallbacks();
-    
+
     return baseTheme.copyWith(
       // Display styles (large text)
       displayLarge: baseTheme.displayLarge?.copyWith(
@@ -121,7 +119,7 @@ class _MyAppState extends State<MyApp> {
       displaySmall: baseTheme.displaySmall?.copyWith(
         fontFamilyFallback: serifFontFallbacks,
       ),
-      
+
       // Headline styles
       headlineLarge: baseTheme.headlineLarge?.copyWith(
         fontFamilyFallback: serifFontFallbacks,
@@ -132,7 +130,7 @@ class _MyAppState extends State<MyApp> {
       headlineSmall: baseTheme.headlineSmall?.copyWith(
         fontFamilyFallback: serifFontFallbacks,
       ),
-      
+
       // Title styles
       titleLarge: baseTheme.titleLarge?.copyWith(
         fontFamilyFallback: serifFontFallbacks,
@@ -143,7 +141,7 @@ class _MyAppState extends State<MyApp> {
       titleSmall: baseTheme.titleSmall?.copyWith(
         fontFamilyFallback: fontFallbacks,
       ),
-      
+
       // Body text styles
       bodyLarge: baseTheme.bodyLarge?.copyWith(
         fontFamilyFallback: fontFallbacks,
@@ -154,7 +152,7 @@ class _MyAppState extends State<MyApp> {
       bodySmall: baseTheme.bodySmall?.copyWith(
         fontFamilyFallback: fontFallbacks,
       ),
-      
+
       // Label styles (buttons, tabs, etc.)
       labelLarge: baseTheme.labelLarge?.copyWith(
         fontFamilyFallback: fontFallbacks,
@@ -175,7 +173,7 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           title: 'Afterlife',
           debugShowCheckedModeBanner: false,
-          
+
           // Add localization support
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -185,7 +183,7 @@ class _MyAppState extends State<MyApp> {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           locale: languageProvider.currentLocale,
-          
+
           theme: ThemeData(
             useMaterial3: true,
             primaryColor: AppTheme.etherealCyan,
@@ -194,12 +192,12 @@ class _MyAppState extends State<MyApp> {
               brightness: Brightness.dark,
             ),
             scaffoldBackgroundColor: AppTheme.backgroundStart,
-            
+
             // Global text theme with Cyrillic font support (Ukrainian and Russian)
             textTheme: _buildTextThemeWithUkrainianSupport(
               ThemeData.dark().textTheme,
             ),
-            
+
             dialogTheme: DialogThemeData(
               backgroundColor: AppTheme.deepIndigo,
               shape: RoundedRectangleBorder(
@@ -209,10 +207,13 @@ class _MyAppState extends State<MyApp> {
             snackBarTheme: SnackBarThemeData(
               backgroundColor: AppTheme.deepIndigo,
               contentTextStyle: const TextStyle(color: Colors.white),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
-          home: const SplashScreen(), // Use the splash screen as the home screen
+          home:
+              const SplashScreen(), // Use the splash screen as the home screen
         );
       },
     );

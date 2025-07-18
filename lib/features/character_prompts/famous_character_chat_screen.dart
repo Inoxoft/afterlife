@@ -51,11 +51,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     _selectedModel = FamousCharacterPrompts.getSelectedModel(
       widget.characterName,
     );
-    
+
     // Inject the LanguageProvider
     final languageProvider = context.read<LanguageProvider>();
     FamousCharacterService.setLanguageProvider(languageProvider);
-    
+
     _initializeChat();
   }
 
@@ -114,14 +114,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     // Clear the input field
     _messageController.clear();
 
-    // Add user message to chat locally for immediate UI update
+    // Set loading state but don't add the message locally yet
+    // Let the service handle adding it to prevent duplication
     setState(() {
       _isLoading = true;
-      _messages.add({
-        'content': message,
-        'isUser': true,
-        'timestamp': DateTime.now().toIso8601String(),
-      });
     });
 
     // Scroll to the bottom after state update
@@ -134,7 +130,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         message: message,
       );
 
-      // Add AI response to chat history if not null
+      // Add artificial delay to simulate natural conversation flow
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      // Update messages from service which includes both user message and AI response
       if (response != null) {
         setState(() {
           _messages = FamousCharacterService.getFormattedChatHistory(
@@ -143,6 +142,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         });
       } else {
         // Handle null response by showing a fallback message
+        // First get the current history, then add the error message
+        setState(() {
+          _messages = FamousCharacterService.getFormattedChatHistory(
+            widget.characterName,
+          );
+        });
+
+        // Add error message to the service's history
         _messages.add({
           'content': localizations.errorProcessingMessage,
           'isUser': false,
@@ -157,6 +164,13 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       }
 
       // Add error message to chat history
+      // First get the current history, then add the error message
+      setState(() {
+        _messages = FamousCharacterService.getFormattedChatHistory(
+          widget.characterName,
+        );
+      });
+
       _messages.add({
         'content': localizations.errorConnecting,
         'isUser': false,
@@ -305,8 +319,9 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                                             vertical: 1,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold
-                                                .withValues(alpha: 0.2),
+                                            color: AppTheme.warmGold.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               2,
                                             ),
@@ -377,7 +392,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.startChattingWith.replaceAll('{name}', widget.characterName),
+                localizations.startChattingWith.replaceAll(
+                  '{name}',
+                  widget.characterName,
+                ),
                 style: TextStyle(
                   fontFamily: 'Lato',
                   fontSize: 18,
@@ -409,9 +427,12 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         final message = _messages[index];
         return ChatMessageBubble(
           text: message['content'] as String,
-            isUser: message['isUser'] as bool,
+          isUser: message['isUser'] as bool,
           showAvatar: true,
-          avatarText: message['isUser'] as bool ? localizations.you : widget.characterName[0].toUpperCase(),
+          avatarText:
+              message['isUser'] as bool
+                  ? localizations.you
+                  : widget.characterName[0].toUpperCase(),
           avatarIcon: message['isUser'] as bool ? Icons.person : null,
         );
       },
@@ -456,9 +477,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide(
-                    color: AppTheme.warmGold,
-                  ),
+                  borderSide: BorderSide(color: AppTheme.warmGold),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,

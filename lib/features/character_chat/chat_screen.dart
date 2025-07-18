@@ -76,7 +76,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         setState(() {
           _character = character;
         });
-        
+
         // Select this character so it becomes the active one
         if (character != null) {
           charactersProvider.selectCharacter(character.id);
@@ -128,7 +128,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       setState(() {
         _isLoading = true;
       });
-      
+
       // Reload the character to get updated chat history
       await _loadCharacter();
     }
@@ -137,15 +137,26 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     _scrollToBottom();
 
     try {
+      // Create a copy of chat history excluding the message we just added
+      // to prevent duplication in the AI request
+      final chatHistoryForAI =
+          _character!.chatHistory.where((msg) {
+            // Exclude the message we just added (last user message with same content)
+            return !(msg['isUser'] == true && msg['content'] == message);
+          }).toList();
+
       // Send the message to the character
       final response = await HybridChatService.sendMessageToCharacter(
         characterId: widget.characterId,
         message: message,
         systemPrompt: _character!.systemPrompt,
-        chatHistory: _character!.chatHistory,
+        chatHistory: chatHistoryForAI,
         model: _character!.model,
         localPrompt: _character!.localPrompt,
       );
+
+      // Add artificial delay to simulate natural conversation flow
+      await Future.delayed(const Duration(milliseconds: 800));
 
       // Add AI response to chat history if not null
       if (response != null) {
@@ -237,19 +248,20 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           // Character avatar
           CircleAvatar(
             backgroundColor: AppTheme.midnightPurple,
-            child: _character!.icon != null
-                ? Icon(
-                    _character!.icon!,
-                    color: AppTheme.warmGold,
-                    size: 20,
-                  )
-                : Text(
-                    _character!.name[0].toUpperCase(),
-                    style: TextStyle(
+            child:
+                _character!.icon != null
+                    ? Icon(
+                      _character!.icon!,
                       color: AppTheme.warmGold,
-                      fontWeight: FontWeight.bold,
+                      size: 20,
+                    )
+                    : Text(
+                      _character!.name[0].toUpperCase(),
+                      style: TextStyle(
+                        color: AppTheme.warmGold,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
           ),
           const SizedBox(width: 12),
           // Character name
@@ -275,9 +287,9 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CharacterProfileScreen(
-                  characterId: _character!.id,
-                ),
+                builder:
+                    (context) =>
+                        CharacterProfileScreen(characterId: _character!.id),
               ),
             );
           },
@@ -295,7 +307,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   Widget _buildChatList(AppLocalizations localizations) {
     if (_character!.chatHistory.isEmpty) {
       final fontScale = ResponsiveUtils.getFontSizeScale(context);
-      
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -334,9 +346,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           text: message['content'] as String,
           isUser: message['isUser'] as bool,
           showAvatar: true,
-          avatarText: message['isUser'] as bool
-              ? localizations.you
-              : _character!.name[0].toUpperCase(),
+          avatarText:
+              message['isUser'] as bool
+                  ? localizations.you
+                  : _character!.name[0].toUpperCase(),
         );
       },
     );
@@ -344,7 +357,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
   Widget _buildInputArea(AppLocalizations localizations) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
-    
+
     return Container(
       padding: ResponsiveUtils.getChatInputPadding(context),
       decoration: BoxDecoration(
@@ -406,18 +419,19 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           SizedBox(width: 8 * fontScale),
           // Send button
           IconButton(
-            icon: _isLoading
-                ? SizedBox(
-                    width: 24 * fontScale,
-                    height: 24 * fontScale,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.warmGold,
+            icon:
+                _isLoading
+                    ? SizedBox(
+                      width: 24 * fontScale,
+                      height: 24 * fontScale,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.warmGold,
+                        ),
                       ),
-                    ),
-                  )
-                : Icon(Icons.send, size: 24 * fontScale),
+                    )
+                    : Icon(Icons.send, size: 24 * fontScale),
             color: AppTheme.warmGold,
             onPressed: _isLoading ? null : _sendMessage,
           ),
@@ -429,45 +443,46 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   Future<void> _showClearChatDialog(AppLocalizations localizations) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundStart,
-        title: Text(
-          localizations.clearChatHistoryTitle,
-          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-            text: localizations.clearChatHistoryTitle,
-            color: Colors.white,
-          ),
-        ),
-        content: Text(
-          localizations.clearChatHistoryConfirm,
-          style: UkrainianFontUtils.latoWithUkrainianSupport(
-            text: localizations.clearChatHistoryConfirm,
-            color: Colors.white70,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              localizations.cancel,
-              style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: localizations.cancel,
-                color: AppTheme.warmGold,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            title: Text(
+              localizations.clearChatHistoryTitle,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: localizations.clearChatHistoryTitle,
+                color: Colors.white,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              localizations.clear,
+            content: Text(
+              localizations.clearChatHistoryConfirm,
               style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: localizations.clear,
-                color: Colors.red,
+                text: localizations.clearChatHistoryConfirm,
+                color: Colors.white70,
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  localizations.cancel,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.cancel,
+                    color: AppTheme.warmGold,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  localizations.clear,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.clear,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (result == true) {

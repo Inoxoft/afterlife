@@ -54,7 +54,6 @@ class ChatService {
   // Method to refresh API key from the latest source
   static Future<void> refreshApiKey() async {
     try {
-
       // Get the latest key directly
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
 
@@ -69,8 +68,7 @@ class ChatService {
           );
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   static Future<String?> sendMessageToCharacter({
@@ -101,10 +99,7 @@ class ChatService {
         ...chatHistory.map((msg) {
           // Ensure each message has a proper role field
           if (msg.containsKey('role')) {
-            return {
-              'role': msg['role'],
-              'content': msg['content'],
-            };
+            return {'role': msg['role'], 'content': msg['content']};
           } else if (msg.containsKey('isUser')) {
             return {
               'role': msg['isUser'] == true ? 'user' : 'assistant',
@@ -142,7 +137,8 @@ class ChatService {
       if (response.statusCode != 200) {
         if (kDebugMode) {
           print(
-              'API Error in character_chat: ${response.statusCode}: ${response.body}');
+            'API Error in character_chat: ${response.statusCode}: ${response.body}',
+          );
         }
         return 'I apologize, but I encountered a server error. Please try again.';
       }
@@ -150,10 +146,10 @@ class ChatService {
       // Parse response with explicit UTF-8 decoding
       final responseBody = utf8.decode(response.bodyBytes);
       final data = jsonDecode(responseBody);
-      
+
       // Add null checks to prevent "The method '[]' was called on null" error
-      if (data == null || 
-          data['choices'] == null || 
+      if (data == null ||
+          data['choices'] == null ||
           data['choices'].isEmpty ||
           data['choices'][0] == null ||
           data['choices'][0]['message'] == null) {
@@ -162,7 +158,7 @@ class ChatService {
         }
         return 'I apologize, I received an invalid response format. Please try again.';
       }
-      
+
       return data['choices'][0]['message']['content'] as String;
     } on TimeoutException catch (e) {
       if (kDebugMode) {

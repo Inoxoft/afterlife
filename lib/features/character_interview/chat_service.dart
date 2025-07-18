@@ -27,7 +27,7 @@ class ChatService {
 
       // Get API key from environment
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
-      
+
       // Check if we're using a default key or a user key
       _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
@@ -58,7 +58,6 @@ class ChatService {
   // Method to refresh API key from the latest source
   static Future<void> refreshApiKey() async {
     try {
-
       // Get the latest key directly
       _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
 
@@ -67,9 +66,7 @@ class ChatService {
 
       if (_apiKey == null || _apiKey!.isEmpty) {
         if (kDebugMode) {
-          print(
-            'Warning: API key refresh failed - No key found',
-          );
+          print('Warning: API key refresh failed - No key found');
         }
       } else {
         if (kDebugMode) {
@@ -109,23 +106,24 @@ class ChatService {
     if (systemPrompt?.isNotEmpty ?? false) {
       messagesList.add({'role': 'system', 'content': systemPrompt});
     }
-    
+
     // Ensure each message has a valid 'role' field
     for (final msg in messages) {
       // Make a copy of the message to avoid modifying the original
       final Map<String, dynamic> formattedMsg = Map.from(msg);
-      
+
       // Ensure the message has a role field
       if (!formattedMsg.containsKey('role')) {
         // If it has an 'isUser' field, use that to determine role
         if (formattedMsg.containsKey('isUser')) {
-          formattedMsg['role'] = formattedMsg['isUser'] == true ? 'user' : 'assistant';
+          formattedMsg['role'] =
+              formattedMsg['isUser'] == true ? 'user' : 'assistant';
         } else {
           // Default to 'user' if we can't determine
           formattedMsg['role'] = 'user';
         }
       }
-      
+
       messagesList.add(formattedMsg);
     }
 
@@ -139,7 +137,7 @@ class ChatService {
     try {
       // Log headers and API key for debugging
       logDiagnostics();
-      
+
       final response = await http
           .post(
             Uri.parse(_openRouterUrl),
@@ -166,10 +164,10 @@ class ChatService {
       // Explicitly decode response body as UTF-8
       final responseBody = utf8.decode(response.bodyBytes);
       final data = jsonDecode(responseBody);
-      
+
       // Add null checks to prevent "The method '[]' was called on null" error
-      if (data == null || 
-          data['choices'] == null || 
+      if (data == null ||
+          data['choices'] == null ||
           data['choices'].isEmpty ||
           data['choices'][0] == null ||
           data['choices'][0]['message'] == null) {
@@ -178,7 +176,7 @@ class ChatService {
         }
         return 'I apologize, I received an invalid response format. Please try again.';
       }
-      
+
       return data['choices'][0]['message']['content'] as String;
     } on TimeoutException catch (e) {
       if (kDebugMode) {
