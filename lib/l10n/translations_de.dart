@@ -1,105 +1,231 @@
 import 'app_localizations.dart';
 
 class AppLocalizationsDe extends AppLocalizations {
-  @override String get appTitle => 'Afterlife';
-  @override String get explore => 'Erkunden';
-  @override String get yourTwins => 'Ihre Zwillinge';
-  @override String get create => 'Erstellen';
-  @override String get settings => 'Einstellungen';
-  @override String get exploreDigitalTwins => 'DIGITALE ZWILLINGE ERKUNDEN';
-  @override String get yourDigitalTwins => 'IHRE DIGITALEN ZWILLINGE';
-  @override String get interactWithHistoricalFigures => 'Interagieren Sie mit historischen Figuren durch ihre Masken';
-  @override String get noDigitalTwinsDetected => 'KEINE DIGITALEN ZWILLINGE ERKANNT';
-  @override String get createNewTwinDescription => 'Erstellen Sie einen neuen digitalen Zwilling, um mit Ihrem erhaltenen Bewusstsein zu interagieren';
-  @override String get createNewTwin => 'NEUEN ZWILLING ERSTELLEN';
-  @override String get yourDigitalTwin => 'Ihr Digitaler Zwilling';
-  @override String get darkMode => 'Dunkler Modus';
-  @override String get darkModeDescription => 'Verbessern Sie Ihre Seherfahrung bei schwachem Licht (bald)';
-  @override String get chatFontSize => 'Chat-Schriftgröße';
-  @override String get chatFontSizeDescription => 'Passen Sie die Textgröße in Chat-Unterhaltungen an';
-  @override String get enableAnimations => 'Animationen aktivieren';
-  @override String get enableAnimationsDescription => 'Interface-Animationen und visuelle Effekte umschalten';
-  @override String get enableNotifications => 'Benachrichtigungen aktivieren';
-  @override String get enableNotificationsDescription => 'Werden Sie benachrichtigt, wenn Ihre digitalen Zwillinge chatten möchten';
-  @override String get exportAllCharacters => 'Alle Charaktere exportieren';
-  @override String get exportAllCharactersDescription => 'Speichern Sie Ihre digitalen Zwillinge in einer Datei';
-  @override String get clearAllData => 'Alle Daten löschen';
-  @override String get clearAllDataDescription => 'Alle Charaktere löschen und App zurücksetzen (Vorsicht: kann nicht rückgängig gemacht werden)';
-  @override String get appVersion => 'App-Version';
-  @override String get privacyPolicy => 'Datenschutzrichtlinie';
-  @override String get privacyPolicyDescription => 'Lesen Sie, wie Ihre Daten verwendet und geschützt werden';
-  @override String get customApiKey => 'Benutzerdefinierter OpenRouter API-Schlüssel';
-  @override String get customApiKeyDescription => 'Setzen oder aktualisieren Sie Ihren persönlichen API-Schlüssel';
-  @override String get chatWithDeveloper => 'Mit Entwickler chatten';
-  @override String get chatWithDeveloperDescription => 'Erhalten Sie direkte Unterstützung und teilen Sie Feedback über die App';
-  @override String get language => 'Sprache';
-  @override String get languageDescription => 'Wählen Sie Ihre bevorzugte Sprache für die App und KI-Antworten';
-  @override String get appearance => 'Erscheinungsbild';
-  @override String get notifications => 'Benachrichtigungen';
-  @override String get dataManagement => 'Datenverwaltung';
-  @override String get about => 'Über';
-  @override String get apiConnectivity => 'API & Konnektivität';
-  @override String get developerConnection => 'Entwicklerverbindung';
-  @override String get typeMessage => 'Geben Sie Ihre Nachricht ein...';
-  @override String get send => 'Senden';
-  @override String get clearChat => 'Chat löschen';
-  @override String get clearChatConfirmation => 'Dies wird alle Nachrichten in dieser Unterhaltung löschen. Diese Aktion kann nicht rückgängig gemacht werden.';
-  @override String get cancel => 'Abbrechen';
-  @override String get clear => 'Löschen';
-  @override String get chatHistoryCleared => 'Chat-Verlauf gelöscht';
-  @override String get welcomeInterview => "Willkommen! Ich bin hier, um Ihnen bei der Erstellung Ihres digitalen Zwillings zu helfen — ein tiefes, lebendiges Porträt Ihrer Persönlichkeit, Erinnerungen, Werte und Ihres Stils.";
-  @override String get fileUploadOption => "Laden Sie eine Datei (PDF, TXT, DOC oder E-Mail) mit Ihren Informationen hoch";
-  @override String get questionAnswerOption => "Beantworten Sie meine Fragen zu Ihrer Persönlichkeit und Ihren Erfahrungen";
-  @override String get agree => 'einverstanden';
-  @override String get errorConnecting => "Es tut mir leid, aber ich habe im Moment Probleme bei der Verbindung. Bitte versuchen Sie es später erneut.";
-  @override String get errorProcessingMessage => "Es tut mir leid, ich konnte Ihre Nachricht derzeit nicht verarbeiten. Bitte versuchen Sie es später erneut.";
-  @override String get noApiKey => 'Fehler: Verbindung zum KI-Service nicht möglich. Bitte überprüfen Sie Ihre API-Schlüssel-Konfiguration.';
-  @override String get checkApiKey => 'Bitte überprüfen Sie Ihre API-Schlüssel-Einstellungen.';
-  @override String get languageEnglish => 'English';
-  @override String get languageSpanish => 'Español';
-  @override String get languageFrench => 'Français';
-  @override String get languageGerman => 'Deutsch';
-  @override String get languageItalian => 'Italiano';
-  @override String get languageJapanese => '日本語';
-  @override String get languageKorean => '한국어';
-  @override String get languageUkrainian => 'Українська';
-  @override String get languageRussian => 'Русский';
-  @override String get accessingDataStorage => 'ZUGRIFF AUF DATENSPEICHER';
-  @override String get physicist => 'PHYSIKER';
-  @override String get presidentActor => 'PRÄSIDENT, SCHAUSPIELER';
-  @override String get computerScientist => 'INFORMATIKER';
-  @override String get actressModelSinger => 'SCHAUSPIELERIN, MODEL & SÄNGERIN';
-  @override String get settingsDescription => 'Passen Sie Ihr Afterlife-Erlebnis an';
-  @override String get privacyPolicyNotAvailable => 'Datenschutzrichtlinie in dieser Version nicht verfügbar';
-  @override String get apiKeyNote => 'Hinweis: Der Standard-API-Schlüssel aus der .env-Datei wird als Fallback verwendet, wenn kein benutzerdefinierter Schlüssel angegeben ist.';
-  @override String get clearAllDataConfirmation => 'Dies wird alle Ihre Charaktere permanent löschen und die App auf ihren Standardzustand zurücksetzen. Diese Aktion kann nicht rückgängig gemacht werden.';
-  @override String get deleteEverything => 'Alles Löschen';
-  @override String get dataCleared => 'Alle Daten wurden gelöscht';
-  @override String get errorClearingData => 'Fehler beim Löschen des Chat-Verlaufs. Bitte versuchen Sie es erneut.';
-  @override String get startChattingWith => 'Chat mit {name} beginnen';
-  @override String get sendMessageToBegin => 'Senden Sie eine Nachricht unten, um das Gespräch zu beginnen';
-  @override String get chat => 'Chat';
-  @override String get viewProfile => 'Profil anzeigen';
-  @override String get you => 'Sie';
-  @override String get clearChatHistory => 'Chat-Verlauf löschen';
-  @override String get clearChatHistoryTitle => 'Chat-Verlauf löschen';
-  @override String get clearChatHistoryConfirm => 'Sind Sie sicher, dass Sie den Chat-Verlauf löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
-  @override String get noBiographyAvailable => 'Keine Biografie verfügbar.';
-  @override String get profileOf => 'Profil von {name}';
-  @override String get name => 'Name';
-  @override String get years => 'Jahre';
-  @override String get profession => 'Beruf';
-  @override String get biography => 'Biografie';
-  @override String get aiModel => 'KI-MODELL';
-  @override String get viewAllModels => 'Alle Modelle anzeigen';
-  @override String get featureAvailableSoon => 'Diese Funktion wird bald verfügbar sein';
-  @override String get startConversation => 'Gespräch beginnen';
-  @override String get recommended => 'EMPFOHLEN';
-  @override String get aiModelUpdatedFor => 'KI-Modell für {name} aktualisiert';
-  @override String get selectAiModelFor => 'KI-Modell für {name} auswählen';
-  @override String get chooseAiModelFor => 'Wählen Sie das KI-Modell, das {name} antreiben wird:';
-  @override String get select => 'AUSWÄHLEN';
-  @override String systemPromptLanguageInstruction(String language) {
+  @override
+  String get appTitle => 'Afterlife';
+  @override
+  String get explore => 'Erkunden';
+  @override
+  String get yourTwins => 'Ihre Zwillinge';
+  @override
+  String get create => 'Erstellen';
+  @override
+  String get settings => 'Einstellungen';
+  @override
+  String get exploreDigitalTwins => 'DIGITALE ZWILLINGE ERKUNDEN';
+  @override
+  String get yourDigitalTwins => 'IHRE DIGITALEN ZWILLINGE';
+  @override
+  String get interactWithHistoricalFigures =>
+      'Interagieren Sie mit historischen Figuren durch ihre Masken';
+  @override
+  String get noDigitalTwinsDetected => 'KEINE DIGITALEN ZWILLINGE ERKANNT';
+  @override
+  String get createNewTwinDescription =>
+      'Erstellen Sie einen neuen digitalen Zwilling, um mit Ihrem erhaltenen Bewusstsein zu interagieren';
+  @override
+  String get createNewTwin => 'NEUEN ZWILLING ERSTELLEN';
+  @override
+  String get yourDigitalTwin => 'Ihr Digitaler Zwilling';
+  @override
+  String get darkMode => 'Dunkler Modus';
+  @override
+  String get darkModeDescription =>
+      'Verbessern Sie Ihre Seherfahrung bei schwachem Licht (bald)';
+  @override
+  String get chatFontSize => 'Chat-Schriftgröße';
+  @override
+  String get chatFontSizeDescription =>
+      'Passen Sie die Textgröße in Chat-Unterhaltungen an';
+  @override
+  String get enableAnimations => 'Animationen aktivieren';
+  @override
+  String get enableAnimationsDescription =>
+      'Interface-Animationen und visuelle Effekte umschalten';
+  @override
+  String get enableNotifications => 'Benachrichtigungen aktivieren';
+  @override
+  String get enableNotificationsDescription =>
+      'Werden Sie benachrichtigt, wenn Ihre digitalen Zwillinge chatten möchten';
+  @override
+  String get exportAllCharacters => 'Alle Charaktere exportieren';
+  @override
+  String get exportAllCharactersDescription =>
+      'Speichern Sie Ihre digitalen Zwillinge in einer Datei';
+  @override
+  String get clearAllData => 'Alle Daten löschen';
+  @override
+  String get clearAllDataDescription =>
+      'Alle Charaktere löschen und App zurücksetzen (Vorsicht: kann nicht rückgängig gemacht werden)';
+  @override
+  String get appVersion => 'App-Version';
+  @override
+  String get privacyPolicy => 'Datenschutzrichtlinie';
+  @override
+  String get privacyPolicyDescription =>
+      'Lesen Sie, wie Ihre Daten verwendet und geschützt werden';
+  @override
+  String get customApiKey => 'Benutzerdefinierter OpenRouter API-Schlüssel';
+  @override
+  String get customApiKeyDescription =>
+      'Setzen oder aktualisieren Sie Ihren persönlichen API-Schlüssel';
+  @override
+  String get chatWithDeveloper => 'Mit Entwickler chatten';
+  @override
+  String get chatWithDeveloperDescription =>
+      'Erhalten Sie direkte Unterstützung und teilen Sie Feedback über die App';
+  @override
+  String get language => 'Sprache';
+  @override
+  String get languageDescription =>
+      'Wählen Sie Ihre bevorzugte Sprache für die App und KI-Antworten';
+  @override
+  String get appearance => 'Erscheinungsbild';
+  @override
+  String get notifications => 'Benachrichtigungen';
+  @override
+  String get dataManagement => 'Datenverwaltung';
+  @override
+  String get about => 'Über';
+  @override
+  String get apiConnectivity => 'API & Konnektivität';
+  @override
+  String get developerConnection => 'Entwicklerverbindung';
+  @override
+  String get typeMessage => 'Geben Sie Ihre Nachricht ein...';
+  @override
+  String get send => 'Senden';
+  @override
+  String get clearChat => 'Chat löschen';
+  @override
+  String get clearChatConfirmation =>
+      'Dies wird alle Nachrichten in dieser Unterhaltung löschen. Diese Aktion kann nicht rückgängig gemacht werden.';
+  @override
+  String get cancel => 'Abbrechen';
+  @override
+  String get clear => 'Löschen';
+  @override
+  String get chatHistoryCleared => 'Chat-Verlauf gelöscht';
+  @override
+  String get welcomeInterview =>
+      "Willkommen! Ich bin hier, um Ihnen bei der Erstellung Ihres digitalen Zwillings zu helfen — ein tiefes, lebendiges Porträt Ihrer Persönlichkeit, Erinnerungen, Werte und Ihres Stils.";
+  @override
+  String get fileUploadOption =>
+      "Laden Sie eine Datei (PDF, TXT, DOC oder E-Mail) mit Ihren Informationen hoch";
+  @override
+  String get questionAnswerOption =>
+      "Beantworten Sie meine Fragen zu Ihrer Persönlichkeit und Ihren Erfahrungen";
+  @override
+  String get agree => 'einverstanden';
+  @override
+  String get errorConnecting =>
+      "Es tut mir leid, aber ich habe im Moment Probleme bei der Verbindung. Bitte versuchen Sie es später erneut.";
+  @override
+  String get errorProcessingMessage =>
+      "Es tut mir leid, ich konnte Ihre Nachricht derzeit nicht verarbeiten. Bitte versuchen Sie es später erneut.";
+  @override
+  String get noApiKey =>
+      'Fehler: Verbindung zum KI-Service nicht möglich. Bitte überprüfen Sie Ihre API-Schlüssel-Konfiguration.';
+  @override
+  String get checkApiKey =>
+      'Bitte überprüfen Sie Ihre API-Schlüssel-Einstellungen.';
+  @override
+  String get languageEnglish => 'English';
+  @override
+  String get languageSpanish => 'Español';
+  @override
+  String get languageFrench => 'Français';
+  @override
+  String get languageGerman => 'Deutsch';
+  @override
+  String get languageItalian => 'Italiano';
+  @override
+  String get languageJapanese => '日本語';
+  @override
+  String get languageKorean => '한국어';
+  @override
+  String get languageUkrainian => 'Українська';
+  @override
+  String get languageRussian => 'Русский';
+  @override
+  String get accessingDataStorage => 'ZUGRIFF AUF DATENSPEICHER';
+  @override
+  String get physicist => 'PHYSIKER';
+  @override
+  String get presidentActor => 'PRÄSIDENT, SCHAUSPIELER';
+  @override
+  String get computerScientist => 'INFORMATIKER';
+  @override
+  String get actressModelSinger => 'SCHAUSPIELERIN, MODEL & SÄNGERIN';
+  @override
+  String get settingsDescription => 'Passen Sie Ihr Afterlife-Erlebnis an';
+  @override
+  String get privacyPolicyNotAvailable =>
+      'Datenschutzrichtlinie in dieser Version nicht verfügbar';
+  @override
+  String get apiKeyNote =>
+      'Hinweis: Der Standard-API-Schlüssel aus der .env-Datei wird als Fallback verwendet, wenn kein benutzerdefinierter Schlüssel angegeben ist.';
+  @override
+  String get clearAllDataConfirmation =>
+      'Dies wird alle Ihre Charaktere permanent löschen und die App auf ihren Standardzustand zurücksetzen. Diese Aktion kann nicht rückgängig gemacht werden.';
+  @override
+  String get deleteEverything => 'Alles Löschen';
+  @override
+  String get dataCleared => 'Alle Daten wurden gelöscht';
+  @override
+  String get errorClearingData =>
+      'Fehler beim Löschen des Chat-Verlaufs. Bitte versuchen Sie es erneut.';
+  @override
+  String get startChattingWith => 'Chat mit {name} beginnen';
+  @override
+  String get sendMessageToBegin =>
+      'Senden Sie eine Nachricht unten, um das Gespräch zu beginnen';
+  @override
+  String get chat => 'Chat';
+  @override
+  String get viewProfile => 'Profil anzeigen';
+  @override
+  String get you => 'Sie';
+  @override
+  String get clearChatHistory => 'Chat-Verlauf löschen';
+  @override
+  String get clearChatHistoryTitle => 'Chat-Verlauf löschen';
+  @override
+  String get clearChatHistoryConfirm =>
+      'Sind Sie sicher, dass Sie den Chat-Verlauf löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
+  @override
+  String get noBiographyAvailable => 'Keine Biografie verfügbar.';
+  @override
+  String get profileOf => 'Profil von {name}';
+  @override
+  String get name => 'Name';
+  @override
+  String get years => 'Jahre';
+  @override
+  String get profession => 'Beruf';
+  @override
+  String get biography => 'Biografie';
+  @override
+  String get aiModel => 'KI-MODELL';
+  @override
+  String get viewAllModels => 'Alle Modelle anzeigen';
+  @override
+  String get featureAvailableSoon => 'Diese Funktion wird bald verfügbar sein';
+  @override
+  String get startConversation => 'Gespräch beginnen';
+  @override
+  String get recommended => 'EMPFOHLEN';
+  @override
+  String get aiModelUpdatedFor => 'KI-Modell für {name} aktualisiert';
+  @override
+  String get selectAiModelFor => 'KI-Modell für {name} auswählen';
+  @override
+  String get chooseAiModelFor =>
+      'Wählen Sie das KI-Modell, das {name} antreiben wird:';
+  @override
+  String get select => 'AUSWÄHLEN';
+  @override
+  String systemPromptLanguageInstruction(String language) {
     return "\n\nWICHTIG: Bitte antworte immer auf Deutsch ($language), es sei denn, der Benutzer bittet dich ausdrücklich, die Sprache zu wechseln. Deine Antworten sollten natürlich und fließend auf Deutsch sein.";
   }
 
@@ -123,13 +249,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get theMindBehindTwins => 'DER GEIST HINTER IHREN ZWILLINGEN';
 
   @override
-  String get poweredByAdvancedLanguageModels => 'Angetrieben von fortgeschrittenen Sprachmodellen';
+  String get poweredByAdvancedLanguageModels =>
+      'Angetrieben von fortgeschrittenen Sprachmodellen';
 
   @override
   String get howItWorks => 'Wie es funktioniert';
 
   @override
-  String get twinsPoweredByAI => 'Ihre digitalen Zwillinge werden von ausgeklügelten KI-Sprachmodellen angetrieben, die es ihnen ermöglichen, natürlich zu denken, zu argumentieren und zu interagieren. Je fortgeschrittener das Modell, desto authentischer und wissensreicher werden Ihre Interaktionen sein.';
+  String get twinsPoweredByAI =>
+      'Ihre digitalen Zwillinge werden von ausgeklügelten KI-Sprachmodellen angetrieben, die es ihnen ermöglichen, natürlich zu denken, zu argumentieren und zu interagieren. Je fortgeschrittener das Modell, desto authentischer und wissensreicher werden Ihre Interaktionen sein.';
 
   @override
   String get basicLLM => 'GRUNDLEGENDES LLM';
@@ -180,28 +308,35 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diversePerspectives => 'VIELFÄLTIGE PERSPEKTIVEN';
 
   @override
-  String get fromPoliticsToArt => 'Von Politik bis Kunst, Geschichte wird lebendig';
+  String get fromPoliticsToArt =>
+      'Von Politik bis Kunst, Geschichte wird lebendig';
 
   @override
-  String get engageWithDiverseFigures => 'Interagieren Sie mit vielfältigen Persönlichkeiten aus Politik, Wissenschaft, Kunst und mehr, die unsere Welt geprägt haben.';
+  String get engageWithDiverseFigures =>
+      'Interagieren Sie mit vielfältigen Persönlichkeiten aus Politik, Wissenschaft, Kunst und mehr, die unsere Welt geprägt haben.';
 
   @override
-  String get rememberSimulations => 'Bedenken Sie, dass dies Simulationen auf Basis verfügbarer Daten sind - Antworten stellen unseren bestmöglichen Versuch historischer Genauigkeit dar.';
+  String get rememberSimulations =>
+      'Bedenken Sie, dass dies Simulationen auf Basis verfügbarer Daten sind - Antworten stellen unseren bestmöglichen Versuch historischer Genauigkeit dar.';
 
   @override
-  String get createYourOwnTwins => 'Erstellen Sie Ihre eigenen digitalen Zwillinge mit der Erstellen-Schaltfläche in der unteren Navigation.';
+  String get createYourOwnTwins =>
+      'Erstellen Sie Ihre eigenen digitalen Zwillinge mit der Erstellen-Schaltfläche in der unteren Navigation.';
 
   @override
   String get exampleInteraction => 'Beispiel-Interaktion';
 
   @override
-  String get whenDiscussingRelativityWithEinstein => 'Bei der Diskussion über Relativität mit Einstein:';
+  String get whenDiscussingRelativityWithEinstein =>
+      'Bei der Diskussion über Relativität mit Einstein:';
 
   @override
-  String get withAdvancedLLMExample => '"Lassen Sie mich erklären, wie die Raumzeit-Krümmung die Gravitationslinsen beeinflusst und warum dies für die experimentelle Bestätigung der allgemeinen Relativitätstheorie entscheidend war..."';
+  String get withAdvancedLLMExample =>
+      '"Lassen Sie mich erklären, wie die Raumzeit-Krümmung die Gravitationslinsen beeinflusst und warum dies für die experimentelle Bestätigung der allgemeinen Relativitätstheorie entscheidend war..."';
 
   @override
-  String get withBasicLLMExample => '"Nun, E=mc² ist wichtig für die Relativität, aber ich kann die tieferen Implikationen oder das mathematische Rahmenwerk nicht erklären..."';
+  String get withBasicLLMExample =>
+      '"Nun, E=mc² ist wichtig für die Relativität, aber ich kann die tieferen Implikationen oder das mathematische Rahmenwerk nicht erklären..."';
 
   @override
   String get withAdvancedLLMLabel => 'Mit Fortgeschrittenem LLM:';
@@ -214,19 +349,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   // Mask page strings
   @override
-  String get digitalPersonasWithHistoricalEssence => 'Digitale Personas mit historischer Essenz';
+  String get digitalPersonasWithHistoricalEssence =>
+      'Digitale Personas mit historischer Essenz';
 
   @override
-  String get einsteinWithMaskAndLLMArmor => 'Einstein mit Maske und LLM-Rüstung';
+  String get einsteinWithMaskAndLLMArmor =>
+      'Einstein mit Maske und LLM-Rüstung';
 
   @override
-  String get masksAreAIPersonas => 'Masken sind KI-Personas, die aus historischen Daten, persönlichen Berichten und detaillierten Charakterspezifikationen erstellt wurden.';
+  String get masksAreAIPersonas =>
+      'Masken sind KI-Personas, die aus historischen Daten, persönlichen Berichten und detaillierten Charakterspezifikationen erstellt wurden.';
 
   @override
-  String get eachMaskTriesToEmbody => 'Jede Maske versucht, den authentischen Charakter, die Persönlichkeit und das Wissen ihrer historischen Figur zu verkörpern.';
+  String get eachMaskTriesToEmbody =>
+      'Jede Maske versucht, den authentischen Charakter, die Persönlichkeit und das Wissen ihrer historischen Figur zu verkörpern.';
 
   @override
-  String get theseDigitalTwinsAllow => 'Diese digitalen Zwillinge ermöglichen es Ihnen, mit Perspektiven aus verschiedenen Zeiten und Realitäten zu interagieren.';
+  String get theseDigitalTwinsAllow =>
+      'Diese digitalen Zwillinge ermöglichen es Ihnen, mit Perspektiven aus verschiedenen Zeiten und Realitäten zu interagieren.';
 
   // Character Profile screen strings
   @override
@@ -242,13 +382,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fullDetailedPrompt => 'Vollständiger detaillierter Prompt';
 
   @override
-  String get usedForCloudAiModels => 'Verwendet für Cloud-KI-Modelle (GPT, Claude, Gemini, etc.)';
+  String get usedForCloudAiModels =>
+      'Verwendet für Cloud-KI-Modelle (GPT, Claude, Gemini, etc.)';
 
   @override
   String get optimizedLocalPrompt => 'Optimierter lokaler Prompt';
 
   @override
-  String get usedForLocalModels => 'Verwendet für lokale Modelle (DeepSeek, Gemma, etc.)';
+  String get usedForLocalModels =>
+      'Verwendet für lokale Modelle (DeepSeek, Gemma, etc.)';
 
   @override
   String get apiModels => 'API-Modelle';
@@ -287,7 +429,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get imageGuidelines => 'Bildrichtlinien:';
 
   @override
-  String get imageGuidelinesText => '• Quadratische Bilder funktionieren am besten\n• Maximale Größe: 512x512 Pixel\n• Unterstützte Formate: JPG, PNG\n• Bilder werden automatisch optimiert';
+  String get imageGuidelinesText =>
+      '• Quadratische Bilder funktionieren am besten\n• Maximale Größe: 512x512 Pixel\n• Unterstützte Formate: JPG, PNG\n• Bilder werden automatisch optimiert';
 
   @override
   String get characterIconImage => 'Charakter-Symbolbild';
@@ -302,13 +445,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get changesSavedSuccessfully => 'Änderungen erfolgreich gespeichert';
 
   @override
-  String get errorSavingChanges => 'Fehler beim Speichern der Änderungen: {error}';
+  String get errorSavingChanges =>
+      'Fehler beim Speichern der Änderungen: {error}';
 
   @override
-  String get characterUpdatedSuccessfully => 'Charakter erfolgreich aktualisiert';
+  String get characterUpdatedSuccessfully =>
+      'Charakter erfolgreich aktualisiert';
 
   @override
-  String get errorUpdatingCharacter => 'Fehler beim Aktualisieren des Charakters: {error}';
+  String get errorUpdatingCharacter =>
+      'Fehler beim Aktualisieren des Charakters: {error}';
 
   @override
   String get viewAllAvailableModels => 'Alle verfügbaren Modelle anzeigen';
@@ -317,16 +463,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get exploreMoreAiOptions => 'Weitere KI-Optionen erkunden';
 
   @override
-  String get privacyFirstLocalAi => 'Datenschutzorientierte lokale KI mit multimodaler Unterstützung (3,1GB)';
+  String get privacyFirstLocalAi =>
+      'Datenschutzorientierte lokale KI mit multimodaler Unterstützung (3,1GB)';
 
   @override
-  String get speedMultimodalSupport => 'Geschwindigkeit, multimodale Unterstützung und 1M Token-Kontextfenster';
+  String get speedMultimodalSupport =>
+      'Geschwindigkeit, multimodale Unterstützung und 1M Token-Kontextfenster';
 
   @override
-  String get lightweightInstructionTuned => 'Leichtes, anweisungsoptimiertes Modell für Gesprächskreativität';
+  String get lightweightInstructionTuned =>
+      'Leichtes, anweisungsoptimiertes Modell für Gesprächskreativität';
 
   @override
-  String get requiresModelDownload => 'Modell-Download erforderlich • Kein Internet benötigt';
+  String get requiresModelDownload =>
+      'Modell-Download erforderlich • Kein Internet benötigt';
 
   @override
   String get noInternetNeeded => 'Kein Internet benötigt';
@@ -335,7 +485,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get selectAiModel => 'KI-Modell auswählen';
 
   @override
-  String get chooseAiModelThatWillPower => 'Wählen Sie das KI-Modell, das diesen Charakter antreiben wird:';
+  String get chooseAiModelThatWillPower =>
+      'Wählen Sie das KI-Modell, das diesen Charakter antreiben wird:';
 
   @override
   String get aiModelUpdatedSuccessfully => 'KI-Modell erfolgreich aktualisiert';
@@ -344,7 +495,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get reinterview => 'Charakter erneut interviewen';
 
   @override
-  String get reinterviewDescription => 'Aktualisieren Sie die Persönlichkeit und Erinnerungen Ihres Charakters durch einen neuen Interview-Prozess';
+  String get reinterviewDescription =>
+      'Aktualisieren Sie die Persönlichkeit und Erinnerungen Ihres Charakters durch einen neuen Interview-Prozess';
 
   @override
   String get selectIcon => 'Symbol auswählen';
@@ -359,38 +511,156 @@ class AppLocalizationsDe extends AppLocalizations {
   String get selectCharacterImage => 'Charakterbild auswählen';
 
   @override
-  String get openRouterGpt4o => 'Kombiniert fortgeschrittenes Denken, Code-Generierung und multimodale Verständnis';
+  String get openRouterGpt4o =>
+      'Kombiniert fortgeschrittenes Denken, Code-Generierung und multimodale Verständnis';
 
   @override
-  String get openRouterClaude35Sonnet => 'Hervorragend in Schreiben, Mathematik, Programmierung und visueller Analyse';
+  String get openRouterClaude35Sonnet =>
+      'Hervorragend in Schreiben, Mathematik, Programmierung und visueller Analyse';
 
   @override
-  String get openRouterGpt4Turbo => 'Optimiertes GPT-4 Modell für Geschwindigkeit und Effizienz mit Bildfähigkeiten';
+  String get openRouterGpt4Turbo =>
+      'Optimiertes GPT-4 Modell für Geschwindigkeit und Effizienz mit Bildfähigkeiten';
 
   @override
-  String get openRouterGeminiPro => 'Googles vielseitiges Modell mit starken multimodalen Denkfähigkeiten';
+  String get openRouterGeminiPro =>
+      'Googles vielseitiges Modell mit starken multimodalen Denkfähigkeiten';
 
   @override
-  String get mistralLarge => 'Mistral AIs Flaggschiff-Modell mit überlegenen Denkfähigkeiten';
+  String get mistralLarge =>
+      'Mistral AIs Flaggschiff-Modell mit überlegenen Denkfähigkeiten';
 
   @override
-  String get localGemma2b => 'Kompaktes Modell, das lokal auf dem Gerät für Privatsphäre läuft';
+  String get localGemma2b =>
+      'Kompaktes Modell, das lokal auf dem Gerät für Privatsphäre läuft';
 
   @override
   String get private => 'PRIVAT';
 
   // Famous character bios
   @override
-  String get einsteinBio => 'Theoretischer Physiker, der die Relativitätstheorie entwickelte und unser Verständnis von Raum, Zeit und Schwerkraft grundlegend veränderte. Nobelpreisträger, dessen Gleichung E=mc² zu einer der berühmtesten Formeln der Wissenschaft wurde.';
+  String get einsteinBio =>
+      'Theoretischer Physiker, der die Relativitätstheorie entwickelte und unser Verständnis von Raum, Zeit und Schwerkraft grundlegend veränderte. Nobelpreisträger, dessen Gleichung E=mc² zu einer der berühmtesten Formeln der Wissenschaft wurde.';
 
   @override
-  String get reaganBio => '40. Präsident der Vereinigten Staaten (1981-1989), ehemaliger Hollywood-Schauspieler und Gouverneur von Kalifornien. Bekannt für seine Wirtschaftspolitik ("Reaganomics"), seine Rolle bei der Beendigung des Kalten Krieges und seine außergewöhnlichen Kommunikationsfähigkeiten, die ihm den Spitznamen "Der große Kommunikator" einbrachten.';
+  String get reaganBio =>
+      '40. Präsident der Vereinigten Staaten (1981-1989), ehemaliger Hollywood-Schauspieler und Gouverneur von Kalifornien. Bekannt für seine Wirtschaftspolitik ("Reaganomics"), seine Rolle bei der Beendigung des Kalten Krieges und seine außergewöhnlichen Kommunikationsfähigkeiten, die ihm den Spitznamen "Der große Kommunikator" einbrachten.';
 
   @override
-  String get turingBio => 'Brillanter Mathematiker und Kryptoanalytiker, der half, den deutschen Enigma-Code während des Zweiten Weltkriegs zu knacken und möglicherweise den Krieg um Jahre verkürzte. Pionier der Informatik und künstlichen Intelligenz, der das Konzept der Turing-Maschine entwickelte, ein mathematisches Modell der Berechnung.';
+  String get turingBio =>
+      'Brillanter Mathematiker und Kryptoanalytiker, der half, den deutschen Enigma-Code während des Zweiten Weltkriegs zu knacken und möglicherweise den Krieg um Jahre verkürzte. Pionier der Informatik und künstlichen Intelligenz, der das Konzept der Turing-Maschine entwickelte, ein mathematisches Modell der Berechnung.';
 
   @override
-  String get monroeBio => 'Legendäre Hollywood-Schauspielerin, Model und kulturelle Ikone, deren Filme über 200 Millionen Dollar einspielten. Bekannt für ihr komödiantisches Talent und ikonische Auftritte in "Manche mögen\'s heiß" und "Blondinen bevorzugt." Ihr charakteristisches Aussehen und Charisma machten sie zu einem der beständigsten Stars des 20. Jahrhunderts.';
+  String get monroeBio =>
+      'Legendäre Hollywood-Schauspielerin, Model und kulturelle Ikone, deren Filme über 200 Millionen Dollar einspielten. Bekannt für ihr komödiantisches Talent und ikonische Auftritte in "Manche mögen\'s heiß" und "Blondinen bevorzugt." Ihr charakteristisches Aussehen und Charisma machten sie zu einem der beständigsten Stars des 20. Jahrhunderts.';
+
+  @override
+  String get kobeBryantBio =>
+      'Legendärer NBA-Basketball-Spieler, der seine gesamte 20-jährige Karriere bei den Los Angeles Lakers verbrachte. Fünfmaliger NBA-Champion, 18-maliger All-Star und Befürworter des Frauenbasketballs. Bekannt für seine "Mamba Mentality"-Arbeitsethik und seinen tragischen Tod im Jahr 2020.';
+
+  @override
+  String get kurtCobainBio =>
+      'Hauptsänger, Gitarrist und Hauptsongwriter der Grunge-Band Nirvana. Seine rohe, emotionale Musik definierte eine Generation und brachte Alternative Rock zum Mainstream-Erfolg. Kämpfte mit Ruhm und persönlichen Dämonen vor seinem Tod 1994.';
+
+  @override
+  String get nelsonMandelaBio =>
+      'Südafrikanischer Anti-Apartheid-Aktivist und politischer Führer, der von 1994 bis 1999 als Präsident Südafrikas diente. Verbrachte 27 Jahre im Gefängnis für seinen Aktivismus, wurde später Friedensnobelpreisträger und globales Symbol des Widerstands gegen Unterdrückung.';
+
+  @override
+  String get bobMarleyBio =>
+      'Jamaikanischer Reggae-Sänger, Songwriter und Musiker, der zu einer globalen Ikone wurde. Popularisierte Reggae-Musik weltweit und setzte sich für Frieden, Liebe und Rastafari-Spiritualität ein. Seine Botschaft von Einheit und sozialer Gerechtigkeit inspiriert weiterhin Millionen.';
+
+  @override
+  String get bruceLeeBio =>
+      'Kampfkünstler, Schauspieler und Philosoph, der Kampfkünste in der Populärkultur revolutionierte. Gründete seine eigene Kampfphilosophie, Jeet Kune Do, und durchbrach Rassenschranken in Hollywood. Starb tragisch jung im Alter von 32 Jahren.';
+
+  @override
+  String get martinLutherKingJrBio =>
+      'Amerikanischer Baptist-Prediger und Bürgerrechtsaktivist, der die amerikanische Bürgerrechtsbewegung von 1955 bis zu seiner Ermordung 1968 anführte. Befürwortete gewaltlosen Widerstand und hielt die berühmte "I Have a Dream"-Rede beim Marsch auf Washington.';
+
+  @override
+  String get marieCurieBio =>
+      'Polnisch-französische Physikerin und Chemikerin, erste Frau, die einen Nobelpreis gewann und einzige Person, die Nobelpreise in zwei verschiedenen Wissenschaften (Physik und Chemie) gewann. Pionierin der Radioaktivitätsforschung und Entdeckerin der Elemente Polonium und Radium.';
+
+  @override
+  String get abrahamLincolnBio =>
+      '16. Präsident der Vereinigten Staaten, der das Land durch den Bürgerkrieg führte und die verfassungsmäßige Union gegen die aufständische Konföderation verteidigte. Schaffte die Sklaverei mit der Emanzipationsproklamation ab und wurde 1865 ermordet.';
+
+  @override
+  String get cleopatraBio =>
+      'Letzte aktive Pharaonin des alten Ägypten (69-30 v. Chr.), bekannt für ihre Intelligenz, politische Klugheit und Beziehungen zu Julius Caesar und Marcus Antonius. Sprach mehrere Sprachen und war hochgebildet in Mathematik, Philosophie und Rhetorik.';
+
+  @override
+  String get aviciiBio =>
+      'Schwedischer DJ, Remixer und Plattenproduzent, der in der elektronischen Tanzmusikszene einflussreich war. Bekannt für Hits wie "Levels" und "Wake Me Up." Seine Musik half dabei, EDM zu Mainstream-Publikum zu bringen, vor seinem Tod 2018.';
+
+  @override
+  String get tupacShakurBio =>
+      'Amerikanischer Rapper, Schauspieler und Aktivist. Einer der einflussreichsten Rapper aller Zeiten, bekannt für seine kraftvollen Texte zu sozialen Problemen, Ungleichheit und den Kämpfen des Stadtlebens. Verkaufte weltweit über 75 Millionen Platten.';
+
+  @override
+  String get davidBowieBio =>
+      'Englischer Singer-Songwriter und Schauspieler, bekannt für seine musikalische Innovation und visuelle Neuerfindung. Schuf ikonische Persönlichkeiten wie Ziggy Stardust und den Thin White Duke. Beeinflusste Rockmusik jahrzehntelang mit seinem theatralischen Stil und konstanter Evolution.';
+
+  @override
+  String get stephenHawkingBio =>
+      'Theoretischer Physiker und Kosmologe, der bahnbrechende Beiträge zu unserem Verständnis von schwarzen Löchern und dem Universum leistete. Trotz 50+ Jahren mit ALS schrieb er Bestseller wie "Eine kurze Geschichte der Zeit."';
+
+  @override
+  String get elvisPresleyBio =>
+      'Amerikanischer Sänger und Schauspieler, oft als "König des Rock and Roll" bezeichnet. Seine energetischen Auftritte und sein einzigartiger Stil revolutionierten die Popmusik und machten ihn zu einer kulturellen Ikone des 20. Jahrhunderts.';
+
+  @override
+  String get winstonChurchillBio =>
+      'Britischer Premierminister, der das Vereinigte Königreich während des Zweiten Weltkriegs führte. Anerkannter Redner, Schriftsteller und Literaturnobelpreisträger. Seine Führung und Reden inspirierten das britische Volk in ihrer dunkelsten Stunde.';
+
+  @override
+  String get nikolaTeslaBio =>
+      'Serbisch-amerikanischer Erfinder und Elektroingenieur, der die Entwicklung von Wechselstrom (AC)-Elektrosystemen vorantrieb. Besaß über 300 Patente und machte zahlreiche Innovationen in drahtloser Technologie und Elektromotoren.';
+
+  @override
+  String get williamShakespeareBio =>
+      'Englischer Dramatiker und Dichter, weithin als größter Schriftsteller der englischen Sprache angesehen. Schuf zeitlose Werke wie "Hamlet," "Romeo und Julia," und "Macbeth," die weiterhin weltweit aufgeführt und studiert werden.';
+
+  @override
+  String get juliusCaesarBio =>
+      'Römischer General und Staatsmann, der eine kritische Rolle beim Aufstieg des Römischen Reiches spielte. Bekannt für seine militärischen Eroberungen in Gallien, das Überschreiten des Rubikon und seine eventuelle Ermordung im Senat 44 v. Chr.';
+
+  @override
+  String get steveJobsBio =>
+      'Mitbegründer und CEO von Apple Inc., Visionär, der Personal Computing, Mobiltelefone und digitale Unterhaltung revolutionierte. Bekannt für seinen perfektionistischen Ansatz bei Design und Marketing, der einige der ikonischsten Produkte der Welt schuf.';
+
+  @override
+  String get princessDianaBio =>
+      'Prinzessin von Wales und Humanitärin, die ihre königliche Plattform nutzte, um für wohltätige Zwecke zu werben, insbesondere Minenräumung und AIDS-Aufklärung. Bekannt als "Volksprinzessin" für ihr Mitgefühl und ihre Zugänglichkeit.';
+
+  @override
+  String get freddieMercuryBio =>
+      'Britischer Sänger und Songwriter, Leadsänger der Rockband Queen. Bekannt für seine kraftvolle vier-Oktaven-Stimme, theatralische Bühnenpräsenz und Hits wie "Bohemian Rhapsody" und "We Will Rock You."';
+
+  @override
+  String get muhammadAliBio =>
+      'Amerikanischer Schwergewichts-Boxchampion und Aktivist. Dreimaliger Schwergewichts-Weltmeister, bekannt für seine Box-Fähigkeiten, ausgesprochene Persönlichkeit und prinzipielle Haltung gegen den Vietnamkrieg, die ihm Jahre seiner Karriere kostete.';
+
+  @override
+  String get carlSaganBio =>
+      'Amerikanischer Astronom und Wissenschaftskommunikator, der komplexe wissenschaftliche Konzepte durch Bücher wie "Kosmos" und TV-Auftritte der Öffentlichkeit zugänglich machte. Pionier bei der Suche nach außerirdischem Leben und Befürworter wissenschaftlicher Bildung.';
+
+  @override
+  String get mahatmaGandhiBio =>
+      'Indischer Unabhängigkeitsaktivist, der Indiens erfolgreiche Unabhängigkeitsbewegung durch gewaltlosen zivilen Ungehorsam anführte. Seine Philosophie der Satyagraha (Wahrheitskraft) inspirierte Bürgerrechtsbewegungen weltweit, einschließlich Martin Luther King Jr.';
+
+  @override
+  String get vincentVanGoghBio =>
+      'Niederländischer postimpressionistischer Maler, dessen kühne Farben und emotionale Direktheit die moderne Kunst beeinflussten. Schuf über 2.000 Kunstwerke, darunter "Sternennacht" und "Sonnenblumen," trotz Kämpfen mit Geisteskrankheit und Armut.';
+
+  @override
+  String get leonardoDaVinciBio =>
+      'Italienischer Renaissance-Universalgelehrter - Maler, Erfinder, Wissenschaftler und Ingenieur. Schuf Meisterwerke wie die "Mona Lisa" und "Das letzte Abendmahl," während er mehrere Bereiche einschließlich Anatomie, Ingenieurwesen und Astronomie vorantrieb.';
+
+  @override
+  String get socratesBio =>
+      'Antiker griechischer Philosoph (470-399 v. Chr.), gilt als Begründer der westlichen Philosophie. Bekannt für die sokratische Methode des Fragens und seine berühmte Erklärung "Ich weiß, dass ich nichts weiß." Lehrte Platon, der Aristoteles lehrte.';
 
   // Date and time strings
   @override
@@ -409,23 +679,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String get errorLoadingCharacter => 'Fehler beim Laden des Charakters';
 
   @override
-  String get failedToSaveSettings => 'Einstellungen konnten nicht gespeichert werden';
+  String get failedToSaveSettings =>
+      'Einstellungen konnten nicht gespeichert werden';
 
   @override
-  String get apiKeyUpdatedSuccessfully => 'API-Schlüssel erfolgreich aktualisiert';
+  String get apiKeyUpdatedSuccessfully =>
+      'API-Schlüssel erfolgreich aktualisiert';
 
   // Dialog boxes and confirmations
   @override
   String get restartInterview => 'Interview neu starten';
 
   @override
-  String get clearResponsesConfirmation => 'Dies wird alle Ihre Antworten löschen. Sind Sie sicher?';
+  String get clearResponsesConfirmation =>
+      'Dies wird alle Ihre Antworten löschen. Sind Sie sicher?';
 
   @override
   String get deleteCharacter => 'Charakter löschen';
 
   @override
-  String get deleteCharacterConfirmation => 'Diese Aktion kann nicht rückgängig gemacht werden.';
+  String get deleteCharacterConfirmation =>
+      'Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
   String get delete => 'Löschen';
@@ -444,10 +718,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get apiKeyRequired => 'API-Schlüssel erforderlich';
 
   @override
-  String get updateApiKeyDescription => 'Aktualisieren Sie Ihren OpenRouter API-Schlüssel für KI-Funktionalität:';
+  String get updateApiKeyDescription =>
+      'Aktualisieren Sie Ihren OpenRouter API-Schlüssel für KI-Funktionalität:';
 
   @override
-  String get apiKeyRequiredDescription => 'Die Anwendung benötigt einen OpenRouter API-Schlüssel, um zu funktionieren. Bitte geben Sie Ihren API-Schlüssel unten ein:';
+  String get apiKeyRequiredDescription =>
+      'Die Anwendung benötigt einen OpenRouter API-Schlüssel, um zu funktionieren. Bitte geben Sie Ihren API-Schlüssel unten ein:';
 
   @override
   String get enterApiKey => 'API-Schlüssel eingeben (sk-...)';
@@ -456,16 +732,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get clearCurrentKey => 'Aktuellen Schlüssel löschen';
 
   @override
-  String get getApiKeyFromOpenRouter => 'Sie können einen API-Schlüssel von openrouter.ai erhalten';
+  String get getApiKeyFromOpenRouter =>
+      'Sie können einen API-Schlüssel von openrouter.ai erhalten';
 
   @override
-  String get usingCustomApiKey => 'Verwende Ihren benutzerdefinierten API-Schlüssel';
+  String get usingCustomApiKey =>
+      'Verwende Ihren benutzerdefinierten API-Schlüssel';
 
   @override
-  String get replaceKeyInstructions => 'Um mit einem anderen Schlüssel zu ersetzen, löschen Sie zuerst das Feld und geben Sie den neuen Schlüssel ein';
+  String get replaceKeyInstructions =>
+      'Um mit einem anderen Schlüssel zu ersetzen, löschen Sie zuerst das Feld und geben Sie den neuen Schlüssel ein';
 
   @override
-  String get apiKeyShouldStartWithSk => 'API-Schlüssel sollte mit "sk-" beginnen';
+  String get apiKeyShouldStartWithSk =>
+      'API-Schlüssel sollte mit "sk-" beginnen';
 
   // Interview and character creation
   @override
@@ -475,7 +755,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get characterDataIncomplete => 'Charakterdaten sind unvollständig';
 
   @override
-  String get failedToSaveCharacter => 'Charakter konnte nicht gespeichert werden';
+  String get failedToSaveCharacter =>
+      'Charakter konnte nicht gespeichert werden';
 
   @override
   String get characterProfileNotFound => 'Charakterprofil nicht gefunden';
@@ -485,34 +766,44 @@ class AppLocalizationsDe extends AppLocalizations {
 
   // Generic error messages with parameters
   @override
-  String errorLoadingCharacterWithDetails(String error) => 'Fehler beim Laden des Charakters: $error';
+  String errorLoadingCharacterWithDetails(String error) =>
+      'Fehler beim Laden des Charakters: $error';
 
   @override
-  String errorSavingApiKeyWithDetails(String error) => 'Fehler beim Speichern des API-Schlüssels: $error';
+  String errorSavingApiKeyWithDetails(String error) =>
+      'Fehler beim Speichern des API-Schlüssels: $error';
 
   @override
-  String errorRemovingApiKeyWithDetails(String error) => 'Fehler beim Entfernen des API-Schlüssels: $error';
+  String errorRemovingApiKeyWithDetails(String error) =>
+      'Fehler beim Entfernen des API-Schlüssels: $error';
 
   @override
-  String failedToSaveSettingsWithDetails(String error) => 'Einstellungen konnten nicht gespeichert werden: $error';
+  String failedToSaveSettingsWithDetails(String error) =>
+      'Einstellungen konnten nicht gespeichert werden: $error';
 
   @override
-  String aiModelUpdatedForCharacter(String characterName) => 'KI-Modell für $characterName aktualisiert';
+  String aiModelUpdatedForCharacter(String characterName) =>
+      'KI-Modell für $characterName aktualisiert';
 
   @override
-  String characterCardCopiedForCharacter(String characterName) => 'Charakterkarte für "$characterName" in Zwischenablage kopiert';
+  String characterCardCopiedForCharacter(String characterName) =>
+      'Charakterkarte für "$characterName" in Zwischenablage kopiert';
 
   @override
-  String errorUpdatingModel(String error) => 'Fehler beim Aktualisieren des Modells: $error';
+  String errorUpdatingModel(String error) =>
+      'Fehler beim Aktualisieren des Modells: $error';
 
   @override
-  String errorSavingCharacterWithDetails(String error) => 'Fehler beim Speichern des Charakters: $error';
+  String errorSavingCharacterWithDetails(String error) =>
+      'Fehler beim Speichern des Charakters: $error';
 
   @override
-  String errorClearingDataWithDetails(String error) => 'Fehler beim Löschen der Daten: $error';
+  String errorClearingDataWithDetails(String error) =>
+      'Fehler beim Löschen der Daten: $error';
 
   @override
-  String errorExportingCharactersWithDetails(String error) => 'Fehler beim Exportieren der Charaktere: $error';
+  String errorExportingCharactersWithDetails(String error) =>
+      'Fehler beim Exportieren der Charaktere: $error';
 
   // Additional UI strings
   @override
@@ -528,15 +819,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveKey => 'Schlüssel speichern';
 
   @override
-  String get usingDefaultApiKey => 'Verwende Standard-API-Schlüssel aus .env-Datei';
+  String get usingDefaultApiKey =>
+      'Verwende Standard-API-Schlüssel aus .env-Datei';
 
   // Interview initial message
   @override
-  String get interviewInitialMessage => 'Hallo! Ich bin bereit, eine detaillierte Charakterkarte für Sie zu erstellen. Sie können wählen:\n\n1. Meine Fragen zu Ihrer Persönlichkeit und Ihren Erfahrungen beantworten\n2. Eine Datei (PDF, TXT, DOC oder E-Mail) mit Ihren Informationen hochladen\n\nWas würden Sie bevorzugen?';
+  String get interviewInitialMessage =>
+      'Hallo! Ich bin bereit, eine detaillierte Charakterkarte für Sie zu erstellen. Sie können wählen:\n\n1. Meine Fragen zu Ihrer Persönlichkeit und Ihren Erfahrungen beantworten\n2. Eine Datei (PDF, TXT, DOC oder E-Mail) mit Ihren Informationen hochladen\n\nWas würden Sie bevorzugen?';
 
   // Splash screen status messages
   @override
-  String get initializingPreservationSystems => 'ERHALTUNGSSYSTEME INITIALISIEREN';
+  String get initializingPreservationSystems =>
+      'ERHALTUNGSSYSTEME INITIALISIEREN';
 
   @override
   String get calibratingNeuralNetworks => 'NEURONALE NETZWERKE KALIBRIEREN';
@@ -554,7 +848,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get preservationSystemsReady => 'ERHALTUNGSSYSTEME BEREIT';
 
   @override
-  String get errorInitializingSystems => 'FEHLER BEIM INITIALISIEREN DER SYSTEME';
+  String get errorInitializingSystems =>
+      'FEHLER BEIM INITIALISIEREN DER SYSTEME';
 
   // Error messages and user feedback
   @override
@@ -567,14 +862,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get apiKeyCannotBeEmpty => 'API-Schlüssel kann nicht leer sein';
 
   @override
-  String get characterCardCopiedToClipboard => 'Charakterkarte in Zwischenablage kopiert';
+  String get characterCardCopiedToClipboard =>
+      'Charakterkarte in Zwischenablage kopiert';
 
   @override
-  String get charactersExportedSuccessfully => 'Charaktere erfolgreich exportiert!';
+  String get charactersExportedSuccessfully =>
+      'Charaktere erfolgreich exportiert!';
 
   @override
-  String get errorExportingCharacters => 'Fehler beim Exportieren der Charaktere';
+  String get errorExportingCharacters =>
+      'Fehler beim Exportieren der Charaktere';
 
   @override
   String get errorSavingApiKey => 'Fehler beim Speichern des API-Schlüssels';
-} 
+}

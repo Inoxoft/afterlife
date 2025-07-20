@@ -646,6 +646,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monroeBio =>
       'Legendary Hollywood actress, model, and cultural icon whose films grossed over 200 million dollars. Known for her comedic talent and iconic performances in "Some Like It Hot" and "Gentlemen Prefer Blondes." Her signature look and charisma made her one of the most enduring stars of the 20th century.';
 
+  @override
+  String get kobeBryantBio =>
+      'Legendary NBA basketball player who spent his entire 20-year career with the Los Angeles Lakers. Five-time NBA champion, 18-time All-Star, and advocate for women\'s basketball. Known for his "Mamba Mentality" work ethic and tragic death in 2020.';
+
+  @override
+  String get kurtCobainBio =>
+      'Lead singer, guitarist, and primary songwriter of the grunge band Nirvana. His raw, emotional music defined a generation and brought alternative rock to mainstream success. Struggled with fame and personal demons before his death in 1994.';
+
+  @override
+  String get nelsonMandelaBio =>
+      'South African anti-apartheid activist and political leader who served as President of South Africa from 1994 to 1999. Spent 27 years in prison for his activism, later became a Nobel Peace Prize winner and global symbol of resistance against oppression.';
+
+  @override
+  String get bobMarleyBio =>
+      'Jamaican reggae singer, songwriter, and musician who became a global icon. Popularized reggae music worldwide and advocated for peace, love, and Rastafarian spirituality. His message of unity and social justice continues to inspire millions.';
+
+  @override
+  String get bruceLeeBio =>
+      'Martial artist, actor, and philosopher who revolutionized martial arts in popular culture. Founded his own fighting philosophy, Jeet Kune Do, and broke down racial barriers in Hollywood. Died tragically young at age 32.';
+
+  @override
+  String get martinLutherKingJrBio =>
+      'American Baptist minister and civil rights activist who led the American civil rights movement from 1955 until his assassination in 1968. Advocated for nonviolent resistance and delivered the famous "I Have a Dream" speech during the March on Washington.';
+
+  @override
+  String get marieCurieBio =>
+      'Polish-French physicist and chemist, first woman to win a Nobel Prize and the only person to win Nobel Prizes in two different sciences (Physics and Chemistry). Pioneered research on radioactivity and discovered the elements polonium and radium.';
+
+  @override
+  String get abrahamLincolnBio =>
+      '16th President of the United States who led the country through the Civil War, defending the constitutional union against the insurgent Confederacy. Abolished slavery with the Emancipation Proclamation and was assassinated in 1865.';
+
+  @override
+  String get cleopatraBio =>
+      'Last active pharaoh of Ancient Egypt (69-30 BC), known for her intelligence, political acumen, and relationships with Julius Caesar and Mark Antony. Spoke multiple languages and was highly educated in mathematics, philosophy, and rhetoric.';
+
+  @override
+  String get aviciiBio =>
+      'Swedish DJ, remixer, and record producer who was influential in the electronic dance music scene. Known for hits like "Levels" and "Wake Me Up." His music helped bring EDM to mainstream audiences before his death in 2018.';
+
+  @override
+  String get tupacShakurBio =>
+      'American rapper, actor, and activist. One of the most influential rappers of all time, known for his powerful lyrics addressing social issues, inequality, and the struggles of urban life. Sold over 75 million records worldwide.';
+
+  @override
+  String get davidBowieBio =>
+      'English singer-songwriter and actor, renowned for his musical innovation and visual reinvention. Created iconic personas like Ziggy Stardust and the Thin White Duke. Influenced rock music for decades with his theatrical style and constant evolution.';
+
+  @override
+  String get stephenHawkingBio =>
+      'Theoretical physicist and cosmologist who made groundbreaking contributions to our understanding of black holes and the universe. Despite living with ALS for over 50 years, he wrote bestselling books like "A Brief History of Time."';
+
+  @override
+  String get elvisPresleyBio =>
+      'American singer and actor, often referred to as the "King of Rock and Roll." His energetic performances and unique style revolutionized popular music and made him a cultural icon of the 20th century.';
+
+  @override
+  String get winstonChurchillBio =>
+      'British Prime Minister who led the United Kingdom during World War II. Renowned orator, writer, and Nobel Prize winner in Literature. His leadership and speeches inspired the British people during their darkest hour.';
+
+  @override
+  String get nikolaTeslaBio =>
+      'Serbian-American inventor and electrical engineer who pioneered the development of alternating current (AC) electrical systems. Held over 300 patents and made numerous innovations in wireless technology and electric motors.';
+
+  @override
+  String get williamShakespeareBio =>
+      'English playwright and poet, widely regarded as the greatest writer in the English language. Created timeless works like "Hamlet," "Romeo and Juliet," and "Macbeth" that continue to be performed and studied worldwide.';
+
+  @override
+  String get juliusCaesarBio =>
+      'Roman general and statesman who played a critical role in the rise of the Roman Empire. Known for his military conquests in Gaul, crossing the Rubicon, and his eventual assassination in the Senate in 44 BC.';
+
+  @override
+  String get steveJobsBio =>
+      'Co-founder and CEO of Apple Inc., visionary who revolutionized personal computing, mobile phones, and digital entertainment. Known for his perfectionist approach to design and marketing that created some of the world\'s most iconic products.';
+
+  @override
+  String get princessDianaBio =>
+      'Princess of Wales and humanitarian who used her royal platform to advocate for charitable causes, particularly landmine removal and AIDS awareness. Known as the "People\'s Princess" for her compassion and accessibility.';
+
+  @override
+  String get freddieMercuryBio =>
+      'British singer and songwriter, lead vocalist of the rock band Queen. Known for his powerful four-octave vocal range, theatrical stage presence, and hits like "Bohemian Rhapsody" and "We Will Rock You."';
+
+  @override
+  String get muhammadAliBio =>
+      'American heavyweight boxing champion and activist. Three-time world heavyweight champion known for his boxing prowess, outspoken personality, and principled stance against the Vietnam War that cost him years of his career.';
+
+  @override
+  String get carlSaganBio =>
+      'American astronomer and science communicator who made complex scientific concepts accessible to the public through books like "Cosmos" and TV appearances. Pioneer in the search for extraterrestrial life and advocate for scientific literacy.';
+
+  @override
+  String get mahatmaGandhiBio =>
+      'Indian independence activist who led India\'s successful independence movement through nonviolent civil disobedience. His philosophy of satyagraha (truth-force) inspired civil rights movements worldwide, including Martin Luther King Jr.';
+
+  @override
+  String get vincentVanGoghBio =>
+      'Dutch post-impressionist painter whose bold colors and emotional directness influenced modern art. Created over 2,000 artworks including "Starry Night" and "Sunflowers," despite struggling with mental illness and poverty.';
+
+  @override
+  String get leonardoDaVinciBio =>
+      'Italian Renaissance polymath - painter, inventor, scientist, and engineer. Created masterpieces like the "Mona Lisa" and "The Last Supper" while advancing multiple fields including anatomy, engineering, and astronomy.';
+
+  @override
+  String get socratesBio =>
+      'Ancient Greek philosopher (470-399 BC) considered the founder of Western philosophy. Known for the Socratic method of questioning and his famous declaration "I know that I know nothing." Taught Plato, who taught Aristotle.';
+
   // Date and time strings
   @override
   String get created => 'Created';

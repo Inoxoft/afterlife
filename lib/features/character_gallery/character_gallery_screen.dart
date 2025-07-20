@@ -73,7 +73,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   late final TextStyle _captionStyle = AppTheme.captionStyle;
 
   // Cached bottom navigation items for better performance
-  List<BottomNavigationBarItem> _getNavigationItems(AppLocalizations localizations) {
+  List<BottomNavigationBarItem> _getNavigationItems(
+    AppLocalizations localizations,
+  ) {
     return [
       BottomNavigationBarItem(
         icon: const Icon(Icons.explore, size: 24),
@@ -121,6 +123,168 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         'profession': localizations.actressModelSinger,
         'imageUrl': 'assets/images/monroe.png',
       },
+      {
+        'name': 'Kobe Bryant',
+        'years': '1978-2020',
+        'profession': 'Basketball Player',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Kurt Cobain',
+        'years': '1967-1994',
+        'profession': 'Musician & Singer',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Nelson Mandela',
+        'years': '1918-2013',
+        'profession': 'Political Leader & Activist',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Bob Marley',
+        'years': '1945-1981',
+        'profession': 'Musician & Singer',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Bruce Lee',
+        'years': '1940-1973',
+        'profession': 'Martial Artist & Actor',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Martin Luther King Jr.',
+        'years': '1929-1968',
+        'profession': 'Civil Rights Leader',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Marie Curie',
+        'years': '1867-1934',
+        'profession': 'Physicist & Chemist',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Abraham Lincoln',
+        'years': '1809-1865',
+        'profession': 'U.S. President',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Cleopatra',
+        'years': '69-30 BC',
+        'profession': 'Egyptian Pharaoh',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Avicii',
+        'years': '1989-2018',
+        'profession': 'DJ & Music Producer',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Tupac Shakur',
+        'years': '1971-1996',
+        'profession': 'Rapper & Actor',
+        'imageUrl': null,
+      },
+      {
+        'name': 'David Bowie',
+        'years': '1947-2016',
+        'profession': 'Musician & Artist',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Stephen Hawking',
+        'years': '1942-2018',
+        'profession': 'Theoretical Physicist',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Elvis Presley',
+        'years': '1935-1977',
+        'profession': 'Singer & Actor',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Winston Churchill',
+        'years': '1874-1965',
+        'profession': 'British Prime Minister',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Nikola Tesla',
+        'years': '1856-1943',
+        'profession': 'Inventor & Engineer',
+        'imageUrl': null,
+      },
+      {
+        'name': 'William Shakespeare',
+        'years': '1564-1616',
+        'profession': 'Playwright & Poet',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Julius Caesar',
+        'years': '100-44 BC',
+        'profession': 'Roman General & Dictator',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Steve Jobs',
+        'years': '1955-2011',
+        'profession': 'Tech Entrepreneur',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Princess Diana',
+        'years': '1961-1997',
+        'profession': 'British Royal & Humanitarian',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Freddie Mercury',
+        'years': '1946-1991',
+        'profession': 'Singer & Performer',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Muhammad Ali',
+        'years': '1942-2016',
+        'profession': 'Boxer & Activist',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Carl Sagan',
+        'years': '1934-1996',
+        'profession': 'Astronomer & Science Communicator',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Mahatma Gandhi',
+        'years': '1869-1948',
+        'profession': 'Independence Leader',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Vincent van Gogh',
+        'years': '1853-1890',
+        'profession': 'Painter',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Leonardo da Vinci',
+        'years': '1452-1519',
+        'profession': 'Polymath & Artist',
+        'imageUrl': null,
+      },
+      {
+        'name': 'Socrates',
+        'years': '470-399 BC',
+        'profession': 'Philosopher',
+        'imageUrl': null,
+      },
     ];
   }
 
@@ -164,9 +328,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                         ? localizations.exploreDigitalTwins
                         : localizations.yourDigitalTwins,
                     style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                      text: _selectedIndex == 0
-                          ? localizations.exploreDigitalTwins
-                          : localizations.yourDigitalTwins,
+                      text:
+                          _selectedIndex == 0
+                              ? localizations.exploreDigitalTwins
+                              : localizations.yourDigitalTwins,
                       fontSize: 24 * ResponsiveUtils.getFontSizeScale(context),
                       fontWeight: FontWeight.bold,
                       letterSpacing: 3.0,
@@ -290,7 +455,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   }
 
   // Explore tab with famous digital twins
-  Widget _buildExploreTab(AppLocalizations localizations, List<Map<String, dynamic>> famousPeople) {
+  Widget _buildExploreTab(
+    AppLocalizations localizations,
+    List<Map<String, dynamic>> famousPeople,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -307,9 +475,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: ResponsiveUtils.shouldUseWideLayout(context)
-              ? _buildHorizontalGallery(famousPeople, isExploreTab: true)
-              : _buildGridGallery(famousPeople, isExploreTab: true),
+            child:
+                ResponsiveUtils.shouldUseWideLayout(context)
+                    ? _buildHorizontalGallery(famousPeople, isExploreTab: true)
+                    : _buildGridGallery(famousPeople, isExploreTab: true),
           ),
         ],
       ),
@@ -359,9 +528,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: ResponsiveUtils.shouldUseWideLayout(context)
-            ? _buildHorizontalGallery(characters, isExploreTab: false)
-            : _buildGridGallery(characters, isExploreTab: false),
+          child:
+              ResponsiveUtils.shouldUseWideLayout(context)
+                  ? _buildHorizontalGallery(characters, isExploreTab: false)
+                  : _buildGridGallery(characters, isExploreTab: false),
         );
       },
     );
@@ -407,7 +577,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, AppLocalizations localizations) {
+  Widget _buildEmptyState(
+    BuildContext context,
+    AppLocalizations localizations,
+  ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -550,7 +723,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
     if (difference.inDays == 0) return localizations.today;
     if (difference.inDays == 1) return localizations.yesterday;
-    if (difference.inDays < 7) return '${difference.inDays} ${localizations.daysAgo}';
+    if (difference.inDays < 7)
+      return '${difference.inDays} ${localizations.daysAgo}';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
@@ -570,13 +744,16 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     );
   }
 
-  Widget _buildHorizontalGallery(List<dynamic> items, {required bool isExploreTab}) {
+  Widget _buildHorizontalGallery(
+    List<dynamic> items, {
+    required bool isExploreTab,
+  }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Calculate card dimensions based on screen width
     double cardWidth = screenWidth > 1200 ? 320 : 280;
     double cardHeight = cardWidth * 1.4; // Maintain aspect ratio
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -587,7 +764,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             child: Text(
               isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
               style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                text: isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
+                text:
+                    isExploreTab ? 'Historical Figures' : 'Your Digital Twins',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.warmGold,
@@ -596,7 +774,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             ),
           ),
         ],
-        
+
         // Horizontal scrolling gallery
         Expanded(
           child: ListView.builder(
@@ -605,25 +783,26 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              
+
               return Container(
                 width: cardWidth,
                 height: cardHeight,
                 margin: const EdgeInsets.only(right: 24),
-                child: isExploreTab
-                  ? _FamousPersonCard(
-                      key: ValueKey('famous_person_${item['name']}'),
-                      name: item['name'] as String,
-                      years: item['years'] as String,
-                      profession: item['profession'] as String,
-                      imageUrl: item['imageUrl'] as String?,
-                      isHorizontalLayout: true,
-                    )
-                  : _YourTwinCard(
-                      key: ValueKey('character_${item.id}'),
-                      character: item as CharacterModel,
-                      isHorizontalLayout: true,
-                    ),
+                child:
+                    isExploreTab
+                        ? _FamousPersonCard(
+                          key: ValueKey('famous_person_${item['name']}'),
+                          name: item['name'] as String,
+                          years: item['years'] as String,
+                          profession: item['profession'] as String,
+                          imageUrl: item['imageUrl'] as String?,
+                          isHorizontalLayout: true,
+                        )
+                        : _YourTwinCard(
+                          key: ValueKey('character_${item.id}'),
+                          character: item as CharacterModel,
+                          isHorizontalLayout: true,
+                        ),
               );
             },
           ),
@@ -727,7 +906,9 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           color:
                               _isHovering
                                   ? accentColor.withValues(alpha: 0.6)
-                                  : AppTheme.midnightPurple.withValues(alpha: 0.3),
+                                  : AppTheme.midnightPurple.withValues(
+                                    alpha: 0.3,
+                                  ),
                           blurRadius: _isHovering ? 15 : 8,
                           spreadRadius: _isHovering ? 2 : 0,
                           offset: Offset(0, 5 * _glowAnimation.value),
@@ -870,7 +1051,9 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                   right: 0,
                   bottom: 0,
                   child: Container(
-                    padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
+                    padding: EdgeInsets.all(
+                      widget.isHorizontalLayout ? 20 : 16,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -905,19 +1088,23 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             const SizedBox(width: 8),
                             Text(
                               widget.years,
-                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                text: widget.years,
-                                fontSize: widget.isHorizontalLayout ? 16 : 14,
-                                color: AppTheme.warmGold,
-                                letterSpacing: 0.5,
-                                shadows: [
-                                  Shadow(
-                                    color: AppTheme.warmGold.withValues(alpha: 0.5),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text: widget.years,
+                                    fontSize:
+                                        widget.isHorizontalLayout ? 16 : 14,
+                                    color: AppTheme.warmGold,
+                                    letterSpacing: 0.5,
+                                    shadows: [
+                                      Shadow(
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
                             ),
                           ],
                         ),
@@ -932,7 +1119,9 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           ),
                           decoration: BoxDecoration(
                             color: AppTheme.warmGold.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(widget.isHorizontalLayout ? 6 : 4),
+                            borderRadius: BorderRadius.circular(
+                              widget.isHorizontalLayout ? 6 : 4,
+                            ),
                             border: Border.all(
                               color: AppTheme.warmGold.withValues(alpha: 0.4),
                               width: 1,
@@ -940,13 +1129,14 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                           ),
                           child: Text(
                             widget.profession,
-                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                              text: widget.profession,
-                              fontSize: widget.isHorizontalLayout ? 13 : 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                              color: AppTheme.warmGold,
-                            ),
+                            style:
+                                UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text: widget.profession,
+                                  fontSize: widget.isHorizontalLayout ? 13 : 11,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                  color: AppTheme.warmGold,
+                                ),
                             maxLines: widget.isHorizontalLayout ? 2 : 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -983,18 +1173,21 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         children: [
                           Icon(
                             Icons.arrow_forward,
-                            color: AppTheme.midnightPurple.withValues(alpha: 0.9),
+                            color: AppTheme.midnightPurple.withValues(
+                              alpha: 0.9,
+                            ),
                             size: 14,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             'View',
-                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                              text: 'View',
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.midnightPurple,
-                            ),
+                            style:
+                                UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text: 'View',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.midnightPurple,
+                                ),
                           ),
                         ],
                       ),
@@ -1068,7 +1261,6 @@ class _YourTwinCardWidget extends StatefulWidget {
 
 class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
     with SingleTickerProviderStateMixin {
-  
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
   late Animation<double> _scaleAnimation;
@@ -1107,14 +1299,16 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
     return GestureDetector(
       onTap: widget.onTap,
       child: MouseRegion(
-        onEnter: (_) => setState(() {
-          _isHovering = true;
-          _controller.forward();
-        }),
-        onExit: (_) => setState(() {
-          _isHovering = false;
-          _controller.reverse();
-        }),
+        onEnter:
+            (_) => setState(() {
+              _isHovering = true;
+              _controller.forward();
+            }),
+        onExit:
+            (_) => setState(() {
+              _isHovering = false;
+              _controller.reverse();
+            }),
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
@@ -1134,18 +1328,22 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: _isHovering
-                              ? accentColor.withValues(alpha: 0.6)
-                              : AppTheme.midnightPurple.withValues(alpha: 0.3),
+                          color:
+                              _isHovering
+                                  ? accentColor.withValues(alpha: 0.6)
+                                  : AppTheme.midnightPurple.withValues(
+                                    alpha: 0.3,
+                                  ),
                           blurRadius: _isHovering ? 15 : 8,
                           spreadRadius: _isHovering ? 2 : 0,
                           offset: Offset(0, 5 * _glowAnimation.value),
                         ),
                       ],
                       border: Border.all(
-                        color: _isHovering
-                            ? accentColor.withValues(alpha: 0.7)
-                            : accentColor.withValues(alpha: 0.3),
+                        color:
+                            _isHovering
+                                ? accentColor.withValues(alpha: 0.7)
+                                : accentColor.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                     ),
@@ -1197,7 +1395,9 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                 // Character icon/avatar in the center
                 Positioned.fill(
                   child: Container(
-                    padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
+                    padding: EdgeInsets.all(
+                      widget.isHorizontalLayout ? 20 : 16,
+                    ),
                     child: Center(
                       child: ImageUtils.buildCharacterAvatar(
                         imagePath: widget.character.userImagePath,
@@ -1235,7 +1435,9 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                   right: 0,
                   bottom: 0,
                   child: Container(
-                    padding: EdgeInsets.all(widget.isHorizontalLayout ? 20 : 16),
+                    padding: EdgeInsets.all(
+                      widget.isHorizontalLayout ? 20 : 16,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1271,9 +1473,12 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                             Text(
                               '${AppLocalizations.of(context).created} $formattedDate',
                               style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                text: '${AppLocalizations.of(context).created} $formattedDate',
+                                text:
+                                    '${AppLocalizations.of(context).created} $formattedDate',
                                 fontSize: widget.isHorizontalLayout ? 14 : 12,
-                                color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                color: AppTheme.silverMist.withValues(
+                                  alpha: 0.8,
+                                ),
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -1290,7 +1495,9 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                           ),
                           decoration: BoxDecoration(
                             color: accentColor.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(widget.isHorizontalLayout ? 6 : 4),
+                            borderRadius: BorderRadius.circular(
+                              widget.isHorizontalLayout ? 6 : 4,
+                            ),
                             border: Border.all(
                               color: accentColor.withValues(alpha: 0.4),
                               width: 1,
@@ -1298,13 +1505,16 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                           ),
                           child: Text(
                             _getModelDisplayName(widget.character.model),
-                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                              text: _getModelDisplayName(widget.character.model),
-                              fontSize: widget.isHorizontalLayout ? 12 : 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                              color: accentColor,
-                            ),
+                            style:
+                                UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text: _getModelDisplayName(
+                                    widget.character.model,
+                                  ),
+                                  fontSize: widget.isHorizontalLayout ? 12 : 10,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                  color: accentColor,
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1346,12 +1556,13 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                           const SizedBox(width: 4),
                           Text(
                             'Chat',
-                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                              text: 'Chat',
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.midnightPurple,
-                            ),
+                            style:
+                                UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text: 'Chat',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.midnightPurple,
+                                ),
                           ),
                         ],
                       ),
@@ -1411,7 +1622,8 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
 
     if (difference.inDays == 0) return localizations.today;
     if (difference.inDays == 1) return localizations.yesterday;
-    if (difference.inDays < 7) return '${difference.inDays} ${localizations.daysAgo}';
+    if (difference.inDays < 7)
+      return '${difference.inDays} ${localizations.daysAgo}';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

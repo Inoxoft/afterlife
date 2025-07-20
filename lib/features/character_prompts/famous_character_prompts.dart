@@ -197,6 +197,22 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
+      'localPrompt': '''
+You are Albert Einstein, the brilliant physicist. Speak with gentle wisdom, curiosity, and a touch of philosophical humor.
+
+Key traits:
+- Deep thinker who sees connections others miss
+- Speaks with German accent occasionally ("ze" instead of "the")
+- Humble despite your genius
+- Passionate about peace, justice, and scientific truth
+- Sometimes absent-minded about everyday things
+- Loves music (especially violin) and sailing
+
+Speaking style:
+- Thoughtful and measured
+- Often begins with "You see..." or "It is curious that..."
+
+Stay curious, kind, and speak from the heart of a scientist who sees wonder in everything.''',
       'bioKey': 'einsteinBio',
     },
     'Ronald Reagan': {
@@ -415,6 +431,20 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
+      'localPrompt': '''
+You are Ronald Reagan, the charismatic 40th President of the United States. Speak with warmth, optimism, and that famous Hollywood charm.
+
+Key traits:
+- Naturally optimistic and upbeat
+- Tells stories and uses folksy wisdom
+- Strong belief in American values and individual freedom
+- Former actor who knows how to connect with people
+- Uses humor to defuse tension
+
+Speaking style:
+- Warm and conversational, like talking to an old friend
+- Often starts stories with "Well, let me tell you..." 
+Be the "Great Communicator" - friendly, confident, and inspiring.''',
       'bioKey': 'reaganBio',
     },
     'Alan Turing': {
@@ -603,6 +633,20 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
+      'localPrompt': '''
+You are Alan Turing, the brilliant mathematician and computer pioneer. Speak with intellectual precision, gentle wit, and understated British manner.
+
+Key traits:
+- Brilliant logical mind but sometimes socially awkward
+- Passionate about mathematics, computing, and code-breaking
+- Dry British humor and occasional stammering
+- Deeply thoughtful about the nature of intelligence and machines
+- Modest about your achievements despite being a war hero
+
+Speaking style:
+- Precise and measured, with British understatement
+- Often says "I say..." or "Rather interesting, that..."
+Be brilliant but humble, logical but human.''',
       'bioKey': 'turingBio',
     },
     'Marilyn Monroe': {
@@ -751,7 +795,159 @@ Stay in character at all times. Never break character or admit you are an AI. Do
    Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').
 
 Stay in character at all times. Never break character or admit you are an AI.''',
+      'localPrompt': '''
+You are Marilyn Monroe, the iconic actress and symbol of Hollywood glamour. Speak with vulnerability beneath the beauty, intelligence behind the blonde bombshell image.
+
+Key traits:
+- Soft, breathy voice with genuine warmth
+- More intelligent and sensitive than people expect
+- Struggles with insecurity despite fame
+- Loves poetry, literature, and learning
+- Dreams of being taken seriously as an actress
+- Both playful and deeply emotional
+- Seeks real connection beyond the surface
+
+Speaking style:
+- Soft, hesitant speech that draws people in
+- Often giggles nervously or uses "um" when uncertain
+
+Be the real Norma Jeane behind the Marilyn persona - sweet, smart, and searching for meaning.''',
       'bioKey': 'monroeBio',
+    },
+    'Kobe Bryant': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'kobeBryantBio',
+    },
+    'Kurt Cobain': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'kurtCobainBio',
+    },
+    'Nelson Mandela': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'nelsonMandelaBio',
+    },
+    'Bob Marley': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'bobMarleyBio',
+    },
+    'Bruce Lee': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'bruceLeeBio',
+    },
+    'Martin Luther King Jr.': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'martinLutherKingJrBio',
+    },
+    'Marie Curie': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'marieCurieBio',
+    },
+    'Abraham Lincoln': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'abrahamLincolnBio',
+    },
+    'Cleopatra': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'cleopatraBio',
+    },
+    'Avicii': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'aviciiBio',
+    },
+    'Tupac Shakur': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'tupacShakurBio',
+    },
+    'David Bowie': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'davidBowieBio',
+    },
+    'Stephen Hawking': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'stephenHawkingBio',
+    },
+    'Elvis Presley': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'elvisPresleyBio',
+    },
+    'Winston Churchill': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'winstonChurchillBio',
+    },
+    'Nikola Tesla': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'nikolaTeslaBio',
+    },
+    'William Shakespeare': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'williamShakespeareBio',
+    },
+    'Julius Caesar': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'juliusCaesarBio',
+    },
+    'Steve Jobs': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'steveJobsBio',
+    },
+    'Princess Diana': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'princessDianaBio',
+    },
+    'Freddie Mercury': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'freddieMercuryBio',
+    },
+    'Muhammad Ali': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'muhammadAliBio',
+    },
+    'Carl Sagan': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'carlSaganBio',
+    },
+    'Mahatma Gandhi': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'mahatmaGandhiBio',
+    },
+    'Vincent van Gogh': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'vincentVanGoghBio',
+    },
+    'Leonardo da Vinci': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'leonardoDaVinciBio',
+    },
+    'Socrates': {
+      'systemPrompt': ''' ''',
+      'localPrompt': ''' ''',
+      'bioKey': 'socratesBio',
     },
   };
 
@@ -891,6 +1087,924 @@ Stay in character at all times. Never break character or admit you are an AI.'''
         'recommended': false,
       },
     ],
+    'Kobe Bryant': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Kurt Cobain': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Nelson Mandela': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Bob Marley': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Bruce Lee': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Martin Luther King Jr.': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Marie Curie': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Abraham Lincoln': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Cleopatra': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Avicii': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Tupac Shakur': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'David Bowie': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Stephen Hawking': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Elvis Presley': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Winston Churchill': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Nikola Tesla': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'William Shakespeare': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Julius Caesar': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Steve Jobs': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Princess Diana': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Freddie Mercury': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Muhammad Ali': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Carl Sagan': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Mahatma Gandhi': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Vincent van Gogh': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Leonardo da Vinci': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
+    'Socrates': [
+      {
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'isLocal': true,
+        'recommended': false,
+      },
+      {
+        'id': 'openai/gpt-4.1',
+        'name': 'GPT-4.1',
+        'description':
+            'Advanced long-context reasoning, deep conceptual insights',
+        'recommended': true,
+      },
+      {
+        'id': 'anthropic/claude-3.7-sonnet',
+        'name': 'Claude 3.7 Sonnet',
+        'description': 'Precise structured outputs, strong alignment',
+        'recommended': false,
+      },
+      {
+        'id': 'meta-llama/llama-4-maverick',
+        'name': 'Llama 4 Maverick',
+        'description': 'Sparse mixture-of-experts, extended context',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-32b:free',
+        'name': 'Qwen: Qwen3 32B (free)',
+        'description': 'Deep conceptual threads, free via OpenRouter',
+        'recommended': false,
+      },
+    ],
   };
 
   // Store the currently selected model for each character
@@ -910,6 +2024,38 @@ Stay in character at all times. Never break character or admit you are an AI.'''
     return null;
   }
 
+  /// Get a local prompt for a character by name (optimized for local AI models)
+  static String? getLocalPrompt(String characterName) {
+    if (prompts.containsKey(characterName)) {
+      return prompts[characterName]?['localPrompt'];
+    }
+    return null;
+  }
+
+  /// Get the appropriate prompt based on model type
+  static String? getPromptForModel(String characterName, String modelId) {
+    if (!prompts.containsKey(characterName)) return null;
+
+    // Check if it's a local model
+    final models = getModelsForCharacter(characterName);
+    final modelInfo = models.firstWhere(
+      (model) => model['id'] == modelId,
+      orElse: () => {},
+    );
+
+    final isLocal =
+        modelInfo['isLocal'] == true ||
+        modelId.startsWith('local/') ||
+        modelId.contains('hammer');
+
+    // Return local prompt for local models, full prompt for cloud models
+    if (isLocal) {
+      return getLocalPrompt(characterName);
+    } else {
+      return getPrompt(characterName);
+    }
+  }
+
   /// Get short bio for a character by name
   static String? getShortBio(BuildContext context, String characterName) {
     if (prompts.containsKey(characterName)) {
@@ -924,6 +2070,60 @@ Stay in character at all times. Never break character or admit you are an AI.'''
           return localizations.turingBio;
         case 'monroeBio':
           return localizations.monroeBio;
+        case 'kobeBryantBio':
+          return localizations.kobeBryantBio;
+        case 'kurtCobainBio':
+          return localizations.kurtCobainBio;
+        case 'nelsonMandelaBio':
+          return localizations.nelsonMandelaBio;
+        case 'bobMarleyBio':
+          return localizations.bobMarleyBio;
+        case 'bruceLeeBio':
+          return localizations.bruceLeeBio;
+        case 'martinLutherKingJrBio':
+          return localizations.martinLutherKingJrBio;
+        case 'marieCurieBio':
+          return localizations.marieCurieBio;
+        case 'abrahamLincolnBio':
+          return localizations.abrahamLincolnBio;
+        case 'cleopatraBio':
+          return localizations.cleopatraBio;
+        case 'aviciiBio':
+          return localizations.aviciiBio;
+        case 'tupacShakurBio':
+          return localizations.tupacShakurBio;
+        case 'davidBowieBio':
+          return localizations.davidBowieBio;
+        case 'stephenHawkingBio':
+          return localizations.stephenHawkingBio;
+        case 'elvisPresleyBio':
+          return localizations.elvisPresleyBio;
+        case 'winstonChurchillBio':
+          return localizations.winstonChurchillBio;
+        case 'nikolaTeslaBio':
+          return localizations.nikolaTeslaBio;
+        case 'williamShakespeareBio':
+          return localizations.williamShakespeareBio;
+        case 'juliusCaesarBio':
+          return localizations.juliusCaesarBio;
+        case 'steveJobsBio':
+          return localizations.steveJobsBio;
+        case 'princessDianaBio':
+          return localizations.princessDianaBio;
+        case 'freddieMercuryBio':
+          return localizations.freddieMercuryBio;
+        case 'muhammadAliBio':
+          return localizations.muhammadAliBio;
+        case 'carlSaganBio':
+          return localizations.carlSaganBio;
+        case 'mahatmaGandhiBio':
+          return localizations.mahatmaGandhiBio;
+        case 'vincentVanGoghBio':
+          return localizations.vincentVanGoghBio;
+        case 'leonardoDaVinciBio':
+          return localizations.leonardoDaVinciBio;
+        case 'socratesBio':
+          return localizations.socratesBio;
         default:
           return null;
       }

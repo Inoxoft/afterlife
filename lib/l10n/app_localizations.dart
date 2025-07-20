@@ -15,7 +15,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   static const List<Locale> supportedLocales = [
     Locale('en', ''), // English
@@ -330,6 +331,33 @@ abstract class AppLocalizations {
   String get reaganBio;
   String get turingBio;
   String get monroeBio;
+  String get kobeBryantBio;
+  String get kurtCobainBio;
+  String get nelsonMandelaBio;
+  String get bobMarleyBio;
+  String get bruceLeeBio;
+  String get martinLutherKingJrBio;
+  String get marieCurieBio;
+  String get abrahamLincolnBio;
+  String get cleopatraBio;
+  String get aviciiBio;
+  String get tupacShakurBio;
+  String get davidBowieBio;
+  String get stephenHawkingBio;
+  String get elvisPresleyBio;
+  String get winstonChurchillBio;
+  String get nikolaTeslaBio;
+  String get williamShakespeareBio;
+  String get juliusCaesarBio;
+  String get steveJobsBio;
+  String get princessDianaBio;
+  String get freddieMercuryBio;
+  String get muhammadAliBio;
+  String get carlSaganBio;
+  String get mahatmaGandhiBio;
+  String get vincentVanGoghBio;
+  String get leonardoDaVinciBio;
+  String get socratesBio;
 
   // Date and time strings
   String get created;
@@ -338,13 +366,15 @@ abstract class AppLocalizations {
   String get daysAgo;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) {
-    return AppLocalizations.supportedLocales.any((supportedLocale) => 
-        supportedLocale.languageCode == locale.languageCode);
+    return AppLocalizations.supportedLocales.any(
+      (supportedLocale) => supportedLocale.languageCode == locale.languageCode,
+    );
   }
 
   @override
@@ -377,4 +407,4 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
         return AppLocalizationsEn();
     }
   }
-} 
+}
