@@ -35,16 +35,11 @@ This approach allows for a respectful and engaging way to explore history and th
 
 ## 📱 Screenshots
 
-<<<<<<< afterlife_v0.2
 <p align="center">
   <img src="screen1.jpg" alt="Historical Figures Screen" width="250" style="margin-right: 10px"/>
   <img src="screen2.jpg" alt="Create Twin Screen" width="250" style="margin-right: 10px"/>
   <img src="screen3.jpg" alt="Chat Interface" width="250"/>
 </p>
-=======
-here I'll place gifs from mobile and tablet 
-
->>>>>>> main
 
 ## 🌟 Features
 
