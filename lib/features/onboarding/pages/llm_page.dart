@@ -1,13 +1,22 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:math' show pi, cos, sin;
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 
-class LLMPage extends StatelessWidget {
+class LLMPage extends StatefulWidget {
   final AnimationController animationController;
 
   const LLMPage({Key? key, required this.animationController})
     : super(key: key);
+
+  @override
+  State<LLMPage> createState() => _LLMPageState();
+}
+
+class _LLMPageState extends State<LLMPage> {
+  // Track selected LLM option (0 = OpenRouter Models, 1 = Local LLMs)
+  // int _selectedOption = 0; // Removed as per request
 
   @override
   Widget build(BuildContext context) {
@@ -17,14 +26,14 @@ class LLMPage extends StatelessWidget {
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
-        parent: animationController,
+        parent: widget.animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
       ),
     );
 
     final imageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: animationController,
+        parent: widget.animationController,
         curve: const Interval(0.1, 0.7, curve: Curves.easeOutCubic),
       ),
     );
@@ -34,392 +43,463 @@ class LLMPage extends StatelessWidget {
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
-        parent: animationController,
+        parent: widget.animationController,
         curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
       ),
     );
 
+    // Determine which LLM to highlight based on selected option
+    // final bool highlightAdvancedLLM = _selectedOption == 0; // OpenRouter = Advanced
+    // final bool highlightBasicLLM = _selectedOption == 1; // Local = Basic
+    // Always highlight Advanced LLM and de-emphasize Basic LLM
+    const bool highlightAdvancedLLM = true;
+    const bool highlightBasicLLM = false;
+
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Title with animation
-            SlideTransition(
-              position: titleAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animationController,
-                  curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      'LANGUAGE MODELS',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3.0,
-                        color: AppTheme.silverMist,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Choose the right brain for your digital twins',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // LLM comparison visualization
-            FadeTransition(
-              opacity: imageAnimation,
-              child: ScaleTransition(
-                scale: imageAnimation,
-                child: Container(
-                  height: 280,
-                  child: Stack(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Title with animation
+              SlideTransition(
+                position: titleAnimation,
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: widget.animationController,
+                    curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Left side - Basic LLM
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        height: 280,
-                        child: Column(
-                          children: [
-                            Text(
-                              'BASIC LLM',
-                              style: GoogleFonts.cinzel(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.silverMist.withOpacity(0.8),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Simple neuron visualization
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppTheme.midnightPurple.withOpacity(0.5),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.cosmicBlack.withOpacity(
-                                      0.3,
-                                    ),
-                                    blurRadius: 8,
-                                    spreadRadius: 0,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: CustomPaint(
-                                painter: SimpleNeuronPainter(),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Limited Knowledge',
-                              style: GoogleFonts.lato(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w300,
-                                color: AppTheme.silverMist.withOpacity(0.7),
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.midnightPurple.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'E = ?',
-                                style: GoogleFonts.lato(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppTheme.silverMist.withOpacity(0.6),
-                                ),
-                              ),
+                      Text(
+                        AppLocalizations.of(context)!.theMindBehindTwins,
+                        textAlign: TextAlign.center,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text:
+                              AppLocalizations.of(context)!.theMindBehindTwins,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 3.0,
+                          color: AppTheme.silverMist,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 10.0,
+                              color: AppTheme.warmGold.withValues(alpha: 0.8),
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
                       ),
-
-                      // Right side - Advanced LLM
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        height: 280,
-                        child: Column(
-                          children: [
-                            Text(
-                              'ADVANCED LLM',
-                              style: GoogleFonts.cinzel(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.warmGold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Complex neuron visualization
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppTheme.midnightPurple.withOpacity(0.5),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.cosmicBlack.withOpacity(
-                                      0.3,
-                                    ),
-                                    blurRadius: 8,
-                                    spreadRadius: 0,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: CustomPaint(
-                                painter: ComplexNeuronPainter(),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Deep Expertise',
-                              style: GoogleFonts.lato(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w300,
-                                color: AppTheme.warmGold,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.midnightPurple.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'E = mc²',
-                                style: GoogleFonts.lato(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppTheme.warmGold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Center connecting line
-                      Positioned.fill(
-                        child: Center(
-                          child: Container(
-                            width: 2,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  AppTheme.silverMist.withOpacity(0.2),
-                                  AppTheme.warmGold.withOpacity(0.7),
-                                ],
-                              ),
-                            ),
-                          ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.poweredByAdvancedLanguageModels,
+                        textAlign: TextAlign.center,
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text:
+                              AppLocalizations.of(
+                                context,
+                              )!.poweredByAdvancedLanguageModels,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w300,
+                          color: AppTheme.silverMist.withValues(alpha: 0.9),
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-            // LLM options explanation with animation
-            SlideTransition(
-              position: contentAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animationController,
-                  curve: const Interval(0.3, 1.0),
-                ),
-                child: Column(
-                  children: [
-                    _buildModelOptionCard(
-                      'OpenRouter Models',
-                      'Access powerful cloud-based models like Claude, GPT-4, and others. Best for complex conversations and deep expertise.',
-                      'RECOMMENDED',
-                    ),
-                    const SizedBox(height: 10),
-                    _buildModelOptionCard(
-                      'Local LLMs',
-                      'Run AI models directly on your device. More private but may have limited capabilities depending on your hardware.',
-                      null,
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Note: Einstein with a basic model might struggle with complex physics, while Einstein with an advanced model could explain relativity in detail!',
-                      style: GoogleFonts.lato(
-                        color: AppTheme.silverMist.withOpacity(0.7),
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        height: 1.3,
+              // Main explanation
+              SlideTransition(
+                position: contentAnimation,
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: widget.animationController,
+                    curve: const Interval(0.3, 1.0),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                        width: 1,
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Row(
+                    child: Column(
                       children: [
-                        Icon(
-                          Icons.settings,
-                          color: AppTheme.warmGold,
-                          size: 18,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.psychology,
+                              color: AppTheme.warmGold,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context)!.howItWorks,
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text:
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.howItWorks,
+                                    color: AppTheme.warmGold,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(height: 16),
                         Text(
-                          'You can change LLM settings anytime',
-                          style: GoogleFonts.lato(
+                          AppLocalizations.of(context)!.twinsPoweredByAI,
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text:
+                                AppLocalizations.of(context)!.twinsPoweredByAI,
                             color: AppTheme.silverMist,
                             fontSize: 14,
+                            height: 1.4,
                           ),
                         ),
                       ],
                     ),
-                    // Add bottom spacing for button
-                    const SizedBox(height: 24),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 20),
+
+              // LLM comparison visualization
+              SlideTransition(
+                position: contentAnimation,
+                child: FadeTransition(
+                  opacity: imageAnimation,
+                  child: ScaleTransition(
+                    scale: imageAnimation,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxWidth = constraints.maxWidth;
+                        final visualHeight = maxWidth * 0.4;
+                        return SizedBox(
+                          height: visualHeight,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Left side - Basic LLM
+                              Positioned(
+                                left: 0,
+                                child: SizedBox(
+                                  width: maxWidth * 0.45,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!.basicLLM,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.basicLLM,
+                                              fontSize: maxWidth * 0.035,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppTheme.silverMist
+                                                  .withValues(alpha: 0.8),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      SizedBox(
+                                        width: maxWidth * 0.22,
+                                        height: maxWidth * 0.22,
+                                        child: CustomPaint(
+                                          painter: SimpleNeuronPainter(
+                                            highlighted: false,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.limitedKnowledge,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.latoWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.limitedKnowledge,
+                                              fontSize: maxWidth * 0.03,
+                                              fontWeight: FontWeight.w300,
+                                              color: AppTheme.silverMist
+                                                  .withValues(alpha: 0.7),
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Right side - Advanced LLM
+                              Positioned(
+                                right: 0,
+                                child: SizedBox(
+                                  width: maxWidth * 0.45,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.advancedLLM,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.advancedLLM,
+                                              fontSize: maxWidth * 0.035,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppTheme.warmGold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      SizedBox(
+                                        width: maxWidth * 0.22,
+                                        height: maxWidth * 0.22,
+                                        child: CustomPaint(
+                                          painter: ComplexNeuronPainter(
+                                            highlighted: true,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.deepKnowledge,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            UkrainianFontUtils.latoWithUkrainianSupport(
+                                              text:
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.deepKnowledge,
+                                              fontSize: maxWidth * 0.03,
+                                              fontWeight: FontWeight.w300,
+                                              color: AppTheme.warmGold,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Center connecting line
+                              Center(
+                                child: Container(
+                                  width: maxWidth * 0.1,
+                                  height: 2,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        AppTheme.silverMist.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        AppTheme.warmGold.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                        AppTheme.silverMist.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Example Scenario
+              SlideTransition(
+                position: contentAnimation,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: AppTheme.warmGold,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            AppLocalizations.of(context)!.exampleInteraction,
+                            style:
+                                UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                  text:
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.exampleInteraction,
+                                  color: AppTheme.warmGold,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.whenDiscussingRelativityWithEinstein,
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text:
+                              AppLocalizations.of(
+                                context,
+                              )!.whenDiscussingRelativityWithEinstein,
+                          color: AppTheme.warmGold,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildExampleBubble(
+                        AppLocalizations.of(context)!.withAdvancedLLMLabel,
+                        AppLocalizations.of(context)!.withAdvancedLLMExample,
+                        true,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildExampleBubble(
+                        AppLocalizations.of(context)!.withBasicLLMLabel,
+                        AppLocalizations.of(context)!.withBasicLLMExample,
+                        false,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildModelOptionCard(
-    String title,
-    String description,
-    String? badge,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      margin: const EdgeInsets.only(bottom: 2),
-      decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.cosmicBlack.withOpacity(0.3),
-            blurRadius: 8,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
+  Widget _buildModelTile(String name, String description, IconData icon) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.midnightPurple.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
+          child: Icon(icon, color: AppTheme.warmGold, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                  text: name,
+                  color: AppTheme.warmGold,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: description,
+                  color: AppTheme.silverMist,
+                  fontSize: 13,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExampleBubble(String title, String content, bool isAdvanced) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              isAdvanced
+                  ? AppTheme.warmGold.withValues(alpha: 0.3)
+                  : AppTheme.silverMist.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.warmGold.withOpacity(0.2),
-                  blurRadius: 5,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Icon(
-              title.contains('OpenRouter') ? Icons.cloud : Icons.phone_android,
-              color: AppTheme.warmGold,
-              size: 24,
+          Text(
+            title,
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: title,
+              color: isAdvanced ? AppTheme.warmGold : AppTheme.silverMist,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.cinzel(
-                        color: AppTheme.silverMist,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (badge != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          badge,
-                          style: GoogleFonts.lato(
-                            color: AppTheme.warmGold,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  description,
-                  style: GoogleFonts.lato(
-                    color: AppTheme.silverMist.withOpacity(0.8),
-                    fontSize: 14,
-                    height: 1.3,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 4),
+          Text(
+            content,
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: content,
+              color:
+                  isAdvanced
+                      ? AppTheme.silverMist
+                      : AppTheme.silverMist.withValues(alpha: 0.7),
+              fontSize: 13,
+              height: 1.3,
             ),
           ),
         ],
@@ -430,17 +510,27 @@ class LLMPage extends StatelessWidget {
 
 // Paint a simple neuron network
 class SimpleNeuronPainter extends CustomPainter {
+  final bool highlighted;
+
+  SimpleNeuronPainter({this.highlighted = false});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = AppTheme.silverMist.withOpacity(0.3)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.6)
+                  : AppTheme.silverMist.withValues(alpha: 0.3)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
     final dotPaint =
         Paint()
-          ..color = AppTheme.silverMist.withOpacity(0.5)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.8)
+                  : AppTheme.silverMist.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     // Draw a few simple connections
@@ -463,25 +553,48 @@ class SimpleNeuronPainter extends CustomPainter {
 
     // Draw center node
     canvas.drawCircle(center, 5, dotPaint);
+
+    // Add glow effect if highlighted
+    if (highlighted) {
+      canvas.drawCircle(
+        center,
+        25,
+        Paint()
+          ..color = AppTheme.warmGold.withValues(alpha: 0.1)
+          ..style = PaintingStyle.fill,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate is SimpleNeuronPainter &&
+      oldDelegate.highlighted != highlighted;
 }
 
 // Paint a complex neuron network
 class ComplexNeuronPainter extends CustomPainter {
+  final bool highlighted;
+
+  ComplexNeuronPainter({this.highlighted = true});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.6)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.6)
+                  : AppTheme.silverMist.withValues(alpha: 0.3)
           ..strokeWidth = 1.0
           ..style = PaintingStyle.stroke;
 
     final dotPaint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.8)
+          ..color =
+              highlighted
+                  ? AppTheme.warmGold.withValues(alpha: 0.8)
+                  : AppTheme.silverMist.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     // Draw many connections in a more complex pattern
@@ -515,15 +628,19 @@ class ComplexNeuronPainter extends CustomPainter {
     canvas.drawCircle(center, 5, dotPaint);
 
     // Add some glowing effect
-    canvas.drawCircle(
-      center,
-      25,
-      Paint()
-        ..color = AppTheme.warmGold.withOpacity(0.1)
-        ..style = PaintingStyle.fill,
-    );
+    if (highlighted) {
+      canvas.drawCircle(
+        center,
+        25,
+        Paint()
+          ..color = AppTheme.warmGold.withValues(alpha: 0.1)
+          ..style = PaintingStyle.fill,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate is ComplexNeuronPainter &&
+      oldDelegate.highlighted != highlighted;
 }

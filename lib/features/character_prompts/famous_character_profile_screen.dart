@@ -1,10 +1,12 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 import 'famous_character_prompts.dart';
 import 'famous_character_chat_screen.dart';
 import '../character_gallery/character_gallery_screen.dart';
-import 'dart:math';
+import '../../l10n/app_localizations.dart';
+import 'package:afterlife/features/widgets/background_painters.dart';
 
 class FamousCharacterProfileScreen extends StatefulWidget {
   final String name;
@@ -58,14 +60,15 @@ class _FamousCharacterProfileScreenState
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final shortBio =
-        FamousCharacterPrompts.getShortBio(widget.name) ??
-        'No biography available.';
+        FamousCharacterPrompts.getShortBio(context, widget.name) ??
+        localizations.noBiographyAvailable;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundStart,
-        title: Text('${widget.name}\'s Profile'),
+        title: Text(localizations.profileOf.replaceAll('{name}', widget.name)),
         elevation: 0,
       ),
       body: Container(
@@ -81,12 +84,12 @@ class _FamousCharacterProfileScreenState
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.cosmicBlack.withOpacity(0.3),
+                      color: AppTheme.cosmicBlack.withValues(alpha: 0.3),
                       blurRadius: 10,
                       spreadRadius: 1,
                       offset: const Offset(0, 4),
@@ -134,7 +137,7 @@ class _FamousCharacterProfileScreenState
                               center: Alignment.topCenter,
                               radius: 0.8,
                               colors: [
-                                AppTheme.warmGold.withOpacity(0.3),
+                                AppTheme.warmGold.withValues(alpha: 0.3),
                                 Colors.transparent,
                               ],
                             ),
@@ -150,7 +153,7 @@ class _FamousCharacterProfileScreenState
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.warmGold.withOpacity(0.2),
+                                color: AppTheme.warmGold.withValues(alpha: 0.2),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               ),
@@ -169,7 +172,7 @@ class _FamousCharacterProfileScreenState
                                         boxShadow: [
                                           BoxShadow(
                                             color: AppTheme.warmGold
-                                                .withOpacity(0.1),
+                                                .withValues(alpha: 0.1),
                                             blurRadius: 10,
                                             spreadRadius: 2,
                                           ),
@@ -184,7 +187,7 @@ class _FamousCharacterProfileScreenState
                                   : Center(
                                     child: Icon(
                                       Icons.face,
-                                      color: AppTheme.warmGold.withOpacity(0.5),
+                                      color: AppTheme.warmGold.withValues(alpha: 0.5),
                                       size: 80,
                                     ),
                                   ),
@@ -203,7 +206,7 @@ class _FamousCharacterProfileScreenState
                               center: Alignment.center,
                               radius: 0.5,
                               colors: [
-                                AppTheme.warmGold.withOpacity(0.05),
+                                AppTheme.warmGold.withValues(alpha: 0.05),
                                 Colors.transparent,
                               ],
                             ),
@@ -236,16 +239,17 @@ class _FamousCharacterProfileScreenState
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.deepNavy.withOpacity(0.7),
+                            color: AppTheme.deepNavy.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppTheme.warmGold.withOpacity(0.4),
+                              color: AppTheme.warmGold.withValues(alpha: 0.4),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             widget.profession,
-                            style: GoogleFonts.cinzel(
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: widget.profession,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.warmGold,
@@ -264,10 +268,10 @@ class _FamousCharacterProfileScreenState
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -305,7 +309,7 @@ class _FamousCharacterProfileScreenState
                   color: Colors.black26,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -313,14 +317,13 @@ class _FamousCharacterProfileScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Biography',
-                      style: GoogleFonts.cinzel(
-                        textStyle: TextStyle(
-                          color: AppTheme.warmGold,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                        ),
+                      localizations.biography,
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: localizations.biography,
+                        color: AppTheme.warmGold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -346,7 +349,7 @@ class _FamousCharacterProfileScreenState
                   color: Colors.black26,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -354,14 +357,13 @@ class _FamousCharacterProfileScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AI MODEL',
-                      style: GoogleFonts.cinzel(
-                        textStyle: TextStyle(
-                          color: AppTheme.warmGold,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                        ),
+                      localizations.aiModel,
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: localizations.aiModel,
+                        color: AppTheme.warmGold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -373,9 +375,9 @@ class _FamousCharacterProfileScreenState
                       onTap: () {
                         // This will be implemented later
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'This feature will be available soon',
+                              localizations.featureAvailableSoon,
                             ),
                             duration: Duration(seconds: 2),
                           ),
@@ -391,7 +393,7 @@ class _FamousCharacterProfileScreenState
                           color: Colors.black12,
                           border: Border(
                             top: BorderSide(
-                              color: AppTheme.warmGold.withOpacity(0.3),
+                              color: AppTheme.warmGold.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -403,7 +405,7 @@ class _FamousCharacterProfileScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'View all available models',
+                                  localizations.viewAllAvailableModels,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -411,7 +413,7 @@ class _FamousCharacterProfileScreenState
                                   ),
                                 ),
                                 Text(
-                                  'Explore more AI options',
+                                  localizations.exploreMoreAiOptions,
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 13,
@@ -443,7 +445,7 @@ class _FamousCharacterProfileScreenState
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.warmGold.withOpacity(0.4),
+                        color: AppTheme.warmGold.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 1,
                       ),
@@ -452,13 +454,13 @@ class _FamousCharacterProfileScreenState
                   child: ElevatedButton.icon(
                     onPressed: () => _navigateToChat(context),
                     icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                    label: const Padding(
+                    label: Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
                       ),
                       child: Text(
-                        'Start Conversation',
+                        localizations.startConversation,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -489,13 +491,31 @@ class _FamousCharacterProfileScreenState
     required String label,
     required String value,
   }) {
+    final localizations = AppLocalizations.of(context);
+    
+    // Get localized label
+    String localizedLabel;
+    switch (label) {
+      case 'Name':
+        localizedLabel = localizations.name;
+        break;
+      case 'Years':
+        localizedLabel = localizations.years;
+        break;
+      case 'Profession':
+        localizedLabel = localizations.profession;
+        break;
+      default:
+        localizedLabel = label;
+    }
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: 100,
           child: Text(
-            label,
+            localizedLabel,
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ),
@@ -535,36 +555,41 @@ class _FamousCharacterProfileScreenState
         ...models
             .map(
               (model) => _buildModelOption(
+                context: context,
                 id: model['id'] as String,
                 name: model['name'] as String,
                 description: model['description'] as String,
                 isRecommended: model['recommended'] == true,
+                isLocal: model['isLocal'] == true,
                 isSelected: _selectedModel == model['id'],
               ),
-            )
-            .toList(),
+            ),
       ],
     );
   }
 
   Widget _buildModelOption({
+    required BuildContext context,
     required String id,
     required String name,
     required String description,
     required bool isRecommended,
+    bool isLocal = false,
     required bool isSelected,
   }) {
+    final localizations = AppLocalizations.of(context);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color:
-            isSelected ? AppTheme.deepIndigo.withOpacity(0.7) : Colors.black12,
+            isSelected ? AppTheme.deepIndigo.withValues(alpha: 0.7) : Colors.black12,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color:
               isSelected
-                  ? AppTheme.warmGold.withOpacity(0.7)
-                  : AppTheme.warmGold.withOpacity(0.2),
+                  ? AppTheme.warmGold.withValues(alpha: 0.7)
+                  : AppTheme.warmGold.withValues(alpha: 0.2),
           width: isSelected ? 1.5 : 1,
         ),
       ),
@@ -572,6 +597,7 @@ class _FamousCharacterProfileScreenState
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            final localizations = AppLocalizations.of(context);
             setState(() {
               _selectedModel = id;
               FamousCharacterPrompts.setSelectedModel(widget.name, id);
@@ -579,7 +605,7 @@ class _FamousCharacterProfileScreenState
             // Show a confirmation to the user
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('AI model updated for ${widget.name}'),
+                content: Text(localizations.aiModelUpdatedForCharacter(widget.name)),
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -596,19 +622,19 @@ class _FamousCharacterProfileScreenState
                     shape: BoxShape.circle,
                     color:
                         isSelected
-                            ? AppTheme.warmGold.withOpacity(0.2)
+                            ? AppTheme.warmGold.withValues(alpha: 0.2)
                             : Colors.black26,
                     border: Border.all(
                       color:
                           isSelected
                               ? AppTheme.warmGold
-                              : AppTheme.warmGold.withOpacity(0.3),
+                              : AppTheme.warmGold.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                   ),
                   child: Icon(
-                    isSelected ? Icons.check : Icons.psychology_outlined,
-                    color: AppTheme.warmGold,
+                    isSelected ? Icons.check : (isLocal ? Icons.phone_android : Icons.psychology_outlined),
+                    color: isLocal ? Colors.blue : AppTheme.warmGold,
                     size: 16,
                   ),
                 ),
@@ -635,13 +661,34 @@ class _FamousCharacterProfileScreenState
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.warmGold.withOpacity(0.2),
+                                color: AppTheme.warmGold.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                'RECOMMENDED',
+                                localizations.recommended,
                                 style: TextStyle(
                                   color: AppTheme.warmGold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          if (isLocal)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              margin: const EdgeInsets.only(left: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                localizations.private,
+                                style: TextStyle(
+                                  color: Colors.blue,
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.5,

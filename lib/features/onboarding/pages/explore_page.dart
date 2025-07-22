@@ -1,16 +1,18 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:math' show pi, cos, sin, atan2, sqrt;
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
 
 class ExplorePage extends StatelessWidget {
   final AnimationController animationController;
 
-  const ExplorePage({Key? key, required this.animationController})
-    : super(key: key);
+  const ExplorePage({super.key, required this.animationController});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),
@@ -39,16 +41,6 @@ class ExplorePage extends StatelessWidget {
       ),
     );
 
-    final developerTwinAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: animationController,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
-      ),
-    );
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -67,8 +59,9 @@ class ExplorePage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      'DIVERSE PERSPECTIVES',
-                      style: GoogleFonts.cinzel(
+                      l10n.diversePerspectives,
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: l10n.diversePerspectives,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -76,7 +69,7 @@ class ExplorePage extends StatelessWidget {
                         shadows: [
                           Shadow(
                             blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
+                            color: AppTheme.warmGold.withValues(alpha: 0.8),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -84,12 +77,13 @@ class ExplorePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'From politics to art, history comes alive',
+                      l10n.fromPoliticsToArt,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: l10n.fromPoliticsToArt,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
+                        color: AppTheme.silverMist.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -105,7 +99,7 @@ class ExplorePage extends StatelessWidget {
               opacity: imageAnimation,
               child: ScaleTransition(
                 scale: imageAnimation,
-                child: Container(
+                child: SizedBox(
                   height: 180,
                   width: double.infinity,
                   child: Image.asset(
@@ -115,7 +109,7 @@ class ExplorePage extends StatelessWidget {
                       return Center(
                         child: Icon(
                           Icons.image_not_supported,
-                          color: AppTheme.silverMist.withOpacity(0.5),
+                          color: AppTheme.silverMist.withValues(alpha: 0.5),
                           size: 40,
                         ),
                       );
@@ -138,11 +132,11 @@ class ExplorePage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    color: AppTheme.midnightPurple.withOpacity(0.4),
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.cosmicBlack.withOpacity(0.3),
+                        color: AppTheme.cosmicBlack.withValues(alpha: 0.3),
                         blurRadius: 8,
                         spreadRadius: 0,
                       ),
@@ -152,17 +146,17 @@ class ExplorePage extends StatelessWidget {
                     children: [
                       _buildTipRow(
                         Icons.history_edu,
-                        'Engage with diverse figures from politics, science, art, and more who shaped our world.',
+                        l10n.engageWithDiverseFigures,
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
                         Icons.psychology_alt,
-                        'Remember that these are simulations based on available data - responses represent our best attempt at historical accuracy.',
+                        l10n.rememberSimulations,
                       ),
                       const SizedBox(height: 16),
                       _buildTipRow(
                         Icons.add_circle_outline,
-                        'Create your own digital twins by using the Create button in the bottom navigation.',
+                        l10n.createYourOwnTwins,
                       ),
                     ],
                   ),
@@ -170,119 +164,7 @@ class ExplorePage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 25),
-
-            // Developer twin info with animation
-            SlideTransition(
-              position: developerTwinAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animationController,
-                  curve: const Interval(0.5, 1.0),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppTheme.midnightPurple.withOpacity(0.7),
-                        AppTheme.backgroundStart.withOpacity(0.4),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.warmGold.withOpacity(0.1),
-                        blurRadius: 15,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withOpacity(0.6),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.warmGold.withOpacity(0.15),
-                              blurRadius: 8,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.developer_mode,
-                          color: AppTheme.warmGold,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Questions about Afterlife?',
-                              style: GoogleFonts.cinzel(
-                                color: AppTheme.silverMist,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Chat with the developer\'s digital twin to learn more about the app and how it works.',
-                              style: GoogleFonts.lato(
-                                color: AppTheme.silverMist.withOpacity(0.7),
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () {
-                                // This is just a placeholder button for now
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Developer twin coming soon'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.midnightPurple,
-                                foregroundColor: AppTheme.warmGold,
-                                elevation: 5,
-                                shadowColor: AppTheme.warmGold.withOpacity(0.2),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                'CHAT WITH DEVELOPER TWIN',
-                                style: GoogleFonts.cinzel(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -296,7 +178,7 @@ class ExplorePage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.warmGold.withOpacity(0.15),
+            color: AppTheme.warmGold.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: AppTheme.warmGold, size: 22),
@@ -305,7 +187,8 @@ class ExplorePage extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.lato(
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: text,
               color: AppTheme.silverMist,
               fontSize: 14,
               height: 1.4,

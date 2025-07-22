@@ -1,18 +1,24 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
+
+import '../chat/widgets/chat_message_bubble.dart';
 
 class FamousCharacterChatScreen extends StatefulWidget {
   final String characterName;
   final String? imageUrl;
 
   const FamousCharacterChatScreen({
-    Key? key,
+    super.key,
     required this.characterName,
     this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   State<FamousCharacterChatScreen> createState() =>
@@ -45,6 +51,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     _selectedModel = FamousCharacterPrompts.getSelectedModel(
       widget.characterName,
     );
+
+    // Inject the LanguageProvider
+    final languageProvider = context.read<LanguageProvider>();
+    FamousCharacterService.setLanguageProvider(languageProvider);
+
     _initializeChat();
   }
 
@@ -70,7 +81,6 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error initializing chat: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -99,30 +109,39 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     final message = _messageController.text.trim();
     if (message.isEmpty || _isLoading) return;
 
+    final localizations = AppLocalizations.of(context);
+
     // Clear the input field
     _messageController.clear();
 
-    // Add user message to chat locally for immediate UI update
+    // Add user message to chat history immediately
+    FamousCharacterService.addUserMessage(
+      characterName: widget.characterName,
+      message: message,
+    );
+
+    // Update UI to show user message immediately
     setState(() {
+      _messages = FamousCharacterService.getFormattedChatHistory(
+        widget.characterName,
+      );
       _isLoading = true;
-      _messages.add({
-        'content': message,
-        'isUser': true,
-        'timestamp': DateTime.now().toIso8601String(),
-      });
     });
 
-    // Scroll to the bottom after state update
+    // Scroll to the bottom after adding user message
     _scrollToBottom();
 
     try {
-      // Send the message to the character
+      // Send the message using the simplified service (like regular character chat)
       final response = await FamousCharacterService.sendMessage(
         characterName: widget.characterName,
         message: message,
       );
 
-      // Add AI response to chat history if not null
+      // Add artificial delay to simulate natural conversation flow
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      // Update messages from service (will include the AI response)
       if (response != null) {
         setState(() {
           _messages = FamousCharacterService.getFormattedChatHistory(
@@ -130,13 +149,15 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
           );
         });
       } else {
-        // Handle null response by showing a fallback message
-        final fallbackMessage =
-            "I'm sorry, I couldn't process your message at this time. Please try again later.";
-        _messages.add({
-          'content': fallbackMessage,
-          'isUser': false,
-          'timestamp': DateTime.now().toIso8601String(),
+        // Handle null response by adding a fallback message
+        FamousCharacterService.addAIMessage(
+          characterName: widget.characterName,
+          message: localizations.errorProcessingMessage,
+        );
+        setState(() {
+          _messages = FamousCharacterService.getFormattedChatHistory(
+            widget.characterName,
+          );
         });
       }
     } catch (e) {
@@ -147,11 +168,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       }
 
       // Add error message to chat history
-      _messages.add({
-        'content':
-            "I'm sorry, there was an error processing your message. Please try again.",
-        'isUser': false,
-        'timestamp': DateTime.now().toIso8601String(),
+      FamousCharacterService.addAIMessage(
+        characterName: widget.characterName,
+        message: localizations.errorConnecting,
+      );
+      setState(() {
+        _messages = FamousCharacterService.getFormattedChatHistory(
+          widget.characterName,
+        );
       });
     } finally {
       // Update UI
@@ -166,68 +190,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     }
   }
 
-  void _showClearChatDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Clear Chat History'),
-            content: const Text(
-              'This will delete all messages in this conversation. This action cannot be undone.',
-            ),
-            backgroundColor: AppTheme.deepIndigo,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => _clearChatHistory(context),
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _clearChatHistory(BuildContext context) {
-    // Clear chat history
-    FamousCharacterService.clearChatHistory(widget.characterName);
-    setState(() {
-      _messages = [];
-    });
-
-    // Close the dialog
-    Navigator.pop(context);
-
-    // Show a confirmation
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
-  }
-
-  void _changeModel(String newModel) {
-    setState(() {
-      _selectedModel = newModel;
-      FamousCharacterPrompts.setSelectedModel(widget.characterName, newModel);
-    });
-
-    // Show a confirmation to the user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('AI model updated for ${widget.characterName}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(localizations),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
         child: Stack(
@@ -238,10 +205,10 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
             Column(
               children: [
                 // Chat messages
-                Expanded(child: _buildChatList()),
+                Expanded(child: _buildChatList(localizations)),
 
                 // Input area
-                _buildInputArea(),
+                _buildInputArea(localizations),
               ],
             ),
           ],
@@ -250,18 +217,13 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     );
   }
 
-  // Extract app bar to a separate method for readability and performance
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
     // Get available models
     final models = FamousCharacterPrompts.getModelsForCharacter(
       widget.characterName,
     );
 
-    // Find current model details
-    final selectedModel = models.firstWhere(
-      (model) => model['id'] == _selectedModel,
-      orElse: () => {'name': 'Default Model'},
-    );
+    // Current model information is available via _selectedModel
 
     return AppBar(
       backgroundColor: AppTheme.backgroundStart,
@@ -270,7 +232,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: AppTheme.midnightPurple.withOpacity(0.7),
+            backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.7),
             backgroundImage:
                 widget.imageUrl != null ? AssetImage(widget.imageUrl!) : null,
             child:
@@ -285,7 +247,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                         fontSize: 16,
                         shadows: [
                           Shadow(
-                            color: AppTheme.warmGold.withOpacity(0.5),
+                            color: AppTheme.warmGold.withValues(alpha: 0.5),
                             blurRadius: 2,
                             offset: const Offset(0, 1),
                           ),
@@ -354,8 +316,9 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                                             vertical: 1,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold
-                                                .withOpacity(0.2),
+                                            color: AppTheme.warmGold.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               2,
                                             ),
@@ -393,16 +356,16 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withOpacity(0.5),
+            color: AppTheme.midnightPurple.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: AppTheme.warmGold.withOpacity(0.3),
+              color: AppTheme.warmGold.withValues(alpha: 0.3),
               width: 0.5,
             ),
           ),
           child: IconButton(
             icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
-            tooltip: 'Clear Chat',
+            tooltip: localizations.clearChatHistory,
             onPressed: _showClearChatDialog,
           ),
         ),
@@ -410,8 +373,7 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     );
   }
 
-  // Extract chat list to a separate method for readability and performance
-  Widget _buildChatList() {
+  Widget _buildChatList(AppLocalizations localizations) {
     // If no messages, show a welcome message
     if (_messages.isEmpty) {
       return Center(
@@ -420,23 +382,31 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.chat_bubble_outline,
                 size: 48,
-                color: Colors.white54,
+                color: AppTheme.silverMist.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
-                'Start chatting with ${widget.characterName}',
-                style: const TextStyle(fontSize: 18, color: Colors.white70),
+                localizations.startChattingWith.replaceAll(
+                  '{name}',
+                  widget.characterName,
+                ),
+                style: TextStyle(
+                  fontFamily: 'Lato',
+                  fontSize: 18,
+                  color: AppTheme.silverMist.withValues(alpha: 0.8),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                'Send a message below to begin the conversation',
+                localizations.sendMessageToBegin,
                 style: TextStyle(
+                  fontFamily: 'Lato',
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.5),
+                  color: AppTheme.silverMist.withValues(alpha: 0.5),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -448,265 +418,160 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: _messages.length,
       itemBuilder: (context, index) {
         final message = _messages[index];
-        return _MessageBubble(
-          key: ValueKey('msg_${index}_${message['isUser']}'),
-          message: message['content'] as String,
+        return ChatMessageBubble(
+          text: message['content'] as String,
           isUser: message['isUser'] as bool,
+          showAvatar: true,
+          avatarText:
+              message['isUser'] as bool
+                  ? localizations.you
+                  : widget.characterName[0].toUpperCase(),
+          avatarIcon: message['isUser'] as bool ? Icons.person : null,
         );
       },
     );
   }
 
-  // Extract input area to a separate method for readability and performance
-  Widget _buildInputArea() {
+  Widget _buildInputArea(AppLocalizations localizations) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.deepIndigo.withOpacity(0.7),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, -1),
-            blurRadius: 6.0,
-            spreadRadius: 0.0,
-            color: Colors.black.withOpacity(0.1),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
+            width: 1,
           ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(25.0),
-                  border: Border.all(color: Colors.white10, width: 1),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  focusNode: _inputFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Type your message...',
-                    hintStyle: const TextStyle(color: Colors.white60),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: false,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 14.0,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.chat_bubble_outline,
-                      color: AppTheme.etherealCyan.withOpacity(0.5),
-                      size: 18,
-                    ),
-                  ),
-                  style: const TextStyle(color: Colors.white),
-                  minLines: 1,
-                  maxLines: 5,
-                  onSubmitted:
-                      _isLoading
-                          ? null
-                          : (text) {
-                            if (text.trim().isNotEmpty) {
-                              _sendMessage();
-                            }
-                          },
-                ),
-              ),
-            ),
-            const SizedBox(width: 12.0),
-            _SendButton(
-              isLoading: _isLoading,
-              onPressed:
-                  _isLoading
-                      ? null
-                      : () {
-                        if (_messageController.text.trim().isNotEmpty) {
-                          _sendMessage();
-                        }
-                      },
-            ),
-          ],
         ),
       ),
-    );
-  }
-}
-
-// Extracted as a separate stateless widget for better performance
-class _MessageBubble extends StatelessWidget {
-  final String message;
-  final bool isUser;
-
-  const _MessageBubble({Key? key, required this.message, required this.isUser})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final bubbleColor =
-        isUser
-            ? AppTheme.accentPurple.withOpacity(0.6)
-            : Colors.black.withOpacity(0.4);
-    final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
-
-    // Check if message is very long (over 1000 characters)
-    final bool isVeryLong = message.length > 1000;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // AI avatar (only shown for AI messages)
-          if (!isUser) _buildAvatar(context),
-          if (!isUser) const SizedBox(width: 8),
-
-          // Message bubble
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-                maxHeight:
-                    isVeryLong
-                        ? MediaQuery.of(context).size.height * 0.4
-                        : double.infinity,
-              ),
-              decoration: BoxDecoration(
-                color: bubbleColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft:
-                      isUser
-                          ? const Radius.circular(16)
-                          : const Radius.circular(4),
-                  bottomRight:
-                      isUser
-                          ? const Radius.circular(4)
-                          : const Radius.circular(16),
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              focusNode: _inputFocusNode,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                hintText: localizations.typeMessage,
+                hintStyle: TextStyle(
+                  color: AppTheme.silverMist.withValues(alpha: 0.5),
                 ),
-                border: Border.all(
-                  color:
-                      isUser
-                          ? AppTheme.accentPurple.withOpacity(0.7)
-                          : AppTheme.etherealCyan.withOpacity(0.5),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                   ),
-                ],
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide(color: AppTheme.warmGold),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child:
-                  isVeryLong
-                      ? SingleChildScrollView(child: _buildMessageText())
-                      : _buildMessageText(),
+              onSubmitted: (_) => _sendMessage(),
             ),
           ),
-
-          // User avatar (only shown for user messages)
-          if (isUser) const SizedBox(width: 8),
-          if (isUser) _buildAvatar(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(BuildContext context) {
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor:
-          isUser
-              ? AppTheme.accentPurple.withOpacity(0.8)
-              : AppTheme.etherealCyan.withOpacity(0.8),
-      child: Text(
-        isUser ? 'You' : 'AI',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
-        ),
-      ),
-    );
-  }
-
-  // Extracted method to build the message text with proper styling
-  Widget _buildMessageText() {
-    return Text(
-      message,
-      style: const TextStyle(
-        color: Colors.white,
-        height: 1.4, // Improve line spacing
-      ),
-      softWrap: true, // Ensure text wraps properly
-      textWidthBasis:
-          TextWidthBasis.longestLine, // Better handling of long content
-    );
-  }
-}
-
-// Extracted as a separate stateless widget for better performance
-class _SendButton extends StatelessWidget {
-  final bool isLoading;
-  final VoidCallback? onPressed;
-
-  const _SendButton({Key? key, required this.isLoading, this.onPressed})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color:
-            isLoading
-                ? AppTheme.etherealCyan.withOpacity(0.3)
-                : AppTheme.etherealCyan,
-        shape: BoxShape.circle,
-        boxShadow: [
-          if (!isLoading)
-            BoxShadow(
-              color: AppTheme.etherealCyan.withOpacity(0.3),
-              blurRadius: 8,
-              spreadRadius: 1,
+          const SizedBox(width: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.warmGold,
+              borderRadius: BorderRadius.circular(25),
             ),
+            child: IconButton(
+              icon:
+                  _isLoading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.midnightPurple,
+                          ),
+                        ),
+                      )
+                      : const Icon(Icons.send),
+              color: AppTheme.midnightPurple,
+              onPressed: _isLoading ? null : _sendMessage,
+            ),
+          ),
         ],
       ),
-      child: IconButton(
-        icon: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return ScaleTransition(scale: animation, child: child);
-          },
-          child:
-              isLoading
-                  ? const Icon(
-                    Icons.hourglass_top,
-                    key: ValueKey('loading'),
-                    color: Colors.white60,
-                  )
-                  : const Icon(
-                    Icons.send,
-                    key: ValueKey('send'),
-                    color: Colors.black87,
-                  ),
-        ),
-        onPressed: onPressed,
+    );
+  }
+
+  void _changeModel(String newModel) {
+    setState(() {
+      _selectedModel = newModel;
+      // Use the new simplified service method
+      FamousCharacterService.updateCharacterModel(
+        widget.characterName,
+        newModel,
+      );
+    });
+
+    // Show a confirmation to the user
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('AI model updated for ${widget.characterName}'),
+        duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  void _showClearChatDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(localizations.clearChatHistoryTitle),
+            content: Text(localizations.clearChatHistoryConfirm),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(localizations.cancel),
+              ),
+              TextButton(
+                onPressed: () => _clearChatHistory(context),
+                child: Text(localizations.clear),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _clearChatHistory(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    // Clear chat history using simplified service
+    FamousCharacterService.clearChatHistory(widget.characterName);
+    setState(() {
+      _messages = [];
+    });
+
+    // Close the dialog
+    Navigator.pop(context);
+
+    // Show a confirmation
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(localizations.chatHistoryCleared)));
   }
 }

@@ -1,12 +1,16 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../core/services/onboarding_service.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import 'pages/mask_page.dart';
 import 'pages/llm_page.dart';
+import 'pages/setup_guide_page.dart';
 import 'pages/explore_page.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
+import 'pages/language_page.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -38,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _navigateToNextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < 4) {
       _animationController.reset();
       setState(() {
         _currentPage++;
@@ -46,11 +50,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       });
       _animationController.forward();
     } else {
-      // Navigate to main app on last page
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const CharacterGalleryScreen()),
-      );
+      // Mark onboarding as complete and navigate to main app
+      _completeOnboarding();
     }
+  }
+
+  Future<void> _completeOnboarding() async {
+    // Mark onboarding as complete
+    await OnboardingService.markOnboardingComplete();
+
+    if (!mounted) return;
+
+    // Navigate to main app
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const CharacterGalleryScreen()),
+    );
   }
 
   void _navigateToPreviousPage() {
@@ -67,10 +81,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _getPage() {
     switch (_currentPage) {
       case 0:
-        return MaskPage(animationController: _animationController);
+        return const LanguagePage();
       case 1:
-        return LLMPage(animationController: _animationController);
+        return MaskPage(animationController: _animationController);
       case 2:
+        return LLMPage(animationController: _animationController);
+      case 3:
+        return SetupGuidePage(animationController: _animationController);
+      case 4:
         return ExplorePage(animationController: _animationController);
       default:
         return Container();
@@ -79,6 +97,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
@@ -164,8 +184,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ),
                         ),
                         child: Text(
-                          "BACK",
-                          style: GoogleFonts.cinzel(
+                          localizations.backButton,
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: localizations.backButton,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.0,
@@ -179,7 +200,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     // Page indicators
                     Row(
                       children: List.generate(
-                        3,
+                        5,
                         (index) => Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           width: 10,
@@ -189,7 +210,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             color:
                                 _currentPage == index
                                     ? AppTheme.warmGold
-                                    : AppTheme.warmGold.withOpacity(0.3),
+                                    : AppTheme.warmGold.withValues(alpha: 0.3),
                           ),
                         ),
                       ),
@@ -211,11 +232,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           borderRadius: BorderRadius.circular(30),
                         ),
                         elevation: 5,
-                        shadowColor: AppTheme.warmGold.withOpacity(0.5),
+                        shadowColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                       child: Text(
-                        _currentPage == 2 ? "BEGIN" : "NEXT",
-                        style: GoogleFonts.cinzel(
+                        _currentPage == 4
+                            ? localizations.getStarted
+                            : localizations.nextButton,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text:
+                              _currentPage == 4
+                                  ? localizations.getStarted
+                                  : localizations.nextButton,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.0,

@@ -1,15 +1,21 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_theme.dart';
-import '../providers/characters_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
+import '../../../core/services/onboarding_service.dart';
+import '../providers/characters_provider.dart';
+import '../providers/language_provider.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/env_config.dart';
+import '../../../core/widgets/api_key_input_dialog.dart';
 import 'themed_icon.dart';
-import '../../core/widgets/api_key_input_dialog.dart';
-import '../../core/utils/env_config.dart';
 import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
-import '../character_interview/chat_service.dart' as character_interview;
+import '../character_interview/chat_service.dart' as interview_chat;
+
+import 'local_llm_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -19,57 +25,22 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkModeEnabled = true;
-  bool _isNotificationsEnabled = true;
-  bool _isAnimationsEnabled = true;
-  double _chatFontSize = 15.0;
-
-  // We'll use these keys for shared preferences
-  static const String _darkModeKey = 'dark_mode_enabled';
-  static const String _notificationsKey = 'notifications_enabled';
-  static const String _animationsKey = 'animations_enabled';
-  static const String _fontSizeKey = 'chat_font_size';
+  // Remove the _chatFontSize variable and _fontSizeKey
+  // Remove all code related to chat font size loading, saving, and UI
+  // Remove the _buildSettingCard for chatFontSize
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    // Remove the _loadSettings() call
   }
 
-  Future<void> _loadSettings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _isDarkModeEnabled = prefs.getBool(_darkModeKey) ?? true;
-        _isNotificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
-        _isAnimationsEnabled = prefs.getBool(_animationsKey) ?? true;
-        _chatFontSize = prefs.getDouble(_fontSizeKey) ?? 15.0;
-      });
-    } catch (e) {
-      print('Error loading settings: $e');
-    }
-  }
-
-  Future<void> _saveSettings() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_darkModeKey, _isDarkModeEnabled);
-      await prefs.setBool(_notificationsKey, _isNotificationsEnabled);
-      await prefs.setBool(_animationsKey, _isAnimationsEnabled);
-      await prefs.setDouble(_fontSizeKey, _chatFontSize);
-    } catch (e) {
-      print('Error saving settings: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save settings: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  // Remove the _loadSettings() function
+  // Remove the _saveSettings() function
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
@@ -91,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           color: Colors.black26,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.warmGold.withOpacity(0.3),
+                            color: AppTheme.warmGold.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -109,12 +80,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Settings',
+                            localizations.settings,
                             style: AppTheme.titleStyle.copyWith(fontSize: 28),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Customize your Afterlife experience',
+                            localizations.settingsDescription,
                             style: AppTheme.captionStyle,
                           ),
                         ],
@@ -129,142 +100,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     // Appearance section
-                    _buildSectionHeader('Appearance'),
-                    _buildSettingCard(
-                      title: 'Dark Mode',
-                      subtitle:
-                          'Enhance your viewing experience in low light conditions(soon)',
-                      icon: Icons.dark_mode,
-                      trailing: Switch(
-                        value: _isDarkModeEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isDarkModeEnabled = value;
-                          });
-                          _saveSettings();
-                        },
-                        activeColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withOpacity(0.5),
-                      ),
-                    ),
+                    _buildSectionHeader(localizations.appearance),
 
-                    _buildSettingCard(
-                      title: 'Chat Font Size',
-                      subtitle: 'Adjust the text size in chat conversations',
-                      icon: Icons.text_fields,
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${_chatFontSize.toInt()}',
-                            style: TextStyle(
-                              color: AppTheme.silverMist,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    // Language selection
+                    Consumer<LanguageProvider>(
+                      builder: (context, languageProvider, child) {
+                        return _buildSettingCard(
+                          title: localizations.language,
+                          subtitle: localizations.languageDescription,
+                          icon: Icons.language,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                languageProvider.currentLanguageName,
+                                style: TextStyle(
+                                  color: AppTheme.silverMist,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                color: AppTheme.silverMist,
+                                size: 16,
+                              ),
+                            ],
                           ),
-                          SizedBox(
-                            width: 150,
-                            child: Slider(
-                              value: _chatFontSize,
-                              min: 12.0,
-                              max: 20.0,
-                              divisions: 8,
-                              activeColor: AppTheme.warmGold,
-                              inactiveColor: AppTheme.warmGold.withOpacity(0.3),
-                              onChanged: (value) {
-                                setState(() {
-                                  _chatFontSize = value;
-                                });
-                              },
-                              onChangeEnd: (value) {
-                                _saveSettings();
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                          onTap: () => _showLanguageSelectionDialog(context),
+                        );
+                      },
                     ),
 
-                    _buildSettingCard(
-                      title: 'Enable Animations',
-                      subtitle:
-                          'Toggle interface animations and visual effects',
-                      icon: Icons.animation,
-                      trailing: Switch(
-                        value: _isAnimationsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAnimationsEnabled = value;
-                          });
-                          _saveSettings();
-                        },
-                        activeColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withOpacity(0.5),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Notifications section
-                    _buildSectionHeader('Notifications'),
-                    _buildSettingCard(
-                      title: 'Enable Notifications',
-                      subtitle:
-                          'Get notified when your digital twins want to chat',
-                      icon: Icons.notifications,
-                      trailing: Switch(
-                        value: _isNotificationsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isNotificationsEnabled = value;
-                          });
-                          _saveSettings();
-                        },
-                        activeColor: AppTheme.warmGold,
-                        activeTrackColor: AppTheme.warmGold.withOpacity(0.5),
-                      ),
-                    ),
-
+                    // Remove the _buildSettingCard for chatFontSize
                     const SizedBox(height: 16),
 
                     // Data management section
-                    _buildSectionHeader('Data Management'),
-                    _buildSettingCard(
-                      title: 'Export All Characters',
-                      subtitle: 'Save your digital twins to a file',
-                      icon: Icons.download,
-                      onTap: () => _exportAllCharacters(context),
-                    ),
+                    _buildSectionHeader(localizations.dataManagement),
 
                     _buildSettingCard(
-                      title: 'Clear All Data',
-                      subtitle:
-                          'Delete all characters and reset app (caution: cannot be undone)',
+                      title: localizations.clearAllData,
+                      subtitle: localizations.clearAllDataDescription,
                       icon: Icons.delete_forever,
                       iconColor: Colors.redAccent,
                       onTap: () => _showClearDataDialog(context),
                     ),
 
+                    _buildSettingCard(
+                      title: 'Reset Onboarding',
+                      subtitle:
+                          'Show the onboarding tutorial again on next app start',
+                      icon: Icons.refresh,
+                      iconColor: Colors.orangeAccent,
+                      onTap: () => _showResetOnboardingDialog(context),
+                    ),
+
                     const SizedBox(height: 16),
 
                     // About section
-                    _buildSectionHeader('About'),
+                    _buildSectionHeader(localizations.about),
                     _buildSettingCard(
-                      title: 'App Version',
+                      title: localizations.appVersion,
                       subtitle: 'Afterlife v1.0.0',
                       icon: Icons.info_outline,
                     ),
 
                     _buildSettingCard(
-                      title: 'Privacy Policy',
-                      subtitle: 'Read how your data is used and protected',
+                      title: localizations.privacyPolicy,
+                      subtitle: localizations.privacyPolicyDescription,
                       icon: Icons.privacy_tip_outlined,
                       onTap: () {
                         // Open privacy policy
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Privacy Policy not available in this version',
+                              localizations.privacyPolicyNotAvailable,
                             ),
                             backgroundColor: AppTheme.deepIndigo,
                           ),
@@ -275,26 +185,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
 
                     // API & Connectivity section
-                    _buildSectionHeader('API & Connectivity'),
+                    _buildSectionHeader(localizations.apiConnectivity),
                     _buildSettingCard(
-                      title: 'Custom OpenRouter API Key',
-                      subtitle:
-                          'Set or update your personal API key',
+                      title: 'OpenRouter API Key',
+                      subtitle: localizations.customApiKeyDescription,
                       icon: Icons.vpn_key,
                       onTap: () => _showApiKeyDialog(context),
                     ),
-                    
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                      child: Text(
-                        'Note: The default API key from .env file will be used as a fallback if no custom key is provided.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
+
+                    _buildSettingCard(
+                      title: 'Local AI Settings',
+                      subtitle: 'Configure local AI model for offline usage',
+                      icon: Icons.offline_bolt,
+                      onTap: () => _navigateToLocalLLMSettings(context),
                     ),
+
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -307,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
       child: Row(
         children: [
           Container(
@@ -315,13 +221,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             height: 20,
             decoration: BoxDecoration(
               color: AppTheme.warmGold,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 8),
           Text(
             title.toUpperCase(),
-            style: GoogleFonts.cinzel(
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: title,
               color: AppTheme.warmGold,
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -346,9 +253,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        side: BorderSide(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
-      color: AppTheme.midnightPurple.withOpacity(0.5),
+      color: AppTheme.midnightPurple.withValues(alpha: 0.5),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: ThemedIcon(
@@ -357,7 +267,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: title,
             color: AppTheme.silverMist,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -367,8 +278,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             subtitle,
-            style: TextStyle(
-              color: AppTheme.silverMist.withOpacity(0.7),
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: subtitle,
+              color: AppTheme.silverMist.withValues(alpha: 0.7),
               fontSize: 13,
             ),
           ),
@@ -379,73 +291,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _exportAllCharacters(BuildContext context) async {
-    try {
-      final charactersProvider = Provider.of<CharactersProvider>(
-        context,
-        listen: false,
-      );
-
-      if (charactersProvider.characters.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("No characters to export"),
-            backgroundColor: AppTheme.deepIndigo,
-          ),
-        );
-        return;
-      }
-
-      // In a real app, we would implement export functionality here
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Exporting ${charactersProvider.characters.length} characters...',
-          ),
-          backgroundColor: AppTheme.deepIndigo,
-        ),
-      );
-
-      // Simulate export delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Characters exported successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error exporting characters: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   void _showClearDataDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
             title: Text(
-              'Clear All Data',
-              style: TextStyle(
+              localizations.clearAllData,
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.clearAllData,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             content: Text(
-              'This will permanently delete all your characters and reset the app to its default state. This action cannot be undone.',
-              style: TextStyle(color: Colors.white70),
+              localizations.clearAllDataConfirmation,
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.clearAllDataConfirmation,
+                color: Colors.white70,
+              ),
             ),
             backgroundColor: AppTheme.deepIndigo,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: Colors.redAccent.withOpacity(0.5),
+                color: Colors.redAccent.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -453,8 +324,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  'Cancel',
-                  style: TextStyle(color: AppTheme.silverMist),
+                  localizations.cancel,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.cancel,
+                    color: AppTheme.silverMist,
+                  ),
                 ),
               ),
               TextButton(
@@ -471,13 +345,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await prefs.clear();
 
                     // Reload settings after clearing
-                    _loadSettings();
+                    // _loadSettings(); // This line is removed
 
                     Navigator.pop(context);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('All data has been cleared'),
+                        content: Text(localizations.dataCleared),
                         backgroundColor: Colors.green,
                       ),
                     );
@@ -485,15 +359,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error clearing data: $e'),
+                        content: Text(localizations.errorClearingData),
                         backgroundColor: Colors.red,
                       ),
                     );
                   }
                 },
                 child: Text(
-                  'Delete Everything',
-                  style: TextStyle(color: Colors.redAccent),
+                  localizations.deleteEverything,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.deleteEverything,
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showResetOnboardingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Reset Onboarding',
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: 'Reset Onboarding',
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+              'This will reset the onboarding status and show the tutorial again on next app start. Continue?',
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text:
+                    'This will reset the onboarding status and show the tutorial again on next app start. Continue?',
+                color: Colors.white70,
+              ),
+            ),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Colors.orangeAccent.withValues(alpha: 0.5),
+                width: 1,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: 'Cancel',
+                    color: AppTheme.silverMist,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    await OnboardingService.resetOnboarding();
+                    Navigator.pop(context);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Onboarding reset successfully! Tutorial will show on next app start.',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Error resetting onboarding. Please try again.',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  'Reset',
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: 'Reset',
+                    color: Colors.orangeAccent,
+                  ),
                 ),
               ),
             ],
@@ -510,24 +466,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isFromSettings: true,
       onKeyUpdated: () {
         // Re-initialize env config and all services that use the API key
-        print('API key updated, reinitializing services...');
         EnvConfig.forceReload().then((_) {
           // Force refresh all chat services to use the new key
           // Reinitialize all chat services
           ChatService.initialize();
           character_chat.ChatService.initialize();
-          character_interview.ChatService.initialize();
-          
+          interview_chat.ChatService.initialize();
+
           // Force a refresh of API keys in each service
           try {
             ChatService.refreshApiKey();
             character_chat.ChatService.refreshApiKey();
-            character_interview.ChatService.refreshApiKey();
-          } catch (e) {
-            print('Error refreshing API keys: $e');
-          }
-          
-          print('All chat services reinitialized with new API key');
+            interview_chat.ChatService.refreshApiKey();
+          } catch (e) {}
 
           // Dump diagnostics after updating
           EnvConfig.dumpApiKeyInfo();
@@ -543,5 +494,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
+  }
+
+  void _showLanguageSelectionDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
+    final languages = [
+      {'code': 'en', 'name': localizations.languageEnglish},
+      {'code': 'es', 'name': localizations.languageSpanish},
+      {'code': 'fr', 'name': localizations.languageFrench},
+      {'code': 'de', 'name': localizations.languageGerman},
+      {'code': 'it', 'name': localizations.languageItalian},
+      {'code': 'ja', 'name': localizations.languageJapanese},
+      {'code': 'ko', 'name': localizations.languageKorean},
+      {'code': 'uk', 'name': localizations.languageUkrainian},
+      {'code': 'ru', 'name': localizations.languageRussian},
+    ];
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Select Language',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: languages.length,
+                itemBuilder: (context, index) {
+                  final language = languages[index];
+                  final languageProvider = Provider.of<LanguageProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final isSelected =
+                      languageProvider.currentLanguageCode == language['code'];
+
+                  return ListTile(
+                    title: Text(
+                      language['name']!,
+                      style: TextStyle(
+                        color: isSelected ? AppTheme.warmGold : Colors.white,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    trailing:
+                        isSelected
+                            ? Icon(Icons.check, color: AppTheme.warmGold)
+                            : null,
+                    onTap: () {
+                      languageProvider.setLanguage(language['code']!);
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Language changed to ${language['name']}',
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _navigateToLocalLLMSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LocalLLMSettingsScreen()),
+    );
   }
 }

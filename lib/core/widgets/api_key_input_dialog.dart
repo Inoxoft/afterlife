@@ -1,6 +1,7 @@
-import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../utils/env_config.dart';
 
@@ -44,7 +45,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   bool _isLoading = true;
   String? _errorText;
   String? _currentKey;
-  bool _isUserKey = false; // Track if this is a user-specified key
 
   @override
   void initState() {
@@ -61,17 +61,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
       // Make sure environment is initialized
       await EnvConfig.initialize();
 
-      // Check if there's a user-set API key and if not, don't show the default key
-      _isUserKey = await EnvConfig.hasUserApiKey();
-      
-      if (_isUserKey) {
-        _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
-        print('Loaded user-set API key');
-      } else {
-        // Don't show the default key from .env in the input field
-        _currentKey = null;
-        print('No user-set API key found');
-      }
+      _currentKey = EnvConfig.get('OPENROUTER_API_KEY');
 
       // Don't display placeholder as a real key
       if (_currentKey == 'your_api_key_here') {
@@ -92,7 +82,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading current API key: $e');
       setState(() {
         _isLoading = false;
       });
@@ -131,15 +120,12 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
 
       // If the input contains the masked key, don't update it
       if (skipValidation) {
-        print('Masked key detected, skipping update');
         // No changes to save, but consider it a successful close if from settings
         if (widget.isFromSettings) {
           Navigator.of(context).pop(false);
         }
         return;
       }
-
-      print('Saving new API key to storage: ${apiKey.substring(0, 4)}...');
 
       // Instead of writing to .env file, save to SharedPreferences
       final success = await EnvConfig.setUserApiKey(apiKey);
@@ -170,7 +156,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      print('Error saving API key: $e');
       setState(() {
         _errorText = 'Error saving API key: $e';
         _isSubmitting = false;
@@ -182,6 +167,13 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppTheme.deepIndigo,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
       title: Text(
         widget.isFromSettings ? 'OpenRouter API Key' : 'API Key Required',
         style: const TextStyle(color: Colors.white),
@@ -190,9 +182,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
           _isLoading
               ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppTheme.etherealCyan,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.warmGold),
                 ),
               )
               : Column(
@@ -213,10 +203,10 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: AppTheme.backgroundEnd.withOpacity(0.3),
+                      fillColor: AppTheme.midnightPurple.withValues(alpha: 0.3),
                       hintText: 'Enter API Key (sk-...)',
                       hintStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                       errorText: _errorText,
                       prefixIcon:
@@ -224,7 +214,9 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                               ? IconButton(
                                 icon: Icon(
                                   Icons.delete_outline,
-                                  color: Colors.redAccent.withOpacity(0.7),
+                                  color: Colors.redAccent.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                                 tooltip: 'Clear current key',
                                 onPressed: () async {
@@ -239,7 +231,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                                   try {
                                     // Use the new removeUserApiKey method
                                     await EnvConfig.removeUserApiKey();
-                                    print('API key cleared via clear button');
 
                                     // Reinitialize config to reflect changes with force reload
                                     await EnvConfig.forceReload();
@@ -248,7 +239,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                                       widget.onKeyUpdated!();
                                     }
                                   } catch (e) {
-                                    print('Error clearing API key: $e');
                                   } finally {
                                     if (mounted) {
                                       setState(() {
@@ -273,13 +263,13 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: AppTheme.etherealCyan.withOpacity(0.5),
+                          color: AppTheme.warmGold.withValues(alpha: 0.5),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: AppTheme.etherealCyan,
+                          color: AppTheme.warmGold,
                           width: 2,
                         ),
                       ),
@@ -304,7 +294,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                             child: Text(
                               'To replace with a different key, clear the field first and enter new key',
                               style: TextStyle(
-                                color: Colors.amber.withOpacity(0.8),
+                                color: Colors.amber.withValues(alpha: 0.8),
                                 fontSize: 12,
                               ),
                             ),
@@ -313,21 +303,102 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, size: 12, color: Colors.white54),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'You can get an API key from openrouter.ai',
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warmGold.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline,
+                              size: 16,
+                              color: AppTheme.warmGold,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'How to get your API key:',
+                              style: TextStyle(
+                                color: AppTheme.warmGold,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '1. Visit openrouter.ai and sign up/login',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '2. Go to "Keys" section in your dashboard',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '3. Create a new API key',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () async {
+                            final uri = Uri.parse('https://openrouter.ai/keys');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '→ Get your API key here: ',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'openrouter.ai/keys',
+                                  style: TextStyle(
+                                    color: AppTheme.warmGold,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () async {
+                                          final uri = Uri.parse(
+                                            'https://openrouter.ai/keys',
+                                          );
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(
+                                              uri,
+                                              mode:
+                                                  LaunchMode
+                                                      .externalApplication,
+                                            );
+                                          }
+                                        },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -348,30 +419,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.green.shade300,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                  // Show if a default key exists but we're not using it
-                  if (!_isUserKey && EnvConfig.getDefaultValue('OPENROUTER_API_KEY') != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.settings_applications,
-                            size: 14,
-                            color: Colors.blue.shade300,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Using default API key from .env file',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue.shade300,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -403,7 +450,6 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                         if (!success) {
                           throw Exception('Failed to remove API key');
                         }
-                        print('API key removed successfully');
 
                         // Re-initialize env config with force reload
                         await EnvConfig.forceReload();
@@ -431,9 +477,9 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         ElevatedButton(
           onPressed: _isSubmitting ? null : () => _saveApiKey(_controller.text),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.etherealCyan,
+            backgroundColor: AppTheme.warmGold,
             foregroundColor: Colors.black87,
-            disabledBackgroundColor: AppTheme.etherealCyan.withOpacity(0.3),
+            disabledBackgroundColor: AppTheme.warmGold.withValues(alpha: 0.3),
           ),
           child:
               _isSubmitting

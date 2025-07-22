@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// AppTheme defines the visual styling for the entire Afterlife application.
 /// This includes colors, text styles, decorations, and other visual elements.
 class AppTheme {
   // Primary colors
-  static Color primaryColor = const Color(0xFF00E5FF);
+  static const Color primaryColor = Color(0xFF6200EE);
   static Color secondaryColor = const Color(0xFFAE00FF);
   static Color accentColor = const Color(0xFFFFD500);
 
@@ -41,7 +40,7 @@ class AppTheme {
   static LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryColor, primaryColor.withOpacity(0.6)],
+    colors: [primaryColor, primaryColor.withValues(alpha: 0.6)],
   );
 
   static LinearGradient accentGradient = LinearGradient(
@@ -60,7 +59,7 @@ class AppTheme {
   static LinearGradient jarGlassGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [jarGlassColorDark.withOpacity(0.6), jarGlassColorDark],
+    colors: [jarGlassColorDark.withValues(alpha: 0.6), jarGlassColorDark],
   );
 
   static LinearGradient neonGradient = LinearGradient(
@@ -70,49 +69,47 @@ class AppTheme {
   );
 
   // Text styles
-  static TextStyle get headingStyle => GoogleFonts.spaceMono(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: lightColor,
-    letterSpacing: 0.5,
+  static TextStyle get headingStyle => const TextStyle(
+    fontFamily: 'SpaceMono',
+    fontSize: 24.0,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.2,
   );
 
-  static TextStyle get subheadingStyle => GoogleFonts.spaceMono(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    color: lightColor,
-    letterSpacing: 0.3,
+  static TextStyle get subheadingStyle => const TextStyle(
+    fontFamily: 'SpaceMono',
+    fontSize: 18.0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 1.1,
   );
 
-  static TextStyle get bodyStyle => GoogleFonts.roboto(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    color: lightColor,
-    letterSpacing: 0.2,
+  static TextStyle get bodyStyle => const TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 16.0,
+    height: 1.5,
   );
 
-  static TextStyle get captionStyle => GoogleFonts.roboto(
-    fontSize: 14,
-    fontWeight: FontWeight.w300,
-    color: greyColor,
-    letterSpacing: 0.1,
+  static TextStyle get captionStyle => TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 12.0,
+    color: AppTheme.lightColor,
   );
 
-  static TextStyle get buttonStyle => GoogleFonts.roboto(
-    fontSize: 16,
+  static TextStyle get buttonStyle => const TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 16.0,
     fontWeight: FontWeight.w500,
-    color: darkColor,
-    letterSpacing: 0.3,
+    letterSpacing: 1.1,
   );
 
   // Decorations
   static BoxDecoration cardDecoration = BoxDecoration(
     color: darkAccentColor,
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: primaryColor.withOpacity(0.3), width: 1),
+    border: Border.all(color: primaryColor.withValues(alpha: 0.3), width: 1),
     boxShadow: [
       BoxShadow(
-        color: darkColor.withOpacity(0.5),
+        color: darkColor.withValues(alpha: 0.5),
         blurRadius: 8,
         offset: const Offset(0, 4),
       ),
@@ -124,7 +121,7 @@ class AppTheme {
     borderRadius: BorderRadius.circular(8),
     boxShadow: [
       BoxShadow(
-        color: primaryColor.withOpacity(0.3),
+        color: primaryColor.withValues(alpha: 0.3),
         blurRadius: 8,
         spreadRadius: 0,
         offset: const Offset(0, 4),
@@ -135,7 +132,7 @@ class AppTheme {
   static BoxDecoration inputDecoration = BoxDecoration(
     color: darkAccentColor,
     borderRadius: BorderRadius.circular(8),
-    border: Border.all(color: greyColor.withOpacity(0.3), width: 1),
+    border: Border.all(color: greyColor.withValues(alpha: 0.3), width: 1),
   );
 
   // Theme data
@@ -145,8 +142,7 @@ class AppTheme {
     colorScheme: ColorScheme.dark(
       primary: primaryColor,
       secondary: secondaryColor,
-      background: darkColor,
-      surface: darkAccentColor,
+      surface: darkColor,
       error: errorColor,
     ),
     textTheme: TextTheme(
@@ -179,25 +175,25 @@ class AppTheme {
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: greyColor.withOpacity(0.3), width: 1),
+        borderSide: BorderSide(color: greyColor.withValues(alpha: 0.3), width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: greyColor.withOpacity(0.3), width: 1),
+        borderSide: BorderSide(color: greyColor.withValues(alpha: 0.3), width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-          color: primaryColor.withOpacity(0.6),
+          color: primaryColor.withValues(alpha: 0.6),
           width: 1.5,
         ),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: errorColor.withOpacity(0.6), width: 1),
+        borderSide: BorderSide(color: errorColor.withValues(alpha: 0.6), width: 1),
       ),
       labelStyle: captionStyle,
-      hintStyle: captionStyle.copyWith(color: greyColor.withOpacity(0.5)),
+      hintStyle: captionStyle.copyWith(color: greyColor.withValues(alpha: 0.5)),
     ),
   );
 }

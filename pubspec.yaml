@@ -30,16 +30,23 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^4.0.5
-  cupertino_icons: ^1.0.2
-  http: ^1.1.0
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
   provider: ^6.0.5
-  flutter_dotenv: ^5.1.0
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.2.2
+  intl: ^0.19.0
+  http: ^1.2.0
   file_selector: ^1.0.0
   path: ^1.8.3
   path_provider: ^2.1.2
   syncfusion_flutter_pdf: ^24.1.41
+  flutter_markdown: ^0.6.18
+  file_picker: ^8.0.6
+  flutter_gemma: ^0.9.0
+  url_launcher: ^6.2.4
+  wakelock_plus: ^1.2.1
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +65,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -73,12 +81,40 @@ flutter:
     - assets/images/afterlife_icon.png
     - assets/images/einstein_mask.png  # Einstein with LLM armor illustration
     - assets/images/perspective_mask.png
-    # Optional assets - these may not exist during development
-    - .env
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
+    # Famous character portraits
+    - assets/images/kobe_bryant.png
+    - assets/images/kurt_cobain.png
+    - assets/images/nelson_mandela.png
+    - assets/images/bob_marley.png
+    - assets/images/bruce_lee.png
+    - assets/images/martin_luther.png
+    - assets/images/marie_curie.png
+    - assets/images/abraham_lincoln.png
+    - assets/images/cleopatra.png
+    - assets/images/avici.png
+    - assets/images/tupac.png
+    - assets/images/david_bowie.png
+    - assets/images/stephen_hawking.png
+    - assets/images/elvis_presley.png
+    - assets/images/winston_churchill.png
+    - assets/images/nikola_tesla.png
+    - assets/images/william_shakespeare.png
+    - assets/images/caesar.png
+    - assets/images/steve_jobs.png
+    - assets/images/diana_princess.png
+    - assets/images/freddie_mercury.png
+    - assets/images/muhammad_ali.png
+    - assets/images/carl_sagan.png
+    - assets/images/vincent_van_gogh.png
+    - assets/images/da_vinci.png
+    - assets/images/socrates.png
+    - assets/images/gandhi.png
+    # Additional character images (may not be used yet)
+    - assets/images/jane_austen.png
+    - assets/images/edgar_allan_poe.png
+    - assets/images/mark_twain.png
+    - assets/images/oscar_wilde.png
+  #
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
@@ -87,17 +123,27 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: Cinzel
+      fonts:
+        - asset: assets/fonts/cinzel-v25-latin_latin-ext-regular.ttf
+        - asset: assets/fonts/cinzel-v25-latin_latin-ext-700.ttf
+          weight: 700
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/lato-v24-latin_latin-ext-regular.ttf
+        - asset: assets/fonts/lato-v24-latin_latin-ext-700.ttf
+          weight: 700
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/roboto-v48-latin_latin-ext-regular.ttf
+        - asset: assets/fonts/roboto-v48-latin_latin-ext-700.ttf
+          weight: 700
+    - family: SpaceMono
+      fonts:
+        - asset: assets/fonts/space-mono-v16-latin_latin-ext-regular.ttf
+        - asset: assets/fonts/space-mono-v16-latin_latin-ext-700.ttf
+          weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

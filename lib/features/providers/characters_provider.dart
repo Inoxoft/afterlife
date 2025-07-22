@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/character_model.dart';
@@ -101,7 +102,10 @@ class CharactersProvider with ChangeNotifier {
     List<String> charactersJson,
   ) {
     return charactersJson.map((json) {
-      final decoded = jsonDecode(json);
+      // Explicitly decode as UTF-8 to preserve Ukrainian characters
+      final jsonBytes = utf8.encode(json);
+      final decodedJson = utf8.decode(jsonBytes);
+      final decoded = jsonDecode(decodedJson);
       return CharacterModel.fromJson(decoded);
     }).toList();
   }
@@ -139,18 +143,21 @@ class CharactersProvider with ChangeNotifier {
 
   // Encode character JSON in an isolate for better performance
   static List<String> _encodeCharactersJson(List<CharacterModel> characters) {
-    return characters.map((char) => jsonEncode(char.toJson())).toList();
+    return characters.map((char) {
+      // Explicitly encode to UTF-8 to preserve Ukrainian characters
+      final jsonString = jsonEncode(char.toJson());
+      final jsonBytes = utf8.encode(jsonString);
+      return utf8.decode(jsonBytes);
+    }).toList();
   }
 
   Future<void> addCharacter(CharacterModel character) async {
     try {
       _characters.add(character);
-      _characterCache[character.id] = character;
-      _selectedCharacterId = character.id;
       await _saveCharacters();
       notifyListeners();
     } catch (e) {
-      _lastError = 'Error adding character: $e';
+      print('Error in addCharacter: $e');
       rethrow;
     }
   }
@@ -248,6 +255,38 @@ class CharactersProvider with ChangeNotifier {
       await updateCharacter(updatedCharacter);
     } catch (e) {
       _lastError = 'Error adding message: $e';
+      rethrow;
+    }
+  }
+
+  // Add messages to a specific character by ID
+  Future<void> addMessageToCharacter({
+    required String characterId,
+    required String text,
+    required bool isUser,
+  }) async {
+    try {
+      // Find the character by ID
+      final characterIndex = _characters.indexWhere(
+        (char) => char.id == characterId,
+      );
+      if (characterIndex == -1) {
+        throw Exception('Character with ID $characterId not found');
+      }
+
+      final character = _characters[characterIndex];
+      final updatedCharacter = character.addMessage(text: text, isUser: isUser);
+
+      // Update the character in the list
+      _characters[characterIndex] = updatedCharacter;
+
+      // Update the cache directly for immediate access
+      _characterCache[updatedCharacter.id] = updatedCharacter;
+
+      await _saveCharacters();
+      notifyListeners();
+    } catch (e) {
+      _lastError = 'Error adding message to character: $e';
       rethrow;
     }
   }

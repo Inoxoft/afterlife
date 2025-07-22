@@ -22,7 +22,7 @@ Afterlife lets you build lifelike conversational agents from real humans — liv
 ## 🎭 The Concept of Masks
 
 <p align="center">
-  <img src="https://sdmntprsouthcentralus.oaiusercontent.com/files/00000000-dcb4-61f7-8ed3-2080e4807b16/raw?se=2025-05-22T11%3A25%3A40Z&sp=r&sv=2024-08-04&sr=b&scid=e89fd39f-b915-5821-9982-3838b5096518&skoid=71e8fa5c-90a9-4c17-827b-14c3005164d6&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-05-21T20%3A41%3A25Z&ske=2025-05-22T20%3A41%3A25Z&sks=b&skv=2024-08-04&sig=ffCwOC2R8GilEfV%2BI8IDjjTBSXOW9xnJUEd3jticIMk%3D" alt="AI LLM Persona Mask" width="400"/>
+  <img src="mask.gif" alt="AI LLM Persona Mask" width="400"/>
 </p>
 
 In Afterlife, the AI doesn't channel the actual consciousness of historical figures. Instead, think of each AI model as a highly advanced digital actor wearing a "mask." This mask is meticulously crafted from historical data, writings, and known personality traits of the figure it represents.
@@ -35,7 +35,6 @@ This approach allows for a respectful and engaging way to explore history and th
 
 ## 📱 Screenshots
 
-here I'll place gifs from mobile and tablet 
 
 
 ## 🌟 Features
@@ -70,23 +69,17 @@ here I'll place gifs from mobile and tablet
    flutter pub get
    ```
 
-3. Create a `.env` file in the project root with your OpenRouter API key:
-   ```
-   OPENROUTER_API_KEY=your_api_key_here
-   ```
-
-4. Run the app:
+3. Run the app:
    ```bash
    flutter run
    ```
+4. When you first run the app, you will be prompted to enter your OpenRouter API key.
 
 ## 🔧 Configuration
 
 Afterlife uses OpenRouter to connect to various LLM providers. By default, the app uses Google's Gemini model, but you can configure other models in the settings.
 
-### Environment Variables
-
-- `OPENROUTER_API_KEY`: Your OpenRouter API key(or just paste it in app manualy)
+You can change your API key at any time in the app's settings.
 
 ## 💡 Usage
 

@@ -1,6 +1,6 @@
-// lib/core/theme/app_theme.dart
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../utils/ukrainian_font_utils.dart';
 
 /// Central theme configuration for the Afterlife application
 class AppTheme {
@@ -34,7 +34,7 @@ class AppTheme {
     0xFF080815,
   ); // Slightly adjusted for mask theme
   static const Color deepSpaceNavy = Color(0xFF050530);
-  static const Color etherealCyan = Color(0xFF00BFFF);
+  static const Color etherealCyan = Color(0xFF00E5FF);
   static const Color cyberPurple = Color(0xFF8A2BE2);
   static const Color neonPink = Color(0xFFFF1493);
   static const Color cosmicBlue = Color(0xFF0B0B45);
@@ -71,81 +71,88 @@ class AppTheme {
     stops: [0.0, 1.0],
   );
 
-  // Text styles - Updated for better contrast with new colors
-  static TextStyle get titleStyle => GoogleFonts.cinzel(
-    fontSize: 36,
+  // Font styles
+  // ===========================================================================
+
+  /// Base text style with Lato font
+  static const TextStyle baseTextStyle = TextStyle(
+    fontFamily: 'Lato',
+    color: AppTheme.silverMist,
+    height: 1.5,
+  );
+
+  /// Title style with Cinzel font - for main headings
+  static TextStyle get titleStyle => const TextStyle(
+    fontFamily: 'Cinzel',
+    fontSize: 28,
     fontWeight: FontWeight.bold,
-    letterSpacing: 3.0,
-    color: silverMist,
+    color: AppTheme.warmGold,
+    letterSpacing: 2.0,
     shadows: [
       Shadow(
-        color: warmGold.withOpacity(0.8),
-        blurRadius: 10,
-        offset: const Offset(0, 2),
+        blurRadius: 8.0,
+        color: AppTheme.warmGold,
+        offset: Offset(0, 0),
       ),
     ],
   );
 
-  static TextStyle get subtitleStyle => GoogleFonts.cinzel(
+  /// Subtitle style - for secondary headings
+  static TextStyle get subtitleStyle => const TextStyle(
+    fontFamily: 'Cinzel',
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    letterSpacing: 3.0,
-    color: silverMist,
-    shadows: [
-      Shadow(
-        color: warmGold.withOpacity(0.6),
-        blurRadius: 8,
-        offset: const Offset(0, 1),
-      ),
-    ],
+    color: AppTheme.silverMist,
+    letterSpacing: 1.5,
   );
 
-  static TextStyle get bodyTextStyle => GoogleFonts.lato(
+  /// Body text style - for standard text
+  static TextStyle get bodyTextStyle => baseTextStyle.copyWith(
     fontSize: 16,
-    fontWeight: FontWeight.w400,
-    color: silverMist,
-    letterSpacing: 0.5,
+    fontWeight: FontWeight.normal,
   );
 
-  static TextStyle get captionStyle => GoogleFonts.lato(
-    fontSize: 14,
-    fontWeight: FontWeight.w300,
-    color: silverMist.withOpacity(0.9),
-    letterSpacing: 0.5,
-  );
-
-  static TextStyle get twinNameStyle => GoogleFonts.cinzel(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 1.0,
-    color: silverMist,
-  );
-
-  static TextStyle get metadataStyle => GoogleFonts.lato(
+  /// Caption style - for smaller text, metadata
+  static TextStyle get captionStyle => baseTextStyle.copyWith(
     fontSize: 12,
-    fontWeight: FontWeight.w400,
-    color: silverMist.withOpacity(0.8),
-    letterSpacing: 0.3,
+    color: AppTheme.silverMist.withOpacity(0.7),
   );
 
-  static TextStyle get labelStyle => GoogleFonts.lato(
-    fontSize: 11,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.8,
-    color: warmGold,
+  /// Twin name style - for character names in cards
+  static TextStyle get twinNameStyle => const TextStyle(
+    fontFamily: 'Cinzel',
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: AppTheme.silverMist,
   );
+
+  /// Metadata style - for timestamps, etc.
+  static TextStyle get metadataStyle => baseTextStyle.copyWith(
+    fontSize: 12,
+    color: AppTheme.silverMist.withOpacity(0.5),
+  );
+
+  /// Label style - for buttons, tabs, etc.
+  static TextStyle get labelStyle => baseTextStyle.copyWith(
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+    letterSpacing: 1.0,
+  );
+
+  // ===========================================================================
+  // Color extensions
 
   // Container decorations - Updated for mask aesthetics
   static BoxDecoration get containerDecoration => BoxDecoration(
-    color: midnightPurple.withOpacity(0.7), // More opacity for dramatic effect
+    color: midnightPurple.withValues(alpha: 0.7), // More opacity for dramatic effect
     borderRadius: BorderRadius.circular(18),
     border: Border.all(
-      color: warmGold.withOpacity(0.4),
+      color: warmGold.withValues(alpha: 0.4),
       width: 1,
     ), // Slightly more visible border
     boxShadow: [
       BoxShadow(
-        color: cosmicBlack.withOpacity(0.5),
+        color: cosmicBlack.withValues(alpha: 0.5),
         blurRadius: 15,
         spreadRadius: 1,
         offset: const Offset(0, 5),
@@ -158,7 +165,7 @@ class AppTheme {
     borderRadius: BorderRadius.circular(18),
     boxShadow: [
       BoxShadow(
-        color: warmGold.withOpacity(0.2),
+        color: warmGold.withValues(alpha: 0.2),
         blurRadius: 15,
         spreadRadius: 0,
       ),
@@ -169,7 +176,7 @@ class AppTheme {
   static BoxDecoration get glowDecoration => BoxDecoration(
     boxShadow: [
       BoxShadow(
-        color: warmGold.withOpacity(0.4), // Slightly stronger glow
+        color: warmGold.withValues(alpha: 0.4), // Slightly stronger glow
         blurRadius: 20,
         spreadRadius: 0,
       ),
@@ -179,9 +186,9 @@ class AppTheme {
   // Bottom navigation theme - Updated with new colors
   static BottomNavigationBarThemeData get bottomNavTheme =>
       BottomNavigationBarThemeData(
-        backgroundColor: cosmicBlack.withOpacity(0.85), // Slightly more opaque
+        backgroundColor: cosmicBlack.withValues(alpha: 0.85), // Slightly more opaque
         selectedItemColor: warmGold,
-        unselectedItemColor: silverMist.withOpacity(0.5),
+        unselectedItemColor: silverMist.withValues(alpha: 0.5),
         showSelectedLabels: true,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
@@ -190,5 +197,5 @@ class AppTheme {
 
   // Divider styling
   static Divider get divider =>
-      Divider(color: warmGold.withOpacity(0.3), thickness: 1, height: 1);
+      Divider(color: warmGold.withValues(alpha: 0.3), thickness: 1, height: 1);
 }

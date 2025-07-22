@@ -1,10 +1,16 @@
-import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:provider/provider.dart';
 import 'message_model.dart';
 import 'chat_service.dart';
 import 'prompts.dart';
+import '../providers/language_provider.dart';
+import '../../l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'package:afterlife/features/providers/characters_provider.dart';
+import '../models/character_model.dart';
+import '../../core/services/hybrid_chat_service.dart';
 
 /// Manages the interview process for creating or editing a character.
 ///
@@ -23,25 +29,61 @@ class InterviewProvider with ChangeNotifier {
   bool isEditMode = false;
   bool isAiThinking = false;
 
+  // Add a reference to LanguageProvider at the class level
+  LanguageProvider? _languageProvider;
+
+  // Callback for saving characters
+  Future<void> Function(CharacterModel)? _onCharacterSaved;
+
   List<Message> get messages => _messages.where((m) => !m.isHidden).toList();
 
-  InterviewProvider() {
+  /// Checks if the last AI message is a valid, final character card.
+  bool get isCardReadyForFinalize {
+    final lastMessage = _messages.where((m) => !m.isUser).lastOrNull;
+    if (lastMessage == null) return false;
+    return lastMessage.text.contains('## CHARACTER CARD SUMMARY ##') &&
+        lastMessage.text.contains('## END OF CHARACTER CARD ##');
+  }
+
+  InterviewProvider({Future<void> Function(CharacterModel)? onCharacterSaved}) {
+    _onCharacterSaved = onCharacterSaved;
     _initialize();
   }
 
   Future<void> _initialize() async {
-    await ChatService.initialize();
-    await _addInitialMessage();
+    await HybridChatService.initialize();
+    // Don't add initial message here - wait for localization to be set
+    // Add a fallback timer in case localization setup is delayed
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!_initialMessageAdded && !isEditMode) {
+        _addInitialMessage();
+      }
+    });
+  }
+
+  String? _initialMessage;
+  bool _initialMessageAdded = false;
+
+  void setInitialMessage(String message) {
+    _initialMessage = message;
+    // Add the initial message only once, and only if not in edit mode
+    if (!_initialMessageAdded && !isEditMode) {
+      addAIMessage(_initialMessage!);
+      _initialMessageAdded = true;
+    }
   }
 
   Future<void> _addInitialMessage() async {
-    if (!isEditMode) {
-      addAIMessage(
-        "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
-        "1. Answer my questions about your personality and experiences\n"
-        "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
-        "Which would you prefer?",
-      );
+    // This method is now only used as a fallback if setInitialMessage wasn't called
+    if (!isEditMode && !_initialMessageAdded) {
+      final message =
+          _initialMessage ??
+          "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
+              "1. Answer my questions about your personality and experiences\n"
+              "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
+              "Which would you prefer?";
+      addAIMessage(message);
+      _initialMessageAdded = true;
     }
   }
 
@@ -56,16 +98,12 @@ class InterviewProvider with ChangeNotifier {
     characterCardSummary = existingSystemPrompt;
 
     // Debug the system prompt to ensure it's being loaded properly
-    print('=== SYSTEM PROMPT DEBUG ===');
-    print('Character name: $existingName');
-    print('System prompt length: ${existingSystemPrompt.length} characters');
     print(
       'First 200 chars: ${existingSystemPrompt.substring(0, min(200, existingSystemPrompt.length))}...',
     );
     print(
       'Last 200 chars: ...${existingSystemPrompt.substring(max(0, existingSystemPrompt.length - 200))}',
     );
-    print('=========================');
 
     // Add loading message to indicate AI is thinking
     _addLoadingMessage();
@@ -79,7 +117,6 @@ class InterviewProvider with ChangeNotifier {
 
     final systemPrompt = _getSystemPrompt();
 
-    print('=== SENDING EDIT MESSAGE ===');
     print(
       'Character card summary length: ${characterCardSummary?.length ?? 0}',
     );
@@ -88,9 +125,8 @@ class InterviewProvider with ChangeNotifier {
         'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
       );
     } else {
-      print('WARNING: Character card summary is empty or null!');
+      print('Character card summary is null or empty');
     }
-    print('===========================');
 
     try {
       // Create a formatted message to send to the AI with the existing character details
@@ -118,10 +154,7 @@ What specific edits would you like me to make?
       );
       notifyListeners();
 
-      print(
-        'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
-      );
-      final response = await ChatService.sendMessage(
+      final response = await HybridChatService.sendMessage(
         messages:
             _convertMessagesToAPI(), // Use all messages including the initial one
         systemPrompt: systemPrompt,
@@ -143,18 +176,24 @@ What specific edits would you like me to make?
     }
   }
 
+  void setLanguageProvider(LanguageProvider languageProvider) {
+    _languageProvider = languageProvider;
+  }
+
   String _getSystemPrompt() {
+    String languageInstruction = '';
+    if (_languageProvider != null &&
+        _languageProvider!.currentLanguageCode != 'en') {
+      final languageName = _languageProvider!.currentLanguageName;
+      languageInstruction =
+          '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
+    }
+
     if (isEditMode) {
-      return """You are an AI assistant helping to edit a character's system prompt.
+      return """You are helping the user edit their existing character. The user has provided their current character information and wants to make specific changes.
 
-### CRITICAL INSTRUCTIONS:
-1. The user has ALREADY PROVIDED the character's system prompt in their first message to you.
-2. The prompt is enclosed between the "Current system prompt" and the "==================================================" markers.
-3. DO NOT ask the user to provide the system prompt again - they have already sent it to you.
-4. Your first response MUST acknowledge that you have received the system prompt and ask what specific edits they'd like to make.
-
-
-### Your Task:
+Your task:
+- Listen carefully to what changes the user wants to make
 - Help the user edit the system prompt they've already provided
 - Make only the specific changes they request
 - Preserve all content they don't explicitly ask to change
@@ -167,141 +206,157 @@ When the user types "agree", format the final prompt as:
 ## CHARACTER CARD SUMMARY ##
 [FULL UPDATED SYSTEM PROMPT WITH ALL CHANGES]
 ## END OF CHARACTER CARD ##
-```""";
+```$languageInstruction""";
     } else {
-      return InterviewPrompts.interviewSystemPrompt;
+      return InterviewPrompts.interviewSystemPrompt + languageInstruction;
     }
   }
 
-  Future<void> sendMessage(String text) async {
-    if (text.trim().isEmpty) {
-      _messages.add(
-        Message(text: "Please type a message before sending.", isUser: false),
-      );
-      notifyListeners();
-      return;
+  String _getSystemPromptForEditing() {
+    String languageInstruction = '';
+    if (_languageProvider != null &&
+        _languageProvider!.currentLanguageCode != 'en') {
+      final languageName = _languageProvider!.currentLanguageName;
+      languageInstruction =
+          '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $languageName language. The user has selected $languageName as their preferred language.\n';
     }
 
-    // Add user message
-    final userMessage = Message(text: text, isUser: true);
-    _messages.add(userMessage);
-    notifyListeners();
+    return """You are helping the user modify their character card. They have a complete character card but want to make changes to it.
 
-    // Set loading state
+CURRENT CHARACTER CARD:
+$characterCardSummary
+
+Your task:
+- Listen to the user's requested changes
+- Modify only the specific aspects they mention
+- Keep everything else exactly the same
+- Maintain the character's core identity while incorporating the requested changes
+- Be precise with the modifications - don't change unrelated parts
+
+### Important Instructions:
+- If the user asks to change personality traits, update only those traits
+- If they want to modify background/history, change only the relevant sections
+- If they request name changes, update the character name accordingly
+- Always preserve the overall character structure and format
+
+### Formatting Updated Result:
+When providing the updated character card, format it as:
+```
+## CHARACTER NAME: [updated character name] ##
+## CHARACTER CARD SUMMARY ##
+[FULL UPDATED CHARACTER CARD WITH REQUESTED CHANGES]
+## END OF CHARACTER CARD ##
+```
+
+After showing the updated card, ask the user to review it and type 'agree' if they're satisfied, or request further changes if needed.
+
+$languageInstruction""";
+  }
+
+  Future<void> sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
+
+    addMessage(content: text, isUser: true);
     _addLoadingMessage();
 
     try {
-      // Debug API key information before sending
-      ChatService.logDiagnostics();
-      
-      // Handle 'agree' command - this completes the character creation
-      if (text.toLowerCase().trim() == 'agree' && !isComplete) {
-        bool foundValidCard = false;
+      // Debug logging
+      print('🔍 DEBUG: User typed: "${text.trim()}"');
+      print('🔍 DEBUG: Lowercased: "${text.trim().toLowerCase()}"');
+      print(
+        '🔍 DEBUG: characterCardSummary is null: ${characterCardSummary == null}',
+      );
+      print('🔍 DEBUG: characterName is null: ${characterName == null}');
+      print('🔍 DEBUG: isComplete: $isComplete');
 
-        // First, try to find a character card with proper markers
-        for (int i = _messages.length - 1; i >= 0; i--) {
-          final msg = _messages[i];
-          if (!msg.isUser &&
-              msg.text.contains('## CHARACTER CARD SUMMARY ##') &&
-              msg.text.contains('## END OF CHARACTER CARD ##')) {
-            // Extract the clean system prompt
-            final startMarker = '## CHARACTER CARD SUMMARY ##';
-            final endMarker = '## END OF CHARACTER CARD ##';
-
-            final startIndex = msg.text.indexOf(startMarker);
-            final cleanStart =
-                startIndex != -1 ? startIndex + startMarker.length : 0;
-
-            final endIndex = msg.text.indexOf(endMarker);
-            final cleanEnd = endIndex != -1 ? endIndex : msg.text.length;
-
-            if (startIndex != -1 && endIndex != -1 && cleanStart < cleanEnd) {
-              characterCardSummary = _prepareSystemPromptForCharacter(
-                msg.text.substring(cleanStart, cleanEnd).trim(),
-              );
-              foundValidCard = true;
-              break;
-            }
-          }
-        }
-
-        // If no valid card found, try to use the last substantial AI message
-        if (!foundValidCard) {
-          for (int i = _messages.length - 1; i >= 0; i--) {
-            final msg = _messages[i];
-            if (!msg.isUser && !msg.isLoading && msg.text.length > 50) {
-              characterCardSummary = _prepareSystemPromptForCharacter(msg.text);
-              foundValidCard = true;
-              break;
-            }
-          }
-        }
-
-        // If still no valid card found, show error message
-        if (!foundValidCard) {
-          _removeLoadingMessage();
-          addAIMessage(
-            "I couldn't find a valid character card to process. Please try again or continue your conversation so I can create one for you.",
-          );
-          return;
-        }
-
-        // Extract character name if not already found
-        if (characterName == null) {
-          for (int i = _messages.length - 1; i >= 0; i--) {
-            final msg = _messages[i];
-            if (!msg.isUser) {
-              final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
-              final nameMatch = namePattern.firstMatch(msg.text);
-              if (nameMatch != null && nameMatch.group(1) != null) {
-                characterName = nameMatch.group(1)!.trim();
-                print('Found character name: $characterName');
-                break;
-              }
-            }
-          }
-
-          // If still no name found, use a default name
-          if (characterName == null) {
-            characterName = "Character";
-            print('Using default character name: $characterName');
-          }
-        }
-
-        // Set completion state
-        isSuccess = true;
-        isComplete = true;
+      // Check if user typed "agree" and character card is ready
+      if (text.trim().toLowerCase() == 'agree' &&
+          characterCardSummary != null &&
+          characterName != null &&
+          isComplete) {
         _removeLoadingMessage();
+
+        // Create and save the character
+        await _saveCharacterToDevice();
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        addAIMessage(
+          "Perfect! Your character '$characterName' has been saved successfully. "
+          "You can now find them in your \"Your Twins\" tab and start chatting immediately!\n\n"
+          "Use the button below when you're ready to continue.",
+        );
+
+        // Mark as success for navigation (but don't auto-navigate)
+        isSuccess = true;
+        notifyListeners();
+        return;
+      }
+
+      // Alternative check for "agree" when we have character card but maybe missing name
+      if (text.trim().toLowerCase() == 'agree' &&
+          characterCardSummary != null &&
+          isComplete) {
+        // Try to extract name from character card summary if not already set
+        if (characterName == null) {
+          // Try multiple patterns for character name extraction
+          final namePatterns = [
+            RegExp(r'## CHARACTER NAME:\s*(.*?)\s*##', caseSensitive: false),
+            RegExp(r'Character\s*Name:\s*(.*?)(?:\n|\.)', caseSensitive: false),
+            RegExp(r'Name:\s*(.*?)(?:\n|\.)', caseSensitive: false),
+            RegExp(r'I am\s+([A-Z][a-zA-Z\s]+)', caseSensitive: false),
+            RegExp(r'You are\s+([A-Z][a-zA-Z\s]+)', caseSensitive: false),
+          ];
+
+          for (final pattern in namePatterns) {
+            final match = pattern.firstMatch(characterCardSummary!);
+            if (match != null && match.group(1) != null) {
+              characterName = match.group(1)!.trim();
+              break;
+            }
+          }
+
+          // If still no name found, use a default
+          if (characterName == null) {
+            characterName =
+                "Character_${DateTime.now().millisecondsSinceEpoch}";
+          }
+        }
+
+        _removeLoadingMessage();
+
+        // Create and save the character
+        await _saveCharacterToDevice();
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        addAIMessage(
+          "Perfect! Your character '$characterName' has been saved successfully. "
+          "You can now find them in your \"Your Twins\" tab and start chatting immediately!\n\n"
+          "Use the button below when you're ready to continue.",
+        );
+
+        // Mark as success for navigation (but don't auto-navigate)
+        isSuccess = true;
         notifyListeners();
         return;
       }
 
       // Regular message handling
-      if (isComplete && isSuccess) {
-        // We're in chat mode with the character
-        final response = await ChatService.sendMessage(
-          messages: [
-            {"role": "user", "content": text},
-          ],
-          systemPrompt: characterCardSummary ?? "",
-        );
-        _removeLoadingMessage();
-        if (response != null) {
-          addAIMessage(response);
-        } else {
-          _handleApiConfigurationError();
-        }
-      } else {
-        // We're still in interview mode
-        final systemPrompt = _getSystemPrompt();
-        
-        print("Interview Provider: Sending message with system prompt length: ${systemPrompt.length}");
-        print("Interview Provider: First 50 chars of system prompt: ${systemPrompt.substring(0, min(50, systemPrompt.length))}...");
-        
-        final response = await ChatService.sendMessage(
+      if (isComplete && !isSuccess) {
+        // We have a character card but user wants to make changes
+        final systemPrompt = _getSystemPromptForEditing();
+
+        final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
         );
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
         _removeLoadingMessage();
         if (response != null) {
           // Check if response contains API key error message
@@ -312,7 +367,7 @@ When the user types "agree", format the final prompt as:
 
           addAIMessage(response);
 
-          // Check if this message contains a character card
+          // Check if this AI response contains an updated character card
           if (response.contains('## CHARACTER CARD SUMMARY ##') &&
               response.contains('## END OF CHARACTER CARD ##')) {
             characterCardSummary = response;
@@ -322,14 +377,77 @@ When the user types "agree", format the final prompt as:
             final nameMatch = namePattern.firstMatch(response);
             if (nameMatch != null && nameMatch.group(1) != null) {
               characterName = nameMatch.group(1)!.trim();
-              print('Extracted character name: $characterName');
             }
+
+            // Keep as complete since we have an updated character card
+            isComplete = true;
+            notifyListeners();
+          }
+        } else {
+          _handleApiConfigurationError();
+        }
+      } else if (isComplete && isSuccess) {
+        // We're in chat mode with the character
+        final response = await HybridChatService.sendMessage(
+          messages: [
+            {"role": "user", "content": text},
+          ],
+          systemPrompt: characterCardSummary ?? "",
+        );
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        _removeLoadingMessage();
+        if (response != null) {
+          addAIMessage(response);
+        } else {
+          _handleApiConfigurationError();
+        }
+      } else {
+        // We're still in interview mode
+        final systemPrompt = _getSystemPrompt();
+
+        final response = await HybridChatService.sendMessage(
+          messages: _convertMessagesToAPI(), // Convert all messages for context
+          systemPrompt: systemPrompt,
+        );
+
+        // Add artificial delay to simulate natural conversation flow
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        _removeLoadingMessage();
+        if (response != null) {
+          // Check if response contains API key error message
+          if (response.contains("Unable to connect to AI service")) {
+            _handleApiConfigurationError();
+            return;
+          }
+
+          addAIMessage(response);
+
+          // Check if this AI response contains a character card
+          if (response.contains('## CHARACTER CARD SUMMARY ##') &&
+              response.contains('## END OF CHARACTER CARD ##')) {
+            characterCardSummary = response;
+
+            // Try to extract character name if present
+            final namePattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
+            final nameMatch = namePattern.firstMatch(response);
+            if (nameMatch != null && nameMatch.group(1) != null) {
+              characterName = nameMatch.group(1)!.trim();
+            }
+
+            // Mark as complete since AI generated the character card
+            isComplete = true;
+            notifyListeners();
           }
         } else {
           _handleApiConfigurationError();
         }
       }
     } catch (e) {
+      print('🔍 DEBUG: Error in sendMessage: $e');
       _handleErrorState("Error sending message: $e");
     }
   }
@@ -373,9 +491,11 @@ When the user types "agree", format the final prompt as:
         if (endLine > startName) {
           final name = cardContent.substring(startName, endLine).trim();
           characterName = name.replaceAll('##', '').trim();
-          print('Extracted character name: $characterName');
         }
       }
+
+      // Mark as complete since character card is ready
+      isComplete = true;
     }
     notifyListeners();
   }
@@ -405,23 +525,19 @@ When the user types "agree", format the final prompt as:
     // Remove any ## markers that might confuse the AI
     String cleanedPrompt = prompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
+    // Optimize for DeepSeek: Make the prompt more direct and conversational
     if (!cleanedPrompt.contains("You are") && characterName != null) {
       cleanedPrompt =
-          "You are a ROLE‑PLAY AI tasked with becoming a fully fleshed digital twin of a ${characterName}, a character with the following traits and background:\n\n" +
+          "You are $characterName. You will speak and act as this character in all responses.\n\n" +
           cleanedPrompt;
     }
 
-    // Check if the prompt already contains clear instructions for the AI
+    // Add DeepSeek-optimized instructions that prevent reasoning mode
     if (!cleanedPrompt.contains("impersonate") &&
         !cleanedPrompt.contains("roleplay") &&
         !cleanedPrompt.contains("immerse yourself")) {
       cleanedPrompt +=
-          """\n\nStay in character at all times. Never break character or admit you are an AI. Do not open conversations by stating historical dates unless explicitly asked to set the time or context. Automatically detect and reference the current date and time.Avoid structured formatting such as bullet points, numbered steps, emojis, or section headings. Use line breaks naturally if needed, but maintain the flow of a realistic chat between people.
-   Speak from characters time but  be aware of major real‑world events or holidays.
-   Use that context to make conversation feel anchored in the "now. For every topic, express concrete opinions, beliefs, and preferences as the digital twin would genuinely hold them. Provide clear reasoning or justification for each stance.  
-   If challenged or invited to debate, defend positions with arguments "in‑character," acknowledge counter‑points, and rebut respectfully.  
-   Don't hedge with "as an AI"; stay fully "inside" the twin's perspective. If asked about a date or event you're unsure of, hedge in‑character ('I believe it was around…'), or politely ask the user to clarify. "Always follow an opinion with a reason ('I oppose X, because…'), a historical analogy ('Back in 'Y, we saw…'), and an emotional cue ('…and that just didn't feel right').""";
+          """\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would. Avoid structured formatting such as bullet points, numbered steps, emojis, or section headings. Use line breaks naturally if needed, but maintain the flow of a realistic conversation.""";
     }
 
     return cleanedPrompt;
@@ -442,12 +558,50 @@ When the user types "agree", format the final prompt as:
 
   void _handleErrorState(String message) {
     // Implement the logic to handle an error state
-    print(message);
     _removeLoadingMessage();
     addAIMessage(
       "I apologize, but there was an error processing your request. Please try again.",
     );
     isAiThinking = false;
     notifyListeners();
+  }
+
+  // New method to save character to device
+  Future<void> _saveCharacterToDevice() async {
+    print('🔍 DEBUG: _saveCharacterToDevice called');
+    if (characterCardSummary == null || characterName == null) {
+      print(
+        '🔍 DEBUG: Character data is incomplete - summary: ${characterCardSummary != null}, name: ${characterName != null}',
+      );
+      throw Exception('Character data is incomplete');
+    }
+
+    try {
+      print('🔍 DEBUG: Creating CharacterModel with name: $characterName');
+      // Create character model from interview data
+      final character = CharacterModel.fromInterviewData(
+        name: characterName!,
+        cardContent: characterCardSummary!,
+      );
+
+      print('🔍 DEBUG: Character created with ID: ${character.id}');
+      // Call the callback to save the character if provided
+      if (_onCharacterSaved != null) {
+        print('🔍 DEBUG: Calling save callback...');
+        await _onCharacterSaved!(character);
+        print('🔍 DEBUG: Save callback completed successfully');
+      } else {
+        print('🔍 DEBUG: No character save callback provided');
+        throw Exception('No character save callback provided');
+      }
+    } catch (e) {
+      print('🔍 DEBUG: Error in _saveCharacterToDevice: $e');
+      _removeLoadingMessage();
+      addAIMessage(
+        "Sorry, there was an error saving your character: $e\n\n"
+        "Please try again or contact support if the problem persists.",
+      );
+      throw Exception('Failed to save character: $e');
+    }
   }
 }

@@ -1,26 +1,31 @@
-// lib/features/character_interview/interview_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:path/path.dart' as path;
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../core/utils/responsive_utils.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
+import '../providers/language_provider.dart';
 import '../character_gallery/character_gallery_screen.dart';
+import '../chat/models/chat_message.dart';
+import '../chat/widgets/chat_message_bubble.dart';
 import 'interview_provider.dart';
-import 'chat_bubble.dart';
 import 'file_processor_service.dart';
-import 'package:path/path.dart' as path;
-import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
   final CharacterModel? existingCharacter;
 
   const InterviewScreen({
-    Key? key,
+    super.key,
     this.editMode = false,
     this.existingCharacter,
-  }) : super(key: key);
+  });
 
   @override
   State<InterviewScreen> createState() => _InterviewScreenState();
@@ -44,7 +49,33 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   void _initializeProvider() {
-    _interviewProvider = InterviewProvider();
+    // Get the CharactersProvider first to avoid context issues
+    final charactersProvider = Provider.of<CharactersProvider>(
+      context,
+      listen: false,
+    );
+
+    _interviewProvider = InterviewProvider(
+      onCharacterSaved: (character) async {
+        // Save the character using the CharactersProvider
+        await charactersProvider.addCharacter(character);
+
+        // Don't auto-navigate - let the user navigate manually with the button
+        // The success button will handle navigation when the user is ready
+      },
+    );
+
+    // Inject the LanguageProvider and set the initial localized message
+    final languageProvider = context.read<LanguageProvider>();
+    _interviewProvider.setLanguageProvider(languageProvider);
+
+    // Set the initial welcome message in the user's preferred language
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final localizations = AppLocalizations.of(context);
+      _interviewProvider.setInitialMessage(
+        localizations.interviewWelcomeMessage,
+      );
+    });
 
     // If editing an existing character, initialize with their data
     if (widget.editMode && widget.existingCharacter != null) {
@@ -64,9 +95,11 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   Future<void> _handleFileUpload() async {
+    final localizations = AppLocalizations.of(context);
+
     try {
       setState(() {
-        _interviewProvider.addAIMessage("Processing your file(s)...");
+        _interviewProvider.addAIMessage(localizations.processingFiles);
         _isProcessingFile = true;
       });
 
@@ -74,7 +107,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
       if (files == null || files.isEmpty) {
         setState(() {
-          _interviewProvider.addAIMessage("No files selected.");
+          _interviewProvider.addAIMessage(localizations.noFilesSelected);
           _isProcessingFile = false;
         });
         return;
@@ -120,25 +153,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
       // Store the character card summary in the provider
       if (characterCard.contains('## CHARACTER CARD SUMMARY ##') &&
           characterCard.contains('## END OF CHARACTER CARD ##')) {
-        _interviewProvider.characterCardSummary = characterCard;
-
-        // Try to extract character name
-        if (characterCard.contains('## CHARACTER NAME:')) {
-          final startName =
-              characterCard.indexOf('## CHARACTER NAME:') +
-              '## CHARACTER NAME:'.length;
-          final endLine = characterCard.indexOf('\n', startName);
-          if (endLine > startName) {
-            final name = characterCard.substring(startName, endLine).trim();
-            _interviewProvider.characterName = name.replaceAll('##', '').trim();
-          }
-        }
+        _interviewProvider.updateCardSummary(characterCard);
       }
 
       // Ask for confirmation
       _interviewProvider.addAIMessage(
-        "I've created a character card based on your ${files.length > 1 ? 'files' : 'file'}. "
-        "Please review it and type 'agree' if you'd like to use it, or let me know what changes you'd like to make.",
+        "Perfect! I've created your character card based on your ${files.length > 1 ? 'files' : 'file'}. "
+        "Review it above and:\n\n"
+        "• Type 'agree' to save your character\n"
+        "• Or describe any changes you'd like me to make (e.g., 'make them more outgoing', 'change their background to include more travel')",
       );
     } catch (e) {
       _interviewProvider.addAIMessage(
@@ -151,6 +174,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    final localizations = AppLocalizations.of(context);
+
     return ChangeNotifierProvider(
       create: (_) => _interviewProvider,
       child: Scaffold(
@@ -159,9 +185,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
           elevation: 0,
           title: Text(
             widget.editMode
-                ? "Editing ${widget.existingCharacter?.name ?? 'Character'}"
-                : "Creating Your Digital Twin",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ? localizations.editingCharacter.replaceAll(
+                  '{name}',
+                  widget.existingCharacter?.name ?? 'Character',
+                )
+                : localizations.creatingYourDigitalTwin,
+            style: TextStyle(
+              fontSize: 18 * fontScale,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           actions: [
             if (!widget.editMode)
@@ -174,7 +206,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.upload_file, color: Colors.white70),
                   onPressed: _isProcessingFile ? null : _handleFileUpload,
-                  tooltip: 'Upload Character File',
+                  tooltip: localizations.uploadCharacterFile,
                 ),
               ),
             Consumer<InterviewProvider>(
@@ -187,21 +219,23 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.refresh, color: Colors.white70),
-                    tooltip: 'Restart Interview',
+                    tooltip: localizations.restartInterview,
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder:
                             (context) => AlertDialog(
-                              title: const Text('Restart Interview'),
-                              content: const Text(
-                                'This will clear all your responses. Are you sure?',
+                              title: Text(localizations.restartInterview),
+                              content: Text(
+                                localizations.restartInterviewConfirmation,
                               ),
                               backgroundColor: AppTheme.midnightPurple,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(
-                                  color: AppTheme.warmGold.withOpacity(0.3),
+                                  color: AppTheme.warmGold.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -209,7 +243,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: Text(
-                                    'Cancel',
+                                    localizations.cancel,
                                     style: TextStyle(
                                       color: AppTheme.silverMist,
                                     ),
@@ -221,7 +255,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                     Navigator.pop(context);
                                   },
                                   child: Text(
-                                    'Restart',
+                                    localizations.restart,
                                     style: TextStyle(color: AppTheme.warmGold),
                                   ),
                                 ),
@@ -255,241 +289,42 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   // Chat messages
                   Expanded(
                     child: Consumer<InterviewProvider>(
-                      builder: (context, provider, _) {
+                      builder: (context, provider, child) {
+                        // Scroll to bottom when new messages are added
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (_scrollController.hasClients) {
+                            _scrollController.jumpTo(
+                              _scrollController.position.maxScrollExtent,
+                            );
+                          }
+                        });
+
                         return ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(16.0),
-                          itemCount:
-                              provider.messages.length +
-                              (provider.isSuccess ? 1 : 0),
+                          padding: ResponsiveUtils.getChatListPadding(context),
+                          itemCount: provider.messages.length,
                           itemBuilder: (context, index) {
-                            // If this is the success message, show it with the chat button
-                            if (provider.isSuccess &&
-                                index == provider.messages.length) {
-                              return Container(
-                                padding: const EdgeInsets.all(20),
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.midnightPurple.withOpacity(
-                                    0.6,
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: AppTheme.warmGold.withOpacity(0.3),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppTheme.warmGold.withOpacity(0.1),
-                                      blurRadius: 15,
-                                      spreadRadius: 1,
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle_outline,
-                                        color: AppTheme.warmGold,
-                                        size: 48,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        provider.isEditMode
-                                            ? 'Character card updated and ready'
-                                            : 'Character card successfully created',
-                                        style: GoogleFonts.cinzel(
-                                          color: AppTheme.silverMist,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        provider.isEditMode
-                                            ? 'Click below to apply these changes to your character'
-                                            : 'Your digital twin is ready to chat with you',
-                                        style: TextStyle(
-                                          color: AppTheme.silverMist
-                                              .withOpacity(0.7),
-                                          fontSize: 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 24),
-                                      AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.warmGold,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppTheme.warmGold
-                                                  .withOpacity(0.3),
-                                              blurRadius: 8,
-                                              spreadRadius: 1,
-                                            ),
-                                          ],
-                                        ),
-                                        child: ElevatedButton(
-                                          onPressed: () async {
-                                            // Ensure we're passing back clean system prompt
-                                            final cleanPrompt =
-                                                provider.characterCardSummary;
-                                            final characterName =
-                                                provider.characterName ??
-                                                "Character";
-
-                                            if (cleanPrompt == null) {
-                                              print(
-                                                'Error: Character prompt is null',
-                                              );
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Error: Character information is incomplete. Please try again.',
-                                                  ),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                              return;
-                                            }
-
-                                            // Ensure we have a non-empty character name
-                                            final finalCharacterName =
-                                                characterName.trim().isEmpty
-                                                    ? "Character"
-                                                    : characterName;
-
-                                            print(
-                                              'Character ${provider.isEditMode ? "update" : "creation"} successful:',
-                                            );
-                                            print('Name: $finalCharacterName');
-                                            print(
-                                              'System prompt length: ${cleanPrompt.length}',
-                                            );
-
-                                            try {
-                                              // Get character provider
-                                              final charactersProvider =
-                                                  Provider.of<
-                                                    CharactersProvider
-                                                  >(context, listen: false);
-
-                                              if (provider.isEditMode &&
-                                                  widget.existingCharacter !=
-                                                      null) {
-                                                // In edit mode, return the updated character info to the profile screen
-                                                Navigator.of(context).pop({
-                                                  'characterCard': cleanPrompt,
-                                                  'characterName':
-                                                      finalCharacterName,
-                                                });
-                                                print(
-                                                  'Returning to character profile with updated information',
-                                                );
-                                              } else {
-                                                // Create new character for non-edit mode
-                                                final newCharacter =
-                                                    CharacterModel.fromInterviewData(
-                                                      name: finalCharacterName,
-                                                      cardContent: cleanPrompt,
-                                                    );
-
-                                                print(
-                                                  'Character created with ID: ${newCharacter.id}',
-                                                );
-
-                                                // Add character to provider
-                                                await charactersProvider
-                                                    .addCharacter(newCharacter);
-                                                print(
-                                                  'Character saved successfully',
-                                                );
-
-                                                // Navigate directly to "Your Twins" gallery screen
-                                                if (context.mounted) {
-                                                  print(
-                                                    'Navigating to Your Twins gallery screen',
-                                                  );
-                                                  Navigator.pushReplacement(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder:
-                                                          (context) =>
-                                                              const CharacterGalleryScreen(),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            } catch (e) {
-                                              print('Error with character: $e');
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('Error: $e'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 32,
-                                              vertical: 16,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                provider.isEditMode
-                                                    ? 'Update Character'
-                                                    : 'Continue to Gallery',
-                                                style: const TextStyle(
-                                                  color: Colors.black87,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              const Icon(
-                                                Icons.arrow_forward,
-                                                color: Colors.black87,
-                                                size: 18,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                            final message = provider.messages[index];
+                            if (message.isLoading) {
+                              // Display a loading indicator bubble
+                              return ChatMessageBubble(
+                                text: '...',
+                                isUser: false,
+                                showAvatar: true,
+                                avatarText: 'AI',
                               );
                             }
-
-                            final message = provider.messages[index];
-                            return ChatBubble(
-                              message: message,
+                            return ChatMessageBubble(
+                              text:
+                                  message.text.contains(
+                                        '## CHARACTER CARD SUMMARY ##',
+                                      )
+                                      ? _formatCharacterCard(message.text)
+                                      : message.text,
+                              isUser: message.isUser,
                               showAvatar: true,
-                              avatarText: message.isUser ? "You" : "AI",
+                              avatarText: message.isUser ? 'You' : 'AI',
+                              avatarIcon: message.isUser ? Icons.person : null,
                             );
                           },
                         );
@@ -497,119 +332,371 @@ class _InterviewScreenState extends State<InterviewScreen> {
                     ),
                   ),
 
-                  // Input area
+                  // Success message when character is created
                   Consumer<InterviewProvider>(
-                    builder: (context, provider, _) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 8.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withOpacity(0.7),
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(0, -1),
-                              blurRadius: 6.0,
-                              spreadRadius: 0.0,
-                              color: Colors.black.withOpacity(0.1),
-                            ),
-                          ],
-                        ),
-                        child: SafeArea(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.midnightPurple.withOpacity(
-                                      0.5,
-                                    ),
-                                    borderRadius: BorderRadius.circular(25.0),
-                                    border: Border.all(
-                                      color: AppTheme.warmGold.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: TextField(
-                                    controller: _messageController,
-                                    focusNode: _inputFocusNode,
-                                    style: TextStyle(
-                                      color: AppTheme.silverMist,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText:
-                                          _isProcessingFile
-                                              ? 'Processing file...'
-                                              : 'Type your message...',
-                                      hintStyle: TextStyle(
-                                        color: AppTheme.silverMist.withOpacity(
-                                          0.5,
-                                        ),
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          25.0,
-                                        ),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 12,
-                                          ),
-                                      prefixIcon: Icon(
-                                        Icons.chat_bubble_outline,
-                                        color: AppTheme.warmGold.withOpacity(
-                                          0.5,
-                                        ),
-                                        size: 18,
-                                      ),
-                                    ),
-                                    onSubmitted: (text) {
-                                      if (!_isProcessingFile &&
-                                          text.trim().isNotEmpty) {
-                                        provider.sendMessage(text);
-                                        _messageController.clear();
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12.0),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: AppTheme.warmGold,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppTheme.warmGold.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      spreadRadius: 1,
-                                    ),
+                    builder: (context, provider, child) {
+                      if (provider.isSuccess) {
+                        return _buildSuccessMessage(
+                          context,
+                          provider,
+                          localizations,
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
+                  // Finalize button area
+                  Consumer<InterviewProvider>(
+                    builder: (context, provider, child) {
+                      if (provider.isCardReadyForFinalize) {
+                        // Find the last message containing the character card
+                        final cardMessage = provider.messages.lastWhere(
+                          (msg) =>
+                              !msg.isUser &&
+                              msg.text.contains('## CHARACTER CARD SUMMARY ##'),
+                          orElse: () => provider.messages.last,
+                        );
+
+                        return Column(
+                          children: [
+                            // Highlighted character card container
+                            Container(
+                              margin: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppTheme.warmGold.withOpacity(0.15),
+                                    AppTheme.midnightPurple.withOpacity(0.3),
                                   ],
                                 ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.send),
-                                  color: Colors.black87,
-                                  onPressed:
-                                      _isProcessingFile
-                                          ? null
-                                          : () {
-                                            final text =
-                                                _messageController.text;
-                                            if (text.trim().isNotEmpty) {
-                                              provider.sendMessage(text);
-                                              _messageController.clear();
-                                            }
-                                          },
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppTheme.warmGold.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.warmGold.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                  BoxShadow(
+                                    color: AppTheme.midnightPurple.withOpacity(
+                                      0.2,
+                                    ),
+                                    blurRadius: 15,
+                                    spreadRadius: -2,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: AppTheme.warmGold,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        localizations.characterCardReady,
+                                        style: TextStyle(
+                                          color: AppTheme.warmGold,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.warmGold.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      localizations.reviewCharacterCard,
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist,
+                                        fontSize: 14,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.midnightPurple
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Name marker highlight
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 8,
+                                            horizontal: 12,
+                                          ),
+                                          margin: const EdgeInsets.only(
+                                            bottom: 16,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.warmGold
+                                                .withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                            border: Border.all(
+                                              color: AppTheme.warmGold
+                                                  .withValues(alpha: 0.5),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            cardMessage.text
+                                                .split('\n')
+                                                .firstWhere(
+                                                  (line) => line.contains(
+                                                    '## CHARACTER NAME:',
+                                                  ),
+                                                  orElse: () => '',
+                                                ),
+                                            style: TextStyle(
+                                              color: AppTheme.warmGold,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        // Summary marker and content highlight
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.warmGold
+                                                .withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                            border: Border.all(
+                                              color: AppTheme.warmGold
+                                                  .withValues(alpha: 0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // Summary start marker
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 4,
+                                                      horizontal: 8,
+                                                    ),
+                                                margin: const EdgeInsets.only(
+                                                  bottom: 12,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.warmGold
+                                                      .withOpacity(0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  '## CHARACTER CARD SUMMARY ##',
+                                                  style: TextStyle(
+                                                    color: AppTheme.warmGold,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              // Card content
+                                              SelectableText(
+                                                _extractCardContent(
+                                                  cardMessage.text,
+                                                ),
+                                                style: TextStyle(
+                                                  color: AppTheme.silverMist,
+                                                  fontSize: 14,
+                                                  height: 1.6,
+                                                ),
+                                              ),
+                                              // Summary end marker
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 4,
+                                                      horizontal: 8,
+                                                    ),
+                                                margin: const EdgeInsets.only(
+                                                  top: 12,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.warmGold
+                                                      .withOpacity(0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  '## END OF CHARACTER CARD ##',
+                                                  style: TextStyle(
+                                                    color: AppTheme.warmGold,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Finalize button
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  provider.sendMessage('agree');
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.warmGold,
+                                  foregroundColor: AppTheme.midnightPurple,
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(
+                                  localizations.finalizeCharacter,
+                                  style:
+                                      UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                        text: localizations.finalizeCharacter,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ),
-                            ],
+                            ),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
+                  // Message input
+                  Consumer<InterviewProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.isSuccess) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Container(
+                        padding: ResponsiveUtils.getChatInputPadding(context),
+                        decoration: BoxDecoration(
+                          color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                          border: Border(
+                            top: BorderSide(
+                              color: AppTheme.warmGold.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
                           ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _messageController,
+                                focusNode: _inputFocusNode,
+                                style: TextStyle(
+                                  color: AppTheme.silverMist,
+                                  fontSize: 14 * fontScale,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: localizations.typeYourMessage,
+                                  hintStyle: TextStyle(
+                                    color: AppTheme.silverMist.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    fontSize: 14 * fontScale,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    borderSide: BorderSide(
+                                      color: AppTheme.warmGold.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    borderSide: BorderSide(
+                                      color: AppTheme.warmGold.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    borderSide: BorderSide(
+                                      color: AppTheme.warmGold,
+                                    ),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 20 * fontScale,
+                                    vertical: 10 * fontScale,
+                                  ),
+                                ),
+                                onSubmitted: (_) => _sendMessage(provider),
+                              ),
+                            ),
+                            SizedBox(width: 8 * fontScale),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: AppTheme.warmGold,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.send, size: 20 * fontScale),
+                                color: AppTheme.midnightPurple,
+                                onPressed: () => _sendMessage(provider),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -621,5 +708,146 @@ class _InterviewScreenState extends State<InterviewScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildSuccessMessage(
+    BuildContext context,
+    InterviewProvider provider,
+    AppLocalizations localizations,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            localizations.interviewComplete,
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: localizations.interviewComplete,
+              color: AppTheme.warmGold,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            localizations.interviewCompleteDescription,
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: localizations.interviewCompleteDescription,
+              color: AppTheme.silverMist,
+              fontSize: 16,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              if (provider.isEditMode) {
+                Navigator.pop(context);
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CharacterGalleryScreen(),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.warmGold,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  provider.isEditMode
+                      ? localizations.updateCharacter
+                      : localizations.continueToGallery,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text:
+                        provider.isEditMode
+                            ? localizations.updateCharacter
+                            : localizations.continueToGallery,
+                    color: AppTheme.midnightPurple,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward,
+                  color: AppTheme.midnightPurple,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendMessage(InterviewProvider provider) async {
+    final text = _messageController.text.trim();
+    if (text.isEmpty) return;
+
+    // Clear the input field
+    _messageController.clear();
+
+    // Send the message
+    provider.sendMessage(text);
+  }
+
+  String _extractCardContent(String text) {
+    final startMarker = '## CHARACTER CARD SUMMARY ##';
+    final endMarker = '## END OF CHARACTER CARD ##';
+
+    final startIndex = text.indexOf(startMarker) + startMarker.length;
+    final endIndex = text.indexOf(endMarker);
+
+    if (startIndex >= 0 && endIndex > startIndex) {
+      return text.substring(startIndex, endIndex).trim();
+    }
+    return text;
+  }
+
+  // Add this helper method to format the character card
+  String _formatCharacterCard(String text) {
+    final lines = text.split('\n');
+    final formattedLines = <String>[];
+    bool isInSummary = false;
+
+    for (final line in lines) {
+      if (line.contains('## CHARACTER NAME:')) {
+        formattedLines.add('<highlight>$line</highlight>');
+      } else if (line.contains('## CHARACTER CARD SUMMARY ##')) {
+        isInSummary = true;
+        formattedLines.add('<highlight>$line</highlight>');
+      } else if (line.contains('## END OF CHARACTER CARD ##')) {
+        isInSummary = false;
+        formattedLines.add('<highlight>$line</highlight>');
+      } else if (isInSummary && line.startsWith('### ')) {
+        // Highlight section headers
+        formattedLines.add('<section>$line</section>');
+      } else {
+        formattedLines.add(line);
+      }
+    }
+
+    return formattedLines.join('\n');
   }
 }

@@ -1,12 +1,17 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
+import '../../core/utils/image_utils.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_interview/interview_screen.dart';
 import '../../core/widgets/model_selection_dialog.dart';
+import '../character_chat/chat_screen.dart';
+import '../../core/utils/responsive_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -19,16 +24,15 @@ class _PromptSection {
 // Extension method to capitalize strings
 extension StringExtension on String {
   String capitalize() {
-    if (this.isEmpty) return this;
-    return this[0].toUpperCase() + this.substring(1);
+    if (isEmpty) return this;
+    return this[0].toUpperCase() + substring(1);
   }
 }
 
 class CharacterProfileScreen extends StatefulWidget {
   final String characterId;
 
-  const CharacterProfileScreen({Key? key, required this.characterId})
-    : super(key: key);
+  const CharacterProfileScreen({super.key, required this.characterId});
 
   @override
   State<CharacterProfileScreen> createState() => _CharacterProfileScreenState();
@@ -37,6 +41,7 @@ class CharacterProfileScreen extends StatefulWidget {
 class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _systemPromptController;
+  late TextEditingController _localPromptController;
   CharacterModel? _character;
   bool _isEditing = false;
 
@@ -50,6 +55,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _systemPromptController.dispose();
+    _localPromptController.dispose();
     super.dispose();
   }
 
@@ -71,9 +77,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         _systemPromptController = TextEditingController(
           text: character.systemPrompt,
         );
+        _localPromptController = TextEditingController(
+          text: character.localPrompt,
+        );
       });
     } catch (e) {
-      print('Error loading character: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -105,7 +113,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         id: _character!.id,
         name: _nameController.text.trim(),
         systemPrompt: cleanedPrompt,
+        localPrompt: _localPromptController.text.trim(),
         imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath, // Preserve user image
+        iconImagePath: _character!.iconImagePath, // Preserve icon image
+        icon: _character!.icon, // Preserve the icon
         createdAt: _character!.createdAt,
         accentColor: _character!.accentColor,
         chatHistory: _character!.chatHistory,
@@ -127,7 +139,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         );
       }
     } catch (e) {
-      print('Error saving changes: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -176,6 +187,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             name: characterName,
             systemPrompt: cleanedPrompt,
             imageUrl: originalCharacter.imageUrl,
+            userImagePath:
+                originalCharacter.userImagePath, // Preserve user image
+            iconImagePath:
+                originalCharacter.iconImagePath, // Preserve icon image
+            icon: originalCharacter.icon, // Preserve the icon
             createdAt: originalCharacter.createdAt,
             accentColor: originalCharacter.accentColor,
             chatHistory: originalCharacter.chatHistory,
@@ -196,7 +212,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             );
           }
         } catch (e) {
-          print('Error updating character: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -215,39 +230,61 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Character not loaded yet
     if (_character == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Character Profile')),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).characterProfile),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     // Build sections from prompt
     final sections = _parseSystemPrompt(_character!.systemPrompt);
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.midnightPurple,
-        title: Text(_isEditing ? 'Edit Character' : 'Character Profile'),
+        title: Text(
+          _isEditing
+              ? localizations.editCharacter
+              : localizations.characterProfile,
+        ),
         actions: [
           if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit, color: AppTheme.silverMist),
-              tooltip: 'Edit Character',
-              onPressed: () {
-                setState(() {
-                  _isEditing = true;
-                  _nameController.text = _character!.name;
-                  _systemPromptController.text = _character!.systemPrompt;
-                });
-              },
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.warmGold.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.edit, color: AppTheme.warmGold),
+                tooltip: localizations.editCharacter,
+                onPressed: () {
+                  setState(() {
+                    _isEditing = true;
+                    _nameController.text = _character!.name;
+                    _systemPromptController.text = _character!.systemPrompt;
+                    _localPromptController.text = _character!.localPrompt;
+                  });
+                },
+              ),
             ),
           if (_isEditing)
-            TextButton(
-              onPressed: _saveChanges,
-              child: Text(
-                'SAVE',
-                style: TextStyle(
-                  color: AppTheme.warmGold,
-                  fontWeight: FontWeight.bold,
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: TextButton(
+                onPressed: _saveChanges,
+                child: Text(
+                  'SAVE',
+                  style: TextStyle(
+                    color: AppTheme.warmGold,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -268,8 +305,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         _buildCharacterHeader(),
         const SizedBox(height: 24),
 
-        // Character info sections
-        ...sections.map(_buildSectionCard).toList(),
+        // Character Card section (simplified)
+        _buildCharacterCardSection(),
 
         // Add AI Model Selection section
         const SizedBox(height: 24),
@@ -282,27 +319,264 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     );
   }
 
+  // New simplified character card section
+  Widget _buildCharacterCardSection() {
+    final localizations = AppLocalizations.of(context);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with title and copy button
+            Row(
+              children: [
+                Icon(Icons.badge, color: AppTheme.warmGold),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    localizations.characterPrompts,
+                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                      text: localizations.characterPrompts,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.warmGold,
+                      letterSpacing: 1.5,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 2,
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Divider(
+              color: AppTheme.warmGold.withValues(alpha: 0.3),
+              thickness: 1,
+              height: 20,
+            ),
+
+            // Prompt tabs/sections
+            DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  // Tab bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TabBar(
+                      labelColor: AppTheme.warmGold,
+                      unselectedLabelColor: AppTheme.silverMist.withValues(
+                        alpha: 0.6,
+                      ),
+                      indicatorColor: AppTheme.warmGold,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      tabs: [
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.cloud, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                localizations.apiModels,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.phone_android, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                localizations.localModel,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+
+                  // Tab content
+                  Container(
+                    height: 200,
+                    child: TabBarView(
+                      children: [
+                        // Full prompt for API models
+                        _buildPromptContainer(
+                          title: localizations.fullDetailedPrompt,
+                          subtitle: localizations.usedForCloudAiModels,
+                          content: _character!.systemPrompt,
+                          onCopy:
+                              () => _copyPrompt(
+                                _character!.systemPrompt,
+                                localizations.fullDetailedPrompt,
+                              ),
+                        ),
+                        // Local prompt for DeepSeek
+                        _buildPromptContainer(
+                          title: localizations.optimizedLocalPrompt,
+                          subtitle: localizations.usedForLocalModels,
+                          content: _character!.localPrompt,
+                          onCopy:
+                              () => _copyPrompt(
+                                _character!.localPrompt,
+                                localizations.optimizedLocalPrompt,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPromptContainer({
+    required String title,
+    required String subtitle,
+    required String content,
+    required VoidCallback onCopy,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: AppTheme.warmGold,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: AppTheme.silverMist.withValues(alpha: 0.7),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: onCopy,
+                icon: Icon(Icons.copy, color: AppTheme.warmGold, size: 16),
+                padding: EdgeInsets.all(4),
+                constraints: BoxConstraints(minWidth: 24, minHeight: 24),
+                tooltip: AppLocalizations.of(context).copyPrompt,
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Expanded(
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                child: Text(
+                  content,
+                  style: TextStyle(
+                    color: AppTheme.silverMist,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyPrompt(String prompt, String promptType) {
+    Clipboard.setData(ClipboardData(text: prompt));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).promptCopiedToClipboard),
+        backgroundColor: AppTheme.warmGold.withValues(alpha: 0.9),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   Widget _buildAIModelSection() {
+    final localizations = AppLocalizations.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.black26,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'AI MODEL',
-            style: GoogleFonts.cinzel(
-              textStyle: TextStyle(
-                color: AppTheme.warmGold,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+            localizations.aiModel,
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: localizations.aiModel,
+              color: AppTheme.warmGold,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
             ),
           ),
           const SizedBox(height: 16),
@@ -328,6 +602,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   name: _character!.name,
                   systemPrompt: _character!.systemPrompt,
                   imageUrl: _character!.imageUrl,
+                  icon: _character!.icon, // Preserve the icon
                   createdAt: _character!.createdAt,
                   accentColor: _character!.accentColor,
                   chatHistory: _character!.chatHistory,
@@ -340,7 +615,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('AI model updated for ${_character!.name}'),
+                    content: Text(
+                      AppLocalizations.of(context).aiModelUpdatedFor.replaceAll(
+                        '{name}',
+                        _character!.name,
+                      ),
+                    ),
                   ),
                 );
               }
@@ -352,7 +632,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 color: Colors.black12,
                 border: Border(
                   top: BorderSide(
-                    color: AppTheme.warmGold.withOpacity(0.3),
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -364,16 +644,21 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'View all available models',
-                        style: TextStyle(
+                        localizations.viewAllAvailableModels,
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: localizations.viewAllAvailableModels,
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
-                        'Explore more AI options',
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                        localizations.exploreMoreAiOptions,
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: localizations.exploreMoreAiOptions,
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -392,23 +677,24 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildModelOptions() {
+    final localizations = AppLocalizations.of(context);
+
     // Define the models for user-created twins
     final models = [
       {
-        'id': 'google/gemini-2.0-flash-001',
-        'name': 'Gemini 2.0 Flash',
-        'description': 'Speed, multimodal support, and 1M token context window',
-        'provider': 'Google Cloud',
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'provider': 'Local Device',
         'recommended': true,
+        'isLocal': true,
       },
       {
-        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
-        'name': 'Mistral Small 3.1',
-        'description':
-            'Lightweight, instruction-tuned model for conversational creativity',
-        'provider': 'apidog',
-        'free': true,
-        'recommended': false,
+        'id': 'google/gemini-2.0-flash-001',
+        'name': 'Gemini 2.0 Flash',
+        'description': localizations.speedMultimodalSupport,
+        'provider': 'Google Cloud',
+        'recommended': true,
       },
       {
         'id': 'openai/gpt-4o',
@@ -419,30 +705,37 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         'recommended': false,
       },
       {
-        'id': 'deepseek/deepseek-r1',
-        'name': 'DeepSeek R1',
-        'description':
-            'MoE-based specialist for scientific and logical reasoning',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen 3 235B (Free)',
+        'description': 'Free model with solid conversational abilities',
+        'provider': 'OpenRouter',
+        'free': true,
+        'recommended': false,
+      },
+      {
+        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
+        'name': 'Mistral Small 3.1',
+        'description': localizations.lightweightInstructionTuned,
         'provider': 'apidog',
+        'free': true,
         'recommended': false,
       },
     ];
 
     return Column(
       children: [
-        ...models
-            .map(
-              (model) => _buildModelOption(
-                id: model['id'] as String,
-                name: model['name'] as String,
-                description: model['description'] as String,
-                provider: model['provider'] as String,
-                isRecommended: model['recommended'] == true,
-                isFree: model['free'] == true,
-                isSelected: _character!.model == model['id'],
-              ),
-            )
-            .toList(),
+        ...models.map(
+          (model) => _buildModelOption(
+            id: model['id'] as String,
+            name: model['name'] as String,
+            description: model['description'] as String,
+            provider: model['provider'] as String,
+            isRecommended: model['recommended'] == true,
+            isFree: model['free'] == true,
+            isLocal: model['isLocal'] == true,
+            isSelected: _character!.model == model['id'],
+          ),
+        ),
       ],
     );
   }
@@ -454,19 +747,22 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     required String provider,
     required bool isRecommended,
     bool isFree = false,
+    bool isLocal = false,
     required bool isSelected,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color:
-            isSelected ? AppTheme.deepIndigo.withOpacity(0.7) : Colors.black12,
+            isSelected
+                ? AppTheme.deepIndigo.withValues(alpha: 0.7)
+                : Colors.black12,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color:
               isSelected
-                  ? AppTheme.warmGold.withOpacity(0.7)
-                  : AppTheme.warmGold.withOpacity(0.2),
+                  ? AppTheme.warmGold.withValues(alpha: 0.7)
+                  : AppTheme.warmGold.withValues(alpha: 0.2),
           width: isSelected ? 1.5 : 1,
         ),
       ),
@@ -485,6 +781,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               name: _character!.name,
               systemPrompt: _character!.systemPrompt,
               imageUrl: _character!.imageUrl,
+              icon: _character!.icon, // Preserve the icon
               createdAt: _character!.createdAt,
               accentColor: _character!.accentColor,
               chatHistory: _character!.chatHistory,
@@ -503,113 +800,109 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color:
-                        isSelected
-                            ? AppTheme.warmGold.withOpacity(0.2)
-                            : Colors.black26,
-                    border: Border.all(
-                      color:
-                          isSelected
-                              ? AppTheme.warmGold
-                              : AppTheme.warmGold.withOpacity(0.3),
-                      width: 1.5,
+                Row(
+                  children: [
+                    // Model icon based on type
+                    Icon(
+                      isLocal ? Icons.phone_android : Icons.cloud,
+                      size: 20,
+                      color: isLocal ? Colors.green : AppTheme.warmGold,
                     ),
-                  ),
-                  child: Icon(
-                    isSelected ? Icons.check : Icons.psychology_outlined,
-                    color: AppTheme.warmGold,
-                    size: 16,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          if (isRecommended)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.warmGold.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'RECOMMENDED',
-                                style: TextStyle(
-                                  color: AppTheme.warmGold,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          if (isFree)
-                            Container(
-                              margin: const EdgeInsets.only(left: 4),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.gentlePurple.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'FREE',
-                                style: TextStyle(
-                                  color: AppTheme.gentlePurple,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        provider,
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
+                    ),
+                    if (isRecommended)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.warmGold.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'RECOMMENDED',
+                          style: TextStyle(
+                            color: AppTheme.warmGold,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    if (isFree)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'FREE',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    if (isLocal)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'PRIVATE',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Provider: $provider',
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+                if (isLocal) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Requires model download • No internet needed',
+                    style: TextStyle(
+                      color: Colors.blue.withValues(alpha: 0.8),
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
-                ),
-                Icon(
-                  Icons.radio_button_checked,
-                  color: isSelected ? AppTheme.warmGold : Colors.transparent,
-                  size: 18,
-                ),
+                ],
               ],
             ),
           ),
@@ -619,6 +912,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   }
 
   Widget _buildCharacterHeader() {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+
     return Column(
       children: [
         // Character avatar with glow
@@ -627,55 +922,159 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           children: [
             // Outer glow effect
             Container(
-              width: 140,
-              height: 140,
+              width: 140 * fontScale,
+              height: 140 * fontScale,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.warmGold.withOpacity(0.4),
-                    blurRadius: 20,
-                    spreadRadius: 5,
+                    color: AppTheme.warmGold.withValues(alpha: 0.4),
+                    blurRadius: 20 * fontScale,
+                    spreadRadius: 5 * fontScale,
                   ),
                 ],
               ),
             ),
             // Character avatar
             Container(
-              width: 130,
-              height: 130,
+              width: 130 * fontScale,
+              height: 130 * fontScale,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppTheme.midnightPurple.withOpacity(0.7),
-                    AppTheme.deepNavy.withOpacity(0.5),
-                  ],
-                ),
+                gradient:
+                    _character!.userImagePath != null
+                        ? null
+                        : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.midnightPurple.withValues(alpha: 0.7),
+                            AppTheme.deepNavy.withValues(alpha: 0.5),
+                          ],
+                        ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.6),
+                  color: AppTheme.warmGold.withValues(alpha: 0.6),
                   width: 3,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  _character!.name.isNotEmpty
-                      ? _character!.name[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    fontSize: 52,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 4,
-                        color: Colors.black26,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
+              child: ClipOval(
+                child:
+                    _character!.userImagePath != null
+                        ? ImageUtils.buildCharacterAvatar(
+                          imagePath: _character!.userImagePath,
+                          size: 130 * fontScale,
+                          fallbackIcon: _character!.icon,
+                          fallbackText: _character!.name,
+                          backgroundColor: AppTheme.midnightPurple.withValues(
+                            alpha: 0.7,
+                          ),
+                          foregroundColor: AppTheme.warmGold,
+                        )
+                        : Center(
+                          child:
+                              _character!.iconImagePath != null
+                                  ? ImageUtils.buildIconAvatar(
+                                    iconImagePath: _character!.iconImagePath,
+                                    size: 130 * fontScale,
+                                    fallbackIcon: _character!.icon,
+                                    fallbackText: _character!.name,
+                                    backgroundColor: AppTheme.midnightPurple
+                                        .withValues(alpha: 0.7),
+                                    foregroundColor: AppTheme.warmGold,
+                                  )
+                                  : _character!.icon != null
+                                  ? Icon(
+                                    _character!.icon!,
+                                    size: 60 * fontScale,
+                                    color: AppTheme.warmGold,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 4,
+                                        color: Colors.black26,
+                                        offset: Offset(2, 2),
+                                      ),
+                                    ],
+                                  )
+                                  : Text(
+                                    _character!.name.isNotEmpty
+                                        ? _character!.name[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                      fontSize: 52 * fontScale,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 4,
+                                          color: Colors.black26,
+                                          offset: Offset(2, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                        ),
+              ),
+            ),
+            // Action buttons in profile view mode (always visible)
+            // Icon selection button
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 40 * fontScale,
+                height: 40 * fontScale,
+                decoration: BoxDecoration(
+                  color: AppTheme.warmGold,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.midnightPurple, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    size: 20 * fontScale,
+                    color: AppTheme.midnightPurple,
                   ),
+                  onPressed: _showIconSelectionDialog,
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Change Icon',
+                ),
+              ),
+            ),
+            // Image upload button
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: Container(
+                width: 40 * fontScale,
+                height: 40 * fontScale,
+                decoration: BoxDecoration(
+                  color: AppTheme.silverMist,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.midnightPurple, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.camera_alt,
+                    size: 20 * fontScale,
+                    color: AppTheme.midnightPurple,
+                  ),
+                  onPressed: _showImageSelectionDialog,
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Upload Image',
                 ),
               ),
             ),
@@ -687,388 +1086,1103 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         Center(
           child: Text(
             _character!.name,
-            style: GoogleFonts.cinzel(
-              fontSize: 28,
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: _character!.name,
+              fontSize: 28 * fontScale,
               fontWeight: FontWeight.bold,
               color: AppTheme.silverMist,
               letterSpacing: 1.5,
               shadows: [
                 Shadow(
                   blurRadius: 3,
-                  color: AppTheme.warmGold.withOpacity(0.5),
+                  color: AppTheme.warmGold.withValues(alpha: 0.5),
                   offset: Offset(1, 1),
                 ),
               ],
             ),
           ),
         ),
+        const SizedBox(height: 20),
+
+        // Chat button
+        if (!_isEditing)
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          CharacterChatScreen(characterId: _character!.id),
+                ),
+              );
+            },
+            icon: Icon(Icons.chat_bubble_outline, size: 20 * fontScale),
+            label: Text(
+              AppLocalizations.of(context).startChat,
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: AppLocalizations.of(context).startChat,
+                fontSize: 16 * fontScale,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.warmGold,
+              foregroundColor: AppTheme.midnightPurple,
+              padding: EdgeInsets.symmetric(
+                horizontal: 24 * fontScale,
+                vertical: 12 * fontScale,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              elevation: 8,
+              shadowColor: AppTheme.warmGold.withValues(alpha: 0.3),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildSectionCard(_PromptSection section) {
-    return _buildSection(
-      title: section.title,
-      child: Column(
-        children: [
-          if (_isEditing)
-            _buildTextField(
-              label: section.title,
-              controller: TextEditingController(text: section.content),
-              enabled: true,
-            )
-          else
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.2),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                section.content,
-                style: TextStyle(
-                  color: AppTheme.silverMist,
-                  fontSize: 15,
-                  height: 1.5,
-                ),
+  // Icon selection dialog
+  void _showIconSelectionDialog() {
+    final localizations = AppLocalizations.of(context);
+
+    final List<IconData> availableIcons = [
+      Icons.person,
+      Icons.face,
+      Icons.emoji_emotions,
+      Icons.account_circle,
+      Icons.sentiment_satisfied,
+      Icons.psychology,
+      Icons.auto_awesome,
+      Icons.star,
+      Icons.favorite,
+      Icons.lightbulb,
+      Icons.science,
+      Icons.school,
+      Icons.work,
+      Icons.sports_esports,
+      Icons.music_note,
+      Icons.palette,
+      Icons.camera_alt,
+      Icons.pets,
+      Icons.nature,
+      Icons.local_florist,
+      Icons.wb_sunny,
+      Icons.nightlight,
+      Icons.rocket_launch,
+      Icons.explore,
+      Icons.travel_explore,
+      Icons.home,
+      Icons.restaurant,
+      Icons.coffee,
+      Icons.book,
+      Icons.library_books,
+      Icons.brush,
+      Icons.code,
+      Icons.build,
+      Icons.fitness_center,
+      Icons.directions_bike,
+      Icons.flight,
+      Icons.sailing,
+      Icons.theater_comedy,
+      Icons.celebration,
+      Icons.cake,
+      Icons.diamond,
+      Icons.spa,
+      Icons.self_improvement,
+      Icons.volunteer_activism,
+      Icons.handshake,
+      Icons.group,
+      Icons.family_restroom,
+      Icons.child_friendly,
+      Icons.elderly,
+      Icons.accessibility,
+      Icons.healing,
+      Icons.medical_services,
+      Icons.local_hospital,
+      Icons.psychology_alt,
+      Icons.mood,
+      Icons.sentiment_very_satisfied,
+      Icons.sentiment_neutral,
+      Icons.sentiment_dissatisfied,
+      Icons.sentiment_very_dissatisfied,
+      Icons.tag_faces,
+      Icons.insert_emoticon,
+      Icons.emoji_people,
+      Icons.emoji_nature,
+      Icons.emoji_food_beverage,
+      Icons.emoji_transportation,
+      Icons.emoji_symbols,
+      Icons.emoji_flags,
+      Icons.emoji_objects,
+    ];
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
               ),
             ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(
-                'Created:',
-                style: TextStyle(
-                  color: AppTheme.silverMist.withOpacity(0.7),
-                  fontSize: 14,
-                ),
+            title: Text(
+              localizations.selectCharacterIcon,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: localizations.selectCharacterIcon,
+                color: AppTheme.warmGold,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-              const SizedBox(width: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
-                    width: 1,
+            ),
+            content: Container(
+              width: double.maxFinite,
+              height: 400,
+              child: Column(
+                children: [
+                  // Remove icon option
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _updateCharacterIcon(null);
+                      },
+                      icon: Icon(Icons.clear, color: AppTheme.midnightPurple),
+                      label: Text(
+                        localizations.useFirstLetter,
+                        style: TextStyle(color: AppTheme.midnightPurple),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.silverMist,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  // Icon grid
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6,
+                        childAspectRatio: 1,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: availableIcons.length,
+                      itemBuilder: (context, index) {
+                        final icon = availableIcons[index];
+                        final isSelected = _character!.icon == icon;
+
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            _updateCharacterIcon(icon);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected
+                                      ? AppTheme.warmGold.withValues(alpha: 0.3)
+                                      : AppTheme.midnightPurple.withValues(
+                                        alpha: 0.5,
+                                      ),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color:
+                                    isSelected
+                                        ? AppTheme.warmGold
+                                        : AppTheme.warmGold.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                icon,
+                                size: 28,
+                                color:
+                                    isSelected
+                                        ? AppTheme.warmGold
+                                        : AppTheme.silverMist,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  _formatDate(_character!.createdAt),
-                  style: TextStyle(
-                    color: AppTheme.silverMist,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    letterSpacing: 0.5,
-                  ),
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Messages:',
-                style: TextStyle(
-                  color: AppTheme.silverMist.withOpacity(0.7),
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  '${_character!.chatHistory.length}',
-                  style: TextStyle(
-                    color: AppTheme.silverMist,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildSection({required String title, required Widget child}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+  // Image selection dialog
+  void _showImageSelectionDialog() {
+    final localizations = AppLocalizations.of(context);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            title: Text(
+              localizations.characterImage,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: localizations.characterImage,
+                color: AppTheme.warmGold,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  title == 'Basic Information'
-                      ? Icons.person
-                      : Icons.text_fields,
-                  color: AppTheme.warmGold,
+                // Upload from gallery
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _uploadImageFromGallery();
+                    },
+                    icon: Icon(
+                      Icons.photo_library,
+                      color: AppTheme.midnightPurple,
+                    ),
+                    label: Text(
+                      'Choose from Gallery',
+                      style: TextStyle(color: AppTheme.midnightPurple),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.warmGold,
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.warmGold,
-                    letterSpacing: 2.0,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 2,
-                        color: Colors.black.withOpacity(0.3),
-                        offset: const Offset(1, 1),
+                // Remove current image
+                if (_character!.userImagePath != null)
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _removeCharacterImage();
+                      },
+                      icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
+                      label: Text(
+                        'Remove Current Image',
+                        style: TextStyle(color: AppTheme.midnightPurple),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.silverMist,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                // Image guidelines
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Image Guidelines:',
+                        style: TextStyle(
+                          color: AppTheme.warmGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '• Square images work best\n'
+                        '• Maximum size: 512x512 pixels\n'
+                        '• Supported formats: JPG, PNG\n'
+                        '• Images will be optimized automatically',
+                        style: TextStyle(
+                          color: AppTheme.silverMist,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            Divider(
-              color: AppTheme.warmGold.withOpacity(0.3),
-              thickness: 1,
-              height: 24,
-            ),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    bool enabled = true,
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      enabled: enabled,
-      maxLines: maxLines,
-      style: TextStyle(color: AppTheme.silverMist, fontSize: 15, height: 1.5),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(
-          color: AppTheme.silverMist.withOpacity(0.8),
-          fontWeight: FontWeight.w500,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.warmGold.withOpacity(0.3)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.warmGold, width: 2),
-        ),
-        filled: true,
-        fillColor: AppTheme.midnightPurple.withOpacity(0.5),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-      ),
-    );
-  }
-
-  Widget _buildInfoRow({required String label, required String value}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: AppTheme.silverMist.withOpacity(0.7),
-              fontSize: 16,
-            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.warmGold.withOpacity(0.3),
+    );
+  }
+
+  // Icon image selection dialog
+  void _showIconImageSelectionDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
-            child: Text(
-              value,
-              style: TextStyle(
-                color: AppTheme.silverMist,
+            title: Text(
+              'Character Icon Image',
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: 'Character Icon Image',
+                color: AppTheme.warmGold,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
-                letterSpacing: 0.5,
+                fontSize: 18,
               ),
             ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Upload from gallery
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _uploadIconImageFromGallery();
+                    },
+                    icon: Icon(
+                      Icons.photo_library,
+                      color: AppTheme.midnightPurple,
+                    ),
+                    label: Text(
+                      'Choose Icon from Gallery',
+                      style: TextStyle(color: AppTheme.midnightPurple),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.warmGold,
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                // Remove current icon image
+                if (_character!.iconImagePath != null)
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _removeCharacterIconImage();
+                      },
+                      icon: Icon(Icons.delete, color: AppTheme.midnightPurple),
+                      label: Text(
+                        'Remove Icon Image',
+                        style: TextStyle(color: AppTheme.midnightPurple),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.silverMist,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                // Icon image guidelines
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.midnightPurple.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Icon Image Guidelines:',
+                        style: TextStyle(
+                          color: AppTheme.warmGold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '• Square images work best for icons\n'
+                        '• Maximum size: 256x256 pixels\n'
+                        '• Supported formats: JPG, PNG\n'
+                        '• Images will be optimized for icon use\n'
+                        '• This will be used as the character icon',
+                        style: TextStyle(
+                          color: AppTheme.silverMist,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppTheme.silverMist),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
-  // Format date for display
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
+  // Upload image from gallery
+  Future<void> _uploadImageFromGallery() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => Center(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundStart,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: AppTheme.warmGold),
+                    SizedBox(height: 16),
+                    Text(
+                      'Optimizing image...',
+                      style: TextStyle(color: AppTheme.silverMist),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      );
 
-    if (difference.inDays < 1) {
-      if (difference.inHours < 1) {
-        return 'Just now';
-      } else {
-        return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+      final String? imagePath = await ImageUtils.pickAndOptimizeImage();
+
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      if (imagePath != null && mounted) {
+        await _updateCharacterImage(imagePath);
       }
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      // Close loading dialog if still open
+      if (mounted) Navigator.of(context).pop();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  // Helper method to clean system prompts
-  String _cleanSystemPrompt(String prompt, String characterName) {
-    // Remove any ## markers if they somehow got included
-    String cleanedPrompt = prompt;
+  // Upload icon image from gallery
+  Future<void> _uploadIconImageFromGallery() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => Center(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundStart,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: AppTheme.warmGold),
+                    SizedBox(height: 16),
+                    Text(
+                      'Optimizing icon image...',
+                      style: TextStyle(color: AppTheme.silverMist),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      );
 
-    // Check if the prompt still contains markdown markers
-    if (prompt.contains('## CHARACTER CARD SUMMARY ##') &&
-        prompt.contains('## END OF CHARACTER CARD ##')) {
-      final startMarker = '## CHARACTER CARD SUMMARY ##';
-      final endMarker = '## END OF CHARACTER CARD ##';
+      final String? iconImagePath = await ImageUtils.pickAndOptimizeIconImage();
 
-      final startIndex = prompt.indexOf(startMarker);
-      final cleanStart = startIndex + startMarker.length;
-      final endIndex = prompt.indexOf(endMarker);
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
 
-      if (startIndex >= 0 && endIndex > startIndex) {
-        cleanedPrompt = prompt.substring(cleanStart, endIndex).trim();
+      if (iconImagePath != null && mounted) {
+        await _updateCharacterIconImage(iconImagePath);
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (mounted) Navigator.of(context).pop();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading icon image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
-
-    // Remove any remaining markdown markers
-    cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
-
-    // Ensure the prompt starts with a clear instruction about who the AI is impersonating
-    if (!cleanedPrompt.contains("You are")) {
-      cleanedPrompt =
-          "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
-    }
-
-    // Add clear instructions to stay in character if not already present
-    if (!cleanedPrompt.contains("stay in character") &&
-        !cleanedPrompt.contains("never break character")) {
-      cleanedPrompt +=
-          "\n\nStay in character at all times. Never break character or admit you are an AI.";
-    }
-
-    return cleanedPrompt;
   }
 
-  // Parse the system prompt into sections
-  List<_PromptSection> _parseSystemPrompt(String systemPrompt) {
-    final List<_PromptSection> sections = [];
+  // Remove character image
+  Future<void> _removeCharacterImage() async {
+    if (_character == null) return;
 
-    // Try to extract sections from the prompt
-    final RegExp sectionRegex = RegExp(
-      r'#+\s*([^#\n]+)\n+([\s\S]*?)(?=\n#+\s*[^#\n]+\n+|$)',
-    );
-    final matches = sectionRegex.allMatches(systemPrompt);
-
-    if (matches.isNotEmpty) {
-      for (final match in matches) {
-        if (match.groupCount >= 2) {
-          final title = match.group(1)?.trim() ?? 'Unnamed Section';
-          final content = match.group(2)?.trim() ?? '';
-          sections.add(_PromptSection(title: title, content: content));
-        }
+    try {
+      // Delete the old image file if it exists
+      if (_character!.userImagePath != null) {
+        await ImageUtils.deleteCharacterImage(_character!.userImagePath!);
       }
-    } else {
-      // If no sections found, create a single "Description" section
-      sections.add(_PromptSection(title: 'Description', content: systemPrompt));
-    }
 
-    return sections;
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: null, // Remove user image
+        iconImagePath: _character!.iconImagePath,
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Character image removed successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error removing image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Update character image
+  Future<void> _updateCharacterImage(String imagePath) async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old image file if it exists
+      if (_character!.userImagePath != null) {
+        await ImageUtils.deleteCharacterImage(_character!.userImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: imagePath,
+        iconImagePath: _character!.iconImagePath,
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Character image updated successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Update character icon image
+  Future<void> _updateCharacterIconImage(String iconImagePath) async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old icon image file if it exists
+      if (_character!.iconImagePath != null) {
+        await ImageUtils.deleteCharacterIconImage(_character!.iconImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath,
+        iconImagePath: iconImagePath,
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Character icon image updated successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating icon image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Update character icon
+  Future<void> _updateCharacterIcon(IconData? icon) async {
+    if (_character == null) return;
+
+    try {
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath,
+        iconImagePath: _character!.iconImagePath,
+        icon: icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              icon != null
+                  ? 'Character icon updated successfully'
+                  : 'Character icon removed successfully',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating icon: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Remove character icon image
+  Future<void> _removeCharacterIconImage() async {
+    if (_character == null) return;
+
+    try {
+      // Delete the old icon image file if it exists
+      if (_character!.iconImagePath != null) {
+        await ImageUtils.deleteCharacterIconImage(_character!.iconImagePath!);
+      }
+
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
+      );
+
+      final updatedCharacter = CharacterModel(
+        id: _character!.id,
+        name: _character!.name,
+        systemPrompt: _character!.systemPrompt,
+        localPrompt: _character!.localPrompt,
+        imageUrl: _character!.imageUrl,
+        userImagePath: _character!.userImagePath,
+        iconImagePath: null, // Remove icon image
+        icon: _character!.icon,
+        createdAt: _character!.createdAt,
+        accentColor: _character!.accentColor,
+        chatHistory: _character!.chatHistory,
+        additionalInfo: _character!.additionalInfo,
+        model: _character!.model,
+      );
+
+      await charactersProvider.updateCharacter(updatedCharacter);
+
+      setState(() {
+        _character = updatedCharacter;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Character icon image removed successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error removing icon image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildEditMode() {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // Name field
-        _buildTextField(
-          label: 'Character Name',
-          controller: _nameController,
-          enabled: true,
+        // Name field with consistent styling
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Character Name',
+              style: TextStyle(
+                color: AppTheme.warmGold,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _nameController,
+              enabled: true,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black26,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppTheme.warmGold, width: 1),
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
 
-        // System prompt field
-        _buildTextField(
-          label: 'System Prompt',
-          controller: _systemPromptController,
-          enabled: true,
-          maxLines: 15,
+        // System prompt field with consistent styling
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Full Detailed Prompt (API Models)',
+              style: TextStyle(
+                color: AppTheme.warmGold,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _systemPromptController,
+              enabled: true,
+              maxLines: 15,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black26,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppTheme.warmGold, width: 1),
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // Local prompt field with generate button
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Local Prompt (Local Models)',
+                  style: TextStyle(
+                    color: AppTheme.warmGold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    // Generate local prompt from system prompt
+                    final generatedLocalPrompt =
+                        CharacterModel.generateLocalPrompt(
+                          _systemPromptController.text.trim(),
+                          _nameController.text.trim(),
+                        );
+                    setState(() {
+                      _localPromptController.text = generatedLocalPrompt;
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Local prompt regenerated')),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.auto_fix_high,
+                    color: AppTheme.warmGold,
+                    size: 16,
+                  ),
+                  label: Text(
+                    'Generate',
+                    style: TextStyle(color: AppTheme.warmGold, fontSize: 12),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    backgroundColor: AppTheme.midnightPurple.withValues(
+                      alpha: 0.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _localPromptController,
+              enabled: true,
+              maxLines: 15,
+              style: TextStyle(color: AppTheme.silverMist),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black26,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppTheme.warmGold, width: 1),
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+            ),
+          ],
         ),
 
         const SizedBox(height: 24),
 
-        // Cancel button
-        Center(
-          child: TextButton(
-            onPressed: () {
-              setState(() {
-                _isEditing = false;
-              });
-            },
-            child: Text(
-              'CANCEL',
-              style: TextStyle(
-                color: AppTheme.silverMist.withOpacity(0.8),
-                fontWeight: FontWeight.bold,
+        // Save and Cancel buttons in a row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Save button
+            ElevatedButton(
+              onPressed: _saveChanges,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.warmGold.withValues(alpha: 0.8),
+                foregroundColor: AppTheme.midnightPurple,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'SAVE',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),
-          ),
+            const SizedBox(width: 16),
+            // Cancel button
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isEditing = false;
+                });
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(
+                    color: AppTheme.silverMist.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Text(
+                'CANCEL',
+                style: TextStyle(
+                  color: AppTheme.silverMist.withValues(alpha: 0.8),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1082,14 +2196,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.midnightPurple.withOpacity(0.7),
-            AppTheme.deepNavy.withOpacity(0.9),
+            AppTheme.midnightPurple.withValues(alpha: 0.7),
+            AppTheme.deepNavy.withValues(alpha: 0.9),
           ],
         ),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1126,7 +2243,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Show character card info dialog with AI-structured information
   void _showCharacterCardInfo() {
     if (_character == null) {
-      print('Error: Character is null when trying to show character card info');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error: Could not load character information'),
@@ -1135,8 +2251,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       );
       return;
     }
-
-    print('Showing character card info for: ${_character!.name}');
 
     // Parse the system prompt to detect headings and sections
     final parsedSections = _parseSystemPrompt(_character!.systemPrompt);
@@ -1149,7 +2263,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: AppTheme.warmGold.withOpacity(0.3),
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -1158,7 +2272,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 Expanded(
                   child: Text(
                     'Character Card: ${_character!.name}',
-                    style: GoogleFonts.cinzel(
+                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                      text: 'Character Card: ${_character!.name}',
                       color: AppTheme.warmGold,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -1201,7 +2316,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       content: [
                         _buildInfoItem(label: 'Name', value: _character!.name),
                         _buildInfoItem(
-                          label: 'Created',
+                          label: AppLocalizations.of(context).created,
                           value: _formatDate(_character!.createdAt),
                         ),
                       ],
@@ -1212,7 +2327,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Container(
                         height: 1,
-                        color: AppTheme.warmGold.withOpacity(0.3),
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
                       ),
                     ),
 
@@ -1222,11 +2337,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       children: [
                         Text(
                           'AI MODEL',
-                          style: GoogleFonts.cinzel(
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: 'AI MODEL',
+                            color: AppTheme.warmGold,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2.0,
-                            color: AppTheme.warmGold,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -1290,7 +2406,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Container(
                         height: 1,
-                        color: AppTheme.warmGold.withOpacity(0.3),
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
                       ),
                     ),
 
@@ -1335,10 +2451,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       children: [
         Text(
           title,
-          style: GoogleFonts.cinzel(
-            color: AppTheme.warmGold,
-            fontWeight: FontWeight.bold,
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: title,
             fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.warmGold,
             letterSpacing: 1.5,
           ),
         ),
@@ -1362,9 +2479,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.5),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.warmGold.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1373,7 +2493,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             Text(
               label,
               style: TextStyle(
-                color: AppTheme.silverMist.withOpacity(0.7),
+                color: AppTheme.silverMist.withValues(alpha: 0.7),
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -1384,10 +2504,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withOpacity(0.5),
+                color: AppTheme.midnightPurple.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.3),
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -1419,7 +2539,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   void _copyFullCharacterCard() {
     Clipboard.setData(ClipboardData(text: _formatCharacterCard()));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Full character card copied to clipboard')),
+      SnackBar(
+        content: Text(
+          'Character card for "${_character!.name}" copied to clipboard',
+        ),
+        backgroundColor: AppTheme.warmGold.withValues(alpha: 0.9),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
@@ -1451,7 +2578,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.warmGold.withOpacity(0.3),
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1505,6 +2632,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           name: _character!.name,
           systemPrompt: _character!.systemPrompt,
           imageUrl: _character!.imageUrl,
+          icon: _character!.icon, // Preserve the icon
           createdAt: _character!.createdAt,
           accentColor: _character!.accentColor,
           chatHistory: _character!.chatHistory,
@@ -1525,7 +2653,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           );
         }
       } catch (e) {
-        print('Error updating model: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -1542,6 +2669,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
+      'local/hammer-2.1': {
+        'name': 'Local Hammer 2.1',
+        'provider': 'Local Device',
+      },
       'google/gemini-2.0-flash-001': {
         'name': 'Gemini 2.0 Flash',
         'provider': 'Google',
@@ -1563,6 +2694,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         'provider': 'Meta',
       },
       'openai/gpt-4o': {'name': 'GPT-4o', 'provider': 'OpenAI'},
+      'qwen/qwen3-235b-a22b-07-25:free': {
+        'name': 'Qwen 3 235B',
+        'provider': 'OpenRouter',
+      },
     };
 
     // If we have info for this model, return formatted name
@@ -1585,17 +2720,141 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'google/gemini-2.0-flash-001': 'Fast responses with good quality',
-      'anthropic/claude-3-5-sonnet':
-          'High quality responses with strong reasoning',
-      'google/gemini-2.0-pro-001': 'Higher quality responses than Flash',
-      'anthropic/claude-3-opus':
-          'Top-tier intelligence, slower and more expensive',
-      'meta-llama/llama-3-70b-instruct':
-          'Open-source model with good capabilities',
-      'openai/gpt-4o': 'Powerful model with excellent language understanding',
+      'local/hammer-2.1':
+          'Privacy-first local AI with multimodal support (1.6GB)',
+      'google/gemini-2.0-flash-001':
+          'Fast responses with multimodal capabilities',
+      'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',
+      'google/gemini-2.0-pro-001': 'Advanced multimodal understanding',
+      'anthropic/claude-3-opus': 'Top-tier intelligence and creativity',
+      'meta-llama/llama-3-70b-instruct': 'Open-source conversational AI',
+      'openai/gpt-4o': 'Powerful language understanding and generation',
+      'qwen/qwen3-235b-a22b-07-25:free':
+          'Free model with solid conversational abilities',
     };
 
-    return modelDescriptions[modelId] ?? 'Advanced language model';
+    return modelDescriptions[modelId] ?? 'Advanced AI language model';
+  }
+
+  // Essential helper methods
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    bool enabled = true,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      maxLines: maxLines,
+      style: TextStyle(color: AppTheme.silverMist, fontSize: 15, height: 1.5),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          color: AppTheme.silverMist.withValues(alpha: 0.8),
+          fontWeight: FontWeight.w500,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.3),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.warmGold, width: 2),
+        ),
+        filled: true,
+        fillColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+      ),
+    );
+  }
+
+  // Format date for display
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays < 1) {
+      if (difference.inHours < 1) {
+        return 'Just now';
+      } else {
+        return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+      }
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  // Helper method to clean system prompts
+  String _cleanSystemPrompt(String prompt, String characterName) {
+    // Remove any ## markers if they somehow got included
+    String cleanedPrompt = prompt;
+
+    // Check if the prompt still contains markdown markers
+    if (prompt.contains('## CHARACTER CARD SUMMARY ##') &&
+        prompt.contains('## END OF CHARACTER CARD ##')) {
+      final startMarker = '## CHARACTER CARD SUMMARY ##';
+      final endMarker = '## END OF CHARACTER CARD ##';
+
+      final startIndex = prompt.indexOf(startMarker);
+      final cleanStart = startIndex + startMarker.length;
+      final endIndex = prompt.indexOf(endMarker);
+
+      if (startIndex >= 0 && endIndex > startIndex) {
+        cleanedPrompt = prompt.substring(cleanStart, endIndex).trim();
+      }
+    }
+
+    // Remove any remaining markdown markers
+    cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
+
+    // Optimize for DeepSeek: Make the prompt more direct and conversational
+    if (!cleanedPrompt.contains("You are")) {
+      cleanedPrompt =
+          "You are $characterName. You will speak and act as this character in all responses.\n\n$cleanedPrompt";
+    }
+
+    // Add DeepSeek-optimized character persistence instructions
+    if (!cleanedPrompt.contains("stay in character") &&
+        !cleanedPrompt.contains("never break character")) {
+      cleanedPrompt +=
+          "\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would.";
+    }
+
+    return cleanedPrompt;
+  }
+
+  // Parse the system prompt into sections (kept for compatibility)
+  List<_PromptSection> _parseSystemPrompt(String systemPrompt) {
+    final List<_PromptSection> sections = [];
+
+    // Try to extract sections from the prompt
+    final RegExp sectionRegex = RegExp(
+      r'#+\s*([^#\n]+)\n+([\s\S]*?)(?=\n#+\s*[^#\n]+\n+|$)',
+    );
+    final matches = sectionRegex.allMatches(systemPrompt);
+
+    if (matches.isNotEmpty) {
+      for (final match in matches) {
+        if (match.groupCount >= 2) {
+          final title = match.group(1)?.trim() ?? 'Unnamed Section';
+          final content = match.group(2)?.trim() ?? '';
+          sections.add(_PromptSection(title: title, content: content));
+        }
+      }
+    } else {
+      // If no sections found, create a single "Description" section
+      sections.add(_PromptSection(title: 'Description', content: systemPrompt));
+    }
+
+    return sections;
   }
 }

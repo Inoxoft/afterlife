@@ -1,6 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'famous_character_prompts.dart';
+import '../../l10n/app_localizations.dart';
 
 class FamousCharacterModelDialog extends StatefulWidget {
   final String characterName;
@@ -42,10 +44,11 @@ class _FamousCharacterModelDialogState
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return AlertDialog(
       backgroundColor: AppTheme.deepIndigo,
       title: Text(
-        'Select AI Model for ${widget.characterName}',
+        localizations.selectAiModelFor.replaceAll('{name}', widget.characterName),
         style: const TextStyle(color: Colors.white),
       ),
       content: Container(
@@ -58,7 +61,7 @@ class _FamousCharacterModelDialogState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Choose the AI model that will power ${widget.characterName}:',
+              localizations.chooseAiModelFor.replaceAll('{name}', widget.characterName),
               style: const TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 16),
@@ -73,8 +76,8 @@ class _FamousCharacterModelDialogState
                   return Card(
                     color:
                         isSelected
-                            ? AppTheme.warmGold.withOpacity(0.2)
-                            : AppTheme.backgroundEnd.withOpacity(0.3),
+                            ? AppTheme.warmGold.withValues(alpha: 0.2)
+                            : AppTheme.backgroundEnd.withValues(alpha: 0.3),
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -103,7 +106,7 @@ class _FamousCharacterModelDialogState
                                   _selectedModel = value!;
                                 });
                               },
-                              activeColor: AppTheme.warmGold,
+                              fillColor: WidgetStateProperty.all(AppTheme.warmGold),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -129,15 +132,35 @@ class _FamousCharacterModelDialogState
                                           ),
                                           decoration: BoxDecoration(
                                             color: AppTheme.warmGold
-                                                .withOpacity(0.2),
+                                                .withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(
                                               4,
                                             ),
                                           ),
-                                          child: const Text(
-                                            'RECOMMENDED',
-                                            style: TextStyle(
+                                          child: Text(
+                                            localizations.recommended,
+                                            style: const TextStyle(
                                               color: AppTheme.warmGold,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      if (model['isLocal'] == true)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          margin: const EdgeInsets.only(left: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withValues(alpha: 0.2),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            'PRIVATE',
+                                            style: const TextStyle(
+                                              color: Colors.blue,
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -170,7 +193,7 @@ class _FamousCharacterModelDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('CANCEL', style: TextStyle(color: Colors.white70)),
+          child: Text(localizations.cancel, style: const TextStyle(color: Colors.white70)),
         ),
         ElevatedButton(
           onPressed: () {
@@ -185,7 +208,7 @@ class _FamousCharacterModelDialogState
             backgroundColor: AppTheme.warmGold,
             foregroundColor: Colors.black,
           ),
-          child: const Text('SELECT'),
+          child: Text(localizations.select),
         ),
       ],
     );

@@ -1,5 +1,5 @@
+import 'dart:math';
 import 'dart:io';
-import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:file_selector/file_selector.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -101,7 +101,6 @@ class FileProcessorService {
 
       return files;
     } catch (e) {
-      print('Error picking files: $e');
       return null;
     }
   }

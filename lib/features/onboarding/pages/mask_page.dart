@@ -1,6 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/ukrainian_font_utils.dart';
+import '../../../l10n/app_localizations.dart';
 
 class MaskPage extends StatelessWidget {
   final AnimationController animationController;
@@ -10,6 +12,8 @@ class MaskPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),
@@ -56,8 +60,9 @@ class MaskPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      'UNDERSTAND MASKS',
-                      style: GoogleFonts.cinzel(
+                      localizations.understandMasks,
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: localizations.understandMasks,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3.0,
@@ -65,7 +70,7 @@ class MaskPage extends StatelessWidget {
                         shadows: [
                           Shadow(
                             blurRadius: 10.0,
-                            color: AppTheme.warmGold.withOpacity(0.8),
+                            color: AppTheme.warmGold.withValues(alpha: 0.8),
                             offset: const Offset(0, 2),
                           ),
                         ],
@@ -73,12 +78,14 @@ class MaskPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Digital personas with historical essence',
+                      localizations.digitalPersonasWithHistoricalEssence,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lato(
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text:
+                            localizations.digitalPersonasWithHistoricalEssence,
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
-                        color: AppTheme.silverMist.withOpacity(0.9),
+                        color: AppTheme.silverMist.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -102,10 +109,10 @@ class MaskPage extends StatelessWidget {
                       right: 40,
                       child: Text(
                         'E=mc²',
-                        style: GoogleFonts.lato(
-                          color: AppTheme.warmGold.withOpacity(0.3),
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: 'E=mc²',
+                          color: AppTheme.warmGold.withValues(alpha: 0.3),
                           fontSize: 22,
-                          fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w200,
                         ),
                       ),
@@ -115,10 +122,10 @@ class MaskPage extends StatelessWidget {
                       left: 40,
                       child: Text(
                         'π',
-                        style: GoogleFonts.lato(
-                          color: AppTheme.warmGold.withOpacity(0.25),
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: 'π',
+                          color: AppTheme.warmGold.withValues(alpha: 0.25),
                           fontSize: 24,
-                          fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w200,
                         ),
                       ),
@@ -130,10 +137,10 @@ class MaskPage extends StatelessWidget {
                         angle: -0.2,
                         child: Text(
                           'ψ',
-                          style: GoogleFonts.lato(
-                            color: AppTheme.warmGold.withOpacity(0.2),
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text: 'ψ',
+                            color: AppTheme.warmGold.withValues(alpha: 0.2),
                             fontSize: 20,
-                            fontStyle: FontStyle.italic,
                             fontWeight: FontWeight.w200,
                           ),
                         ),
@@ -162,7 +169,9 @@ class MaskPage extends StatelessWidget {
                             return Container(
                               height: 280,
                               decoration: BoxDecoration(
-                                color: AppTheme.midnightPurple.withOpacity(0.4),
+                                color: AppTheme.midnightPurple.withValues(
+                                  alpha: 0.4,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Center(
@@ -176,7 +185,7 @@ class MaskPage extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Einstein with mask and LLM armor',
+                                      localizations.einsteinWithMaskAndLLMArmor,
                                       textAlign: TextAlign.center,
                                       style: AppTheme.captionStyle,
                                     ),
@@ -208,18 +217,21 @@ class MaskPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     _buildExplanationWithIcon(
+                      context,
                       Icons.face_retouching_natural,
-                      'Masks are AI personas created from historical data, personal accounts, and detailed character specifications.',
+                      localizations.masksAreAIPersonas,
                     ),
                     const SizedBox(height: 10),
                     _buildExplanationWithIcon(
+                      context,
                       Icons.psychology,
-                      'Each mask tries to embody the authentic character, personality, and knowledge of its historical figure.',
+                      localizations.eachMaskTriesToEmbody,
                     ),
                     const SizedBox(height: 10),
                     _buildExplanationWithIcon(
+                      context,
                       Icons.people_alt,
-                      'These digital twins allow you to interact with perspectives from across time and reality.',
+                      localizations.theseDigitalTwinsAllow,
                     ),
                     // Add extra spacing at the bottom to avoid button overlap
                     const SizedBox(height: 24),
@@ -233,15 +245,19 @@ class MaskPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExplanationWithIcon(IconData iconData, String text) {
+  Widget _buildExplanationWithIcon(
+    BuildContext context,
+    IconData iconData,
+    String text,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.5),
+        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.cosmicBlack.withOpacity(0.3),
+            color: AppTheme.cosmicBlack.withValues(alpha: 0.3),
             blurRadius: 8,
             spreadRadius: 0,
             offset: const Offset(0, 2),
@@ -254,11 +270,11 @@ class MaskPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withOpacity(0.7),
+              color: AppTheme.midnightPurple.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.warmGold.withOpacity(0.2),
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
                   blurRadius: 5,
                   spreadRadius: 0,
                 ),
@@ -270,7 +286,8 @@ class MaskPage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.lato(
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: text,
                 color: AppTheme.silverMist,
                 fontSize: 14,
                 height: 1.3,
@@ -290,7 +307,7 @@ class NeuralLinesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.4)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.4)
           ..strokeWidth = 1.5
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
@@ -329,7 +346,7 @@ class NeuralLinesPainter extends CustomPainter {
     // Add some small circles at the neural connection endpoints
     final circlePaint =
         Paint()
-          ..color = AppTheme.warmGold.withOpacity(0.6)
+          ..color = AppTheme.warmGold.withValues(alpha: 0.6)
           ..style = PaintingStyle.fill;
 
     canvas.drawCircle(

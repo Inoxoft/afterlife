@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class CharacterModel {
@@ -7,8 +8,12 @@ class CharacterModel {
 
   final String id;
   final String name;
-  final String systemPrompt;
-  final String? imageUrl;
+  final String systemPrompt; // Full detailed prompt for API models
+  final String localPrompt; // Short optimized prompt for local models
+  final String? imageUrl; // Asset image URL (for famous characters)
+  final String? userImagePath; // User-uploaded image path
+  final String? iconImagePath; // User-uploaded icon image path
+  final IconData? icon; // Character icon
   final DateTime createdAt;
   final Color accentColor;
   final List<Map<String, dynamic>> chatHistory;
@@ -19,7 +24,11 @@ class CharacterModel {
     required this.id,
     required this.name,
     required this.systemPrompt,
+    String? localPrompt,
     this.imageUrl,
+    this.userImagePath,
+    this.iconImagePath,
+    this.icon,
     required this.createdAt,
     Color? accentColor,
     List<Map<String, dynamic>>? chatHistory,
@@ -28,6 +37,7 @@ class CharacterModel {
   }) : accentColor = accentColor ?? Color(int.parse(_defaultAccentColor)),
        chatHistory = chatHistory ?? [],
        model = model ?? _defaultModel,
+       localPrompt = localPrompt ?? generateLocalPrompt(systemPrompt, name),
        assert(id.isNotEmpty, 'Character ID cannot be empty'),
        assert(name.isNotEmpty, 'Character name cannot be empty'),
        assert(systemPrompt.isNotEmpty, 'System prompt cannot be empty');
@@ -37,6 +47,9 @@ class CharacterModel {
     required String name,
     required String cardContent,
     String? imageUrl,
+    String? userImagePath,
+    String? iconImagePath,
+    IconData? icon,
     String? model,
   }) {
     final id = '${_characterIdPrefix}${DateTime.now().millisecondsSinceEpoch}';
@@ -48,6 +61,9 @@ class CharacterModel {
       name: name,
       systemPrompt: cleanSystemPrompt,
       imageUrl: imageUrl,
+      userImagePath: userImagePath,
+      iconImagePath: iconImagePath,
+      icon: icon,
       createdAt: createdAt,
       model: model,
     );
@@ -75,20 +91,118 @@ class CharacterModel {
     // Remove any remaining markdown markers
     cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
 
-    // Ensure proper instruction format
+    // Optimize for DeepSeek: Make the prompt more direct and conversational
     if (!cleanedPrompt.contains("You are")) {
       cleanedPrompt =
-          "You are $characterName, a character with the following traits and background:\n\n$cleanedPrompt";
+          "You are $characterName. You will speak and act as this character in all responses.\n\n$cleanedPrompt";
     }
 
-    // Add character persistence instruction if not present
+    // Add DeepSeek-optimized character persistence instructions
     if (!cleanedPrompt.contains("stay in character") &&
         !cleanedPrompt.contains("never break character")) {
       cleanedPrompt +=
-          "\n\nStay in character at all times. Never break character or admit you are an AI.";
+          "\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would.";
     }
 
     return cleanedPrompt;
+  }
+
+  // Get the appropriate prompt based on model type
+  String getPromptForModel() {
+    return isLocalModel(model) ? localPrompt : systemPrompt;
+  }
+
+  // Check if a model is a local model
+  static bool isLocalModel(String modelId) {
+    return modelId.startsWith('local/') ||
+        modelId == 'local' ||
+        modelId.contains('hammer') ||
+        modelId.contains('gemma');
+  }
+
+  // Generate optimized local prompt from full prompt
+  static String generateLocalPrompt(String fullPrompt, String characterName) {
+    // Remove markdown markers if present
+    String cleanedPrompt = fullPrompt;
+    if (fullPrompt.contains('## CHARACTER CARD SUMMARY ##') &&
+        fullPrompt.contains('## END OF CHARACTER CARD ##')) {
+      final startMarker = '## CHARACTER CARD SUMMARY ##';
+      final endMarker = '## END OF CHARACTER CARD ##';
+
+      final startIndex = fullPrompt.indexOf(startMarker);
+      final cleanStart = startIndex + startMarker.length;
+      final endIndex = fullPrompt.indexOf(endMarker);
+
+      if (startIndex >= 0 && endIndex > startIndex) {
+        cleanedPrompt = fullPrompt.substring(cleanStart, endIndex).trim();
+      }
+    }
+
+    // Remove any remaining markdown markers
+    cleanedPrompt = cleanedPrompt.replaceAll(RegExp(r'##.*?##'), '').trim();
+
+    // Remove excessive formatting and structure that local models struggle with
+    cleanedPrompt = cleanedPrompt.replaceAll(
+      RegExp(r'\*\*.*?\*\*'),
+      '',
+    ); // Remove bold
+    cleanedPrompt = cleanedPrompt.replaceAll(
+      RegExp(r'\*.*?\*'),
+      '',
+    ); // Remove italics
+    cleanedPrompt = cleanedPrompt.replaceAll(
+      RegExp(r'###?\s*'),
+      '',
+    ); // Remove headers
+    cleanedPrompt = cleanedPrompt.replaceAll(
+      RegExp(r'-\s+'),
+      '',
+    ); // Remove bullet points
+    cleanedPrompt = cleanedPrompt.replaceAll(
+      RegExp(r'\n\s*\n\s*\n'),
+      '\n\n',
+    ); // Reduce excessive newlines
+
+    // Start building the local prompt with clear character identity
+    String localPrompt = "You are $characterName. ";
+
+    // Extract core personality and background information
+    final sections = <String>[];
+    final lines = cleanedPrompt.split('\n');
+
+    // Look for key information sections
+    String currentSection = '';
+    final importantInfo = <String>[];
+
+    for (final line in lines) {
+      final trimmedLine = line.trim();
+      if (trimmedLine.isEmpty) continue;
+
+      // Look for personality, background, and behavioral information
+      if (trimmedLine.length > 15 &&
+          !trimmedLine.startsWith('You are') &&
+          !trimmedLine.startsWith('Your name') &&
+          !trimmedLine.contains('respond as') &&
+          !trimmedLine.contains('character') &&
+          importantInfo.length < 5) {
+        importantInfo.add(trimmedLine);
+      }
+    }
+
+    // Add the most important character information
+    if (importantInfo.isNotEmpty) {
+      localPrompt += "${importantInfo.take(3).join(' ')} ";
+    }
+
+    // Add concise behavioral instructions optimized for local models
+    localPrompt +=
+        "Respond naturally and conversationally as $characterName would. ";
+    localPrompt += "Stay in character at all times. ";
+    localPrompt +=
+        "Keep responses focused and authentic to $characterName's personality and background. ";
+    localPrompt += "Do not mention being an AI or break character.";
+
+    return localPrompt;
   }
 
   // Convert to JSON for storage
@@ -97,9 +211,15 @@ class CharacterModel {
       'id': id,
       'name': name,
       'systemPrompt': systemPrompt,
+      'localPrompt': localPrompt,
       'imageUrl': imageUrl,
+      'userImagePath': userImagePath,
+      'iconImagePath': iconImagePath,
+      'iconCodePoint': icon?.codePoint,
+      'iconFontFamily': icon?.fontFamily,
+      'iconFontPackage': icon?.fontPackage,
       'createdAt': createdAt.toIso8601String(),
-      'accentColor': accentColor.value,
+      'accentColor': accentColor.toARGB32(),
       'chatHistory': chatHistory,
       'additionalInfo': additionalInfo,
       'model': model,
@@ -121,17 +241,29 @@ class CharacterModel {
       try {
         createdAt = DateTime.parse(json['createdAt'] as String);
       } catch (e) {
-        print('Error parsing date, using current time: $e');
         createdAt = DateTime.now();
       }
 
-      // Parse the accent color safely
       Color accentColor;
       try {
         accentColor = Color(json['accentColor'] as int);
       } catch (e) {
-        print('Error parsing accent color, using default: $e');
         accentColor = Color(int.parse(_defaultAccentColor));
+      }
+
+      // Parse the icon safely
+      IconData? icon;
+      try {
+        if (json['iconCodePoint'] != null) {
+          icon = IconData(
+            json['iconCodePoint'] as int,
+            fontFamily: json['iconFontFamily'] as String?,
+            fontPackage: json['iconFontPackage'] as String?,
+          );
+        }
+      } catch (e) {
+        // Icon parsing failed, use null
+        icon = null;
       }
 
       // Parse chat history safely
@@ -141,14 +273,31 @@ class CharacterModel {
           chatHistory = List<Map<String, dynamic>>.from(json['chatHistory']);
         }
       } catch (e) {
-        print('Error parsing chat history, using empty list: $e');
+        // Use empty list as fallback
+      }
+
+      // Get system prompt
+      final systemPrompt = json['systemPrompt'] as String;
+      final characterName = json['name'] as String;
+
+      // Handle local prompt - generate if not present (backwards compatibility)
+      String localPrompt;
+      if (json['localPrompt'] != null) {
+        localPrompt = json['localPrompt'] as String;
+      } else {
+        // Generate local prompt for existing characters
+        localPrompt = generateLocalPrompt(systemPrompt, characterName);
       }
 
       return CharacterModel(
         id: json['id'] as String,
-        name: json['name'] as String,
-        systemPrompt: json['systemPrompt'] as String,
+        name: characterName,
+        systemPrompt: systemPrompt,
+        localPrompt: localPrompt,
         imageUrl: json['imageUrl'] as String?,
+        userImagePath: json['userImagePath'] as String?,
+        iconImagePath: json['iconImagePath'] as String?,
+        icon: icon,
         createdAt: createdAt,
         accentColor: accentColor,
         chatHistory: chatHistory,
@@ -176,7 +325,11 @@ class CharacterModel {
       id: id,
       name: name,
       systemPrompt: systemPrompt,
+      localPrompt: localPrompt,
       imageUrl: imageUrl,
+      userImagePath: userImagePath,
+      iconImagePath: iconImagePath,
+      icon: icon,
       createdAt: createdAt,
       accentColor: accentColor,
       chatHistory: newChatHistory,
@@ -194,6 +347,9 @@ class CharacterModel {
           name == other.name &&
           systemPrompt == other.systemPrompt &&
           imageUrl == other.imageUrl &&
+          userImagePath == other.userImagePath &&
+          iconImagePath == other.iconImagePath &&
+          icon == other.icon &&
           createdAt == other.createdAt &&
           accentColor == other.accentColor &&
           chatHistory.length == other.chatHistory.length &&
@@ -206,6 +362,9 @@ class CharacterModel {
       name.hashCode ^
       systemPrompt.hashCode ^
       imageUrl.hashCode ^
+      userImagePath.hashCode ^
+      iconImagePath.hashCode ^
+      icon.hashCode ^
       createdAt.hashCode ^
       accentColor.hashCode ^
       chatHistory.length.hashCode ^

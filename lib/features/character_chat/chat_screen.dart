@@ -1,12 +1,19 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
+import '../providers/language_provider.dart';
 import '../character_profile/character_profile_screen.dart';
 import 'chat_service.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../chat/models/chat_message.dart';
+import '../chat/widgets/chat_message_bubble.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/utils/ukrainian_font_utils.dart';
+import '../../core/utils/responsive_utils.dart';
+import '../../core/services/hybrid_chat_service.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -20,12 +27,11 @@ class CharacterChatScreen extends StatefulWidget {
 
 class _CharacterChatScreenState extends State<CharacterChatScreen>
     with AutomaticKeepAliveClientMixin {
-  final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _messageController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
-  bool _isLoading = false;
   CharacterModel? _character;
-  String? _loadError;
+  bool _isLoading = false;
 
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
@@ -38,19 +44,13 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     ),
   );
 
-  // Keep this screen alive in navigation stack for better performance
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    _isLoading = false;
-
-    // Load the character on the next frame for better UI responsiveness
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadCharacter();
-    });
+    _loadCharacter();
   }
 
   @override
@@ -61,65 +61,36 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     super.dispose();
   }
 
-  void _loadCharacter() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
+  Future<void> _loadCharacter() async {
+    final charactersProvider = Provider.of<CharactersProvider>(
+      context,
+      listen: false,
+    );
 
     try {
-      final charactersProvider = Provider.of<CharactersProvider>(
-        context,
-        listen: false,
-      );
-
-      // Use the provider to load the character
       final character = await charactersProvider.loadCharacterById(
         widget.characterId,
       );
 
-      if (character != null && mounted) {
+      if (mounted) {
         setState(() {
           _character = character;
-          _isLoading = false;
-          _loadError = null;
         });
 
-        // Select this character in the provider
-        charactersProvider.selectCharacter(widget.characterId);
-      } else if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadError = 'Character not found';
-        });
+        // Select this character so it becomes the active one
+        if (character != null) {
+          charactersProvider.selectCharacter(character.id);
+        }
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _loadError = 'Could not load character - $e';
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading character: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    // Show error here instead of in initState
-    if (_loadError != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $_loadError'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      });
     }
   }
 
@@ -135,78 +106,70 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
   Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
-    if (message.isEmpty || _isLoading || _character == null) return;
+    if (message.isEmpty || _isLoading) return;
 
-    // Clear the input field
-    _messageController.clear();
-
-    // Get the character provider
     final charactersProvider = Provider.of<CharactersProvider>(
       context,
       listen: false,
     );
+    final localizations = AppLocalizations.of(context);
+
+    // Clear the input field
+    _messageController.clear();
 
     // Add user message to chat history
-    await charactersProvider.addMessageToSelectedCharacter(
+    await charactersProvider.addMessageToCharacter(
+      characterId: widget.characterId,
       text: message,
       isUser: true,
     );
 
-    // Update state
     if (mounted) {
       setState(() {
         _isLoading = true;
-        // Update character reference to reflect new message
-        _character = charactersProvider.selectedCharacter;
       });
+
+      // Reload the character to get updated chat history
+      await _loadCharacter();
     }
 
     // Scroll to the bottom after state update
     _scrollToBottom();
 
     try {
-      // Get the updated character
-      final character = charactersProvider.selectedCharacter;
-      if (character == null) {
-        throw Exception('Character not selected');
-      }
-
-      // Prepare the chat history for the API - limit to last 10 messages for performance
-      final recentMessages =
-          character.chatHistory.length > 10
-              ? character.chatHistory.sublist(character.chatHistory.length - 10)
-              : character.chatHistory;
-
-      final apiChatHistory =
-          recentMessages
-              .map(
-                (msg) => {
-                  'role': msg['isUser'] == true ? 'user' : 'assistant',
-                  'content': msg['content'] as String,
-                },
-              )
-              .toList();
+      // Create a copy of chat history excluding the message we just added
+      // to prevent duplication in the AI request
+      final chatHistoryForAI =
+          _character!.chatHistory.where((msg) {
+            // Exclude the message we just added (last user message with same content)
+            return !(msg['isUser'] == true && msg['content'] == message);
+          }).toList();
 
       // Send the message to the character
-      final response = await ChatService.sendMessageToCharacter(
-        characterId: character.id,
+      final response = await HybridChatService.sendMessageToCharacter(
+        characterId: widget.characterId,
         message: message,
-        systemPrompt: character.systemPrompt,
-        chatHistory: apiChatHistory,
-        model: character.model,
+        systemPrompt: _character!.systemPrompt,
+        chatHistory: chatHistoryForAI,
+        model: _character!.model,
+        localPrompt: _character!.localPrompt,
       );
+
+      // Add artificial delay to simulate natural conversation flow
+      await Future.delayed(const Duration(milliseconds: 800));
 
       // Add AI response to chat history if not null
       if (response != null) {
-        await charactersProvider.addMessageToSelectedCharacter(
+        await charactersProvider.addMessageToCharacter(
+          characterId: widget.characterId,
           text: response,
           isUser: false,
         );
       } else {
         // Handle null response by showing a fallback message
-        await charactersProvider.addMessageToSelectedCharacter(
-          text:
-              "I'm sorry, I couldn't process your message at this time. Please try again later.",
+        await charactersProvider.addMessageToCharacter(
+          characterId: widget.characterId,
+          text: localizations.errorProcessingMessage,
           isUser: false,
         );
       }
@@ -218,25 +181,17 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       }
 
       // Add error message to chat history
-      await charactersProvider.addMessageToSelectedCharacter(
-        text:
-            "I'm sorry, there was an error processing your message. Please try again.",
+      await charactersProvider.addMessageToCharacter(
+        characterId: widget.characterId,
+        text: localizations.errorConnecting,
         isUser: false,
       );
     } finally {
-      // Update UI
       if (mounted) {
         setState(() {
           _isLoading = false;
-          // Refresh character data
-          _character =
-              Provider.of<CharactersProvider>(
-                context,
-                listen: false,
-              ).selectedCharacter;
         });
-
-        // Scroll to bottom to show new messages
+        await _loadCharacter();
         _scrollToBottom();
       }
     }
@@ -245,11 +200,12 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
+    final localizations = AppLocalizations.of(context);
 
     if (_character == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Chat'),
+          title: Text(localizations.chat),
           backgroundColor: AppTheme.backgroundStart,
         ),
         body: Container(
@@ -259,9 +215,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       );
     }
 
-    // We have a character, render the chat UI
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(localizations),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
         child: Stack(
@@ -272,10 +227,10 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             Column(
               children: [
                 // Chat messages
-                Expanded(child: _buildChatList()),
+                Expanded(child: _buildChatList(localizations)),
 
                 // Input area
-                _buildInputArea(),
+                _buildInputArea(localizations),
               ],
             ),
           ],
@@ -284,126 +239,94 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     );
   }
 
-  // Extract app bar to a separate method for readability and performance
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
     return AppBar(
       backgroundColor: AppTheme.backgroundStart,
       elevation: 0,
       title: Row(
         children: [
+          // Character avatar
           CircleAvatar(
-            radius: 20,
-            backgroundColor: AppTheme.midnightPurple.withOpacity(0.7),
-            child: Text(
-              _character!.name.isNotEmpty
-                  ? _character!.name[0].toUpperCase()
-                  : '?',
-              style: TextStyle(
-                color: AppTheme.warmGold,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                shadows: [
-                  Shadow(
-                    color: AppTheme.warmGold.withOpacity(0.5),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-            ),
+            backgroundColor: AppTheme.midnightPurple,
+            child:
+                _character!.icon != null
+                    ? Icon(
+                      _character!.icon!,
+                      color: AppTheme.warmGold,
+                      size: 20,
+                    )
+                    : Text(
+                      _character!.name[0].toUpperCase(),
+                      style: TextStyle(
+                        color: AppTheme.warmGold,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
           ),
           const SizedBox(width: 12),
+          // Character name
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _character!.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Your Digital Twin',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.silverMist.withOpacity(0.7),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            child: Text(
+              _character!.name,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: _character!.name,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
       ),
       actions: [
-        // Profile button
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: AppTheme.warmGold.withOpacity(0.3),
-              width: 0.5,
-            ),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.person_outline, color: AppTheme.silverMist),
-            tooltip: 'View Profile',
-            onPressed: () => _navigateToProfile(),
-          ),
+        // View profile button
+        IconButton(
+          icon: const Icon(Icons.person_outline),
+          tooltip: localizations.viewProfile,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        CharacterProfileScreen(characterId: _character!.id),
+              ),
+            );
+          },
         ),
-
-        // Clear chat button
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: AppTheme.warmGold.withOpacity(0.3),
-              width: 0.5,
-            ),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
-            tooltip: 'Clear Chat',
-            onPressed: _showClearChatDialog,
-          ),
+        // Clear chat history button
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          tooltip: localizations.clearChatHistory,
+          onPressed: () => _showClearChatDialog(localizations),
         ),
       ],
     );
   }
 
-  // Extract chat list to a separate method for readability and performance
-  Widget _buildChatList() {
-    // If no messages, show a welcome message
+  Widget _buildChatList(AppLocalizations localizations) {
     if (_character!.chatHistory.isEmpty) {
+      final fontScale = ResponsiveUtils.getFontSizeScale(context);
+
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(32),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.chat_bubble_outline,
-                size: 48,
+                size: 64 * fontScale,
                 color: Colors.white54,
               ),
               const SizedBox(height: 16),
               Text(
-                'Start chatting with ${_character!.name}',
-                style: const TextStyle(fontSize: 18, color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Send a message below to begin the conversation',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.5),
+                localizations.startConversation,
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.startConversation,
+                  fontSize: 18 * fontScale,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -415,372 +338,195 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16.0),
+      padding: ResponsiveUtils.getChatListPadding(context),
       itemCount: _character!.chatHistory.length,
       itemBuilder: (context, index) {
         final message = _character!.chatHistory[index];
-        return _MessageBubble(
-          key: ValueKey('msg_${index}_${message['isUser']}'),
-          message: message['content'] as String,
+        return ChatMessageBubble(
+          text: message['content'] as String,
           isUser: message['isUser'] as bool,
+          showAvatar: true,
+          avatarText:
+              message['isUser'] as bool
+                  ? localizations.you
+                  : _character!.name[0].toUpperCase(),
         );
       },
     );
   }
 
-  // Extract input area to a separate method for readability and performance
-  Widget _buildInputArea() {
+  Widget _buildInputArea(AppLocalizations localizations) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: ResponsiveUtils.getChatInputPadding(context),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withOpacity(0.7),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, -1),
-            blurRadius: 6.0,
-            spreadRadius: 0.0,
-            color: Colors.black.withOpacity(0.1),
+        color: AppTheme.backgroundStart.withValues(alpha: 0.8),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.warmGold.withValues(alpha: 0.2),
+            width: 1,
           ),
-        ],
+        ),
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.midnightPurple.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(25.0),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withOpacity(0.3),
-                    width: 1,
+      child: Row(
+        children: [
+          // Message input field
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              focusNode: _inputFocusNode,
+              decoration: InputDecoration(
+                hintText: localizations.typeMessage,
+                hintStyle: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.typeMessage,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 14 * fontScale,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.2),
                   ),
                 ),
-                child: TextField(
-                  controller: _messageController,
-                  focusNode: _inputFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Type your message...',
-                    hintStyle: TextStyle(
-                      color: AppTheme.silverMist.withOpacity(0.6),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: false,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 14.0,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.chat_bubble_outline,
-                      color: AppTheme.warmGold.withOpacity(0.5),
-                      size: 18,
-                    ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.2),
                   ),
-                  style: TextStyle(color: AppTheme.silverMist),
-                  minLines: 1,
-                  maxLines: 5,
-                  onSubmitted:
-                      _isLoading
-                          ? null
-                          : (text) {
-                            if (text.trim().isNotEmpty) {
-                              _sendMessage();
-                            }
-                          },
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide(
+                    color: AppTheme.warmGold.withValues(alpha: 0.5),
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16 * fontScale,
+                  vertical: 12 * fontScale,
                 ),
               ),
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: "Sample text", // Placeholder for style detection
+                color: Colors.white,
+                fontSize: 14 * fontScale,
+              ),
+              maxLines: null,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => _sendMessage(),
             ),
-            const SizedBox(width: 12.0),
-            _SendButton(
-              isLoading: _isLoading,
-              onPressed:
-                  _isLoading
-                      ? null
-                      : () {
-                        if (_messageController.text.trim().isNotEmpty) {
-                          _sendMessage();
-                        }
-                      },
-            ),
-          ],
-        ),
+          ),
+          SizedBox(width: 8 * fontScale),
+          // Send button
+          IconButton(
+            icon:
+                _isLoading
+                    ? SizedBox(
+                      width: 24 * fontScale,
+                      height: 24 * fontScale,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.warmGold,
+                        ),
+                      ),
+                    )
+                    : Icon(Icons.send, size: 24 * fontScale),
+            color: AppTheme.warmGold,
+            onPressed: _isLoading ? null : _sendMessage,
+          ),
+        ],
       ),
     );
   }
 
-  void _showClearChatDialog() {
-    if (_character == null) return;
-
-    showDialog(
+  Future<void> _showClearChatDialog(AppLocalizations localizations) async {
+    final result = await showDialog<bool>(
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: AppTheme.backgroundStart,
             title: Text(
-              'Clear Chat History',
-              style: GoogleFonts.cinzel(
-                color: AppTheme.warmGold,
-                fontWeight: FontWeight.bold,
+              localizations.clearChatHistoryTitle,
+              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                text: localizations.clearChatHistoryTitle,
+                color: Colors.white,
               ),
             ),
             content: Text(
-              'This will delete all messages in this conversation. This action cannot be undone.',
-              style: TextStyle(color: AppTheme.silverMist),
-            ),
-            backgroundColor: AppTheme.midnightPurple,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: AppTheme.warmGold.withOpacity(0.3),
-                width: 1,
+              localizations.clearChatHistoryConfirm,
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: localizations.clearChatHistoryConfirm,
+                color: Colors.white70,
               ),
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(context, false),
                 child: Text(
-                  'Cancel',
-                  style: TextStyle(color: AppTheme.silverMist),
+                  localizations.cancel,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.cancel,
+                    color: AppTheme.warmGold,
+                  ),
                 ),
               ),
               TextButton(
-                onPressed: () => _clearChatHistory(context),
+                onPressed: () => Navigator.pop(context, true),
                 child: Text(
-                  'Clear',
-                  style: TextStyle(color: AppTheme.warmGold),
+                  localizations.clear,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: localizations.clear,
+                    color: Colors.red,
+                  ),
                 ),
               ),
             ],
           ),
     );
-  }
 
-  void _clearChatHistory(BuildContext context) {
-    // Clear chat history
-    final charactersProvider = Provider.of<CharactersProvider>(
-      context,
-      listen: false,
-    );
-
-    // Create a new character with empty chat history
-    final updatedCharacter = CharacterModel(
-      id: _character!.id,
-      name: _character!.name,
-      systemPrompt: _character!.systemPrompt,
-      imageUrl: _character!.imageUrl,
-      createdAt: _character!.createdAt,
-      accentColor: _character!.accentColor,
-      chatHistory: [],
-    );
-
-    // Update the character
-    charactersProvider.updateCharacter(updatedCharacter);
-
-    // Close the dialog
-    Navigator.pop(context);
-
-    // Update local state
-    setState(() {
-      _character = updatedCharacter;
-    });
-
-    // Show a confirmation
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Chat history cleared')));
-  }
-
-  void _navigateToProfile() {
-    if (_character == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: Could not load character profile'),
-          backgroundColor: Colors.red,
-        ),
+    if (result == true) {
+      final charactersProvider = Provider.of<CharactersProvider>(
+        context,
+        listen: false,
       );
-      return;
+
+      try {
+        // Create updated character with empty chat history
+        final updatedCharacter = CharacterModel(
+          id: _character!.id,
+          name: _character!.name,
+          systemPrompt: _character!.systemPrompt,
+          imageUrl: _character!.imageUrl,
+          createdAt: _character!.createdAt,
+          accentColor: _character!.accentColor,
+          chatHistory: [],
+          additionalInfo: _character!.additionalInfo,
+          model: _character!.model,
+        );
+
+        // Update in provider
+        await charactersProvider.updateCharacter(updatedCharacter);
+
+        setState(() {
+          _character = updatedCharacter;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(localizations.chatHistoryCleared)),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(localizations.errorClearingData),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => CharacterProfileScreen(characterId: _character!.id),
-      ),
-    ).then((_) {
-      // Reload character data when returning from profile
-      _loadCharacter();
-    });
-  }
-}
-
-// Extracted as a separate stateless widget for better performance
-class _MessageBubble extends StatelessWidget {
-  final String message;
-  final bool isUser;
-
-  const _MessageBubble({Key? key, required this.message, required this.isUser})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final bubbleColor =
-        isUser
-            ? AppTheme.midnightPurple.withOpacity(0.6)
-            : AppTheme.midnightPurple.withOpacity(0.5);
-    final alignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
-
-    // Check if message is very long (over 1000 characters)
-    final bool isVeryLong = message.length > 1000;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // AI avatar (only shown for AI messages)
-          if (!isUser) _buildAvatar(context),
-          if (!isUser) const SizedBox(width: 8),
-
-          // Message bubble
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-                maxHeight:
-                    isVeryLong
-                        ? MediaQuery.of(context).size.height * 0.4
-                        : double.infinity,
-              ),
-              decoration: BoxDecoration(
-                color: bubbleColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft:
-                      isUser
-                          ? const Radius.circular(16)
-                          : const Radius.circular(4),
-                  bottomRight:
-                      isUser
-                          ? const Radius.circular(4)
-                          : const Radius.circular(16),
-                ),
-                border: Border.all(
-                  color:
-                      isUser
-                          ? AppTheme.warmGold.withOpacity(0.5)
-                          : AppTheme.warmGold.withOpacity(0.4),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child:
-                  isVeryLong
-                      ? SingleChildScrollView(child: _buildMessageText())
-                      : _buildMessageText(),
-            ),
-          ),
-
-          // User avatar (only shown for user messages)
-          if (isUser) const SizedBox(width: 8),
-          if (isUser) _buildAvatar(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(BuildContext context) {
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor:
-          isUser
-              ? AppTheme.midnightPurple.withOpacity(0.8)
-              : AppTheme.midnightPurple.withOpacity(0.8),
-      child: Text(
-        isUser ? 'You' : 'AI',
-        style: TextStyle(
-          color: AppTheme.warmGold,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
-        ),
-      ),
-    );
-  }
-
-  // Extracted method to build the message text with proper styling
-  Widget _buildMessageText() {
-    return Text(
-      message,
-      style: TextStyle(
-        color: AppTheme.silverMist,
-        height: 1.4, // Improve line spacing
-      ),
-      softWrap: true, // Ensure text wraps properly
-      textWidthBasis:
-          TextWidthBasis.longestLine, // Better handling of long content
-    );
-  }
-}
-
-// Extracted as a separate stateless widget for better performance
-class _SendButton extends StatelessWidget {
-  final bool isLoading;
-  final VoidCallback? onPressed;
-
-  const _SendButton({Key? key, required this.isLoading, this.onPressed})
-    : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color:
-            isLoading ? AppTheme.warmGold.withOpacity(0.3) : AppTheme.warmGold,
-        shape: BoxShape.circle,
-        boxShadow: [
-          if (!isLoading)
-            BoxShadow(
-              color: AppTheme.warmGold.withOpacity(0.3),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-        ],
-      ),
-      child: IconButton(
-        icon: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return ScaleTransition(scale: animation, child: child);
-          },
-          child:
-              isLoading
-                  ? Icon(
-                    Icons.hourglass_top,
-                    key: ValueKey('loading'),
-                    color: AppTheme.silverMist.withOpacity(0.6),
-                  )
-                  : const Icon(
-                    Icons.send,
-                    key: ValueKey('send'),
-                    color: Colors.black87,
-                  ),
-        ),
-        onPressed: onPressed,
-      ),
-    );
   }
 }
