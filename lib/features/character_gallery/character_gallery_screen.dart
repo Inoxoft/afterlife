@@ -126,163 +126,163 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       {
         'name': 'Kobe Bryant',
         'years': '1978-2020',
-        'profession': 'Basketball Player',
+        'profession': localizations.basketballPlayer,
         'imageUrl': 'assets/images/kobe_bryant.png',
       },
       {
         'name': 'Kurt Cobain',
         'years': '1967-1994',
-        'profession': 'Musician & Singer',
+        'profession': localizations.musicianSinger,
         'imageUrl': 'assets/images/kurt_cobain.png',
       },
       {
         'name': 'Nelson Mandela',
         'years': '1918-2013',
-        'profession': 'Political Leader & Activist',
+        'profession': localizations.politicalLeaderActivist,
         'imageUrl': 'assets/images/nelson_mandela.png',
       },
       {
         'name': 'Bob Marley',
         'years': '1945-1981',
-        'profession': 'Musician & Singer',
+        'profession': localizations.musicianSinger,
         'imageUrl': 'assets/images/bob_marley.png',
       },
       {
         'name': 'Bruce Lee',
         'years': '1940-1973',
-        'profession': 'Martial Artist & Actor',
+        'profession': localizations.martialArtistActor,
         'imageUrl': 'assets/images/bruce_lee.png',
       },
       {
         'name': 'Martin Luther King Jr.',
         'years': '1929-1968',
-        'profession': 'Civil Rights Leader',
+        'profession': localizations.civilRightsLeader,
         'imageUrl': 'assets/images/martin_luther.png',
       },
       {
         'name': 'Marie Curie',
         'years': '1867-1934',
-        'profession': 'Physicist & Chemist',
+        'profession': localizations.physicistChemist,
         'imageUrl': 'assets/images/marie_curie.png',
       },
       {
         'name': 'Abraham Lincoln',
         'years': '1809-1865',
-        'profession': 'U.S. President',
+        'profession': localizations.usPresident,
         'imageUrl': 'assets/images/abraham_lincoln.png',
       },
       {
         'name': 'Cleopatra',
         'years': '69-30 BC',
-        'profession': 'Egyptian Pharaoh',
+        'profession': localizations.egyptianPharaoh,
         'imageUrl': 'assets/images/cleopatra.png',
       },
       {
         'name': 'Avicii',
         'years': '1989-2018',
-        'profession': 'DJ & Music Producer',
+        'profession': localizations.djMusicProducer,
         'imageUrl': 'assets/images/avici.png',
       },
       {
         'name': 'Tupac Shakur',
         'years': '1971-1996',
-        'profession': 'Rapper & Actor',
+        'profession': localizations.rapperActor,
         'imageUrl': 'assets/images/tupac.png',
       },
       {
         'name': 'David Bowie',
         'years': '1947-2016',
-        'profession': 'Musician & Artist',
+        'profession': localizations.musicianArtist,
         'imageUrl': 'assets/images/david_bowie.png',
       },
       {
         'name': 'Stephen Hawking',
         'years': '1942-2018',
-        'profession': 'Theoretical Physicist',
+        'profession': localizations.theoreticalPhysicist,
         'imageUrl': 'assets/images/stephen_hawking.png',
       },
       {
         'name': 'Elvis Presley',
         'years': '1935-1977',
-        'profession': 'Singer & Actor',
+        'profession': localizations.singerActor,
         'imageUrl': 'assets/images/elvis_presley.png',
       },
       {
         'name': 'Winston Churchill',
         'years': '1874-1965',
-        'profession': 'British Prime Minister',
+        'profession': localizations.britishPrimeMinister,
         'imageUrl': 'assets/images/winston_churchill.png',
       },
       {
         'name': 'Nikola Tesla',
         'years': '1856-1943',
-        'profession': 'Inventor & Engineer',
+        'profession': localizations.inventorEngineer,
         'imageUrl': 'assets/images/nikola_tesla.png',
       },
       {
         'name': 'William Shakespeare',
         'years': '1564-1616',
-        'profession': 'Playwright & Poet',
+        'profession': localizations.playwrightPoet,
         'imageUrl': 'assets/images/william_shakespeare.png',
       },
       {
         'name': 'Julius Caesar',
         'years': '100-44 BC',
-        'profession': 'Roman General & Dictator',
+        'profession': localizations.romanGeneralDictator,
         'imageUrl': 'assets/images/caesar.png',
       },
       {
         'name': 'Steve Jobs',
         'years': '1955-2011',
-        'profession': 'Tech Entrepreneur',
+        'profession': localizations.techEntrepreneur,
         'imageUrl': 'assets/images/steve_jobs.png',
       },
       {
         'name': 'Princess Diana',
         'years': '1961-1997',
-        'profession': 'British Royal & Humanitarian',
+        'profession': localizations.britishRoyalHumanitarian,
         'imageUrl': 'assets/images/diana_princess.png',
       },
       {
         'name': 'Freddie Mercury',
         'years': '1946-1991',
-        'profession': 'Singer & Performer',
+        'profession': localizations.singerPerformer,
         'imageUrl': 'assets/images/freddie_mercury.png',
       },
       {
         'name': 'Muhammad Ali',
         'years': '1942-2016',
-        'profession': 'Boxer & Activist',
+        'profession': localizations.boxerActivist,
         'imageUrl': 'assets/images/muhammad_ali.png',
       },
       {
         'name': 'Carl Sagan',
         'years': '1934-1996',
-        'profession': 'Astronomer & Science Communicator',
+        'profession': localizations.astronomerScienceCommunicator,
         'imageUrl': 'assets/images/carl_sagan.png',
       },
       {
         'name': 'Mahatma Gandhi',
         'years': '1869-1948',
-        'profession': 'Independence Leader',
+        'profession': localizations.independenceLeader,
         'imageUrl': 'assets/images/gandhi.png',
       },
       {
         'name': 'Vincent van Gogh',
         'years': '1853-1890',
-        'profession': 'Painter',
+        'profession': localizations.painter,
         'imageUrl': 'assets/images/vincent_van_gogh.png',
       },
       {
         'name': 'Leonardo da Vinci',
         'years': '1452-1519',
-        'profession': 'Polymath & Artist',
+        'profession': localizations.polymathArtist,
         'imageUrl': 'assets/images/da_vinci.png',
       },
       {
         'name': 'Socrates',
         'years': '470-399 BC',
-        'profession': 'Philosopher',
+        'profession': localizations.philosopher,
         'imageUrl': 'assets/images/socrates.png',
       },
     ];
@@ -379,19 +379,25 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withValues(alpha: 0.7),
+            color: AppTheme.midnightPurple.withValues(alpha: 0.8),
             border: Border(
               top: BorderSide(
-                color: AppTheme.warmGold.withValues(alpha: 0.3),
-                width: 1.0,
+                color: AppTheme.warmGold.withValues(alpha: 0.4),
+                width: 1.5,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.deepNavy.withValues(alpha: 0.3),
-                blurRadius: 10,
+                color: AppTheme.deepNavy.withValues(alpha: 0.4),
+                blurRadius: 15,
                 spreadRadius: 0,
-                offset: const Offset(0, -2),
+                offset: const Offset(0, -3),
+              ),
+              BoxShadow(
+                color: AppTheme.warmGold.withValues(alpha: 0.1),
+                blurRadius: 8,
+                spreadRadius: 0,
+                offset: const Offset(0, -1),
               ),
             ],
           ),
@@ -591,16 +597,30 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             height: 160,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppTheme.midnightPurple.withValues(alpha: 0.3),
-              border: Border.all(
-                color: AppTheme.warmGold.withValues(alpha: 0.3),
-                width: 1,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.midnightPurple.withValues(alpha: 0.4),
+                  AppTheme.deepNavy.withValues(alpha: 0.3),
+                ],
               ),
+              border: Border.all(
+                color: AppTheme.warmGold.withValues(alpha: 0.4),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
             child: Icon(
-              Icons.person_outline,
+              Icons.person_add_outlined,
               size: 80,
-              color: AppTheme.warmGold.withValues(alpha: 0.5),
+              color: AppTheme.warmGold.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 32),
@@ -641,46 +661,55 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
               onTap: () => _onAddCharacter(context),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
+                  horizontal: 28,
+                  vertical: 16,
                 ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      AppTheme.warmGold.withValues(alpha: 0.8),
-                      AppTheme.midnightPurple.withValues(alpha: 0.8),
+                      AppTheme.warmGold.withValues(alpha: 0.9),
+                      AppTheme.warmGold.withValues(alpha: 0.7),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.warmGold.withValues(alpha: 0.3),
-                      blurRadius: 10,
+                      color: AppTheme.warmGold.withValues(alpha: 0.4),
+                      blurRadius: 15,
                       spreadRadius: 0,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: AppTheme.deepNavy.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                   border: Border.all(
-                    color: AppTheme.silverMist.withValues(alpha: 0.3),
-                    width: 0.5,
+                    color: AppTheme.warmGold.withValues(alpha: 0.6),
+                    width: 1,
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.add,
-                      size: 20,
-                      color: AppTheme.silverMist.withValues(alpha: 0.9),
+                      Icons.add_circle_outline,
+                      size: 22,
+                      color: AppTheme.deepNavy.withValues(alpha: 0.9),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     Text(
                       localizations.createNewTwin,
                       style: UkrainianFontUtils.cinzelWithUkrainianSupport(
                         text: localizations.createNewTwin,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.silverMist,
-                        letterSpacing: 1.5,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.deepNavy,
+                        letterSpacing: 1.2,
                       ),
                     ),
                   ],
@@ -900,26 +929,30 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         end: Alignment.bottomRight,
                         colors: [AppTheme.midnightPurple, AppTheme.deepNavy],
                       ),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color:
                               _isHovering
-                                  ? accentColor.withValues(alpha: 0.6)
-                                  : AppTheme.midnightPurple.withValues(
-                                    alpha: 0.3,
-                                  ),
-                          blurRadius: _isHovering ? 15 : 8,
-                          spreadRadius: _isHovering ? 2 : 0,
-                          offset: Offset(0, 5 * _glowAnimation.value),
+                                  ? accentColor.withValues(alpha: 0.8)
+                                  : accentColor.withValues(alpha: 0.4),
+                          blurRadius: _isHovering ? 20 : 12,
+                          spreadRadius: _isHovering ? 3 : 1,
+                          offset: Offset(0, _isHovering ? 8 : 4),
+                        ),
+                        BoxShadow(
+                          color: AppTheme.deepNavy.withValues(alpha: 0.6),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                       border: Border.all(
                         color:
                             _isHovering
-                                ? accentColor.withValues(alpha: 0.7)
-                                : accentColor.withValues(alpha: 0.3),
-                        width: 1.5,
+                                ? accentColor.withValues(alpha: 0.9)
+                                : accentColor.withValues(alpha: 0.6),
+                        width: _isHovering ? 2.5 : 2.0,
                       ),
                     ),
                     child: ClipRRect(
@@ -935,7 +968,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                       builder: (context, _) {
                         return Positioned.fill(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(20),
                             child: CustomPaint(
                               painter: PulseRingPainter(
                                 progress: _glowAnimation.value,
@@ -951,7 +984,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
             );
           },
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
                 // Background image if available
@@ -1325,30 +1358,34 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                         end: Alignment.bottomRight,
                         colors: [AppTheme.midnightPurple, AppTheme.deepNavy],
                       ),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color:
                               _isHovering
-                                  ? accentColor.withValues(alpha: 0.6)
-                                  : AppTheme.midnightPurple.withValues(
-                                    alpha: 0.3,
-                                  ),
-                          blurRadius: _isHovering ? 15 : 8,
-                          spreadRadius: _isHovering ? 2 : 0,
-                          offset: Offset(0, 5 * _glowAnimation.value),
+                                  ? accentColor.withValues(alpha: 0.8)
+                                  : accentColor.withValues(alpha: 0.4),
+                          blurRadius: _isHovering ? 20 : 12,
+                          spreadRadius: _isHovering ? 3 : 1,
+                          offset: Offset(0, _isHovering ? 8 : 4),
+                        ),
+                        BoxShadow(
+                          color: AppTheme.deepNavy.withValues(alpha: 0.6),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                       border: Border.all(
                         color:
                             _isHovering
-                                ? accentColor.withValues(alpha: 0.7)
-                                : accentColor.withValues(alpha: 0.3),
-                        width: 1.5,
+                                ? accentColor.withValues(alpha: 0.9)
+                                : accentColor.withValues(alpha: 0.6),
+                        width: _isHovering ? 2.5 : 2.0,
                       ),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(18),
                       child: child,
                     ),
                   ),
@@ -1360,7 +1397,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                       builder: (context, _) {
                         return Positioned.fill(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(20),
                             child: CustomPaint(
                               painter: PulseRingPainter(
                                 progress: _glowAnimation.value,
@@ -1376,7 +1413,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
             );
           },
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
                 // Background gradient

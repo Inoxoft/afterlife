@@ -8163,33 +8163,33 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
-        'name': 'GPT-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
+        'name': 'Claude 3.5 Sonnet',
         'description':
-            'Advanced long-context reasoning, deep conceptual insights',
+            'Scientific reasoning and theoretical physics discussions',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
-        'description': 'Precise structured outputs, strong alignment',
+        'id': 'openai/gpt-4o',
+        'name': 'GPT-4o',
+        'description': 'Complex mathematical concepts and thought experiments',
         'recommended': false,
       },
       {
-        'id': 'meta-llama/llama-4-maverick',
-        'name': 'Llama 4 Maverick',
-        'description': 'Sparse mixture-of-experts, extended context',
+        'id': 'google/gemini-1.5-pro',
+        'name': 'Gemini 1.5 Pro',
+        'description': 'Deep philosophical insights about science and reality',
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
-        'description': 'Deep conceptual threads, free via OpenRouter',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen 3 235B (Free)',
+        'description': 'Free model with solid scientific knowledge',
         'recommended': false,
       },
     ],
@@ -8197,32 +8197,32 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
         'id': 'openai/gpt-4o',
         'name': 'GPT-4o',
-        'description': 'Multimodal reasoning, coding expertise',
+        'description': 'Computer science and cryptography discussions',
         'recommended': true,
       },
       {
-        'id': 'deepseek/deepseek-r1',
-        'name': 'DeepSeek R1',
-        'description': 'Scientific & mathematical problem-solving',
+        'id': 'anthropic/claude-3.5-sonnet',
+        'name': 'Claude 3.5 Sonnet',
+        'description': 'Logic puzzles and mathematical computations',
         'recommended': false,
       },
       {
-        'id': 'cohere/command-r-plus',
-        'name': 'Command R+',
-        'description': 'Retrieval-augmented factual reasoning',
+        'id': 'deepseek/deepseek-coder-v2',
+        'name': 'DeepSeek Coder V2',
+        'description': 'Programming concepts and algorithm design',
         'recommended': false,
       },
       {
-        'id': 'deepseek/deepseek-r1-zero:free',
-        'name': 'DeepSeek R1 Zero (Free)',
-        'description': 'Structured reasoning, free via OpenRouter',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen 3 235B (Free)',
+        'description': 'Free model with computational thinking abilities',
         'recommended': false,
       },
     ],
@@ -8230,33 +8230,32 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.5-orion',
-        'name': 'GPT-4.5 (Orion)',
-        'description': 'Expressive, emotionally rich responses',
+        'id': 'anthropic/claude-3.5-sonnet',
+        'name': 'Claude 3.5 Sonnet',
+        'description': 'Charismatic and emotionally expressive conversations',
         'recommended': true,
       },
       {
-        'id': 'mistralai/mistral-large-2',
-        'name': 'Mistral Large 2',
-        'description': 'Creative generation, reduced hallucinations',
+        'id': 'openai/gpt-4o',
+        'name': 'GPT-4o',
+        'description': 'Hollywood glamour and artistic sensitivity',
         'recommended': false,
       },
       {
-        'id': 'google/gemini-2.5-pro',
-        'name': 'Gemini 2.5 Pro',
-        'description': 'Persona-driven, high token capacity',
+        'id': 'google/gemini-1.5-pro',
+        'name': 'Gemini 1.5 Pro',
+        'description': 'Vulnerable authenticity behind the public persona',
         'recommended': false,
       },
       {
-        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
-        'name': 'Mistral Small 3.1 (Free)',
-        'description':
-            'Lightweight, creative conversation, free via OpenRouter',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen 3 235B (Free)',
+        'description': 'Free model with empathetic responses',
         'recommended': false,
       },
     ],
@@ -8264,32 +8263,32 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
-        'description': 'Concise rhetoric, safety-aware outputs',
+        'id': 'anthropic/claude-3.5-sonnet',
+        'name': 'Claude 3.5 Sonnet',
+        'description': 'Presidential rhetoric and conservative philosophy',
         'recommended': true,
       },
       {
-        'id': 'cohere/command-r-plus',
-        'name': 'Command R+',
-        'description': 'Structured, assertive dialogue',
+        'id': 'openai/gpt-4o',
+        'name': 'GPT-4o',
+        'description': 'Cold War politics and economic policy insights',
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-3.5-turbo',
-        'name': 'GPT-3.5 Turbo',
-        'description': 'Charismatic conversational style',
+        'id': 'google/gemini-1.5-pro',
+        'name': 'Gemini 1.5 Pro',
+        'description': 'Hollywood charm meets political leadership',
         'recommended': false,
       },
       {
-        'id': 'deepseek/deepseek-chat-v3-0324:free',
-        'name': 'DeepSeek Chat V3 (Free)',
-        'description': 'Friendly, persuasive tone, free via OpenRouter',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen 3 235B (Free)',
+        'description': 'Free model with diplomatic conversation style',
         'recommended': false,
       },
     ],
@@ -8297,12 +8296,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8321,8 +8320,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8331,12 +8330,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8355,8 +8354,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8365,12 +8364,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8389,8 +8388,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8399,12 +8398,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8423,8 +8422,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8433,12 +8432,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8457,8 +8456,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8467,12 +8466,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8491,8 +8490,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8501,12 +8500,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8525,8 +8524,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8535,12 +8534,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8559,8 +8558,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8569,12 +8568,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8593,8 +8592,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8603,12 +8602,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8627,8 +8626,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8637,12 +8636,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8661,8 +8660,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8671,12 +8670,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8695,8 +8694,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8705,12 +8704,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8729,8 +8728,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8739,12 +8738,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8763,8 +8762,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8773,12 +8772,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8797,8 +8796,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8807,12 +8806,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8831,8 +8830,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8841,12 +8840,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8865,8 +8864,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8875,12 +8874,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8899,8 +8898,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8909,12 +8908,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8933,8 +8932,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8943,12 +8942,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -8967,8 +8966,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -8977,12 +8976,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9001,8 +9000,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -9011,12 +9010,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9035,8 +9034,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -9045,12 +9044,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9069,8 +9068,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -9079,12 +9078,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9103,8 +9102,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -9113,12 +9112,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9137,8 +9136,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -9147,12 +9146,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9171,8 +9170,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },
@@ -9181,12 +9180,12 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/hammer-2.1',
         'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (3.1GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4.1',
+        'id': 'anthropic/claude-3.5-sonnet',
         'name': 'GPT-4.1',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
@@ -9205,8 +9204,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': false,
       },
       {
-        'id': 'qwen/qwen3-32b:free',
-        'name': 'Qwen: Qwen3 32B (free)',
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen: Qwen3 235B (free)',
         'description': 'Deep conceptual threads, free via OpenRouter',
         'recommended': false,
       },

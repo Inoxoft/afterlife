@@ -13,7 +13,7 @@ import 'themed_icon.dart';
 import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
 import '../character_interview/chat_service.dart' as interview_chat;
-import '../developer_chat/developer_chat_screen.dart';
+
 import 'local_llm_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -177,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // API & Connectivity section
                     _buildSectionHeader(localizations.apiConnectivity),
                     _buildSettingCard(
-                      title: localizations.customApiKey,
+                      title: 'OpenRouter API Key',
                       subtitle: localizations.customApiKeyDescription,
                       icon: Icons.vpn_key,
                       onTap: () => _showApiKeyDialog(context),
@@ -190,32 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onTap: () => _navigateToLocalLLMSettings(context),
                     ),
 
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        bottom: 16,
-                      ),
-                      child: Text(
-                        localizations.apiKeyNote,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-
                     const SizedBox(height: 16),
-
-                    // Developer Chat section
-                    _buildSectionHeader(localizations.developerConnection),
-                    _buildSettingCard(
-                      title: localizations.chatWithDeveloper,
-                      subtitle: localizations.chatWithDeveloperDescription,
-                      icon: Icons.developer_mode,
-                      onTap: () => _navigateToDeveloperChat(context),
-                    ),
                   ],
                 ),
               ),
@@ -430,13 +405,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
-  }
-
-  void _navigateToDeveloperChat(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const DeveloperChatScreen()),
-    );
   }
 
   void _showLanguageSelectionDialog(BuildContext context) {

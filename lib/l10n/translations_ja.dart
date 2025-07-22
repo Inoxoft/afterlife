@@ -183,6 +183,61 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profession => '職業';
   @override
   String get biography => '伝記';
+
+  // Character professions
+  @override
+  String get basketballPlayer => 'バスケットボール選手';
+  @override
+  String get musicianSinger => 'ミュージシャン・歌手';
+  @override
+  String get politicalLeaderActivist => '政治指導者・活動家';
+  @override
+  String get martialArtistActor => '武道家・俳優';
+  @override
+  String get civilRightsLeader => '公民権運動指導者';
+  @override
+  String get physicistChemist => '物理学者・化学者';
+  @override
+  String get usPresident => 'アメリカ大統領';
+  @override
+  String get egyptianPharaoh => 'エジプトのファラオ';
+  @override
+  String get djMusicProducer => 'DJ・音楽プロデューサー';
+  @override
+  String get rapperActor => 'ラッパー・俳優';
+  @override
+  String get musicianArtist => 'ミュージシャン・アーティスト';
+  @override
+  String get theoreticalPhysicist => '理論物理学者';
+  @override
+  String get singerActor => '歌手・俳優';
+  @override
+  String get britishPrimeMinister => 'イギリス首相';
+  @override
+  String get inventorEngineer => '発明家・技術者';
+  @override
+  String get playwrightPoet => '劇作家・詩人';
+  @override
+  String get romanGeneralDictator => 'ローマの将軍・独裁者';
+  @override
+  String get techEntrepreneur => 'テクノロジー起業家';
+  @override
+  String get britishRoyalHumanitarian => 'イギリス王室・人道主義者';
+  @override
+  String get singerPerformer => '歌手・パフォーマー';
+  @override
+  String get boxerActivist => 'ボクサー・活動家';
+  @override
+  String get astronomerScienceCommunicator => '天文学者・科学コミュニケーター';
+  @override
+  String get independenceLeader => '独立運動指導者';
+  @override
+  String get painter => '画家';
+  @override
+  String get polymathArtist => '博学者・芸術家';
+  @override
+  String get philosopher => '哲学者';
+
   @override
   String get aiModel => 'AIモデル';
   @override
@@ -279,6 +334,56 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get continueButton => '続行';
+
+  // Setup Guide Page strings
+  @override
+  String get gettingStarted => 'はじめに';
+  @override
+  String get chooseYourAiExperience => 'AI体験を選択してください';
+  @override
+  String get cloudAiModels => 'クラウドAIモデル';
+  @override
+  String get bestQualityRequiresInternet => '最高品質、インターネット接続が必要';
+  @override
+  String get accessToGptClaudeAndMore => 'GPT-4、Claude、その他へのアクセス';
+  @override
+  String get advancedReasoningAndKnowledge => '高度な推論と知識';
+  @override
+  String get alwaysUpToDateInformation => '常に最新の情報';
+  @override
+  String get fastResponses => '高速レスポンス';
+  @override
+  String get setUpApiKey => 'APIキーの設定';
+  @override
+  String get getFreeApiKeyAt => '無料のAPIキーを取得：';
+  @override
+  String get localAiModel => 'ローカルAIモデル';
+  @override
+  String get privateWorksOffline => 'プライベート、オフラインで動作';
+  @override
+  String get completePrivacyDataStaysLocal => '完全なプライバシー（データはローカルに保存）';
+  @override
+  String get worksWithoutInternet => 'インターネットなしで動作';
+  @override
+  String get hammerModelSize => 'Hammer2.1モデル（1.6GB）';
+  @override
+  String get optimizedForMobileDevices => 'モバイルデバイス向けに最適化';
+  @override
+  String get downloadModel => 'モデルをダウンロード';
+  @override
+  String get freeDownloadNoAccountRequired => '無料ダウンロード、アカウント不要';
+  @override
+  String get youCanUseBoth => '両方使用できます！';
+  @override
+  String get setBothOptionsAutoChoose =>
+      '両方のオプションを設定すると、アプリが各会話で最適なモデルを自動選択します。';
+  @override
+  String get canSetupLaterInSettings => '設定 → API と接続から後で設定することもできます';
+  @override
+  String get apiKeySavedCanChat => 'APIキーが保存されました！AIキャラクターとチャットできます。';
+  @override
+  String get pleaseOpenBrowserVisit =>
+      'ブラウザを開いて次のサイトにアクセスしてください：openrouter.ai/keys';
 
   @override
   String get diversePerspectives => '多様な視点';
@@ -813,4 +918,61 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get daysAgo => '日前';
+
+  // Interview screen specific
+  @override
+  String get creatingYourDigitalTwin => 'デジタルツインの作成';
+
+  @override
+  String get editingCharacter => '{name}を編集中';
+
+  @override
+  String get uploadCharacterFile => 'キャラクターファイルをアップロード';
+
+  @override
+  String get typeYourMessage => 'メッセージを入力してください...';
+
+  @override
+  String get processingFiles => 'ファイルを処理しています...';
+
+  @override
+  String get noFilesSelected => 'ファイルが選択されていません。';
+
+  @override
+  String get processingFileProgress => 'ファイル処理中 {current}/{total}: {fileName}';
+
+  @override
+  String get characterCardReady => 'キャラクターカードのレビュー準備完了';
+
+  @override
+  String get reviewCharacterCard =>
+      '以下のキャラクターカードをご確認ください。満足いただけましたら、「キャラクターを確定」をクリックして保存してください。';
+
+  @override
+  String get finalizeCharacter => 'キャラクターを確定';
+
+  @override
+  String get interviewComplete => 'インタビュー完了！';
+
+  @override
+  String get interviewCompleteDescription => 'あなたのデジタルツインを作成するために十分な情報を収集しました。';
+
+  @override
+  String get updateCharacter => 'キャラクターを更新';
+
+  @override
+  String get continueToGallery => 'ギャラリーに進む';
+
+  @override
+  String get restartInterviewConfirmation => 'これによりすべての回答が削除されます。よろしいですか？';
+
+  @override
+  String get restart => '再開始';
+
+  @override
+  String get whichWouldYouPrefer => 'どちらがお好みですか？';
+
+  @override
+  String get interviewWelcomeMessage =>
+      'こんにちは！詳細なキャラクターカードを作成する準備ができています。以下のいずれかをお選びください：\n\n1. あなたの性格や経験に関する質問にお答えください\n2. あなたの情報を含むファイル（PDF、TXT、DOC、またはメール）をアップロードしてください\n\nどちらがお好みですか？';
 }

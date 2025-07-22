@@ -5,6 +5,7 @@ import '../../core/widgets/animated_particles.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import 'pages/mask_page.dart';
 import 'pages/llm_page.dart';
+import 'pages/setup_guide_page.dart';
 import 'pages/explore_page.dart';
 import 'pages/language_page.dart';
 import '../../l10n/app_localizations.dart';
@@ -40,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _navigateToNextPage() {
-    if (_currentPage < 3) {
+    if (_currentPage < 4) {
       _animationController.reset();
       setState(() {
         _currentPage++;
@@ -75,6 +76,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       case 2:
         return LLMPage(animationController: _animationController);
       case 3:
+        return SetupGuidePage(animationController: _animationController);
+      case 4:
         return ExplorePage(animationController: _animationController);
       default:
         return Container();
@@ -84,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
@@ -186,7 +189,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     // Page indicators
                     Row(
                       children: List.generate(
-                        4,
+                        5,
                         (index) => Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           width: 10,
@@ -221,9 +224,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         shadowColor: AppTheme.warmGold.withValues(alpha: 0.5),
                       ),
                       child: Text(
-                        _currentPage == 3 ? localizations.getStarted : localizations.nextButton,
+                        _currentPage == 4
+                            ? localizations.getStarted
+                            : localizations.nextButton,
                         style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                          text: _currentPage == 3 ? localizations.getStarted : localizations.nextButton,
+                          text:
+                              _currentPage == 4
+                                  ? localizations.getStarted
+                                  : localizations.nextButton,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.0,

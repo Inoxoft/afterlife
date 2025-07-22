@@ -202,6 +202,62 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profession => 'Профессия';
   @override
   String get biography => 'Биография';
+
+  // Character professions
+  @override
+  String get basketballPlayer => 'Баскетболист';
+  @override
+  String get musicianSinger => 'Музыкант и Певец';
+  @override
+  String get politicalLeaderActivist => 'Политический Лидер и Активист';
+  @override
+  String get martialArtistActor => 'Мастер Боевых Искусств и Актёр';
+  @override
+  String get civilRightsLeader => 'Лидер Движения за Гражданские Права';
+  @override
+  String get physicistChemist => 'Физик и Химик';
+  @override
+  String get usPresident => 'Президент США';
+  @override
+  String get egyptianPharaoh => 'Египетский Фараон';
+  @override
+  String get djMusicProducer => 'Диджей и Музыкальный Продюсер';
+  @override
+  String get rapperActor => 'Рэпер и Актёр';
+  @override
+  String get musicianArtist => 'Музыкант и Артист';
+  @override
+  String get theoreticalPhysicist => 'Теоретический Физик';
+  @override
+  String get singerActor => 'Певец и Актёр';
+  @override
+  String get britishPrimeMinister => 'Британский Премьер-министр';
+  @override
+  String get inventorEngineer => 'Изобретатель и Инженер';
+  @override
+  String get playwrightPoet => 'Драматург и Поэт';
+  @override
+  String get romanGeneralDictator => 'Римский Генерал и Диктатор';
+  @override
+  String get techEntrepreneur => 'Технологический Предприниматель';
+  @override
+  String get britishRoyalHumanitarian =>
+      'Британская Королевская Особа и Гуманитарий';
+  @override
+  String get singerPerformer => 'Певец и Исполнитель';
+  @override
+  String get boxerActivist => 'Боксёр и Активист';
+  @override
+  String get astronomerScienceCommunicator => 'Астроном и Популяризатор Науки';
+  @override
+  String get independenceLeader => 'Лидер Независимости';
+  @override
+  String get painter => 'Художник';
+  @override
+  String get polymathArtist => 'Эрудит и Артист';
+  @override
+  String get philosopher => 'Философ';
+
   @override
   String get aiModel => 'МОДЕЛЬ ИИ';
   @override
@@ -278,6 +334,63 @@ class AppLocalizationsRu extends AppLocalizations {
   String get chooseLanguage => 'Выберите ваш язык для начала';
   @override
   String get continueButton => 'ПРОДОЛЖИТЬ';
+
+  // Setup Guide Page strings
+  @override
+  String get gettingStarted => 'Начало Работы';
+  @override
+  String get chooseYourAiExperience => 'Выберите свой опыт ИИ';
+  @override
+  String get cloudAiModels => 'Облачные Модели ИИ';
+  @override
+  String get bestQualityRequiresInternet => 'Лучшее качество, требует интернет';
+  @override
+  String get accessToGptClaudeAndMore => 'Доступ к GPT-4, Claude и другим';
+  @override
+  String get advancedReasoningAndKnowledge =>
+      'Продвинутые рассуждения и знания';
+  @override
+  String get alwaysUpToDateInformation => 'Всегда актуальная информация';
+  @override
+  String get fastResponses => 'Быстрые ответы';
+  @override
+  String get setUpApiKey => 'Настроить API ключ';
+  @override
+  String get getFreeApiKeyAt => 'Получите свой бесплатный API ключ на ';
+  @override
+  String get localAiModel => 'Локальная Модель ИИ';
+  @override
+  String get privateWorksOffline => 'Приватная, работает офлайн';
+  @override
+  String get completePrivacyDataStaysLocal =>
+      'Полная конфиденциальность (данные остаются локально)';
+  @override
+  String get worksWithoutInternet => 'Работает без интернета';
+  @override
+  String get hammerModelSize => 'Модель Hammer2.1 (1.6 ГБ)';
+  @override
+  String get optimizedForMobileDevices =>
+      'Оптимизирована для мобильных устройств';
+  @override
+  String get downloadModel => 'Скачать Модель';
+  @override
+  String get freeDownloadNoAccountRequired =>
+      'Бесплатная загрузка, не требует регистрации';
+  @override
+  String get youCanUseBoth => 'Вы можете использовать оба!';
+  @override
+  String get setBothOptionsAutoChoose =>
+      'Настройте оба варианта, и приложение автоматически выберет лучшую доступную модель для каждого разговора.';
+  @override
+  String get canSetupLaterInSettings =>
+      'Вы всегда можете настроить это позже в Настройках → API и Подключение';
+  @override
+  String get apiKeySavedCanChat =>
+      'API ключ сохранён! Теперь вы можете общаться с ИИ персонажами.';
+  @override
+  String get pleaseOpenBrowserVisit =>
+      'Пожалуйста, откройте браузер и посетите: openrouter.ai/keys';
+
   @override
   String get diversePerspectives => 'РАЗНООБРАЗНЫЕ ПЕРСПЕКТИВЫ';
   @override
@@ -702,4 +815,64 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yesterday => 'вчера';
   @override
   String get daysAgo => 'дней назад';
+
+  // Interview screen specific
+  @override
+  String get creatingYourDigitalTwin => 'Создание вашего цифрового двойника';
+
+  @override
+  String get editingCharacter => 'Редактирование {name}';
+
+  @override
+  String get uploadCharacterFile => 'Загрузить файл персонажа';
+
+  @override
+  String get typeYourMessage => 'Введите ваше сообщение...';
+
+  @override
+  String get processingFiles => 'Обработка ваших файлов...';
+
+  @override
+  String get noFilesSelected => 'Файлы не выбраны.';
+
+  @override
+  String get processingFileProgress =>
+      'Обработка {current}/{total} файлов: {fileName}';
+
+  @override
+  String get characterCardReady => 'Карточка персонажа готова к проверке';
+
+  @override
+  String get reviewCharacterCard =>
+      'Пожалуйста, просмотрите карточку персонажа ниже. Если вы удовлетворены результатом, нажмите "Завершить персонажа" для сохранения.';
+
+  @override
+  String get finalizeCharacter => 'Завершить персонажа';
+
+  @override
+  String get interviewComplete => 'Интервью завершено!';
+
+  @override
+  String get interviewCompleteDescription =>
+      'Я собрал достаточно информации для создания вашего цифрового двойника.';
+
+  @override
+  String get updateCharacter => 'Обновить персонажа';
+
+  @override
+  String get continueToGallery => 'Перейти в галерею';
+
+  @override
+  String get restartInterviewConfirmation =>
+      'Это удалит все ваши ответы. Вы уверены?';
+
+  @override
+  String get restart => 'Перезапустить';
+
+  @override
+  String get whichWouldYouPrefer => 'Что бы вы предпочли?';
+
+  @override
+  String get interviewWelcomeMessage =>
+      'Привет! Я готов создать подробную карточку персонажа для вас. Вы можете:\n\n1. Ответить на мои вопросы о вашей личности и опыте\n2. Загрузить файл (PDF, TXT, DOC или email) с вашей информацией\n\nЧто бы вы предпочли?';
 }

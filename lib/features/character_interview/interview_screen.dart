@@ -65,9 +65,17 @@ class _InterviewScreenState extends State<InterviewScreen> {
       },
     );
 
-    // Inject the LanguageProvider
+    // Inject the LanguageProvider and set the initial localized message
     final languageProvider = context.read<LanguageProvider>();
     _interviewProvider.setLanguageProvider(languageProvider);
+
+    // Set the initial welcome message in the user's preferred language
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final localizations = AppLocalizations.of(context);
+      _interviewProvider.setInitialMessage(
+        localizations.interviewWelcomeMessage,
+      );
+    });
 
     // If editing an existing character, initialize with their data
     if (widget.editMode && widget.existingCharacter != null) {
@@ -87,9 +95,11 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   Future<void> _handleFileUpload() async {
+    final localizations = AppLocalizations.of(context);
+
     try {
       setState(() {
-        _interviewProvider.addAIMessage("Processing your file(s)...");
+        _interviewProvider.addAIMessage(localizations.processingFiles);
         _isProcessingFile = true;
       });
 
@@ -97,7 +107,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
 
       if (files == null || files.isEmpty) {
         setState(() {
-          _interviewProvider.addAIMessage("No files selected.");
+          _interviewProvider.addAIMessage(localizations.noFilesSelected);
           _isProcessingFile = false;
         });
         return;
@@ -165,6 +175,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
   @override
   Widget build(BuildContext context) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    final localizations = AppLocalizations.of(context);
 
     return ChangeNotifierProvider(
       create: (_) => _interviewProvider,
@@ -174,8 +185,11 @@ class _InterviewScreenState extends State<InterviewScreen> {
           elevation: 0,
           title: Text(
             widget.editMode
-                ? "Editing ${widget.existingCharacter?.name ?? 'Character'}"
-                : "Creating Your Digital Twin",
+                ? localizations.editingCharacter.replaceAll(
+                  '{name}',
+                  widget.existingCharacter?.name ?? 'Character',
+                )
+                : localizations.creatingYourDigitalTwin,
             style: TextStyle(
               fontSize: 18 * fontScale,
               fontWeight: FontWeight.w500,
@@ -192,7 +206,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.upload_file, color: Colors.white70),
                   onPressed: _isProcessingFile ? null : _handleFileUpload,
-                  tooltip: 'Upload Character File',
+                  tooltip: localizations.uploadCharacterFile,
                 ),
               ),
             Consumer<InterviewProvider>(
@@ -205,15 +219,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.refresh, color: Colors.white70),
-                    tooltip: 'Restart Interview',
+                    tooltip: localizations.restartInterview,
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder:
                             (context) => AlertDialog(
-                              title: const Text('Restart Interview'),
-                              content: const Text(
-                                'This will clear all your responses. Are you sure?',
+                              title: Text(localizations.restartInterview),
+                              content: Text(
+                                localizations.restartInterviewConfirmation,
                               ),
                               backgroundColor: AppTheme.midnightPurple,
                               shape: RoundedRectangleBorder(
@@ -229,7 +243,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: Text(
-                                    'Cancel',
+                                    localizations.cancel,
                                     style: TextStyle(
                                       color: AppTheme.silverMist,
                                     ),
@@ -241,7 +255,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                     Navigator.pop(context);
                                   },
                                   child: Text(
-                                    'Restart',
+                                    localizations.restart,
                                     style: TextStyle(color: AppTheme.warmGold),
                                   ),
                                 ),
@@ -322,7 +336,11 @@ class _InterviewScreenState extends State<InterviewScreen> {
                   Consumer<InterviewProvider>(
                     builder: (context, provider, child) {
                       if (provider.isSuccess) {
-                        return _buildSuccessMessage(context, provider);
+                        return _buildSuccessMessage(
+                          context,
+                          provider,
+                          localizations,
+                        );
                       }
                       return const SizedBox.shrink();
                     },
@@ -389,7 +407,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Character Card Ready for Review',
+                                        localizations.characterCardReady,
                                         style: TextStyle(
                                           color: AppTheme.warmGold,
                                           fontSize: 20,
@@ -412,7 +430,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                       ),
                                     ),
                                     child: Text(
-                                      'Please review your character card below. If you\'re satisfied with it, click "Finalize Character" to save it.',
+                                      localizations.reviewCharacterCard,
                                       style: TextStyle(
                                         color: AppTheme.silverMist,
                                         fontSize: 14,
@@ -583,10 +601,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   ),
                                 ),
                                 child: Text(
-                                  "Finalize Character",
+                                  localizations.finalizeCharacter,
                                   style:
                                       UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                        text: "Finalize Character",
+                                        text: localizations.finalizeCharacter,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -629,7 +647,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   fontSize: 14 * fontScale,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Type your message...',
+                                  hintText: localizations.typeYourMessage,
                                   hintStyle: TextStyle(
                                     color: AppTheme.silverMist.withValues(
                                       alpha: 0.5,
@@ -695,6 +713,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
   Widget _buildSuccessMessage(
     BuildContext context,
     InterviewProvider provider,
+    AppLocalizations localizations,
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
@@ -711,9 +730,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Interview Complete!',
+            localizations.interviewComplete,
             style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-              text: 'Interview Complete!',
+              text: localizations.interviewComplete,
               color: AppTheme.warmGold,
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -722,10 +741,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'I have gathered enough information to create your digital twin.',
+            localizations.interviewCompleteDescription,
             style: UkrainianFontUtils.latoWithUkrainianSupport(
-              text:
-                  'I have gathered enough information to create your digital twin.',
+              text: localizations.interviewCompleteDescription,
               color: AppTheme.silverMist,
               fontSize: 16,
             ),
@@ -757,13 +775,13 @@ class _InterviewScreenState extends State<InterviewScreen> {
               children: [
                 Text(
                   provider.isEditMode
-                      ? 'Update Character'
-                      : 'Continue to Gallery',
+                      ? localizations.updateCharacter
+                      : localizations.continueToGallery,
                   style: UkrainianFontUtils.latoWithUkrainianSupport(
                     text:
                         provider.isEditMode
-                            ? 'Update Character'
-                            : 'Continue to Gallery',
+                            ? localizations.updateCharacter
+                            : localizations.continueToGallery,
                     color: AppTheme.midnightPurple,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

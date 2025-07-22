@@ -295,6 +295,86 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profession => 'Profession';
 
+  // Character professions
+  @override
+  String get basketballPlayer => 'Basketball Player';
+
+  @override
+  String get musicianSinger => 'Musician & Singer';
+
+  @override
+  String get politicalLeaderActivist => 'Political Leader & Activist';
+
+  @override
+  String get martialArtistActor => 'Martial Artist & Actor';
+
+  @override
+  String get civilRightsLeader => 'Civil Rights Leader';
+
+  @override
+  String get physicistChemist => 'Physicist & Chemist';
+
+  @override
+  String get usPresident => 'U.S. President';
+
+  @override
+  String get egyptianPharaoh => 'Egyptian Pharaoh';
+
+  @override
+  String get djMusicProducer => 'DJ & Music Producer';
+
+  @override
+  String get rapperActor => 'Rapper & Actor';
+
+  @override
+  String get musicianArtist => 'Musician & Artist';
+
+  @override
+  String get theoreticalPhysicist => 'Theoretical Physicist';
+
+  @override
+  String get singerActor => 'Singer & Actor';
+
+  @override
+  String get britishPrimeMinister => 'British Prime Minister';
+
+  @override
+  String get inventorEngineer => 'Inventor & Engineer';
+
+  @override
+  String get playwrightPoet => 'Playwright & Poet';
+
+  @override
+  String get romanGeneralDictator => 'Roman General & Dictator';
+
+  @override
+  String get techEntrepreneur => 'Tech Entrepreneur';
+
+  @override
+  String get britishRoyalHumanitarian => 'British Royal & Humanitarian';
+
+  @override
+  String get singerPerformer => 'Singer & Performer';
+
+  @override
+  String get boxerActivist => 'Boxer & Activist';
+
+  @override
+  String get astronomerScienceCommunicator =>
+      'Astronomer & Science Communicator';
+
+  @override
+  String get independenceLeader => 'Independence Leader';
+
+  @override
+  String get painter => 'Painter';
+
+  @override
+  String get polymathArtist => 'Polymath & Artist';
+
+  @override
+  String get philosopher => 'Philosopher';
+
   @override
   String get biography => 'Biography';
 
@@ -400,6 +480,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueButton => 'CONTINUE';
+
+  // Setup Guide Page strings
+  @override
+  String get gettingStarted => 'Getting Started';
+  @override
+  String get chooseYourAiExperience => 'Choose your AI experience';
+  @override
+  String get cloudAiModels => 'Cloud AI Models';
+  @override
+  String get bestQualityRequiresInternet => 'Best quality, requires internet';
+  @override
+  String get accessToGptClaudeAndMore => 'Access to GPT-4, Claude, and more';
+  @override
+  String get advancedReasoningAndKnowledge =>
+      'Advanced reasoning and knowledge';
+  @override
+  String get alwaysUpToDateInformation => 'Always up-to-date information';
+  @override
+  String get fastResponses => 'Fast responses';
+  @override
+  String get setUpApiKey => 'Set Up API Key';
+  @override
+  String get getFreeApiKeyAt => 'Get your free API key at ';
+  @override
+  String get localAiModel => 'Local AI Model';
+  @override
+  String get privateWorksOffline => 'Private, works offline';
+  @override
+  String get completePrivacyDataStaysLocal =>
+      'Complete privacy (data stays local)';
+  @override
+  String get worksWithoutInternet => 'Works without internet';
+  @override
+  String get hammerModelSize => '1.6GB Hammer2.1 model';
+  @override
+  String get optimizedForMobileDevices => 'Optimized for mobile devices';
+  @override
+  String get downloadModel => 'Download Model';
+  @override
+  String get freeDownloadNoAccountRequired =>
+      'Free download, no account required';
+  @override
+  String get youCanUseBoth => 'You can use both!';
+  @override
+  String get setBothOptionsAutoChoose =>
+      'Set up both options and the app will automatically choose the best available model for each conversation.';
+  @override
+  String get canSetupLaterInSettings =>
+      'You can always set these up later in Settings → API & Connectivity';
+  @override
+  String get apiKeySavedCanChat =>
+      'API key saved! You can now chat with AI characters.';
+  @override
+  String get pleaseOpenBrowserVisit =>
+      'Please open your browser and visit: openrouter.ai/keys';
 
   @override
   String get diversePerspectives => 'DIVERSE PERSPECTIVES';
@@ -957,4 +1092,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorSavingApiKey => 'Error saving API key';
+
+  // Interview screen
+  @override
+  String get creatingYourDigitalTwin => 'Creating Your Digital Twin';
+
+  @override
+  String get editingCharacter => 'Editing {name}';
+
+  @override
+  String get uploadCharacterFile => 'Upload Character File';
+
+  @override
+  String get typeYourMessage => 'Type your message...';
+
+  @override
+  String get processingFiles => 'Processing your file(s)...';
+
+  @override
+  String get noFilesSelected => 'No files selected.';
+
+  @override
+  String get processingFileProgress =>
+      'Processing {current}/{total} files: {fileName}';
+
+  @override
+  String get characterCardReady => 'Character Card Ready for Review';
+
+  @override
+  String get reviewCharacterCard =>
+      'Please review your character card below. If you\'re satisfied with it, click "Finalize Character" to save it.';
+
+  @override
+  String get finalizeCharacter => 'Finalize Character';
+
+  @override
+  String get interviewComplete => 'Interview Complete!';
+
+  @override
+  String get interviewCompleteDescription =>
+      'I have gathered enough information to create your digital twin.';
+
+  @override
+  String get updateCharacter => 'Update Character';
+
+  @override
+  String get continueToGallery => 'Continue to Gallery';
+
+  @override
+  String get restartInterviewConfirmation =>
+      'This will clear all your responses. Are you sure?';
+
+  @override
+  String get restart => 'Restart';
+
+  @override
+  String get whichWouldYouPrefer => 'Which would you prefer?';
+
+  @override
+  String get interviewWelcomeMessage =>
+      'Hello! I\'m ready to create a detailed character card for you. You can either:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhich would you prefer?';
 }

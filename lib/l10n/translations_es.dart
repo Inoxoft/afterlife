@@ -294,6 +294,62 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get biography => 'Biografía';
 
+  // Character professions
+  @override
+  String get basketballPlayer => 'Jugador de Baloncesto';
+  @override
+  String get musicianSinger => 'Músico y Cantante';
+  @override
+  String get politicalLeaderActivist => 'Líder Político y Activista';
+  @override
+  String get martialArtistActor => 'Artista Marcial y Actor';
+  @override
+  String get civilRightsLeader => 'Líder de Derechos Civiles';
+  @override
+  String get physicistChemist => 'Físico y Químico';
+  @override
+  String get usPresident => 'Presidente de EE.UU.';
+  @override
+  String get egyptianPharaoh => 'Faraón Egipcio';
+  @override
+  String get djMusicProducer => 'DJ y Productor Musical';
+  @override
+  String get rapperActor => 'Rapero y Actor';
+  @override
+  String get musicianArtist => 'Músico y Artista';
+  @override
+  String get theoreticalPhysicist => 'Físico Teórico';
+  @override
+  String get singerActor => 'Cantante y Actor';
+  @override
+  String get britishPrimeMinister => 'Primer Ministro Británico';
+  @override
+  String get inventorEngineer => 'Inventor e Ingeniero';
+  @override
+  String get playwrightPoet => 'Dramaturgo y Poeta';
+  @override
+  String get romanGeneralDictator => 'General y Dictador Romano';
+  @override
+  String get techEntrepreneur => 'Empresario Tecnológico';
+  @override
+  String get britishRoyalHumanitarian =>
+      'Miembro de la Realeza Británica y Humanitario';
+  @override
+  String get singerPerformer => 'Cantante y Intérprete';
+  @override
+  String get boxerActivist => 'Boxeador y Activista';
+  @override
+  String get astronomerScienceCommunicator =>
+      'Astrónomo y Divulgador Científico';
+  @override
+  String get independenceLeader => 'Líder de la Independencia';
+  @override
+  String get painter => 'Pintor';
+  @override
+  String get polymathArtist => 'Erudito y Artista';
+  @override
+  String get philosopher => 'Filósofo';
+
   @override
   String get aiModel => 'MODELO DE IA';
 
@@ -401,6 +457,62 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get continueButton => 'CONTINUAR';
+
+  // Setup Guide Page strings
+  @override
+  String get gettingStarted => 'Comenzando';
+  @override
+  String get chooseYourAiExperience => 'Elige tu experiencia de IA';
+  @override
+  String get cloudAiModels => 'Modelos de IA en la Nube';
+  @override
+  String get bestQualityRequiresInternet => 'Mejor calidad, requiere internet';
+  @override
+  String get accessToGptClaudeAndMore => 'Acceso a GPT-4, Claude y más';
+  @override
+  String get advancedReasoningAndKnowledge =>
+      'Razonamiento avanzado y conocimiento';
+  @override
+  String get alwaysUpToDateInformation => 'Información siempre actualizada';
+  @override
+  String get fastResponses => 'Respuestas rápidas';
+  @override
+  String get setUpApiKey => 'Configurar Clave API';
+  @override
+  String get getFreeApiKeyAt => 'Obtén tu clave API gratuita en ';
+  @override
+  String get localAiModel => 'Modelo de IA Local';
+  @override
+  String get privateWorksOffline => 'Privado, funciona sin conexión';
+  @override
+  String get completePrivacyDataStaysLocal =>
+      'Privacidad completa (los datos permanecen locales)';
+  @override
+  String get worksWithoutInternet => 'Funciona sin internet';
+  @override
+  String get hammerModelSize => 'Modelo Hammer2.1 de 1.6GB';
+  @override
+  String get optimizedForMobileDevices =>
+      'Optimizado para dispositivos móviles';
+  @override
+  String get downloadModel => 'Descargar Modelo';
+  @override
+  String get freeDownloadNoAccountRequired =>
+      'Descarga gratuita, no requiere cuenta';
+  @override
+  String get youCanUseBoth => '¡Puedes usar ambos!';
+  @override
+  String get setBothOptionsAutoChoose =>
+      'Configura ambas opciones y la aplicación elegirá automáticamente el mejor modelo disponible para cada conversación.';
+  @override
+  String get canSetupLaterInSettings =>
+      'Siempre puedes configurar esto más tarde en Configuración → API y Conectividad';
+  @override
+  String get apiKeySavedCanChat =>
+      '¡Clave API guardada! Ahora puedes chatear con personajes de IA.';
+  @override
+  String get pleaseOpenBrowserVisit =>
+      'Por favor, abre tu navegador y visita: openrouter.ai/keys';
 
   @override
   String get diversePerspectives => 'PERSPECTIVAS DIVERSAS';
@@ -960,4 +1072,64 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorSavingApiKey => 'Error al guardar clave API';
+
+  // Interview screen specific
+  @override
+  String get creatingYourDigitalTwin => 'Creando Tu Gemelo Digital';
+
+  @override
+  String get editingCharacter => 'Editando {name}';
+
+  @override
+  String get uploadCharacterFile => 'Subir Archivo de Personaje';
+
+  @override
+  String get typeYourMessage => 'Escribe tu mensaje...';
+
+  @override
+  String get processingFiles => 'Procesando tu(s) archivo(s)...';
+
+  @override
+  String get noFilesSelected => 'No se seleccionaron archivos.';
+
+  @override
+  String get processingFileProgress =>
+      'Procesando {current}/{total} archivos: {fileName}';
+
+  @override
+  String get characterCardReady => 'Tarjeta de Personaje Lista para Revisión';
+
+  @override
+  String get reviewCharacterCard =>
+      'Por favor revisa tu tarjeta de personaje a continuación. Si estás satisfecho con ella, haz clic en "Finalizar Personaje" para guardarla.';
+
+  @override
+  String get finalizeCharacter => 'Finalizar Personaje';
+
+  @override
+  String get interviewComplete => '¡Entrevista Completa!';
+
+  @override
+  String get interviewCompleteDescription =>
+      'He recopilado suficiente información para crear tu gemelo digital.';
+
+  @override
+  String get updateCharacter => 'Actualizar Personaje';
+
+  @override
+  String get continueToGallery => 'Continuar a la Galería';
+
+  @override
+  String get restartInterviewConfirmation =>
+      'Esto borrará todas tus respuestas. ¿Estás seguro?';
+
+  @override
+  String get restart => 'Reiniciar';
+
+  @override
+  String get whichWouldYouPrefer => '¿Cuál preferirías?';
+
+  @override
+  String get interviewWelcomeMessage =>
+      '¡Hola! Estoy listo para crear una tarjeta de personaje detallada para ti. Puedes:\n\n1. Responder mis preguntas sobre tu personalidad y experiencias\n2. Subir un archivo (PDF, TXT, DOC, o email) que contenga tu información\n\n¿Cuál preferirías?';
 }

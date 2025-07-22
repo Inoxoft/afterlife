@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../utils/env_config.dart';
 
@@ -165,6 +167,13 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppTheme.deepIndigo,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
       title: Text(
         widget.isFromSettings ? 'OpenRouter API Key' : 'API Key Required',
         style: const TextStyle(color: Colors.white),
@@ -173,9 +182,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
           _isLoading
               ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppTheme.etherealCyan,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.warmGold),
                 ),
               )
               : Column(
@@ -196,7 +203,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: AppTheme.backgroundEnd.withValues(alpha: 0.3),
+                      fillColor: AppTheme.midnightPurple.withValues(alpha: 0.3),
                       hintText: 'Enter API Key (sk-...)',
                       hintStyle: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
@@ -256,13 +263,13 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: AppTheme.etherealCyan.withValues(alpha: 0.5),
+                          color: AppTheme.warmGold.withValues(alpha: 0.5),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
-                          color: AppTheme.etherealCyan,
+                          color: AppTheme.warmGold,
                           width: 2,
                         ),
                       ),
@@ -296,21 +303,102 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, size: 12, color: Colors.white54),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'You can get an API key from openrouter.ai',
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warmGold.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline,
+                              size: 16,
+                              color: AppTheme.warmGold,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'How to get your API key:',
+                              style: TextStyle(
+                                color: AppTheme.warmGold,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '1. Visit openrouter.ai and sign up/login',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '2. Go to "Keys" section in your dashboard',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '3. Create a new API key',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () async {
+                            final uri = Uri.parse('https://openrouter.ai/keys');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '→ Get your API key here: ',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'openrouter.ai/keys',
+                                  style: TextStyle(
+                                    color: AppTheme.warmGold,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () async {
+                                          final uri = Uri.parse(
+                                            'https://openrouter.ai/keys',
+                                          );
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(
+                                              uri,
+                                              mode:
+                                                  LaunchMode
+                                                      .externalApplication,
+                                            );
+                                          }
+                                        },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -389,11 +477,9 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         ElevatedButton(
           onPressed: _isSubmitting ? null : () => _saveApiKey(_controller.text),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.etherealCyan,
+            backgroundColor: AppTheme.warmGold,
             foregroundColor: Colors.black87,
-            disabledBackgroundColor: AppTheme.etherealCyan.withValues(
-              alpha: 0.3,
-            ),
+            disabledBackgroundColor: AppTheme.warmGold.withValues(alpha: 0.3),
           ),
           child:
               _isSubmitting

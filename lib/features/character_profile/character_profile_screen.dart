@@ -682,9 +682,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Define the models for user-created twins
     final models = [
       {
-        'id': 'local/gemma-3n-e2b-it',
-        'name': 'Local Gemma 3n E2B IT',
-        'description': localizations.privacyFirstLocalAi,
+        'id': 'local/hammer-2.1',
+        'name': 'Local Hammer 2.1',
+        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
         'provider': 'Local Device',
         'recommended': true,
         'isLocal': true,
@@ -697,19 +697,27 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         'recommended': true,
       },
       {
-        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
-        'name': 'Mistral Small 3.1',
-        'description': localizations.lightweightInstructionTuned,
-        'provider': 'apidog',
-        'free': true,
-        'recommended': false,
-      },
-      {
         'id': 'openai/gpt-4o',
         'name': 'GPT-4o',
         'description':
             'Superior multilingual and vision capabilities via OpenRouter',
         'provider': 'OpenRouter',
+        'recommended': false,
+      },
+      {
+        'id': 'qwen/qwen3-235b-a22b-07-25:free',
+        'name': 'Qwen 3 235B (Free)',
+        'description': 'Free model with solid conversational abilities',
+        'provider': 'OpenRouter',
+        'free': true,
+        'recommended': false,
+      },
+      {
+        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
+        'name': 'Mistral Small 3.1',
+        'description': localizations.lightweightInstructionTuned,
+        'provider': 'apidog',
+        'free': true,
         'recommended': false,
       },
     ];
@@ -1067,37 +1075,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   onPressed: _showImageSelectionDialog,
                   padding: EdgeInsets.zero,
                   tooltip: 'Upload Image',
-                ),
-              ),
-            ),
-            // Icon image upload button
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                width: 40 * fontScale,
-                height: 40 * fontScale,
-                decoration: BoxDecoration(
-                  color: AppTheme.deepIndigo,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.midnightPurple, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.face,
-                    size: 20 * fontScale,
-                    color: AppTheme.warmGold,
-                  ),
-                  onPressed: _showIconImageSelectionDialog,
-                  padding: EdgeInsets.zero,
-                  tooltip: 'Upload Icon Image',
                 ),
               ),
             ),
@@ -2692,8 +2669,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
-      'local/gemma-3n-e2b-it': {
-        'name': 'Local Gemma 3n E2B IT',
+      'local/hammer-2.1': {
+        'name': 'Local Hammer 2.1',
         'provider': 'Local Device',
       },
       'google/gemini-2.0-flash-001': {
@@ -2717,6 +2694,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         'provider': 'Meta',
       },
       'openai/gpt-4o': {'name': 'GPT-4o', 'provider': 'OpenAI'},
+      'qwen/qwen3-235b-a22b-07-25:free': {
+        'name': 'Qwen 3 235B',
+        'provider': 'OpenRouter',
+      },
     };
 
     // If we have info for this model, return formatted name
@@ -2739,7 +2720,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'local/gemma-3n-e2b-it': 'Privacy-first local AI with multimodal support',
+      'local/hammer-2.1':
+          'Privacy-first local AI with multimodal support (1.6GB)',
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',
       'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',
@@ -2747,6 +2729,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
       'anthropic/claude-3-opus': 'Top-tier intelligence and creativity',
       'meta-llama/llama-3-70b-instruct': 'Open-source conversational AI',
       'openai/gpt-4o': 'Powerful language understanding and generation',
+      'qwen/qwen3-235b-a22b-07-25:free':
+          'Free model with solid conversational abilities',
     };
 
     return modelDescriptions[modelId] ?? 'Advanced AI language model';

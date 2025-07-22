@@ -137,6 +137,35 @@ abstract class AppLocalizations {
   String get years;
   String get profession;
   String get biography;
+
+  // Character professions
+  String get basketballPlayer;
+  String get musicianSinger;
+  String get politicalLeaderActivist;
+  String get martialArtistActor;
+  String get civilRightsLeader;
+  String get physicistChemist;
+  String get usPresident;
+  String get egyptianPharaoh;
+  String get djMusicProducer;
+  String get rapperActor;
+  String get musicianArtist;
+  String get theoreticalPhysicist;
+  String get singerActor;
+  String get britishPrimeMinister;
+  String get inventorEngineer;
+  String get playwrightPoet;
+  String get romanGeneralDictator;
+  String get techEntrepreneur;
+  String get britishRoyalHumanitarian;
+  String get singerPerformer;
+  String get boxerActivist;
+  String get astronomerScienceCommunicator;
+  String get independenceLeader;
+  String get painter;
+  String get polymathArtist;
+  String get philosopher;
+
   String get aiModel;
   String get viewAllModels;
   String get featureAvailableSoon;
@@ -174,6 +203,31 @@ abstract class AppLocalizations {
   String get welcomeToAfterlife;
   String get chooseLanguage;
   String get continueButton;
+
+  // Setup Guide Page strings
+  String get gettingStarted;
+  String get chooseYourAiExperience;
+  String get cloudAiModels;
+  String get bestQualityRequiresInternet;
+  String get accessToGptClaudeAndMore;
+  String get advancedReasoningAndKnowledge;
+  String get alwaysUpToDateInformation;
+  String get fastResponses;
+  String get setUpApiKey;
+  String get getFreeApiKeyAt;
+  String get localAiModel;
+  String get privateWorksOffline;
+  String get completePrivacyDataStaysLocal;
+  String get worksWithoutInternet;
+  String get hammerModelSize;
+  String get optimizedForMobileDevices;
+  String get downloadModel;
+  String get freeDownloadNoAccountRequired;
+  String get youCanUseBoth;
+  String get setBothOptionsAutoChoose;
+  String get canSetupLaterInSettings;
+  String get apiKeySavedCanChat;
+  String get pleaseOpenBrowserVisit;
 
   String get diversePerspectives;
 
@@ -364,6 +418,26 @@ abstract class AppLocalizations {
   String get today;
   String get yesterday;
   String get daysAgo;
+
+  // Interview screen specific
+  String get creatingYourDigitalTwin;
+  String get editingCharacter;
+  String get uploadCharacterFile;
+  String get typeYourMessage;
+  String get processingFiles;
+  String get noFilesSelected;
+  String get processingFileProgress;
+  String get characterCardReady;
+  String get reviewCharacterCard;
+  String get finalizeCharacter;
+  String get interviewComplete;
+  String get interviewCompleteDescription;
+  String get updateCharacter;
+  String get continueToGallery;
+  String get restartInterviewConfirmation;
+  String get restart;
+  String get whichWouldYouPrefer;
+  String get interviewWelcomeMessage;
 }
 
 class _AppLocalizationsDelegate

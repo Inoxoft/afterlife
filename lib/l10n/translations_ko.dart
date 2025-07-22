@@ -184,6 +184,61 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profession => '직업';
   @override
   String get biography => '전기';
+
+  // Character professions
+  @override
+  String get basketballPlayer => '농구 선수';
+  @override
+  String get musicianSinger => '음악가 및 가수';
+  @override
+  String get politicalLeaderActivist => '정치 지도자 및 활동가';
+  @override
+  String get martialArtistActor => '무술가 및 배우';
+  @override
+  String get civilRightsLeader => '민권 운동 지도자';
+  @override
+  String get physicistChemist => '물리학자 및 화학자';
+  @override
+  String get usPresident => '미국 대통령';
+  @override
+  String get egyptianPharaoh => '이집트 파라오';
+  @override
+  String get djMusicProducer => 'DJ 및 음악 프로듀서';
+  @override
+  String get rapperActor => '래퍼 및 배우';
+  @override
+  String get musicianArtist => '음악가 및 아티스트';
+  @override
+  String get theoreticalPhysicist => '이론 물리학자';
+  @override
+  String get singerActor => '가수 및 배우';
+  @override
+  String get britishPrimeMinister => '영국 총리';
+  @override
+  String get inventorEngineer => '발명가 및 엔지니어';
+  @override
+  String get playwrightPoet => '극작가 및 시인';
+  @override
+  String get romanGeneralDictator => '로마 장군 및 독재자';
+  @override
+  String get techEntrepreneur => '기술 기업가';
+  @override
+  String get britishRoyalHumanitarian => '영국 왕실 및 인도주의자';
+  @override
+  String get singerPerformer => '가수 및 공연자';
+  @override
+  String get boxerActivist => '복서 및 활동가';
+  @override
+  String get astronomerScienceCommunicator => '천문학자 및 과학 커뮤니케이터';
+  @override
+  String get independenceLeader => '독립 운동 지도자';
+  @override
+  String get painter => '화가';
+  @override
+  String get polymathArtist => '박학자 및 예술가';
+  @override
+  String get philosopher => '철학자';
+
   @override
   String get aiModel => 'AI 모델';
   @override
@@ -280,6 +335,56 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get continueButton => '계속';
+
+  // Setup Guide Page strings
+  @override
+  String get gettingStarted => '시작하기';
+  @override
+  String get chooseYourAiExperience => 'AI 경험을 선택하세요';
+  @override
+  String get cloudAiModels => '클라우드 AI 모델';
+  @override
+  String get bestQualityRequiresInternet => '최고 품질, 인터넷 필요';
+  @override
+  String get accessToGptClaudeAndMore => 'GPT-4, Claude 등에 액세스';
+  @override
+  String get advancedReasoningAndKnowledge => '고급 추론 및 지식';
+  @override
+  String get alwaysUpToDateInformation => '항상 최신 정보';
+  @override
+  String get fastResponses => '빠른 응답';
+  @override
+  String get setUpApiKey => 'API 키 설정';
+  @override
+  String get getFreeApiKeyAt => '무료 API 키를 받으세요: ';
+  @override
+  String get localAiModel => '로컬 AI 모델';
+  @override
+  String get privateWorksOffline => '비공개, 오프라인에서 작동';
+  @override
+  String get completePrivacyDataStaysLocal => '완전한 프라이버시 (데이터가 로컬에 유지됨)';
+  @override
+  String get worksWithoutInternet => '인터넷 없이 작동';
+  @override
+  String get hammerModelSize => 'Hammer2.1 모델 (1.6GB)';
+  @override
+  String get optimizedForMobileDevices => '모바일 기기에 최적화';
+  @override
+  String get downloadModel => '모델 다운로드';
+  @override
+  String get freeDownloadNoAccountRequired => '무료 다운로드, 계정 불필요';
+  @override
+  String get youCanUseBoth => '둘 다 사용할 수 있습니다!';
+  @override
+  String get setBothOptionsAutoChoose =>
+      '두 옵션을 모두 설정하면 앱이 각 대화에 가장 적합한 모델을 자동으로 선택합니다.';
+  @override
+  String get canSetupLaterInSettings => '설정 → API 및 연결에서 나중에 설정할 수 있습니다';
+  @override
+  String get apiKeySavedCanChat => 'API 키가 저장되었습니다! 이제 AI 캐릭터와 채팅할 수 있습니다.';
+  @override
+  String get pleaseOpenBrowserVisit =>
+      '브라우저를 열고 다음 사이트를 방문하세요: openrouter.ai/keys';
 
   @override
   String get diversePerspectives => '다양한 관점';
@@ -808,5 +913,62 @@ class AppLocalizationsKo extends AppLocalizations {
   // Interview initial message
   @override
   String get interviewInitialMessage =>
+      '안녕하세요! 상세한 캐릭터 카드를 만들 준비가 되었습니다. 다음 중 하나를 선택할 수 있습니다:\n\n1. 당신의 성격과 경험에 대한 질문에 답하기\n2. 당신의 정보가 포함된 파일(PDF, TXT, DOC 또는 이메일) 업로드하기\n\n어떤 것을 선호하시나요?';
+
+  // Interview screen specific
+  @override
+  String get creatingYourDigitalTwin => '디지털 트윈 생성';
+
+  @override
+  String get editingCharacter => '{name} 편집';
+
+  @override
+  String get uploadCharacterFile => '캐릭터 파일 업로드';
+
+  @override
+  String get typeYourMessage => '메시지를 입력하세요...';
+
+  @override
+  String get processingFiles => '파일을 처리하고 있습니다...';
+
+  @override
+  String get noFilesSelected => '선택된 파일이 없습니다.';
+
+  @override
+  String get processingFileProgress => '파일 처리 중 {current}/{total}: {fileName}';
+
+  @override
+  String get characterCardReady => '캐릭터 카드 검토 준비 완료';
+
+  @override
+  String get reviewCharacterCard =>
+      '아래의 캐릭터 카드를 검토해 주세요. 만족하시면 "캐릭터 확정"을 클릭하여 저장하세요.';
+
+  @override
+  String get finalizeCharacter => '캐릭터 확정';
+
+  @override
+  String get interviewComplete => '인터뷰 완료!';
+
+  @override
+  String get interviewCompleteDescription => '디지털 트윈을 만들기에 충분한 정보를 수집했습니다.';
+
+  @override
+  String get updateCharacter => '캐릭터 업데이트';
+
+  @override
+  String get continueToGallery => '갤러리로 계속';
+
+  @override
+  String get restartInterviewConfirmation => '모든 응답이 삭제됩니다. 확실하신가요?';
+
+  @override
+  String get restart => '다시 시작';
+
+  @override
+  String get whichWouldYouPrefer => '어떤 것을 선호하시나요?';
+
+  @override
+  String get interviewWelcomeMessage =>
       '안녕하세요! 상세한 캐릭터 카드를 만들 준비가 되었습니다. 다음 중 하나를 선택할 수 있습니다:\n\n1. 당신의 성격과 경험에 대한 질문에 답하기\n2. 당신의 정보가 포함된 파일(PDF, TXT, DOC 또는 이메일) 업로드하기\n\n어떤 것을 선호하시나요?';
 }

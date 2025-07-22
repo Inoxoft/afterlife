@@ -3,19 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
-import '../../../features/developer_chat/developer_chat_screen.dart';
 
 class ExplorePage extends StatelessWidget {
   final AnimationController animationController;
 
   const ExplorePage({super.key, required this.animationController});
-
-  void _navigateToDeveloperChat(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const DeveloperChatScreen()),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,16 +38,6 @@ class ExplorePage extends StatelessWidget {
       CurvedAnimation(
         parent: animationController,
         curve: const Interval(0.3, 0.9, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    final developerTwinAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: animationController,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
       ),
     );
 
@@ -182,120 +164,7 @@ class ExplorePage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 25),
-
-            // Developer twin info with animation
-            SlideTransition(
-              position: developerTwinAnimation,
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: animationController,
-                  curve: const Interval(0.5, 1.0),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppTheme.midnightPurple.withValues(alpha: 0.7),
-                        AppTheme.backgroundStart.withValues(alpha: 0.4),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.warmGold.withValues(alpha: 0.1),
-                        blurRadius: 15,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppTheme.midnightPurple.withValues(alpha: 0.6),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.warmGold.withValues(alpha: 0.15),
-                              blurRadius: 8,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.developer_mode,
-                          color: AppTheme.warmGold,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.chatWithDeveloperTwin,
-                              style:
-                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                    text: l10n.chatWithDeveloperTwin,
-                                    color: AppTheme.silverMist,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.chatWithDeveloperDescription,
-                              style:
-                                  UkrainianFontUtils.latoWithUkrainianSupport(
-                                    text: l10n.chatWithDeveloperDescription,
-                                    color: AppTheme.silverMist,
-                                    fontSize: 14,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed:
-                                  () => _navigateToDeveloperChat(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.midnightPurple,
-                                foregroundColor: AppTheme.warmGold,
-                                elevation: 5,
-                                shadowColor: AppTheme.warmGold.withValues(
-                                  alpha: 0.2,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                l10n.chatWithDeveloperTwin,
-                                style:
-                                    UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                      text: l10n.chatWithDeveloperTwin,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.0,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

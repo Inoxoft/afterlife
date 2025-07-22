@@ -52,17 +52,38 @@ class InterviewProvider with ChangeNotifier {
 
   Future<void> _initialize() async {
     await HybridChatService.initialize();
-    await _addInitialMessage();
+    // Don't add initial message here - wait for localization to be set
+    // Add a fallback timer in case localization setup is delayed
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!_initialMessageAdded && !isEditMode) {
+        _addInitialMessage();
+      }
+    });
+  }
+
+  String? _initialMessage;
+  bool _initialMessageAdded = false;
+
+  void setInitialMessage(String message) {
+    _initialMessage = message;
+    // Add the initial message only once, and only if not in edit mode
+    if (!_initialMessageAdded && !isEditMode) {
+      addAIMessage(_initialMessage!);
+      _initialMessageAdded = true;
+    }
   }
 
   Future<void> _addInitialMessage() async {
-    if (!isEditMode) {
-      addAIMessage(
-        "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
-        "1. Answer my questions about your personality and experiences\n"
-        "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
-        "Which would you prefer?",
-      );
+    // This method is now only used as a fallback if setInitialMessage wasn't called
+    if (!isEditMode && !_initialMessageAdded) {
+      final message =
+          _initialMessage ??
+          "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
+              "1. Answer my questions about your personality and experiences\n"
+              "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
+              "Which would you prefer?";
+      addAIMessage(message);
+      _initialMessageAdded = true;
     }
   }
 
