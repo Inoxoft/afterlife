@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
+import '../../../core/services/onboarding_service.dart';
 import '../providers/characters_provider.dart';
 import '../providers/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
@@ -143,6 +144,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       icon: Icons.delete_forever,
                       iconColor: Colors.redAccent,
                       onTap: () => _showClearDataDialog(context),
+                    ),
+
+                    _buildSettingCard(
+                      title: 'Reset Onboarding',
+                      subtitle:
+                          'Show the onboarding tutorial again on next app start',
+                      icon: Icons.refresh,
+                      iconColor: Colors.orangeAccent,
+                      onTap: () => _showResetOnboardingDialog(context),
                     ),
 
                     const SizedBox(height: 16),
@@ -360,6 +370,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: UkrainianFontUtils.latoWithUkrainianSupport(
                     text: localizations.deleteEverything,
                     color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showResetOnboardingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Reset Onboarding',
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: 'Reset Onboarding',
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+              'This will reset the onboarding status and show the tutorial again on next app start. Continue?',
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text:
+                    'This will reset the onboarding status and show the tutorial again on next app start. Continue?',
+                color: Colors.white70,
+              ),
+            ),
+            backgroundColor: AppTheme.deepIndigo,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Colors.orangeAccent.withValues(alpha: 0.5),
+                width: 1,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: 'Cancel',
+                    color: AppTheme.silverMist,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    await OnboardingService.resetOnboarding();
+                    Navigator.pop(context);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Onboarding reset successfully! Tutorial will show on next app start.',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Error resetting onboarding. Please try again.',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  'Reset',
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: 'Reset',
+                    color: Colors.orangeAccent,
                   ),
                 ),
               ),

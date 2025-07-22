@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../core/services/onboarding_service.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import 'pages/mask_page.dart';
 import 'pages/llm_page.dart';
@@ -49,11 +50,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       });
       _animationController.forward();
     } else {
-      // Navigate to main app on last page
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const CharacterGalleryScreen()),
-      );
+      // Mark onboarding as complete and navigate to main app
+      _completeOnboarding();
     }
+  }
+
+  Future<void> _completeOnboarding() async {
+    // Mark onboarding as complete
+    await OnboardingService.markOnboardingComplete();
+
+    if (!mounted) return;
+
+    // Navigate to main app
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const CharacterGalleryScreen()),
+    );
   }
 
   void _navigateToPreviousPage() {

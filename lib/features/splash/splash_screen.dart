@@ -9,6 +9,7 @@ import '../providers/language_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
+import '../../core/services/onboarding_service.dart';
 import '../character_gallery/character_gallery_screen.dart';
 import '../../core/utils/env_config.dart';
 import '../../core/utils/image_optimizer.dart';
@@ -30,7 +31,6 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _fadeInAnimation;
-  static const String _firstTimeKey = 'is_first_time_user';
 
   // Cache widgets for performance
   late final Widget _backgroundParticles = const RepaintBoundary(
@@ -105,12 +105,9 @@ class _SplashScreenState extends State<SplashScreen>
         });
       }
 
-      // Check if this is the first time running the app
-      final prefs = await SharedPreferences.getInstance();
-      // For debugging: always show onboarding
-      const isFirstTime = true;
-      // Uncomment below line for production:
-      // final isFirstTime = prefs.getBool(_firstTimeKey) ?? true;
+      // Check if onboarding has been completed
+      final hasCompletedOnboarding =
+          await OnboardingService.hasCompletedOnboarding();
 
       // Wait for a minimum time to show the splash screen
       await Future.delayed(const Duration(seconds: 2));
@@ -122,16 +119,11 @@ class _SplashScreenState extends State<SplashScreen>
         MaterialPageRoute(
           builder:
               (_) =>
-                  isFirstTime
-                      ? const OnboardingScreen()
-                      : const CharacterGalleryScreen(),
+                  hasCompletedOnboarding
+                      ? const CharacterGalleryScreen()
+                      : const OnboardingScreen(),
         ),
       );
-
-      // Set first time flag to false (commented out for debugging)
-      // if (isFirstTime) {
-      //   await prefs.setBool(_firstTimeKey, false);
-      // }
     } catch (e) {
       if (!mounted) return;
 
