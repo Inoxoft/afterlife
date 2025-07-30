@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Preserved Consciousness</b><br>
-  Connect with digital twins of historical figures through the power of AI
+  Talk to the dead. Or just back up your weird uncle.
 </p>
 
 <p align="center">
@@ -17,9 +17,7 @@
 
 ## ✨ Overview
 
-Afterlife is a cutting-edge Flutter application that enables you to interact with digital recreations of historical figures and create your own AI twins. The app leverages advanced large language models through OpenRouter to provide immersive and historically accurate conversations.
-
-> **"The boundaries between history and the present dissolve in Afterlife."**
+Afterlife lets you build lifelike conversational agents from real humans — living or gone. Feed it documents, diaries, emails, transcripts, or just interview someone. Then it builds a portable, flexible digital twin you can talk to. 
 
 ## 🎭 The Concept of Masks
 
@@ -37,11 +35,7 @@ This approach allows for a respectful and engaging way to explore history and th
 
 ## 📱 Screenshots
 
-<p align="center">
-  <img src="screen1.jpg" alt="Historical Figures Screen" width="250" style="margin-right: 10px"/>
-  <img src="screen2.jpg" alt="Create Twin Screen" width="250" style="margin-right: 10px"/>
-  <img src="screen3.jpg" alt="Chat Interface" width="250"/>
-</p>
+
 
 ## 🌟 Features
 
