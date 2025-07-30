@@ -18,12 +18,12 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   String? _errorMessage;
   bool _isEnabled = false;
   LLMProvider _preferredProvider = LLMProvider.auto;
-  
+
   // Model download state
   ModelDownloadStatus _modelStatus = ModelDownloadStatus.notDownloaded;
   double _downloadProgress = 0.0;
   String? _downloadError;
-  
+
   // Stream subscriptions
   StreamSubscription<double>? _progressSubscription;
   StreamSubscription<ModelDownloadStatus>? _statusSubscription;
@@ -44,7 +44,9 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
   void _setupStreamListeners() {
     // Listen to download progress
-    _progressSubscription = LocalLLMService.downloadProgressStream.listen((progress) {
+    _progressSubscription = LocalLLMService.downloadProgressStream.listen((
+      progress,
+    ) {
       if (mounted) {
         setState(() {
           _downloadProgress = progress;
@@ -73,7 +75,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     try {
       final settings = LocalLLMService.getSettings();
       final prefs = await SharedPreferences.getInstance();
-      
+
       if (mounted) {
         setState(() {
           _isEnabled = settings['enabled'] ?? false;
@@ -83,10 +85,10 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           );
           _downloadProgress = settings['downloadProgress'] ?? 0.0;
           _downloadError = settings['downloadError'];
-          _preferredProvider = LLMProvider.values[
-            prefs.getInt('preferred_llm_provider') ?? LLMProvider.auto.index
-          ];
-          
+          _preferredProvider =
+              LLMProvider.values[prefs.getInt('preferred_llm_provider') ??
+                  LLMProvider.auto.index];
+
           _isLoading = false;
         });
       }
@@ -101,34 +103,22 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   }
 
   Future<void> _saveSettings() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-    }
-
     try {
-      await LocalLLMService.updateSettings({
-        'enabled': _isEnabled,
-      });
-      
+      await LocalLLMService.updateSettings({'enabled': _isEnabled});
+
       await _savePreferredProvider();
-      
+
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Settings saved successfully')),
+          const SnackBar(
+            content: Text('Local LLM settings saved successfully'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _errorMessage = 'Failed to save settings: $e';
-          _isLoading = false;
         });
       }
     }
@@ -150,7 +140,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       final success = await LocalLLMService.downloadModel(
         acceptGoogleAgreement: true, // Always true for Hammer2.1
       );
-      
+
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -177,20 +167,23 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   Future<void> _deleteModel() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Model'),
-        content: const Text('Are you sure you want to delete the downloaded Hammer2.1 model? This will free up 1.6GB of storage.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Model'),
+            content: const Text(
+              'Are you sure you want to delete the downloaded Hammer2.1 model? This will free up 1.6GB of storage.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -201,7 +194,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
             _modelStatus = ModelDownloadStatus.notDownloaded;
             _downloadProgress = 0.0;
           });
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Model deleted successfully')),
           );
@@ -224,47 +217,45 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
         backgroundColor: AppTheme.midnightPurple,
         foregroundColor: AppTheme.silverMist,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _isLoading ? null : _saveSettings,
-          ),
+          IconButton(icon: const Icon(Icons.save), onPressed: _saveSettings),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_errorMessage != null)
-                    Card(
-                      color: Colors.red[50],
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error, color: Colors.red),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _errorMessage!,
-                                style: const TextStyle(color: Colors.red),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_errorMessage != null)
+                      Card(
+                        color: Colors.red[50],
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  const SizedBox(height: 16),
-                  _buildModelCard(),
-                  const SizedBox(height: 16),
-                  _buildProviderSettings(),
-                  const SizedBox(height: 16),
-                  _buildDownloadSection(),
-                ],
+                    const SizedBox(height: 16),
+                    _buildModelCard(),
+                    const SizedBox(height: 16),
+                    _buildProviderSettings(),
+                    const SizedBox(height: 16),
+                    _buildDownloadSection(),
+                  ],
+                ),
               ),
-            ),
     );
   }
 
@@ -273,7 +264,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     final isAvailable = status['isAvailable'] ?? false;
     final settings = LocalLLMService.getSettings();
     final modelConfig = settings['modelConfig'] ?? {};
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -298,25 +289,36 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
             const SizedBox(height: 12),
             _buildStatusRow('Status', _getStatusText(), _getStatusColor()),
             const SizedBox(height: 8),
-            _buildStatusRow('Size', '${modelConfig['fileSizeGB'] ?? '1.6'} GB', Colors.grey[600]),
+            _buildStatusRow(
+              'Size',
+              '${modelConfig['fileSizeGB'] ?? '1.6'} GB',
+              Colors.grey[600],
+            ),
             const SizedBox(height: 8),
-            _buildStatusRow('Supports Images', modelConfig['supportImage'] == true ? 'Yes' : 'No', Colors.grey[600]),
+            _buildStatusRow(
+              'Supports Images',
+              modelConfig['supportImage'] == true ? 'Yes' : 'No',
+              Colors.grey[600],
+            ),
             const SizedBox(height: 8),
-            _buildStatusRow('Max Tokens', '${modelConfig['maxTokens'] ?? '1024'}', Colors.grey[600]),
+            _buildStatusRow(
+              'Max Tokens',
+              '${modelConfig['maxTokens'] ?? '1024'}',
+              Colors.grey[600],
+            ),
             if (_modelStatus == ModelDownloadStatus.downloading) ...[
               const SizedBox(height: 12),
               LinearProgressIndicator(
                 value: _downloadProgress,
                 backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.midnightPurple),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppTheme.midnightPurple,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Downloading... ${(_downloadProgress * 100).toStringAsFixed(1)}%',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
           ],
@@ -329,13 +331,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
         Text(
           value,
           style: TextStyle(
@@ -383,44 +379,42 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           children: [
             const Text(
               'AI Provider Settings',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Enable Local AI'),
               subtitle: const Text('Use local AI when available'),
               value: _isEnabled,
-              onChanged: _modelStatus == ModelDownloadStatus.downloaded
-                  ? (value) {
-                      if (mounted) {
-                        setState(() {
-                          _isEnabled = value;
-                        });
+              onChanged:
+                  _modelStatus == ModelDownloadStatus.downloaded
+                      ? (value) {
+                        if (mounted) {
+                          setState(() {
+                            _isEnabled = value;
+                          });
+                        }
                       }
-                    }
-                  : null,
+                      : null,
             ),
             const SizedBox(height: 8),
             const Text(
               'Preferred Provider',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             DropdownButton<LLMProvider>(
               value: _preferredProvider,
               isExpanded: true,
-              items: LLMProvider.values.map((provider) {
-                return DropdownMenuItem(
-                  value: provider,
-                  child: Text(HybridChatService.getProviderDisplayName(provider)),
-                );
-              }).toList(),
+              items:
+                  LLMProvider.values.map((provider) {
+                    return DropdownMenuItem(
+                      value: provider,
+                      child: Text(
+                        HybridChatService.getProviderDisplayName(provider),
+                      ),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 if (value != null && mounted) {
                   setState(() {
@@ -445,10 +439,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
             children: [
               const Text(
                 'Model Management',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               const Text('The Hammer2.1 model is ready to use!'),
@@ -476,10 +467,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           children: [
             const Text(
               'Download Model',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -487,58 +475,61 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 8),
-            const Text('• Hammer2.1 is an open-source model (no authentication required)'),
+            const Text(
+              '• Hammer2.1 is an open-source model (no authentication required)',
+            ),
             const Text('• 1.6GB of free storage space needed'),
             const Text('• Runs locally on your device for privacy'),
             const Text('• Optimized for mobile devices with fast inference'),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: _modelStatus == ModelDownloadStatus.downloading
-                  ? Column(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            LocalLLMService.stopDownload();
-                            if (mounted) {
-                              setState(() {
-                                _modelStatus = ModelDownloadStatus.error;
-                                _downloadError = 'Download cancelled by user';
-                              });
-                            }
-                          },
-                          icon: const Icon(Icons.stop),
-                          label: const Text('Cancel Download'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+              child:
+                  _modelStatus == ModelDownloadStatus.downloading
+                      ? Column(
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              LocalLLMService.stopDownload();
+                              if (mounted) {
+                                setState(() {
+                                  _modelStatus = ModelDownloadStatus.error;
+                                  _downloadError = 'Download cancelled by user';
+                                });
+                              }
+                            },
+                            icon: const Icon(Icons.stop),
+                            label: const Text('Cancel Download'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Downloading... ${(_downloadProgress * 100).toStringAsFixed(1)}%',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
+                          const SizedBox(height: 8),
+                          Text(
+                            'Downloading... ${(_downloadProgress * 100).toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
                           ),
+                        ],
+                      )
+                      : ElevatedButton.icon(
+                        onPressed: _downloadModel,
+                        icon: const Icon(Icons.download),
+                        label: const Text('Download Hammer2.1 Model (1.6GB)'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.midnightPurple,
+                          foregroundColor: AppTheme.silverMist,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                      ],
-                    )
-                  : ElevatedButton.icon(
-                      onPressed: _downloadModel,
-                      icon: const Icon(Icons.download),
-                      label: const Text('Download Hammer2.1 Model (1.6GB)'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.midnightPurple,
-                        foregroundColor: AppTheme.silverMist,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                    ),
             ),
           ],
         ),
       ),
     );
   }
-} 
+}

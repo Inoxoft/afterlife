@@ -53,16 +53,83 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   int _selectedIndex = 0;
   late final PageController _pageController;
 
+  // Add scroll controllers for each tab
+  late final ScrollController _exploreScrollController;
+  late final ScrollController _yourTwinsScrollController;
+
+  // Animation controller for header visibility
+  late final AnimationController _headerAnimationController;
+  late final Animation<double> _headerOpacityAnimation;
+  late final Animation<double> _headerHeightAnimation;
+
+  bool _isHeaderVisible = true;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+
+    // Initialize scroll controllers
+    _exploreScrollController = ScrollController();
+    _yourTwinsScrollController = ScrollController();
+
+    // Initialize header animation controller
+    _headerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _headerOpacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _headerHeightAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Add scroll listeners
+    _exploreScrollController.addListener(_onScroll);
+    _yourTwinsScrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _exploreScrollController.dispose();
+    _yourTwinsScrollController.dispose();
+    _headerAnimationController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    final ScrollController currentController =
+        _selectedIndex == 0
+            ? _exploreScrollController
+            : _yourTwinsScrollController;
+
+    const double threshold = 50.0; // Scroll threshold to hide header
+
+    if (currentController.hasClients) {
+      final bool shouldHideHeader = currentController.offset > threshold;
+
+      if (shouldHideHeader && _isHeaderVisible) {
+        setState(() {
+          _isHeaderVisible = false;
+        });
+        _headerAnimationController.forward();
+      } else if (!shouldHideHeader && !_isHeaderVisible) {
+        setState(() {
+          _isHeaderVisible = true;
+        });
+        _headerAnimationController.reverse();
+      }
+    }
   }
 
   // Cache text styles for better performance
@@ -315,36 +382,60 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header section with enhanced styling
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    ResponsiveUtils.getScreenPadding(context).left,
-                    32,
-                    ResponsiveUtils.getScreenPadding(context).right,
-                    24,
-                  ),
-                  child: Text(
-                    _selectedIndex == 0
-                        ? localizations.exploreDigitalTwins
-                        : localizations.yourDigitalTwins,
-                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                      text:
-                          _selectedIndex == 0
-                              ? localizations.exploreDigitalTwins
-                              : localizations.yourDigitalTwins,
-                      fontSize: 24 * ResponsiveUtils.getFontSizeScale(context),
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3.0,
-                      color: AppTheme.silverMist,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 10.0,
-                          color: AppTheme.warmGold.withValues(alpha: 0.8),
-                          offset: const Offset(0, 2),
+                // Animated header section
+                AnimatedBuilder(
+                  animation: _headerAnimationController,
+                  builder: (context, child) {
+                    return ClipRect(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: _isHeaderVisible ? null : 0,
+                        child: Opacity(
+                          opacity:
+                              _headerOpacityAnimation.value == 0.0
+                                  ? 1.0 - _headerAnimationController.value
+                                  : 1.0,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              ResponsiveUtils.getScreenPadding(context).left,
+                              32,
+                              ResponsiveUtils.getScreenPadding(context).right,
+                              24,
+                            ),
+                            child: Text(
+                              _selectedIndex == 0
+                                  ? localizations.exploreDigitalTwins
+                                  : localizations.yourDigitalTwins,
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text:
+                                        _selectedIndex == 0
+                                            ? localizations.exploreDigitalTwins
+                                            : localizations.yourDigitalTwins,
+                                    fontSize:
+                                        24 *
+                                        ResponsiveUtils.getFontSizeScale(
+                                          context,
+                                        ),
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 3.0,
+                                    color: AppTheme.silverMist,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 10.0,
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
 
                 // Main content area with PageView
@@ -436,6 +527,14 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+
+      // Reset header visibility when changing tabs
+      if (!_isHeaderVisible) {
+        setState(() {
+          _isHeaderVisible = true;
+        });
+        _headerAnimationController.reverse();
+      }
     }
 
     setState(() {
@@ -456,6 +555,14 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         setState(() {
           _selectedIndex = _selectedIndex < 2 ? _selectedIndex : 1;
         });
+
+        // Reset header visibility when returning from settings
+        if (!_isHeaderVisible) {
+          setState(() {
+            _isHeaderVisible = true;
+          });
+          _headerAnimationController.reverse();
+        }
       });
     }
   }
@@ -470,16 +577,39 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            localizations.interactWithHistoricalFigures,
-            style: UkrainianFontUtils.latoWithUkrainianSupport(
-              text: localizations.interactWithHistoricalFigures,
-              fontSize: 16,
-              color: AppTheme.silverMist.withValues(alpha: 0.8),
-              letterSpacing: 0.5,
-            ),
+          // Animated subtitle that also hides with the header
+          AnimatedBuilder(
+            animation: _headerAnimationController,
+            builder: (context, child) {
+              return ClipRect(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: _isHeaderVisible ? null : 0,
+                  child: Opacity(
+                    opacity:
+                        _headerOpacityAnimation.value == 0.0
+                            ? 1.0 - _headerAnimationController.value
+                            : 1.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizations.interactWithHistoricalFigures,
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text: localizations.interactWithHistoricalFigures,
+                            fontSize: 16,
+                            color: AppTheme.silverMist.withValues(alpha: 0.8),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-          const SizedBox(height: 24),
           Expanded(
             child:
                 ResponsiveUtils.shouldUseWideLayout(context)
@@ -546,6 +676,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   Widget _buildGridGallery(List<dynamic> items, {required bool isExploreTab}) {
     return GridView.builder(
       key: PageStorageKey(isExploreTab ? 'exploreTab' : 'yourTwinsTab'),
+      controller:
+          isExploreTab ? _exploreScrollController : _yourTwinsScrollController,
       padding: EdgeInsets.symmetric(
         horizontal: ResponsiveUtils.getGridSpacing(context),
         vertical: 24,
@@ -807,6 +939,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         // Horizontal scrolling gallery
         Expanded(
           child: ListView.builder(
+            controller:
+                isExploreTab
+                    ? _exploreScrollController
+                    : _yourTwinsScrollController,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: items.length,

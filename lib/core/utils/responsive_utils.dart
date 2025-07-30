@@ -10,7 +10,7 @@ class ResponsiveUtils {
   /// Get the device type based on screen width
   static DeviceType getDeviceType(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    
+
     if (width < mobileBreakpoint) {
       return DeviceType.mobile;
     } else if (width < tabletBreakpoint) {
@@ -47,7 +47,7 @@ class ResponsiveUtils {
   /// Get appropriate padding based on device type
   static EdgeInsets getScreenPadding(BuildContext context) {
     final deviceType = getDeviceType(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return const EdgeInsets.symmetric(horizontal: 16);
@@ -64,7 +64,7 @@ class ResponsiveUtils {
   static double getChatMessageMaxWidthFactor(BuildContext context) {
     final deviceType = getDeviceType(context);
     final isLandscapeMode = isLandscape(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return isLandscapeMode ? 0.6 : 0.75;
@@ -80,7 +80,7 @@ class ResponsiveUtils {
   /// Get appropriate font size scaling based on device type
   static double getFontSizeScale(BuildContext context) {
     final deviceType = getDeviceType(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return 1.0;
@@ -97,7 +97,7 @@ class ResponsiveUtils {
   static double getGridChildAspectRatio(BuildContext context) {
     final deviceType = getDeviceType(context);
     final isLandscapeMode = isLandscape(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return isLandscapeMode ? 0.8 : 0.7;
@@ -113,7 +113,7 @@ class ResponsiveUtils {
   /// Get spacing between grid items
   static double getGridSpacing(BuildContext context) {
     final deviceType = getDeviceType(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return 16;
@@ -129,7 +129,7 @@ class ResponsiveUtils {
   /// Get chat input area padding
   static EdgeInsets getChatInputPadding(BuildContext context) {
     final deviceType = getDeviceType(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return const EdgeInsets.all(16);
@@ -145,7 +145,7 @@ class ResponsiveUtils {
   /// Get chat list padding
   static EdgeInsets getChatListPadding(BuildContext context) {
     final deviceType = getDeviceType(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return const EdgeInsets.all(16);
@@ -162,15 +162,15 @@ class ResponsiveUtils {
   static bool shouldUseWideLayout(BuildContext context) {
     final deviceType = getDeviceType(context);
     final isLandscapeMode = isLandscape(context);
-    
+
     return (deviceType == DeviceType.desktop || deviceType == DeviceType.tv) ||
-           (deviceType == DeviceType.tablet && isLandscapeMode);
+        (deviceType == DeviceType.tablet && isLandscapeMode);
   }
 
   /// Get app bar height based on device type
   static double getAppBarHeight(BuildContext context) {
     final deviceType = getDeviceType(context);
-    
+
     switch (deviceType) {
       case DeviceType.mobile:
         return kToolbarHeight;
@@ -182,11 +182,92 @@ class ResponsiveUtils {
         return kToolbarHeight + 24;
     }
   }
+
+  /// Get adaptive spacing for card content based on available space and device type
+  static double getCardInternalSpacing(
+    BuildContext context, {
+    required bool isHorizontalLayout,
+    CardSpacingType spacingType = CardSpacingType.medium,
+  }) {
+    final deviceType = getDeviceType(context);
+    final baseSpacing = _getBaseSpacing(spacingType);
+
+    // Apply device scaling
+    double deviceMultiplier = switch (deviceType) {
+      DeviceType.mobile => 1.0,
+      DeviceType.tablet => 1.2,
+      DeviceType.desktop => 1.4,
+      DeviceType.tv => 1.6,
+    };
+
+    // Apply layout scaling
+    double layoutMultiplier = isHorizontalLayout ? 1.3 : 1.0;
+
+    return baseSpacing * deviceMultiplier * layoutMultiplier;
+  }
+
+  /// Get adaptive padding for card content
+  static EdgeInsets getCardContentPadding(
+    BuildContext context, {
+    required bool isHorizontalLayout,
+  }) {
+    final deviceType = getDeviceType(context);
+
+    double basePadding = switch (deviceType) {
+      DeviceType.mobile => 16,
+      DeviceType.tablet => 20,
+      DeviceType.desktop => 24,
+      DeviceType.tv => 28,
+    };
+
+    double layoutMultiplier = isHorizontalLayout ? 1.25 : 1.0;
+    double padding = basePadding * layoutMultiplier;
+
+    return EdgeInsets.all(padding);
+  }
+
+  /// Get adaptive height allocation for different card sections
+  static double getCardSectionHeight(
+    BuildContext context, {
+    required bool isHorizontalLayout,
+    required CardSectionType sectionType,
+  }) {
+    final deviceType = getDeviceType(context);
+    final baseHeight = _getBaseSectionHeight(sectionType);
+
+    double deviceMultiplier = switch (deviceType) {
+      DeviceType.mobile => 1.0,
+      DeviceType.tablet => 1.1,
+      DeviceType.desktop => 1.2,
+      DeviceType.tv => 1.3,
+    };
+
+    double layoutMultiplier = isHorizontalLayout ? 1.4 : 1.0;
+
+    return baseHeight * deviceMultiplier * layoutMultiplier;
+  }
+
+  static double _getBaseSpacing(CardSpacingType spacingType) {
+    return switch (spacingType) {
+      CardSpacingType.extraSmall => 2,
+      CardSpacingType.small => 4,
+      CardSpacingType.medium => 8,
+      CardSpacingType.large => 12,
+      CardSpacingType.extraLarge => 16,
+    };
+  }
+
+  static double _getBaseSectionHeight(CardSectionType sectionType) {
+    return switch (sectionType) {
+      CardSectionType.name => 36,
+      CardSectionType.metadata => 20,
+      CardSectionType.label => 32,
+    };
+  }
 }
 
-enum DeviceType {
-  mobile,
-  tablet,
-  desktop,
-  tv,
-} 
+enum DeviceType { mobile, tablet, desktop, tv }
+
+enum CardSpacingType { extraSmall, small, medium, large, extraLarge }
+
+enum CardSectionType { name, metadata, label }

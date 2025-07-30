@@ -215,9 +215,7 @@ class CharacterModel {
       'imageUrl': imageUrl,
       'userImagePath': userImagePath,
       'iconImagePath': iconImagePath,
-      'iconCodePoint': icon?.codePoint,
-      'iconFontFamily': icon?.fontFamily,
-      'iconFontPackage': icon?.fontPackage,
+      // Icon serialization disabled for release builds to avoid tree-shaking issues
       'createdAt': createdAt.toIso8601String(),
       'accentColor': accentColor.toARGB32(),
       'chatHistory': chatHistory,
@@ -251,20 +249,9 @@ class CharacterModel {
         accentColor = Color(int.parse(_defaultAccentColor));
       }
 
-      // Parse the icon safely
+      // For release builds, we'll skip icon restoration from JSON to avoid tree-shaking issues
+      // Icons will need to be re-selected by users if they were customized
       IconData? icon;
-      try {
-        if (json['iconCodePoint'] != null) {
-          icon = IconData(
-            json['iconCodePoint'] as int,
-            fontFamily: json['iconFontFamily'] as String?,
-            fontPackage: json['iconFontPackage'] as String?,
-          );
-        }
-      } catch (e) {
-        // Icon parsing failed, use null
-        icon = null;
-      }
 
       // Parse chat history safely
       List<Map<String, dynamic>> chatHistory = [];
