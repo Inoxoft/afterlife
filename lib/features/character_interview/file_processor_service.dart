@@ -42,9 +42,14 @@ class FileProcessorService {
   }
 
   static Future<String> _processWordFile(File file) async {
-    // For now, we'll just read as text
-    // TODO: Implement proper Word document parsing
-    return await file.readAsString();
+    // For now, we'll just read as text and handle encoding properly
+    try {
+      return await file.readAsString();
+    } catch (e) {
+      // If UTF-8 fails, try Latin-1 encoding
+      final bytes = await file.readAsBytes();
+      return String.fromCharCodes(bytes);
+    }
   }
 
   static Future<String> _processEmailFile(File file) async {

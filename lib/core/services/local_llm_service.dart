@@ -12,17 +12,14 @@ import 'package:http/http.dart' as http;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Model download status
-enum ModelDownloadStatus {
-  notDownloaded,
-  downloading,
-  downloaded,
-  error,
-}
+enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
 // Model configuration for Hammer2.1
 class ModelConfig {
-  static const String url = 'https://huggingface.co/litert-community/Hammer2.1-1.5b/resolve/main/Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
-  static const String filename = 'Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
+  static const String url =
+      'https://huggingface.co/litert-community/Hammer2.1-1.5b/resolve/main/Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
+  static const String filename =
+      'Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
   static const String displayName = 'Hammer2.1-1.5b (CPU) 1.6Gb';
   static const int fileSizeBytes = 1597556473;
   static const int maxTokens = 4096;
@@ -54,7 +51,7 @@ class LocalLLMService {
   static String? _modelPath;
   static double _downloadProgress = 0.0;
   static String? _downloadError;
-  
+
   // Stream controllers
   static StreamController<double>? _downloadProgressController;
   static StreamController<ModelDownloadStatus>? _modelStatusController;
@@ -64,7 +61,8 @@ class LocalLLMService {
 
   // Getters
   static bool get isEnabled => _isEnabled;
-  static bool get isAvailable => _isInitialized && _model != null && _chat != null;
+  static bool get isAvailable =>
+      _isInitialized && _model != null && _chat != null;
   static bool get isInitialized => _isInitialized;
   static ModelDownloadStatus get modelStatus => _modelStatus;
   static String? get modelPath => _modelPath;
@@ -79,7 +77,8 @@ class LocalLLMService {
   }
 
   static Stream<ModelDownloadStatus> get modelStatusStream {
-    _modelStatusController ??= StreamController<ModelDownloadStatus>.broadcast();
+    _modelStatusController ??=
+        StreamController<ModelDownloadStatus>.broadcast();
     return _modelStatusController!.stream;
   }
 
@@ -87,16 +86,17 @@ class LocalLLMService {
   static Future<void> initialize() async {
     try {
       print('Initializing LocalLLMService...');
-      
+
       // Initialize flutter_gemma plugin
       _gemmaPlugin = FlutterGemmaPlugin.instance;
-      
+
       // Load preferences
       final prefs = await SharedPreferences.getInstance();
       _isEnabled = prefs.getBool('local_llm_enabled') ?? false;
       _modelPath = prefs.getString('local_llm_model_path');
       _huggingFaceToken = prefs.getString('huggingface_token');
-      _googleAgreementAccepted = prefs.getBool('google_agreement_accepted') ?? false;
+      _googleAgreementAccepted =
+          prefs.getBool('google_agreement_accepted') ?? false;
 
       // Check if model file exists
       await _checkModelStatus();
@@ -106,7 +106,9 @@ class LocalLLMService {
         await _initializeModel();
       }
 
-      print('LocalLLMService initialized - enabled: $_isEnabled, status: $_modelStatus');
+      print(
+        'LocalLLMService initialized - enabled: $_isEnabled, status: $_modelStatus',
+      );
     } catch (e) {
       print('LocalLLMService initialization error: $e');
       _modelStatus = ModelDownloadStatus.error;
@@ -118,13 +120,15 @@ class LocalLLMService {
   static Future<void> _checkModelStatus() async {
     if (_modelPath != null && await File(_modelPath!).exists()) {
       final fileSize = await File(_modelPath!).length();
-      
+
       // Verify file size with tolerance
       if (_verifyDownload(fileSize, ModelConfig.fileSizeBytes)) {
         _modelStatus = ModelDownloadStatus.downloaded;
         print('Model file found and verified at: $_modelPath');
       } else {
-        print('Model file size mismatch. Expected: ${ModelConfig.fileSizeBytes}, Actual: $fileSize');
+        print(
+          'Model file size mismatch. Expected: ${ModelConfig.fileSizeBytes}, Actual: $fileSize',
+        );
         _modelStatus = ModelDownloadStatus.error;
         _downloadError = 'File size verification failed';
       }
@@ -151,10 +155,10 @@ class LocalLLMService {
 
     try {
       print('Initializing Hammer2.1 model at: $_modelPath');
-      
+
       // Set model path in the model manager
       await _gemmaPlugin.modelManager.setModelPath(_modelPath!);
-      
+
       // Create the model
       _model = await _gemmaPlugin.createModel(
         modelType: ModelConfig.modelType,
@@ -195,7 +199,8 @@ class LocalLLMService {
         'displayName': ModelConfig.displayName,
         'filename': ModelConfig.filename,
         'maxTokens': ModelConfig.maxTokens,
-        'fileSizeGB': (ModelConfig.fileSizeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1),
+        'fileSizeGB': (ModelConfig.fileSizeBytes / (1024 * 1024 * 1024))
+            .toStringAsFixed(1),
         'supportImage': false,
       },
     };
@@ -219,7 +224,10 @@ class LocalLLMService {
   }
 
   // Download model
-  static Future<bool> downloadModel({bool acceptGoogleAgreement = false, String? huggingFaceToken}) async {
+  static Future<bool> downloadModel({
+    bool acceptGoogleAgreement = false,
+    String? huggingFaceToken,
+  }) async {
     if (_modelStatus == ModelDownloadStatus.downloading) {
       print('Model download already in progress');
       return false;
@@ -235,7 +243,7 @@ class LocalLLMService {
       // Get download directory
       final directory = await getApplicationDocumentsDirectory();
       final modelPath = '${directory.path}/${ModelConfig.filename}';
-      
+
       print('Downloading ${ModelConfig.displayName} to: $modelPath');
 
       // Enable wakelock
@@ -250,18 +258,21 @@ class LocalLLMService {
         final response = await client.send(request);
 
         if (response.statusCode != 200) {
-          throw Exception('Failed to download model: HTTP ${response.statusCode}');
+          throw Exception(
+            'Failed to download model: HTTP ${response.statusCode}',
+          );
         }
 
         // Get content length
-        final contentLength = response.contentLength ?? ModelConfig.fileSizeBytes;
-        
+        final contentLength =
+            response.contentLength ?? ModelConfig.fileSizeBytes;
+
         // Create file
         final file = File(modelPath);
         final sink = file.openWrite();
-        
+
         int downloadedBytes = 0;
-        
+
         // Download with progress tracking
         await for (final chunk in response.stream) {
           if (_shouldCancelDownload) {
@@ -271,26 +282,26 @@ class LocalLLMService {
             }
             throw Exception('Download cancelled by user');
           }
-          
+
           sink.add(chunk);
           downloadedBytes += chunk.length;
-          
+
           // Update progress
           _downloadProgress = downloadedBytes / contentLength;
           _downloadProgressController?.add(_downloadProgress);
-          
+
           // Optional: Add small delay to prevent UI blocking
           if (downloadedBytes % (1024 * 1024) == 0) {
             await Future.delayed(Duration(milliseconds: 1));
           }
         }
-        
+
         await sink.close();
-        
+
         // Verify file size
         final actualSize = await file.length();
         print('Downloaded file size: $actualSize bytes');
-        
+
         if (!_verifyDownload(actualSize, ModelConfig.fileSizeBytes)) {
           await file.delete();
           throw Exception('Downloaded file size verification failed');
@@ -331,8 +342,9 @@ class LocalLLMService {
   static Future<bool> enableLocalLLM() async {
     try {
       print('Enabling local LLM...');
-      
-      if (_modelStatus != ModelDownloadStatus.downloaded || _modelPath == null) {
+
+      if (_modelStatus != ModelDownloadStatus.downloaded ||
+          _modelPath == null) {
         print('Cannot enable local LLM: model not downloaded');
         return false;
       }
@@ -342,7 +354,7 @@ class LocalLLMService {
       await prefs.setBool('local_llm_enabled', true);
 
       await _initializeModel();
-      
+
       print('Local LLM enabled: $_isInitialized');
       return _isInitialized;
     } catch (e) {
@@ -355,19 +367,23 @@ class LocalLLMService {
   static Future<void> disableLocalLLM() async {
     try {
       print('Disabling local LLM...');
-      
+
       _isEnabled = false;
       _isInitialized = false;
-      
+
       // Close model and chat
-      await _chat?.session?.close();
-      await _model?.close();
+      if (_chat?.session != null) {
+        await _chat!.session!.close();
+      }
+      if (_model != null) {
+        await _model!.close();
+      }
       _chat = null;
       _model = null;
-      
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('local_llm_enabled', false);
-      
+
       print('Local LLM disabled');
     } catch (e) {
       print('Disable local LLM error: $e');
@@ -375,21 +391,25 @@ class LocalLLMService {
   }
 
   // Send message to local LLM
-  static Future<String> sendMessage(String message, {String? systemPrompt}) async {
+  static Future<String> sendMessage(
+    String message, {
+    String? systemPrompt,
+  }) async {
     if (!isAvailable) {
       throw Exception('Local LLM is not available');
     }
 
     try {
       print('Sending message to local LLM: $message');
-      
+
       // Create message with system prompt if provided
-      final prompt = systemPrompt != null ? '$systemPrompt\n\nUser: $message' : message;
-      
+      final prompt =
+          systemPrompt != null ? '$systemPrompt\n\nUser: $message' : message;
+
       // Add query chunk and get response
       await _chat!.addQueryChunk(Message.text(text: prompt, isUser: true));
       final response = await _chat!.generateChatResponse();
-      
+
       print('Local LLM response received');
       return response;
     } catch (e) {
@@ -399,17 +419,21 @@ class LocalLLMService {
   }
 
   // Send message with streaming response
-  static Stream<String> sendMessageStream(String message, {String? systemPrompt}) async* {
+  static Stream<String> sendMessageStream(
+    String message, {
+    String? systemPrompt,
+  }) async* {
     if (!isAvailable) {
       throw Exception('Local LLM is not available');
     }
 
     try {
       print('Sending streaming message to local LLM: $message');
-      
+
       // Create message with system prompt if provided
-      final prompt = systemPrompt != null ? '$systemPrompt\n\nUser: $message' : message;
-      
+      final prompt =
+          systemPrompt != null ? '$systemPrompt\n\nUser: $message' : message;
+
       // Add query chunk and stream response
       await _chat!.addQueryChunk(Message.text(text: prompt, isUser: true));
       await for (final chunk in _chat!.generateChatResponseAsync()) {
@@ -447,23 +471,23 @@ class LocalLLMService {
       await _model?.close();
       _chat = null;
       _model = null;
-      
+
       if (_modelPath != null) {
         final file = File(_modelPath!);
         if (await file.exists()) {
           await file.delete();
         }
       }
-      
+
       _modelStatus = ModelDownloadStatus.notDownloaded;
       _modelPath = null;
       _isInitialized = false;
       _downloadProgress = 0.0;
       _downloadError = null;
-      
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('local_llm_model_path');
-      
+
       _modelStatusController?.add(_modelStatus);
       print('Model deleted successfully');
     } catch (e) {
@@ -487,7 +511,8 @@ class LocalLLMService {
         'displayName': ModelConfig.displayName,
         'filename': ModelConfig.filename,
         'maxTokens': ModelConfig.maxTokens,
-        'fileSizeGB': (ModelConfig.fileSizeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1),
+        'fileSizeGB': (ModelConfig.fileSizeBytes / (1024 * 1024 * 1024))
+            .toStringAsFixed(1),
       },
     };
   }
@@ -495,7 +520,7 @@ class LocalLLMService {
   // Get diagnostics
   static Map<String, dynamic> getDiagnostics() {
     final diagnostics = getStatus();
-    
+
     if (_modelPath != null) {
       final file = File(_modelPath!);
       diagnostics['modelFileExists'] = file.existsSync();
@@ -513,7 +538,7 @@ class LocalLLMService {
       print('Cannot initialize model: not downloaded or path is null');
       return false;
     }
-    
+
     await _initializeModel();
     return _isInitialized;
   }
@@ -534,4 +559,4 @@ class LocalLLMService {
       print('Dispose error: $e');
     }
   }
-} 
+}

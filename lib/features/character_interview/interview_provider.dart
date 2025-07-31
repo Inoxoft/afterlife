@@ -447,7 +447,7 @@ $languageInstruction""";
         }
       }
     } catch (e) {
-      print('🔍 DEBUG: Error in sendMessage: $e');
+      if (kDebugMode) print('🔍 DEBUG: Error in sendMessage: $e');
       _handleErrorState("Error sending message: $e");
     }
   }

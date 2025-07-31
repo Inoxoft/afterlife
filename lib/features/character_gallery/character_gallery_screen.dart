@@ -25,7 +25,7 @@ class PulseRingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint =
         Paint()
-          ..color = color.withOpacity(0.3 * (1 - progress))
+          ..color = color.withValues(alpha: 0.3 * (1 - progress))
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0 * (1 + progress);
 
@@ -1382,8 +1382,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
             color: AppTheme.warmGold,
             boxShadow: [
               BoxShadow(
-                color: AppTheme.warmGold.withOpacity(
-                  0.5 * _glowAnimation.value,
+                color: AppTheme.warmGold.withValues(
+                  alpha: 0.5 * _glowAnimation.value,
                 ),
                 blurRadius: 4 * _glowAnimation.value,
                 spreadRadius: 1 * _glowAnimation.value,
@@ -1462,7 +1462,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    final Color accentColor = widget.character.accentColor ?? AppTheme.warmGold;
+    final Color accentColor = widget.character.accentColor;
     final String formattedDate = _formatDate(widget.character.createdAt);
 
     return GestureDetector(
@@ -1761,7 +1761,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
             color: color,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.5 * _glowAnimation.value),
+                color: color.withValues(alpha: 0.5 * _glowAnimation.value),
                 blurRadius: 4 * _glowAnimation.value,
                 spreadRadius: 1 * _glowAnimation.value,
               ),
@@ -1851,7 +1851,7 @@ class StarfieldPainter extends CustomPainter {
       final y = star.y * size.height;
 
       final Paint starPaint =
-          Paint()..color = star.color.withOpacity(star.opacity);
+          Paint()..color = star.color.withValues(alpha: star.opacity);
 
       canvas.drawCircle(Offset(x, y), star.size, starPaint);
 

@@ -118,7 +118,15 @@ class UnifiedChatService {
       if (kDebugMode) {
         print('Error: API key is missing. Cannot send message.');
       }
-      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
+      return 'Error: No API key configured. Please add your OpenRouter API key in Settings to use AI features.';
+    }
+
+    // Additional validation for API key format
+    if (!_isValidApiKeyFormat(_apiKey!)) {
+      if (kDebugMode) {
+        print('Error: API key format appears invalid.');
+      }
+      return 'Error: API key format appears invalid. Please check your OpenRouter API key in Settings.';
     }
 
     try {
@@ -363,7 +371,22 @@ class UnifiedChatService {
             'API Error in $debugPrefix: ${response.statusCode}: ${response.body}',
           );
         }
-        return 'I apologize, I encountered a server error. Please try again.';
+
+        // Handle specific API errors with better user feedback
+        switch (response.statusCode) {
+          case 401:
+            return 'Error: Invalid API key. Please check your OpenRouter API key in Settings.';
+          case 403:
+            return 'Error: API key does not have permission for this request. Please check your OpenRouter account.';
+          case 429:
+            return 'Error: Rate limit exceeded. Please try again in a few moments.';
+          case 500:
+          case 502:
+          case 503:
+            return 'Error: AI service is temporarily unavailable. Please try again later.';
+          default:
+            return 'Error: AI service returned an error (${response.statusCode}). Please try again.';
+        }
       }
     } on TimeoutException catch (e) {
       if (kDebugMode) {
@@ -387,6 +410,16 @@ class UnifiedChatService {
       }
       return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
+  }
+
+  // Validate API key format (basic check for OpenRouter keys)
+  static bool _isValidApiKeyFormat(String apiKey) {
+    // OpenRouter API keys typically start with 'sk-or-' and are base64-like
+    if (apiKey.length < 10) return false;
+    if (!apiKey.startsWith('sk-or-') && !apiKey.startsWith('sk-')) return false;
+    // Basic pattern check for common API key formats
+    final pattern = RegExp(r'^sk-[A-Za-z0-9_-]+$');
+    return pattern.hasMatch(apiKey);
   }
 
   // ========== BACKWARD COMPATIBILITY METHODS ==========

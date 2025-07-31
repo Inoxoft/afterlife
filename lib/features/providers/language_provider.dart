@@ -43,14 +43,13 @@ class LanguageProvider with ChangeNotifier {
         _currentLocale = Locale(savedLanguageCode);
         notifyListeners();
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> setLanguage(String languageCode) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Ensure proper UTF-8 encoding for Cyrillic languages (Ukrainian and Russian)
       if (languageCode == 'uk' || languageCode == 'ru') {
         // Use explicit UTF-8 encoding for Cyrillic languages
@@ -60,11 +59,10 @@ class LanguageProvider with ChangeNotifier {
       } else {
         await prefs.setString(_languageKey, languageCode);
       }
-      
+
       _currentLocale = Locale(languageCode);
       notifyListeners();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   static List<Locale> get supportedLocales => const [
@@ -79,6 +77,12 @@ class LanguageProvider with ChangeNotifier {
     Locale('ru'),
   ];
 
-  static List<String> get supportedLanguageCodes => 
-    supportedLocales.map((locale) => locale.languageCode).toList();
-} 
+  static List<String> get supportedLanguageCodes =>
+      supportedLocales.map((locale) => locale.languageCode).toList();
+
+  @override
+  void dispose() {
+    // Clean up any resources if needed
+    super.dispose();
+  }
+}

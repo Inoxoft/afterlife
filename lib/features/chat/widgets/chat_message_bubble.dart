@@ -23,15 +23,18 @@ class ChatMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
-    final maxWidthFactor = ResponsiveUtils.getChatMessageMaxWidthFactor(context);
-    
+    final maxWidthFactor = ResponsiveUtils.getChatMessageMaxWidthFactor(
+      context,
+    );
+
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: 16.0 * fontScale, 
+        horizontal: 16.0 * fontScale,
         vertical: 8.0 * fontScale,
       ),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser && showAvatar) ...[
@@ -40,10 +43,10 @@ class ChatMessageBubble extends StatelessWidget {
               height: 32 * fontScale,
               margin: EdgeInsets.only(right: 8.0 * fontScale),
               decoration: BoxDecoration(
-                color: AppTheme.warmGold.withOpacity(0.1),
+                color: AppTheme.warmGold.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16 * fontScale),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.3),
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -65,12 +68,13 @@ class ChatMessageBubble extends StatelessWidget {
                 maxWidth: MediaQuery.of(context).size.width * maxWidthFactor,
               ),
               decoration: BoxDecoration(
-                color: isUser
-                    ? AppTheme.warmGold.withOpacity(0.1)
-                    : AppTheme.midnightPurple.withOpacity(0.3),
+                color:
+                    isUser
+                        ? AppTheme.warmGold.withValues(alpha: 0.1)
+                        : AppTheme.midnightPurple.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(16 * fontScale),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.3),
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -84,10 +88,10 @@ class ChatMessageBubble extends StatelessWidget {
               height: 32 * fontScale,
               margin: EdgeInsets.only(left: 8.0 * fontScale),
               decoration: BoxDecoration(
-                color: AppTheme.warmGold.withOpacity(0.1),
+                color: AppTheme.warmGold.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16 * fontScale),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.3),
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -110,9 +114,10 @@ class ChatMessageBubble extends StatelessWidget {
 
   Widget _buildMessageContent(BuildContext context) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
-    
+
     // Check if this is a character card
-    if (text.contains('## CHARACTER CARD SUMMARY ##') && text.contains('## END OF CHARACTER CARD ##')) {
+    if (text.contains('## CHARACTER CARD SUMMARY ##') &&
+        text.contains('## END OF CHARACTER CARD ##')) {
       return _buildCharacterCard(context);
     }
 
@@ -129,7 +134,7 @@ class ChatMessageBubble extends StatelessWidget {
 
   Widget _buildCharacterCard(BuildContext context) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
-    
+
     // Extract character name
     final nameMarkerPattern = RegExp(r'## CHARACTER NAME: (.*?) ##');
     final nameMatch = nameMarkerPattern.firstMatch(text);
@@ -140,7 +145,7 @@ class ChatMessageBubble extends StatelessWidget {
     final summaryEnd = '## END OF CHARACTER CARD ##';
     final startIndex = text.indexOf(summaryStart) + summaryStart.length;
     final endIndex = text.indexOf(summaryEnd);
-    
+
     if (startIndex < summaryStart.length || endIndex <= startIndex) {
       return SelectableText('Invalid character card format');
     }
@@ -155,10 +160,10 @@ class ChatMessageBubble extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.warmGold.withOpacity(0.08),
+        color: AppTheme.warmGold.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12 * fontScale),
         border: Border.all(
-          color: AppTheme.warmGold.withOpacity(0.3),
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -169,17 +174,17 @@ class ChatMessageBubble extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(
-              vertical: 12 * fontScale, 
+              vertical: 12 * fontScale,
               horizontal: 16 * fontScale,
             ),
             decoration: BoxDecoration(
-              color: AppTheme.warmGold.withOpacity(0.15),
+              color: AppTheme.warmGold.withValues(alpha: 0.15),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(11 * fontScale),
               ),
               border: Border(
                 bottom: BorderSide(
-                  color: AppTheme.warmGold.withOpacity(0.3),
+                  color: AppTheme.warmGold.withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
@@ -198,7 +203,10 @@ class ChatMessageBubble extends StatelessWidget {
             padding: EdgeInsets.all(16 * fontScale),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: sections.map((section) => _buildSection(section, fontScale)).toList(),
+              children:
+                  sections
+                      .map((section) => _buildSection(section, fontScale))
+                      .toList(),
             ),
           ),
         ],
@@ -209,56 +217,51 @@ class ChatMessageBubble extends StatelessWidget {
   String _cleanContent(String content) {
     // Remove HTML-like tags
     content = content.replaceAll(RegExp(r'<[^>]*>'), '');
-    
+
     // Remove extra whitespace and normalize line breaks
     content = content.replaceAll(RegExp(r'\n\s*\n\s*\n+'), '\n\n');
     content = content.replaceAll(RegExp(r'^\s+', multiLine: true), '');
-    
+
     // Remove any remaining unwanted markers
     content = content.replaceAll(RegExp(r'---\s*\n'), '\n');
-    
+
     return content.trim();
   }
 
   List<Map<String, String>> _parseSections(String content) {
     List<Map<String, String>> sections = [];
-    
+
     // Split by markdown headers (### or ##)
     final sectionPattern = RegExp(r'^#{2,3}\s+(.+?)$', multiLine: true);
     final matches = sectionPattern.allMatches(content).toList();
-    
+
     for (int i = 0; i < matches.length; i++) {
       final match = matches[i];
       final title = match.group(1)?.trim() ?? '';
-      
+
       // Get content between this header and the next one
       final startIndex = match.end;
-      final endIndex = i < matches.length - 1 ? matches[i + 1].start : content.length;
+      final endIndex =
+          i < matches.length - 1 ? matches[i + 1].start : content.length;
       final sectionContent = content.substring(startIndex, endIndex).trim();
-      
+
       if (title.isNotEmpty && sectionContent.isNotEmpty) {
-        sections.add({
-          'title': title,
-          'content': sectionContent,
-        });
+        sections.add({'title': title, 'content': sectionContent});
       }
     }
-    
+
     // If no sections found, treat entire content as one section
     if (sections.isEmpty) {
-      sections.add({
-        'title': 'Character Summary',
-        'content': content,
-      });
+      sections.add({'title': 'Character Summary', 'content': content});
     }
-    
+
     return sections;
   }
 
   Widget _buildSection(Map<String, String> section, double fontScale) {
     final title = section['title'] ?? '';
     final content = section['content'] ?? '';
-    
+
     return Padding(
       padding: EdgeInsets.only(bottom: 16 * fontScale),
       child: Column(
@@ -269,15 +272,15 @@ class ChatMessageBubble extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(
-                vertical: 8 * fontScale, 
+                vertical: 8 * fontScale,
                 horizontal: 12 * fontScale,
               ),
               margin: EdgeInsets.only(bottom: 8 * fontScale),
               decoration: BoxDecoration(
-                color: AppTheme.warmGold.withOpacity(0.1),
+                color: AppTheme.warmGold.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6 * fontScale),
                 border: Border.all(
-                  color: AppTheme.warmGold.withOpacity(0.2),
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -323,10 +326,10 @@ class ChatMessageBubble extends StatelessWidget {
       (match) => '${match.group(1)}',
     );
     content = content.replaceAll(RegExp(r'^\s*-\s+', multiLine: true), '• ');
-    
+
     // Clean up extra whitespace
     content = content.replaceAll(RegExp(r'\n\s*\n\s*\n+'), '\n\n');
-    
+
     return content.trim();
   }
-} 
+}

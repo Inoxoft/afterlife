@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:afterlife/core/services/local_llm_service.dart';
+import '../utils/app_logger.dart';
 import '../../features/character_interview/chat_service.dart' as interview_chat;
 import '../../features/character_chat/chat_service.dart' as character_chat;
 import '../../features/providers/chat_service.dart' as provider_chat;
@@ -12,6 +13,26 @@ enum LLMProvider {
   auto, // Automatically choose based on availability
 }
 
+class ServiceAvailability {
+  final bool localLLM;
+  final bool interviewChat;
+  final bool characterChat;
+  final bool providerChat;
+  final List<String> errors;
+
+  const ServiceAvailability({
+    required this.localLLM,
+    required this.interviewChat,
+    required this.characterChat,
+    required this.providerChat,
+    this.errors = const [],
+  });
+
+  bool get hasAnyWorkingService =>
+      localLLM || interviewChat || characterChat || providerChat;
+  bool get canSendMessages => interviewChat || characterChat || providerChat;
+}
+
 class HybridChatService {
   static HybridChatService? _instance;
   static HybridChatService get instance => _instance ??= HybridChatService._();
@@ -19,29 +40,115 @@ class HybridChatService {
 
   static LLMProvider _preferredProvider = LLMProvider.auto;
   static bool _isInitialized = false;
+  static ServiceAvailability _serviceAvailability = const ServiceAvailability(
+    localLLM: false,
+    interviewChat: false,
+    characterChat: false,
+    providerChat: false,
+  );
+
+  /// Get current service availability
+  static ServiceAvailability get serviceAvailability => _serviceAvailability;
 
   /// Initialize the hybrid chat service
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
+    final errors = <String>[];
+
+    // Track which services successfully initialize
+    bool localLLMReady = false;
+    bool interviewChatReady = false;
+    bool characterChatReady = false;
+    bool providerChatReady = false;
+
+    // Initialize LocalLLMService
     try {
-      // Initialize all services
       await LocalLLMService.initialize();
+      localLLMReady = true;
+      AppLogger.serviceInitialized('LocalLLMService');
+    } catch (e) {
+      AppLogger.serviceError('LocalLLMService', 'initialization failed', e);
+      errors.add('Local LLM service failed: ${e.toString()}');
+    }
+
+    // Initialize interview chat service
+    try {
       await interview_chat.ChatService.initialize();
-      await character_chat.ChatService.initialize();
-      await provider_chat.ChatService.initialize();
-
-      _isInitialized = true;
-
+      interviewChatReady = true;
       if (kDebugMode) {
-        print('HybridChatService initialized successfully');
+        print('Interview ChatService initialized successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('HybridChatService initialization error: $e');
+        print('Interview ChatService initialization failed: $e');
+      }
+      errors.add('Interview chat service failed: ${e.toString()}');
+    }
+
+    // Initialize character chat service
+    try {
+      await character_chat.ChatService.initialize();
+      characterChatReady = true;
+      if (kDebugMode) {
+        print('Character ChatService initialized successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Character ChatService initialization failed: $e');
+      }
+      errors.add('Character chat service failed: ${e.toString()}');
+    }
+
+    // Initialize provider chat service
+    try {
+      await provider_chat.ChatService.initialize();
+      providerChatReady = true;
+      if (kDebugMode) {
+        print('Provider ChatService initialized successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Provider ChatService initialization failed: $e');
+      }
+      errors.add('Provider chat service failed: ${e.toString()}');
+    }
+
+    // Update service availability
+    _serviceAvailability = ServiceAvailability(
+      localLLM: localLLMReady,
+      interviewChat: interviewChatReady,
+      characterChat: characterChatReady,
+      providerChat: providerChatReady,
+      errors: errors,
+    );
+
+    // Set initialization status based on whether we have any working services
+    _isInitialized = _serviceAvailability.hasAnyWorkingService;
+
+    if (kDebugMode) {
+      print('HybridChatService initialization complete:');
+      print('  Local LLM: ${localLLMReady ? '✓' : '✗'}');
+      print('  Interview Chat: ${interviewChatReady ? '✓' : '✗'}');
+      print('  Character Chat: ${characterChatReady ? '✓' : '✗'}');
+      print('  Provider Chat: ${providerChatReady ? '✓' : '✗'}');
+      print('  Can send messages: ${_serviceAvailability.canSendMessages}');
+      if (errors.isNotEmpty) {
+        print('  Errors: ${errors.join(', ')}');
       }
     }
+
+    // Throw error only if NO services are available
+    if (!_serviceAvailability.hasAnyWorkingService) {
+      throw Exception(
+        'No chat services available. Errors: ${errors.join(', ')}',
+      );
+    }
   }
+
+  /// Check if service is ready for use
+  static bool get isReady =>
+      _isInitialized && _serviceAvailability.canSendMessages;
 
   /// Send a message using the optimal provider
   static Future<String?> sendMessage({
@@ -54,6 +161,13 @@ class HybridChatService {
   }) async {
     if (!_isInitialized) {
       await initialize();
+    }
+
+    // Check if we can send messages
+    if (!_serviceAvailability.canSendMessages) {
+      throw Exception(
+        'No chat services available. Please check your configuration.',
+      );
     }
 
     // Use the explicitly provided provider, otherwise use the global preference

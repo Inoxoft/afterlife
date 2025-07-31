@@ -105,8 +105,7 @@ class _AnimatedParticlesState extends State<AnimatedParticles>
       }
 
       if (mounted) setState(() {});
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Offset _generateSpeed() {
@@ -182,7 +181,7 @@ class ParticlePainter extends CustomPainter {
     for (var particle in particles) {
       final paint =
           Paint()
-            ..color = color.withOpacity(particle.opacity)
+            ..color = color.withValues(alpha: particle.opacity)
             ..style = PaintingStyle.fill;
 
       // Only draw particles within the visible area

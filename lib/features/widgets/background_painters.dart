@@ -61,7 +61,7 @@ class CosmicBackgroundPainter extends CustomPainter {
 
       final paint =
           Paint()
-            ..color = starColor.withOpacity(opacity)
+            ..color = starColor.withValues(alpha: opacity)
             ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x, y), radius, paint);
@@ -263,7 +263,7 @@ class LightBackgroundPainter extends CustomPainter {
 
       final paint =
           Paint()
-            ..color = lightColor.withOpacity(opacity)
+            ..color = lightColor.withValues(alpha: opacity)
             ..strokeWidth = 1 + random.nextDouble() * 3
             ..strokeCap = StrokeCap.round
             ..style = PaintingStyle.stroke;
@@ -276,7 +276,7 @@ class LightBackgroundPainter extends CustomPainter {
       // Add a subtle glow at the start point
       final glowPaint =
           Paint()
-            ..color = lightColor.withOpacity(opacity * 0.8)
+            ..color = lightColor.withValues(alpha: opacity)
             ..style = PaintingStyle.fill;
 
       canvas.drawCircle(

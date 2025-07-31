@@ -89,11 +89,7 @@ class AppTheme {
     color: AppTheme.warmGold,
     letterSpacing: 2.0,
     shadows: [
-      Shadow(
-        blurRadius: 8.0,
-        color: AppTheme.warmGold,
-        offset: Offset(0, 0),
-      ),
+      Shadow(blurRadius: 8.0, color: AppTheme.warmGold, offset: Offset(0, 0)),
     ],
   );
 
@@ -107,15 +103,13 @@ class AppTheme {
   );
 
   /// Body text style - for standard text
-  static TextStyle get bodyTextStyle => baseTextStyle.copyWith(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-  );
+  static TextStyle get bodyTextStyle =>
+      baseTextStyle.copyWith(fontSize: 16, fontWeight: FontWeight.normal);
 
   /// Caption style - for smaller text, metadata
   static TextStyle get captionStyle => baseTextStyle.copyWith(
     fontSize: 12,
-    color: AppTheme.silverMist.withOpacity(0.7),
+    color: AppTheme.silverMist.withValues(alpha: 0.7),
   );
 
   /// Twin name style - for character names in cards
@@ -129,7 +123,7 @@ class AppTheme {
   /// Metadata style - for timestamps, etc.
   static TextStyle get metadataStyle => baseTextStyle.copyWith(
     fontSize: 12,
-    color: AppTheme.silverMist.withOpacity(0.5),
+    color: AppTheme.silverMist.withValues(alpha: 0.6),
   );
 
   /// Label style - for buttons, tabs, etc.
@@ -144,7 +138,9 @@ class AppTheme {
 
   // Container decorations - Updated for mask aesthetics
   static BoxDecoration get containerDecoration => BoxDecoration(
-    color: midnightPurple.withValues(alpha: 0.7), // More opacity for dramatic effect
+    color: midnightPurple.withValues(
+      alpha: 0.7,
+    ), // More opacity for dramatic effect
     borderRadius: BorderRadius.circular(18),
     border: Border.all(
       color: warmGold.withValues(alpha: 0.4),
@@ -186,7 +182,9 @@ class AppTheme {
   // Bottom navigation theme - Updated with new colors
   static BottomNavigationBarThemeData get bottomNavTheme =>
       BottomNavigationBarThemeData(
-        backgroundColor: cosmicBlack.withValues(alpha: 0.85), // Slightly more opaque
+        backgroundColor: cosmicBlack.withValues(
+          alpha: 0.85,
+        ), // Slightly more opaque
         selectedItemColor: warmGold,
         unselectedItemColor: silverMist.withValues(alpha: 0.5),
         showSelectedLabels: true,
