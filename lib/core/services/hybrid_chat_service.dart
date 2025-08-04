@@ -72,45 +72,31 @@ class HybridChatService {
       errors.add('Local LLM service failed: ${e.toString()}');
     }
 
-    // Initialize interview chat service
+    // Initialize chat services through BaseChatService (eliminates duplication)
     try {
       await interview_chat.ChatService.initialize();
       interviewChatReady = true;
-      if (kDebugMode) {
-        print('Interview ChatService initialized successfully');
-      }
+      AppLogger.serviceInitialized('Interview ChatService');
     } catch (e) {
-      if (kDebugMode) {
-        print('Interview ChatService initialization failed: $e');
-      }
+      AppLogger.serviceError('Interview ChatService', 'initialization failed', e);
       errors.add('Interview chat service failed: ${e.toString()}');
     }
 
-    // Initialize character chat service
     try {
       await character_chat.ChatService.initialize();
       characterChatReady = true;
-      if (kDebugMode) {
-        print('Character ChatService initialized successfully');
-      }
+      AppLogger.serviceInitialized('Character ChatService');
     } catch (e) {
-      if (kDebugMode) {
-        print('Character ChatService initialization failed: $e');
-      }
+      AppLogger.serviceError('Character ChatService', 'initialization failed', e);
       errors.add('Character chat service failed: ${e.toString()}');
     }
 
-    // Initialize provider chat service
     try {
       await provider_chat.ChatService.initialize();
       providerChatReady = true;
-      if (kDebugMode) {
-        print('Provider ChatService initialized successfully');
-      }
+      AppLogger.serviceInitialized('Provider ChatService');
     } catch (e) {
-      if (kDebugMode) {
-        print('Provider ChatService initialization failed: $e');
-      }
+      AppLogger.serviceError('Provider ChatService', 'initialization failed', e);
       errors.add('Provider chat service failed: ${e.toString()}');
     }
 
@@ -126,16 +112,15 @@ class HybridChatService {
     // Set initialization status based on whether we have any working services
     _isInitialized = _serviceAvailability.hasAnyWorkingService;
 
-    if (kDebugMode) {
-      print('HybridChatService initialization complete:');
-      print('  Local LLM: ${localLLMReady ? '✓' : '✗'}');
-      print('  Interview Chat: ${interviewChatReady ? '✓' : '✗'}');
-      print('  Character Chat: ${characterChatReady ? '✓' : '✗'}');
-      print('  Provider Chat: ${providerChatReady ? '✓' : '✗'}');
-      print('  Can send messages: ${_serviceAvailability.canSendMessages}');
-      if (errors.isNotEmpty) {
-        print('  Errors: ${errors.join(', ')}');
-      }
+    // Log initialization summary
+    AppLogger.debug('HybridChatService initialization complete:', tag: 'HybridChatService');
+    AppLogger.debug('  Local LLM: ${localLLMReady ? '✓' : '✗'}', tag: 'HybridChatService');
+    AppLogger.debug('  Interview Chat: ${interviewChatReady ? '✓' : '✗'}', tag: 'HybridChatService');
+    AppLogger.debug('  Character Chat: ${characterChatReady ? '✓' : '✗'}', tag: 'HybridChatService');
+    AppLogger.debug('  Provider Chat: ${providerChatReady ? '✓' : '✗'}', tag: 'HybridChatService');
+    AppLogger.debug('  Can send messages: ${_serviceAvailability.canSendMessages}', tag: 'HybridChatService');
+    if (errors.isNotEmpty) {
+      AppLogger.warning('  Errors: ${errors.join(', ')}', tag: 'HybridChatService');
     }
 
     // Throw error only if NO services are available
