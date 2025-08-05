@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/preferences_service.dart';
 import '../../core/services/local_llm_service.dart';
 import '../../core/services/hybrid_chat_service.dart';
 import 'dart:async';
@@ -74,7 +73,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
     try {
       final settings = LocalLLMService.getSettings();
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
 
       if (mounted) {
         setState(() {
@@ -125,7 +124,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   }
 
   Future<void> _savePreferredProvider() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await PreferencesService.getPrefs();
     await prefs.setInt('preferred_llm_provider', _preferredProvider.index);
     HybridChatService.setPreferredProvider(_preferredProvider);
   }

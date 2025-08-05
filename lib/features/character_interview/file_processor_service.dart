@@ -85,11 +85,36 @@ class FileProcessorService {
   }
 
   static Future<List<File>?> pickFile() async {
-    final typeGroup = XTypeGroup(
-      label: 'Documents',
-      extensions: ['txt', 'pdf', 'doc', 'docx', 'eml'],
-    );
+    
+    final fileTypes = <String>['txt', 'pdf', 'doc', 'docx', 'eml'];
+    XTypeGroup typeGroup;
 
+    if (Platform.isIOS) {
+      // On iOS, use only uniformTypeIdentifiers (UTIs) for document types
+      // Common UTIs: txt = public.plain-text, pdf = com.adobe.pdf, doc = com.microsoft.word.doc, docx = org.openxmlformats.wordprocessingml.document, eml = com.apple.mail.email
+      typeGroup = const XTypeGroup(
+        label: 'Documents',
+        uniformTypeIdentifiers: [
+          'public.plain-text',
+          'com.adobe.pdf',
+          'com.microsoft.word.doc',
+          'org.openxmlformats.wordprocessingml.document',
+          'com.apple.mail.email',
+        ],
+      );
+    } else if (Platform.isAndroid) {
+      // On Android, use only extensions
+      typeGroup = XTypeGroup(
+        label: 'Documents',
+        extensions: fileTypes,
+      );
+    } else {
+      // Fallback for other platforms: use extensions
+      typeGroup = XTypeGroup(
+        label: 'Documents',
+        extensions: fileTypes,
+      );
+    }
     try {
       final List<XFile> results = await openFiles(
         acceptedTypeGroups: [typeGroup],

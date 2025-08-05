@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/preferences_service.dart';
+import '../services/base_service.dart';
+import 'app_logger.dart';
 
 /// A utility class for managing environment configuration
 class EnvConfig {
@@ -14,31 +16,30 @@ class EnvConfig {
 
   /// Initialize environment configuration
   static Future<void> initialize() async {
-    _isInitialized = false;
+    await StaticServiceInitializer.initializeService(
+      serviceName: 'EnvConfig',
+      isInitialized: () => _isInitialized,
+      markInitialized: () => _isInitialized = true,
+      dependencies: [
+        () => PreferencesService.initialize(),
+      ],
+      initializeLogic: () async {
+        // Get API key from SharedPreferences (user setting)
+        final prefs = await PreferencesService.getPrefs();
+        _cachedUserApiKey = prefs.getString(_openRouterApiKeyPref);
 
-    try {
-      // Get API key from SharedPreferences (user setting)
-      final prefs = await SharedPreferences.getInstance();
-      _cachedUserApiKey = prefs.getString(_openRouterApiKeyPref);
-
-      _isInitialized = true;
-      if (kDebugMode) {
-        print('EnvConfig initialized.');
-        dumpApiKeyInfo();
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error initializing EnvConfig: $e');
-      }
-      _isInitialized = true; // Mark as initialized to prevent repeated attempts
-    }
+        if (kDebugMode) {
+          dumpApiKeyInfo();
+        }
+      },
+    );
   }
 
   /// Get an environment variable value
   static String? get(String key) {
     if (!_isInitialized) {
       if (kDebugMode) {
-        print('Warning: EnvConfig.get called before initialization.');
+        AppLogger.warning('EnvConfig.get called before initialization', tag: 'EnvConfig');
       }
     }
 
@@ -59,7 +60,7 @@ class EnvConfig {
   /// Set an API key that overrides the one in the .env file
   static Future<bool> setUserApiKey(String apiKey) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
 
       if (apiKey.isEmpty) {
         await prefs.remove(_openRouterApiKeyPref);
@@ -72,7 +73,7 @@ class EnvConfig {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Error saving API key: $e');
+        AppLogger.error('Error saving API key', tag: 'EnvConfig', error: e);
       }
       return false;
     }
@@ -86,7 +87,7 @@ class EnvConfig {
   /// Check if the user has set a custom API key
   static Future<bool> hasUserApiKey() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       final key = prefs.getString(_openRouterApiKeyPref);
       return key != null && key.isNotEmpty;
     } catch (e) {
@@ -97,7 +98,7 @@ class EnvConfig {
   /// Force a reload of the configuration from SharedPreferences
   static Future<void> forceReload() async {
     if (kDebugMode) {
-      print('Forcing EnvConfig reload...');
+      AppLogger.debug('Forcing EnvConfig reload', tag: 'EnvConfig');
     }
     await initialize();
   }
@@ -105,13 +106,14 @@ class EnvConfig {
   /// Dump diagnostic information about the API key source
   static Future<void> dumpApiKeyInfo() async {
     if (kDebugMode) {
-      print('--- API Key Diagnostics ---');
-      print(
-        'Cached User Key: ${_cachedUserApiKey != null ? (_cachedUserApiKey!.isEmpty ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...") : "NULL"}',
-      );
+      AppLogger.debug('--- API Key Diagnostics ---', tag: 'EnvConfig');
+      final keyDisplay = _cachedUserApiKey != null 
+          ? (_cachedUserApiKey!.isEmpty ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...")
+          : "NULL";
+      AppLogger.debug('Cached User Key: $keyDisplay', tag: 'EnvConfig');
       final hasKey = await hasUserApiKey();
-      print('Has user API key in SharedPreferences: $hasKey');
-      print('--------------------------');
+      AppLogger.debug('Has user API key in SharedPreferences: $hasKey', tag: 'EnvConfig');
+      AppLogger.debug('--------------------------', tag: 'EnvConfig');
     }
   }
 

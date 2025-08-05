@@ -8,8 +8,10 @@ import 'package:flutter_gemma/core/message.dart';
 import 'package:flutter_gemma/pigeon.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../utils/app_logger.dart';
 
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
@@ -85,13 +87,13 @@ class LocalLLMService {
   // Initialize the service
   static Future<void> initialize() async {
     try {
-      print('Initializing LocalLLMService...');
+      AppLogger.debug('Initializing LocalLLMService', tag: 'LocalLLMService');
 
       // Initialize flutter_gemma plugin
       _gemmaPlugin = FlutterGemmaPlugin.instance;
 
       // Load preferences
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       _isEnabled = prefs.getBool('local_llm_enabled') ?? false;
       _modelPath = prefs.getString('local_llm_model_path');
       _huggingFaceToken = prefs.getString('huggingface_token');
@@ -106,11 +108,13 @@ class LocalLLMService {
         await _initializeModel();
       }
 
-      print(
-        'LocalLLMService initialized - enabled: $_isEnabled, status: $_modelStatus',
+      AppLogger.serviceInitialized('LocalLLMService');
+      AppLogger.debug(
+        'Enabled: $_isEnabled, Status: $_modelStatus',
+        tag: 'LocalLLMService'
       );
     } catch (e) {
-      print('LocalLLMService initialization error: $e');
+      AppLogger.serviceError('LocalLLMService', 'initialization error', e);
       _modelStatus = ModelDownloadStatus.error;
       _downloadError = e.toString();
     }
@@ -124,10 +128,11 @@ class LocalLLMService {
       // Verify file size with tolerance
       if (_verifyDownload(fileSize, ModelConfig.fileSizeBytes)) {
         _modelStatus = ModelDownloadStatus.downloaded;
-        print('Model file found and verified at: $_modelPath');
+        AppLogger.debug('Model file found and verified at: $_modelPath', tag: 'LocalLLMService');
       } else {
-        print(
-          'Model file size mismatch. Expected: ${ModelConfig.fileSizeBytes}, Actual: $fileSize',
+        AppLogger.warning(
+          'Model file size mismatch - Expected: ${ModelConfig.fileSizeBytes}, Actual: $fileSize',
+          tag: 'LocalLLMService'
         );
         _modelStatus = ModelDownloadStatus.error;
         _downloadError = 'File size verification failed';
@@ -135,7 +140,7 @@ class LocalLLMService {
     } else {
       _modelStatus = ModelDownloadStatus.notDownloaded;
       _modelPath = null;
-      print('No model file found');
+      AppLogger.debug('No model file found', tag: 'LocalLLMService');
     }
   }
 
@@ -309,7 +314,7 @@ class LocalLLMService {
 
         // Save model path
         _modelPath = modelPath;
-        final prefs = await SharedPreferences.getInstance();
+        final prefs = await PreferencesService.getPrefs();
         await prefs.setString('local_llm_model_path', modelPath);
 
         _modelStatus = ModelDownloadStatus.downloaded;
@@ -350,7 +355,7 @@ class LocalLLMService {
       }
 
       _isEnabled = true;
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       await prefs.setBool('local_llm_enabled', true);
 
       await _initializeModel();
@@ -381,7 +386,7 @@ class LocalLLMService {
       _chat = null;
       _model = null;
 
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       await prefs.setBool('local_llm_enabled', false);
 
       print('Local LLM disabled');
@@ -448,14 +453,14 @@ class LocalLLMService {
   // Set Google agreement acceptance
   static Future<void> setGoogleAgreementAccepted(bool accepted) async {
     _googleAgreementAccepted = accepted;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await PreferencesService.getPrefs();
     await prefs.setBool('google_agreement_accepted', accepted);
   }
 
   // Set Hugging Face token
   static Future<void> setHuggingFaceToken(String? token) async {
     _huggingFaceToken = token;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await PreferencesService.getPrefs();
     if (token != null) {
       await prefs.setString('huggingface_token', token);
     } else {
@@ -485,7 +490,7 @@ class LocalLLMService {
       _downloadProgress = 0.0;
       _downloadError = null;
 
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       await prefs.remove('local_llm_model_path');
 
       _modelStatusController?.add(_modelStatus);

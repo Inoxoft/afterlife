@@ -3,12 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/character_model.dart';
 import '../../core/providers/base_provider.dart';
+import '../../core/services/preferences_service.dart';
 
 class CharactersProvider extends BaseProvider {
   static const String _storageKey = 'characters';
-
-  // Cache for shared preferences to avoid repeated access
-  SharedPreferences? _prefsCache;
 
   List<CharacterModel> _characters = [];
   String? _selectedCharacterId;
@@ -46,13 +44,9 @@ class CharactersProvider extends BaseProvider {
     _loadCharacters();
   }
 
-  // Get shared preferences instance with caching
+  // Get shared preferences instance (now uses centralized service)
   Future<SharedPreferences> _getPrefs() async {
-    if (_prefsCache != null) {
-      return _prefsCache!;
-    }
-    _prefsCache = await SharedPreferences.getInstance();
-    return _prefsCache!;
+    return await PreferencesService.getPrefs();
   }
 
   Future<void> _loadCharacters() async {
@@ -383,7 +377,6 @@ class CharactersProvider extends BaseProvider {
   void dispose() {
     // Clear caches to prevent memory leaks
     _characterCache.clear();
-    _prefsCache = null;
     _characters.clear();
     _selectedCharacterId = null;
     super.dispose();

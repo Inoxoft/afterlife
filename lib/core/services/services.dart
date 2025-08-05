@@ -5,3 +5,5 @@ export 'unified_chat_service.dart';
 export 'hybrid_chat_service.dart';
 export 'local_llm_service.dart';
 export 'base_chat_service.dart';
+export 'preferences_service.dart';
+export 'base_service.dart';

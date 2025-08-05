@@ -16,6 +16,7 @@ import 'features/providers/chat_service.dart' as providers_chat;
 import 'features/character_prompts/famous_character_prompts.dart';
 import 'l10n/app_localizations.dart';
 import 'core/services/hybrid_chat_service.dart';
+import 'core/services/preferences_service.dart';
 import 'core/utils/ukrainian_font_utils.dart';
 
 class AppInitializationError extends Error {
@@ -54,6 +55,15 @@ Future<InitializationResult> _initializeApp() async {
   try {
     // Initialize all app optimizations
     await AppOptimizer.initializeApp();
+
+    // Initialize shared preferences service first (many other services depend on it)
+    try {
+      await PreferencesService.initialize();
+    } catch (e) {
+      AppLogger.serviceError('PreferencesService', 'initialization failed', e);
+      warnings.add('Preferences service failed to initialize');
+      // Don't fail completely - app can still work with degraded functionality
+    }
 
     // Initialize environment configuration with proper error handling
     try {
@@ -122,7 +132,7 @@ Future<InitializationResult> _initializeServices() async {
         providers_chat.ChatService.logDiagnostics();
       } catch (e) {
         if (kDebugMode) {
-          print('Provider chat service initialization failed: $e');
+          AppLogger.serviceError('ProviderChatService', 'initialization failed', e);
         }
         warnings.add('Provider chat service failed');
         // Not critical
@@ -134,7 +144,7 @@ Future<InitializationResult> _initializeServices() async {
       FamousCharacterPrompts.initialize();
     } catch (e) {
       if (kDebugMode) {
-        print('Famous character prompts initialization failed: $e');
+        AppLogger.serviceError('FamousCharacterService', 'initialization failed', e);
       }
       warnings.add('Character prompts failed to load');
       // Not critical - can work without famous characters
