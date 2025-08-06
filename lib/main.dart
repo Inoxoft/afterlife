@@ -10,6 +10,7 @@ import 'core/utils/app_optimizer.dart';
 import 'core/utils/app_logger.dart';
 import 'features/providers/characters_provider.dart';
 import 'features/providers/language_provider.dart';
+import 'features/providers/group_chat_provider.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/character_interview/chat_service.dart' as interview_chat;
 import 'features/providers/chat_service.dart' as providers_chat;
@@ -132,7 +133,7 @@ Future<InitializationResult> _initializeServices() async {
         providers_chat.ChatService.logDiagnostics();
       } catch (e) {
         if (kDebugMode) {
-          AppLogger.serviceError('ProviderChatService', 'initialization failed', e);
+          print('Provider chat service initialization failed: $e');
         }
         warnings.add('Provider chat service failed');
         // Not critical
@@ -144,7 +145,7 @@ Future<InitializationResult> _initializeServices() async {
       FamousCharacterPrompts.initialize();
     } catch (e) {
       if (kDebugMode) {
-        AppLogger.serviceError('FamousCharacterService', 'initialization failed', e);
+        print('Famous character prompts initialization failed: $e');
       }
       warnings.add('Character prompts failed to load');
       // Not critical - can work without famous characters
@@ -198,6 +199,7 @@ Future<void> main() async {
             providers: [
               ChangeNotifierProvider(create: (_) => CharactersProvider()),
               ChangeNotifierProvider(create: (_) => LanguageProvider()),
+              ChangeNotifierProvider(create: (_) => GroupChatProvider()),
             ],
             child: MyApp(initializationWarnings: initResult.warnings),
           ),

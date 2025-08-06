@@ -62,29 +62,50 @@ abstract class BaseProvider with ChangeNotifier {
     String? tag,
     bool clearErrorFirst = true,
   }) async {
-    if (_isDisposed) return null;
+    print('🔧 [BaseProvider] executeWithState called for: $operationName');
+    print('🔧 [BaseProvider] - Provider type: ${runtimeType.toString()}');
+    print('🔧 [BaseProvider] - Disposed: $_isDisposed');
+    print('🔧 [BaseProvider] - Current loading: $_isLoading');
+    print('🔧 [BaseProvider] - Current error: $_lastError');
+    
+    if (_isDisposed) {
+      print('❌ [BaseProvider] Operation cancelled - provider disposed');
+      return null;
+    }
 
     try {
+      print('🔧 [BaseProvider] Starting operation...');
       if (clearErrorFirst) clearError();
       setLoading(true);
+      print('🔧 [BaseProvider] State set to loading');
 
+      print('🔧 [BaseProvider] Executing operation function...');
       final result = await operation();
+      print('✅ [BaseProvider] Operation function completed successfully');
+      print('🔧 [BaseProvider] Result type: ${result.runtimeType}');
+      print('🔧 [BaseProvider] Result: $result');
 
       // Only update state if not disposed
       if (!_isDisposed) {
         _isLoading = false;
         notifyListeners();
+        print('🔧 [BaseProvider] State updated - loading: false');
       }
 
       AppLogger.debug(
         '$operationName completed successfully',
         tag: tag ?? runtimeType.toString(),
       );
+      print('✅ [BaseProvider] executeWithState completed successfully');
       return result;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ [BaseProvider] Error in executeWithState: $e');
+      print('❌ [BaseProvider] Stack trace: $stackTrace');
       if (!_isDisposed) {
         setError('$operationName failed: ${e.toString()}', error: e, tag: tag);
+        print('❌ [BaseProvider] Error state set');
       }
+      print('❌ [BaseProvider] Returning null due to error');
       return null;
     }
   }

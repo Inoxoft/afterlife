@@ -438,6 +438,46 @@ abstract class AppLocalizations {
   String get restart;
   String get whichWouldYouPrefer;
   String get interviewWelcomeMessage;
+
+  // Group Chat
+  String get createGroupChat;
+  String get editGroupChat;
+  String get groupName;
+  String get enterGroupName;
+  String get selectedCharacters;
+  String get famousCharacters;
+  String get yourCharacters;
+  String get noFamousCharacters;
+  String get noUserCharacters;
+  String get createGroup;
+  String get updateGroup;
+  String get groupCreationError;
+  String get groupCreationFailed;
+  String get groupChats;
+  String get noGroupChats;
+  String get createFirstGroup;
+  String get startGroupChat;
+  String get addMembers;
+  String get removeMembers;
+  String get leaveGroup;
+  String get deleteGroup;
+  String get groupSettings;
+  String get conversationStarters;
+  String get charactersTyping;
+  String get characterTyping;
+  String get sendMessage;
+  String get groupChatWith;
+  String get lastActive;
+  String get membersCount;
+  String get messageCount;
+  String get goBack;
+  String get retry;
+  String get groupsCreated;
+  String get members;
+  String get messages;
+  String get createFirstGroupChat;
+  String get openChat;
+  String get editGroup;
 }
 
 class _AppLocalizationsDelegate

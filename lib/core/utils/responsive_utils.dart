@@ -44,6 +44,19 @@ class ResponsiveUtils {
     }
   }
 
+  /// Get grid axis count (alias for getGridCrossAxisCount)
+  static int getGridAxisCount(BuildContext context) {
+    return getGridCrossAxisCount(context);
+  }
+
+  /// Check if device is tablet or desktop
+  static bool isTabletOrDesktop(BuildContext context) {
+    final deviceType = getDeviceType(context);
+    return deviceType == DeviceType.tablet || 
+           deviceType == DeviceType.desktop || 
+           deviceType == DeviceType.tv;
+  }
+
   /// Get appropriate padding based on device type
   static EdgeInsets getScreenPadding(BuildContext context) {
     final deviceType = getDeviceType(context);

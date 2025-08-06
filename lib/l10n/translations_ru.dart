@@ -875,4 +875,119 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Привет! Я готов создать подробную карточку персонажа для вас. Вы можете:\n\n1. Ответить на мои вопросы о вашей личности и опыте\n2. Загрузить файл (PDF, TXT, DOC или email) с вашей информацией\n\nЧто бы вы предпочли?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Создать групповой чат';
+
+  @override
+  String get editGroupChat => 'Редактировать групповой чат';
+
+  @override
+  String get groupName => 'Название группы';
+
+  @override
+  String get enterGroupName => 'Введите название группы...';
+
+  @override
+  String get selectedCharacters => 'Выбранные персонажи';
+
+  @override
+  String get famousCharacters => 'Знаменитые персонажи';
+
+  @override
+  String get yourCharacters => 'Ваши персонажи';
+
+  @override
+  String get noFamousCharacters => 'Нет знаменитых персонажей';
+
+  @override
+  String get noUserCharacters => 'Нет пользовательских персонажей';
+
+  @override
+  String get createGroup => 'Создать группу';
+
+  @override
+  String get updateGroup => 'Обновить группу';
+
+  @override
+  String get groupCreationError => 'Выберите 2-6 персонажей и введите название группы';
+
+  @override
+  String get groupCreationFailed => 'Не удалось создать группу. Попробуйте снова.';
+
+  @override
+  String get groupChats => 'Групповые чаты';
+
+  @override
+  String get noGroupChats => 'Пока нет групповых чатов';
+
+  @override
+  String get createFirstGroup => 'Создайте свой первый групповой чат';
+
+  @override
+  String get startGroupChat => 'Начать групповой чат';
+
+  @override
+  String get addMembers => 'Добавить участников';
+
+  @override
+  String get removeMembers => 'Удалить участников';
+
+  @override
+  String get leaveGroup => 'Покинуть группу';
+
+  @override
+  String get deleteGroup => 'Удалить группу';
+
+  @override
+  String get groupSettings => 'Настройки группы';
+
+  @override
+  String get conversationStarters => 'Начало разговора';
+
+  @override
+  String get charactersTyping => 'Персонажи печатают...';
+
+  @override
+  String get characterTyping => '{character} печатает...';
+
+  @override
+  String get sendMessage => 'Отправить сообщение...';
+
+  @override
+  String get groupChatWith => 'Групповой чат с {characters}';
+
+  @override
+  String get lastActive => 'Последняя активность {time}';
+
+  @override
+  String get membersCount => '{count} участников';
+
+  @override
+  String get messageCount => '{count} сообщений';
+
+  @override
+  String get goBack => 'Назад';
+
+  @override
+  String get retry => 'Повторить';
+
+  @override
+  String get groupsCreated => 'групп создано';
+
+  @override
+  String get members => 'участники';
+
+  @override
+  String get messages => 'сообщения';
+
+  @override
+  String get createFirstGroupChat => 'Создайте свой первый групповой чат, чтобы начать разговоры с несколькими ИИ персонажами.';
+
+  @override
+  String get openChat => 'Открыть чат';
+
+  @override
+  String get editGroup => 'Редактировать группу';
 }

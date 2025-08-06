@@ -882,4 +882,119 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Привіт! Я готовий створити детальну картку персонажа для вас. Ви можете:\n\n1. Відповісти на мої запитання про вашу особистість та досвід\n2. Завантажити файл (PDF, TXT, DOC або email) з вашою інформацією\n\nЩо б ви воліли?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Створити груповий чат';
+
+  @override
+  String get editGroupChat => 'Редагувати груповий чат';
+
+  @override
+  String get groupName => 'Назва групи';
+
+  @override
+  String get enterGroupName => 'Введіть назву групи...';
+
+  @override
+  String get selectedCharacters => 'Вибрані персонажі';
+
+  @override
+  String get famousCharacters => 'Відомі персонажі';
+
+  @override
+  String get yourCharacters => 'Ваші персонажі';
+
+  @override
+  String get noFamousCharacters => 'Немає доступних відомих персонажів';
+
+  @override
+  String get noUserCharacters => 'Немає доступних персонажів користувача';
+
+  @override
+  String get createGroup => 'Створити групу';
+
+  @override
+  String get updateGroup => 'Оновити групу';
+
+  @override
+  String get groupCreationError => 'Будь ласка, виберіть 2-6 персонажів і введіть назву групи';
+
+  @override
+  String get groupCreationFailed => 'Не вдалося створити групу. Спробуйте ще раз.';
+
+  @override
+  String get groupChats => 'Групові чати';
+
+  @override
+  String get noGroupChats => 'Поки що немає групових чатів';
+
+  @override
+  String get createFirstGroup => 'Створіть свій перший груповий чат';
+
+  @override
+  String get startGroupChat => 'Почати груповий чат';
+
+  @override
+  String get addMembers => 'Додати учасників';
+
+  @override
+  String get removeMembers => 'Видалити учасників';
+
+  @override
+  String get leaveGroup => 'Покинути групу';
+
+  @override
+  String get deleteGroup => 'Видалити групу';
+
+  @override
+  String get groupSettings => 'Налаштування групи';
+
+  @override
+  String get conversationStarters => 'Початки розмов';
+
+  @override
+  String get charactersTyping => 'Персонажі друкують...';
+
+  @override
+  String get characterTyping => '{character} друкує...';
+
+  @override
+  String get sendMessage => 'Надіслати повідомлення...';
+
+  @override
+  String get groupChatWith => 'Груповий чат з {characters}';
+
+  @override
+  String get lastActive => 'Остання активність {time}';
+
+  @override
+  String get membersCount => '{count} учасників';
+
+  @override
+  String get messageCount => '{count} повідомлень';
+
+  @override
+  String get goBack => 'Повернутись';
+
+  @override
+  String get retry => 'Повторити';
+
+  @override
+  String get groupsCreated => 'груп створено';
+
+  @override
+  String get messages => 'повідомлення';
+
+  @override
+  String get createFirstGroupChat => 'Створіть свій перший груповий чат для розмов з кількома ШІ персонажами.';
+
+  @override
+  String get openChat => 'Відкрити чат';
+
+  @override
+  String get editGroup => 'Редагувати групу';
+
+  @override
+  String get members => 'учасники';
 }

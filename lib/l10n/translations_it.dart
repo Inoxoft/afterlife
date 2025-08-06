@@ -1044,4 +1044,119 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Ciao! Sono pronto a creare una scheda personaggio dettagliata per te. Puoi:\n\n1. Rispondere alle mie domande sulla tua personalità ed esperienze\n2. Caricare un file (PDF, TXT, DOC o email) contenente le tue informazioni\n\nCosa preferiresti?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Crea Chat di Gruppo';
+
+  @override
+  String get editGroupChat => 'Modifica Chat di Gruppo';
+
+  @override
+  String get groupName => 'Nome del Gruppo';
+
+  @override
+  String get enterGroupName => 'Inserisci il nome del gruppo...';
+
+  @override
+  String get selectedCharacters => 'Personaggi Selezionati';
+
+  @override
+  String get famousCharacters => 'Personaggi Famosi';
+
+  @override
+  String get yourCharacters => 'I Tuoi Personaggi';
+
+  @override
+  String get noFamousCharacters => 'Nessun personaggio famoso disponibile';
+
+  @override
+  String get noUserCharacters => 'Nessun personaggio utente disponibile';
+
+  @override
+  String get createGroup => 'Crea Gruppo';
+
+  @override
+  String get updateGroup => 'Aggiorna Gruppo';
+
+  @override
+  String get groupCreationError => 'Seleziona 2-6 personaggi e inserisci un nome del gruppo';
+
+  @override
+  String get groupCreationFailed => 'Creazione del gruppo fallita. Riprova.';
+
+  @override
+  String get groupChats => 'Chat di Gruppo';
+
+  @override
+  String get noGroupChats => 'Nessuna chat di gruppo ancora';
+
+  @override
+  String get createFirstGroup => 'Crea la tua prima chat di gruppo';
+
+  @override
+  String get startGroupChat => 'Inizia Chat di Gruppo';
+
+  @override
+  String get addMembers => 'Aggiungi Membri';
+
+  @override
+  String get removeMembers => 'Rimuovi Membri';
+
+  @override
+  String get leaveGroup => 'Lascia Gruppo';
+
+  @override
+  String get deleteGroup => 'Elimina Gruppo';
+
+  @override
+  String get groupSettings => 'Impostazioni Gruppo';
+
+  @override
+  String get conversationStarters => 'Avviatori di Conversazione';
+
+  @override
+  String get charactersTyping => 'I personaggi stanno scrivendo...';
+
+  @override
+  String get characterTyping => '{character} sta scrivendo...';
+
+  @override
+  String get sendMessage => 'Invia messaggio...';
+
+  @override
+  String get groupChatWith => 'Chat di gruppo con {characters}';
+
+  @override
+  String get lastActive => 'Ultimo attivo {time}';
+
+  @override
+  String get membersCount => '{count} membri';
+
+  @override
+  String get messageCount => '{count} messaggi';
+
+  @override
+  String get goBack => 'Indietro';
+
+  @override
+  String get retry => 'Riprova';
+
+  @override
+  String get groupsCreated => 'gruppi creati';
+
+  @override
+  String get members => 'membri';
+
+  @override
+  String get messages => 'messaggi';
+
+  @override
+  String get createFirstGroupChat => 'Crea la tua prima chat di gruppo per iniziare conversazioni con più personaggi IA.';
+
+  @override
+  String get openChat => 'Apri Chat';
+
+  @override
+  String get editGroup => 'Modifica Gruppo';
 }
