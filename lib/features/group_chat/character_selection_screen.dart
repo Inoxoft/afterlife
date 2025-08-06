@@ -158,7 +158,15 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
                       opacity: _fadeAnimation,
                       child: SlideTransition(
                         position: _slideAnimation,
-                        child: _buildMainContent(localizations, fontScale),
+                        child: Stack(
+                          children: [
+                            // Main content (character list)
+                            _buildMainContent(localizations, fontScale),
+                            
+                            // Floating action button
+                            _buildFloatingActionButton(localizations, fontScale),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -252,14 +260,8 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
         // Character selection tabs
         _buildCharacterTabs(localizations, fontScale),
         
-        // Character grid (flexible to take available space)
-        Expanded(child: _buildCharacterGrid(localizations, fontScale)),
-        
-        // Action buttons (fixed at bottom)
-        SafeArea(
-          top: false,
-          child: _buildActionButtons(localizations, fontScale),
-        ),
+        // Character list (takes full available space)
+        Expanded(child: _buildCharacterList(localizations, fontScale)),
       ],
     );
   }
@@ -462,58 +464,427 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
     );
   }
 
-  Widget _buildCharacterGrid(AppLocalizations localizations, double fontScale) {
+  Widget _buildCharacterList(AppLocalizations localizations, double fontScale) {
     return Consumer<CharactersProvider>(
       builder: (context, charactersProvider, child) {
         // Get current characters without triggering state changes
         final userCharacters = charactersProvider.characters;
         final characters = _selectedTabIndex == 0 ? _famousCharacters : userCharacters;
         
-        print('🔧 [CharacterSelection] Building grid - Tab: $_selectedTabIndex, Count: ${characters.length}');
+        print('🔧 [CharacterSelection] Building list - Tab: $_selectedTabIndex, Count: ${characters.length}');
         
         if (characters.isEmpty) {
           return _buildEmptyState(localizations, fontScale);
         }
 
-        return Container(
-          margin: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
-          child: GridView.builder(
-            physics: const BouncingScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: ResponsiveUtils.getGridCrossAxisCount(context),
-              childAspectRatio: ResponsiveUtils.getGridChildAspectRatio(context),
-              crossAxisSpacing: ResponsiveUtils.getGridSpacing(context),
-              mainAxisSpacing: ResponsiveUtils.getGridSpacing(context),
-            ),
-            itemCount: characters.length,
-            itemBuilder: (context, index) {
-              try {
-                if (_selectedTabIndex == 0) {
-                  final character = characters[index];
-                  if (character is Map<String, dynamic>) {
-                    final characterId = 'famous_${character['name']}';
-                    return _buildFamousCharacterCard(character, characterId, fontScale);
+        return Stack(
+          children: [
+            // Character list with smooth scrolling
+            ListView.builder(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.only(
+                left: ResponsiveUtils.getScreenPadding(context).horizontal,
+                right: ResponsiveUtils.getScreenPadding(context).horizontal,
+                top: 0,
+                bottom: 100, // Space for floating button
+              ),
+              itemCount: characters.length,
+              itemBuilder: (context, index) {
+                try {
+                  if (_selectedTabIndex == 0) {
+                    final character = characters[index];
+                    if (character is Map<String, dynamic>) {
+                      final characterId = 'famous_${character['name']}';
+                      return _buildFamousCharacterListItem(character, characterId, fontScale);
+                    } else {
+                      print('❌ [CharacterSelection] Expected Map for famous character, got: ${character.runtimeType}');
+                      return _buildErrorCharacterListItem('Invalid famous character data', fontScale);
+                    }
                   } else {
-                    print('❌ [CharacterSelection] Expected Map for famous character, got: ${character.runtimeType}');
-                    return _buildErrorCharacterCard('Invalid famous character data', fontScale);
+                    final character = characters[index];
+                    if (character is CharacterModel) {
+                      return _buildUserCharacterListItem(character, fontScale);
+                    } else {
+                      print('❌ [CharacterSelection] Expected CharacterModel for user character, got: ${character.runtimeType}');
+                      return _buildErrorCharacterListItem('Invalid user character data', fontScale);
+                    }
                   }
-                } else {
-                  final character = characters[index];
-                  if (character is CharacterModel) {
-                    return _buildUserCharacterCard(character, fontScale);
-                  } else {
-                    print('❌ [CharacterSelection] Expected CharacterModel for user character, got: ${character.runtimeType}');
-                    return _buildErrorCharacterCard('Invalid user character data', fontScale);
-                  }
+                } catch (e) {
+                  print('❌ [CharacterSelection] Error building character list item: $e');
+                  return _buildErrorCharacterListItem('Error loading character', fontScale);
                 }
-              } catch (e) {
-                print('❌ [CharacterSelection] Error building character card: $e');
-                return _buildErrorCharacterCard('Error loading character', fontScale);
-              }
-            },
-          ),
+              },
+            ),
+            
+            // Smooth fade effect at the top
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 20,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.backgroundStart,
+                      AppTheme.backgroundStart.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildFamousCharacterListItem(
+    Map<String, dynamic> character,
+    String characterId,
+    double fontScale,
+  ) {
+    final isSelected = _selectedCharacterIds.contains(characterId);
+    final name = character['name'] as String;
+    final profession = character['profession'] as String;
+    final imageUrl = character['imageUrl'] as String?;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _toggleCharacterSelection(characterId),
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  AppTheme.midnightPurple.withValues(alpha: isSelected ? 0.8 : 0.4),
+                  AppTheme.deepNavy.withValues(alpha: isSelected ? 0.7 : 0.3),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected 
+                    ? AppTheme.warmGold.withValues(alpha: 0.8)
+                    : AppTheme.warmGold.withValues(alpha: 0.2),
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: isSelected ? [
+                BoxShadow(
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 2),
+                ),
+              ] : null,
+            ),
+            child: Row(
+              children: [
+                // Character avatar
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.warmGold.withValues(alpha: 0.5),
+                      width: 2,
+                    ),
+                  ),
+                  child: ClipOval(
+                    child: imageUrl != null
+                        ? Image.asset(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildCharacterAvatarFallback(name, fontScale);
+                            },
+                          )
+                        : _buildCharacterAvatarFallback(name, fontScale),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Character info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text: name,
+                          fontSize: 16 * fontScale,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.silverMist,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        profession,
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: profession,
+                          fontSize: 14 * fontScale,
+                          color: AppTheme.silverMist.withValues(alpha: 0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Selection indicator
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                        ? AppTheme.warmGold 
+                        : AppTheme.silverMist.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.warmGold,
+                      width: 2,
+                    ),
+                  ),
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          size: 14,
+                          color: AppTheme.deepNavy,
+                        )
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserCharacterListItem(CharacterModel character, double fontScale) {
+    final isSelected = _selectedCharacterIds.contains(character.id);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _toggleCharacterSelection(character.id),
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  AppTheme.midnightPurple.withValues(alpha: isSelected ? 0.8 : 0.4),
+                  AppTheme.deepNavy.withValues(alpha: isSelected ? 0.7 : 0.3),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected 
+                    ? AppTheme.warmGold.withValues(alpha: 0.8)
+                    : AppTheme.warmGold.withValues(alpha: 0.2),
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: isSelected ? [
+                BoxShadow(
+                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 2),
+                ),
+              ] : null,
+            ),
+            child: Row(
+              children: [
+                // Character avatar
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: character.accentColor.withValues(alpha: 0.2),
+                    border: Border.all(
+                      color: character.accentColor.withValues(alpha: 0.5),
+                      width: 2,
+                    ),
+                  ),
+                  child: ClipOval(
+                    child: character.userImagePath != null
+                        ? Image.asset(
+                            character.userImagePath!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildCharacterIcon(character, fontScale);
+                            },
+                          )
+                        : _buildCharacterIcon(character, fontScale),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Character info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        character.name,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text: character.name,
+                          fontSize: 16 * fontScale,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.silverMist,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        character.additionalInfo?.isNotEmpty == true 
+                            ? character.additionalInfo!
+                            : 'Custom Character',
+                        style: UkrainianFontUtils.latoWithUkrainianSupport(
+                          text: character.additionalInfo?.isNotEmpty == true 
+                              ? character.additionalInfo!
+                              : 'Custom Character',
+                          fontSize: 14 * fontScale,
+                          color: AppTheme.silverMist.withValues(alpha: 0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Selection indicator
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                        ? AppTheme.warmGold 
+                        : AppTheme.silverMist.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.warmGold,
+                      width: 2,
+                    ),
+                  ),
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          size: 14,
+                          color: AppTheme.deepNavy,
+                        )
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCharacterListItem(String errorMessage, double fontScale) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.errorColor.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.errorColor.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.errorColor.withValues(alpha: 0.3),
+              border: Border.all(
+                color: AppTheme.errorColor.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.error_outline,
+              color: AppTheme.errorColor,
+              size: 28 * fontScale,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              errorMessage,
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: errorMessage,
+                fontSize: 14 * fontScale,
+                color: AppTheme.errorColor,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterAvatarFallback(String name, double fontScale) {
+    final initials = name.split(' ').map((word) => word.isNotEmpty ? word[0] : '').take(2).join();
+    
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.warmGold.withValues(alpha: 0.3),
+            AppTheme.warmGold.withValues(alpha: 0.1),
+          ],
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+            text: initials,
+            fontSize: 18 * fontScale,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.warmGold,
+          ),
+        ),
+      ),
     );
   }
 
@@ -901,73 +1272,103 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
     );
   }
 
-  Widget _buildActionButtons(AppLocalizations localizations, double fontScale) {
-    return Container(
-      padding: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
+  Widget _buildFloatingActionButton(AppLocalizations localizations, double fontScale) {
+    return Positioned(
+      left: ResponsiveUtils.getScreenPadding(context).horizontal,
+      right: ResponsiveUtils.getScreenPadding(context).horizontal,
+      bottom: MediaQuery.of(context).padding.bottom + 16,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Error message
+          // Error message floating above button
           if (_errorMessage != null) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: AppTheme.errorColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: AppTheme.errorColor.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.errorColor.withValues(alpha: 0.3),
+                  color: AppTheme.errorColor,
                   width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.errorColor.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Text(
                 _errorMessage!,
                 style: UkrainianFontUtils.latoWithUkrainianSupport(
                   text: _errorMessage!,
                   fontSize: 14 * fontScale,
-                  color: AppTheme.errorColor,
+                  color: AppTheme.silverMist,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
           ],
           
-          // Create/Update button
-          SizedBox(
+          // Floating Create/Update button with completely transparent background
+          Container(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _canCreateGroup && !_isCreatingGroup ? _createOrUpdateGroup : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.warmGold,
-                foregroundColor: AppTheme.deepNavy,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.warmGold.withValues(alpha: 0.8),
+                width: 2,
               ),
-              child: _isCreatingGroup
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: AppTheme.deepNavy,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      widget.existingGroup != null 
-                          ? localizations.updateGroup
-                          : localizations.createGroup,
-                      style: UkrainianFontUtils.latoWithUkrainianSupport(
-                        text: widget.existingGroup != null 
-                            ? localizations.updateGroup
-                            : localizations.createGroup,
-                        fontSize: 16 * fontScale,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.deepNavy,
-                      ),
-                    ),
+              // Completely transparent background - characters visible behind
+              color: Colors.transparent,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.warmGold.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _canCreateGroup && !_isCreatingGroup ? _createOrUpdateGroup : null,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  child: _isCreatingGroup
+                      ? Center(
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: AppTheme.warmGold,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          widget.existingGroup != null 
+                              ? localizations.updateGroup
+                              : localizations.createGroup,
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text: widget.existingGroup != null 
+                                ? localizations.updateGroup
+                                : localizations.createGroup,
+                            fontSize: 16 * fontScale,
+                            fontWeight: FontWeight.bold,
+                            color: _canCreateGroup 
+                                ? AppTheme.warmGold 
+                                : AppTheme.warmGold.withValues(alpha: 0.5),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                ),
+              ),
             ),
           ),
         ],
