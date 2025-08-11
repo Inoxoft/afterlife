@@ -11,6 +11,10 @@ import '../chat/models/message_status.dart';
 import 'models/group_chat_model.dart';
 import 'models/group_chat_message.dart';
 import 'character_response_coordinator.dart';
+import 'enhanced_conversation_coordinator.dart';
+import 'personality_dynamics_analyzer.dart';
+import 'conversation_memory_system.dart';
+import 'dynamic_timing_controller.dart';
 
 /// Service for managing group conversations with multiple AI characters
 class GroupChatService {
@@ -107,8 +111,8 @@ class GroupChatService {
     };
   }
 
-  /// Send a user message to a group and coordinate AI responses
-  static Future<List<GroupChatMessage>> sendMessageToGroup({
+  /// Send a user message to a group and coordinate AI responses with natural flow
+  static Future<Stream<GroupChatMessage>> sendMessageToGroupStream({
     required String groupId,
     required String userMessage,
     required GroupChatModel groupChat,
@@ -117,85 +121,176 @@ class GroupChatService {
       await initialize();
     }
 
-    final responses = <GroupChatMessage>[];
+    final controller = StreamController<GroupChatMessage>();
 
     try {
-      // Add user message
+      // Add user message immediately
       final userMsg = GroupChatMessage.user(
         content: userMessage,
         timestamp: DateTime.now(),
         status: MessageStatus.sent,
       );
-      responses.add(userMsg);
+      controller.add(userMsg);
 
       // Update active group
       _activeGroups[groupId] = groupChat.addMessage(userMsg);
       _charactersInConversation[groupId] = groupChat.characterIds.toSet();
 
-      // Determine which character(s) should respond
-      final respondingCharacterIds = await _determineRespondingCharacters(
+      // Update conversation memory
+      final characterModels = <String, CharacterModel>{};
+      for (final characterId in groupChat.characterIds) {
+        final character = await _getCharacterById(characterId);
+        if (character != null) {
+          characterModels[characterId] = character;
+        }
+      }
+
+      final existingMemory = ConversationMemorySystem.getMemory(groupId);
+      final updatedMemory = ConversationMemorySystem.updateMemory(
         groupId: groupId,
+        recentMessages: _activeGroups[groupId]!.messages,
+        characterModels: characterModels,
+        existingMemory: existingMemory,
+      );
+
+      // Use enhanced conversation coordinator
+      final responseSchedule = await EnhancedConversationCoordinator.determineRespondingCharactersAdvanced(
         groupChat: _activeGroups[groupId]!,
         userMessage: userMessage,
+        characterModels: characterModels,
+        lastRespondingCharacterId: _lastRespondingCharacter[groupId],
       );
 
       if (kDebugMode) {
-        print('GroupChatService: $groupId - Characters responding: $respondingCharacterIds');
+        print('GroupChatService: $groupId - Enhanced response schedule created');
+        for (final response in responseSchedule) {
+          print('  ${characterModels[response['characterId']]?.name}: ${response['delay']}ms');
+        }
       }
 
-      // Get responses from selected characters
-      for (final characterId in respondingCharacterIds) {
+      // Execute responses with natural timing
+      _executeResponseSchedule(
+        controller,
+        groupId,
+        responseSchedule,
+        userMessage,
+        characterModels,
+        updatedMemory,
+      );
+
+    } catch (e) {
+      AppLogger.error('Failed to send message to group $groupId: $e', tag: 'GroupChatService');
+      
+      controller.addError(e);
+    }
+
+    return controller.stream;
+  }
+
+  /// Execute response schedule with natural timing and character interactions
+  static void _executeResponseSchedule(
+    StreamController<GroupChatMessage> controller,
+    String groupId,
+    List<Map<String, dynamic>> responseSchedule,
+    String userMessage,
+    Map<String, CharacterModel> characterModels,
+    ConversationMemory conversationMemory,
+  ) async {
+    try {
+      for (final responseInfo in responseSchedule) {
+        final characterId = responseInfo['characterId'] as String;
+        final delay = responseInfo['delay'] as int;
+        final showThinking = responseInfo['showThinking'] as bool? ?? false;
+        final thinkingDuration = responseInfo['thinkingDuration'] as int? ?? 0;
+        
+        // Wait for the calculated delay
+        if (delay > 0) {
+          await Future.delayed(Duration(milliseconds: delay));
+        }
+
+        // Show thinking indicator if appropriate
+        if (showThinking && thinkingDuration > 0) {
+          final character = characterModels[characterId]!;
+          final thinkingMsg = GroupChatMessage.character(
+            content: '',
+            characterId: characterId,
+            characterName: character.name,
+            characterAvatarUrl: character.imageUrl,
+            status: MessageStatus.characterTyping,
+            metadata: {'isThinking': true, 'thinkingDuration': thinkingDuration},
+          );
+          controller.add(thinkingMsg);
+
+          // Wait for thinking duration
+          await Future.delayed(Duration(milliseconds: thinkingDuration));
+        }
+
         try {
-          final characterResponse = await _getCharacterResponse(
+          // Get enhanced character response
+          final characterResponse = await _getEnhancedCharacterResponse(
             groupId: groupId,
             characterId: characterId,
             userMessage: userMessage,
             conversationContext: _activeGroups[groupId]!.messages,
+            conversationMemory: conversationMemory,
+            characterModels: characterModels,
           );
 
           if (characterResponse != null) {
-            responses.add(characterResponse);
+            controller.add(characterResponse);
             
             // Update group with character response
             _activeGroups[groupId] = _activeGroups[groupId]!.addMessage(characterResponse);
             _lastRespondingCharacter[groupId] = characterId;
 
-            // Add delay between character responses for natural flow
-            if (respondingCharacterIds.length > 1 && 
-                characterId != respondingCharacterIds.last) {
-              await Future.delayed(Duration(
-                milliseconds: 500 + Random().nextInt(1000),
-              ));
-            }
+            // Update conversation memory with new response
+            ConversationMemorySystem.updateMemory(
+              groupId: groupId,
+              recentMessages: _activeGroups[groupId]!.messages,
+              characterModels: characterModels,
+              existingMemory: conversationMemory,
+            );
           }
         } catch (e) {
           if (kDebugMode) {
-            print('Error getting response from character $characterId: $e');
+            print('Error getting enhanced response from character $characterId: $e');
           }
           
           // Add error message
           final errorMsg = await _createErrorMessage(characterId, 
               'I apologize, but I encountered an issue. Please try again.');
           if (errorMsg != null) {
-            responses.add(errorMsg);
+            controller.add(errorMsg);
           }
         }
       }
-
-      return responses;
     } catch (e) {
-      AppLogger.error('Failed to send message to group $groupId: $e', tag: 'GroupChatService');
-      
-      // Return at least the user message
-      if (responses.isEmpty) {
-        responses.add(GroupChatMessage.user(
-          content: userMessage,
-          status: MessageStatus.error,
-        ));
+      if (kDebugMode) {
+        print('Error executing response schedule: $e');
       }
-      
-      return responses;
+    } finally {
+      controller.close();
     }
+  }
+
+  /// Legacy method for backward compatibility
+  static Future<List<GroupChatMessage>> sendMessageToGroup({
+    required String groupId,
+    required String userMessage,
+    required GroupChatModel groupChat,
+  }) async {
+    final responseStream = await sendMessageToGroupStream(
+      groupId: groupId,
+      userMessage: userMessage,
+      groupChat: groupChat,
+    );
+
+    final responses = <GroupChatMessage>[];
+    await for (final message in responseStream) {
+      responses.add(message);
+    }
+
+    return responses;
   }
 
   /// Determine which characters should respond to the user message
@@ -222,12 +317,14 @@ class GroupChatService {
     );
   }
 
-  /// Get AI response from a specific character
-  static Future<GroupChatMessage?> _getCharacterResponse({
+  /// Get enhanced AI response from a specific character with personality and context awareness
+  static Future<GroupChatMessage?> _getEnhancedCharacterResponse({
     required String groupId,
     required String characterId,
     required String userMessage,
     required List<GroupChatMessage> conversationContext,
+    required ConversationMemory conversationMemory,
+    required Map<String, CharacterModel> characterModels,
   }) async {
     final character = await _getCharacterById(characterId);
     if (character == null) {
@@ -238,17 +335,26 @@ class GroupChatService {
     }
 
     try {
-      // Build conversation context for this character
-      final contextMessages = _buildConversationContext(
+      // Build enhanced conversation context
+      final contextMessages = _buildEnhancedConversationContext(
         conversationContext, 
         character,
+        conversationMemory,
+      );
+
+      // Build enhanced system prompt with personality and memory context
+      final enhancedSystemPrompt = _buildEnhancedGroupSystemPrompt(
+        character, 
+        conversationContext,
+        conversationMemory,
+        characterModels,
       );
 
       // Get AI response using HybridChatService
       final aiResponse = await HybridChatService.sendMessageToCharacter(
         characterId: characterId,
         message: userMessage,
-        systemPrompt: _buildGroupSystemPrompt(character, conversationContext),
+        systemPrompt: enhancedSystemPrompt,
         chatHistory: contextMessages,
         model: character.model,
         localPrompt: character.localPrompt,
@@ -269,7 +375,10 @@ class GroupChatService {
           model: character.model,
           metadata: {
             'groupId': groupId,
-            'responseType': 'ai_generated',
+            'responseType': 'enhanced_ai_generated',
+            'conversationMood': conversationMemory.dominantMood,
+            'tensionLevel': conversationMemory.overallTension.toStringAsFixed(2),
+            'activeTopics': conversationMemory.activeTopics.map((t) => t.topic).toList(),
           },
         );
       }
@@ -277,13 +386,118 @@ class GroupChatService {
       return null;
     } catch (e) {
       if (kDebugMode) {
-        print('Error generating response for character ${character.name}: $e');
+        print('Error generating enhanced response for character ${character.name}: $e');
       }
       return null;
     }
   }
 
-  /// Build system prompt for group context
+  /// Legacy method for backward compatibility
+  static Future<GroupChatMessage?> _getCharacterResponse({
+    required String groupId,
+    required String characterId,
+    required String userMessage,
+    required List<GroupChatMessage> conversationContext,
+  }) async {
+    // Build minimal character models map for compatibility
+    final characterModels = <String, CharacterModel>{};
+    final character = await _getCharacterById(characterId);
+    if (character != null) {
+      characterModels[characterId] = character;
+    }
+
+    // Create minimal conversation memory
+    final minimalMemory = ConversationMemory(
+      groupId: groupId,
+      activeTopics: [],
+      characterStates: {},
+      conversationFlow: [],
+      overallTension: 0.0,
+      dominantMood: 'neutral',
+      lastUpdate: DateTime.now(),
+    );
+
+    return _getEnhancedCharacterResponse(
+      groupId: groupId,
+      characterId: characterId,
+      userMessage: userMessage,
+      conversationContext: conversationContext,
+      conversationMemory: minimalMemory,
+      characterModels: characterModels,
+    );
+  }
+
+  /// Build enhanced system prompt with personality, memory, and relationship context
+  static String _buildEnhancedGroupSystemPrompt(
+    CharacterModel character, 
+    List<GroupChatMessage> conversationContext,
+    ConversationMemory conversationMemory,
+    Map<String, CharacterModel> characterModels,
+  ) {
+    final basePrompt = character.systemPrompt;
+    
+    // Get other character names and their recent interactions
+    final otherCharacters = conversationContext
+        .where((m) => !m.isUser && m.characterId != character.id)
+        .map((m) => m.characterName)
+        .toSet()
+        .toList();
+
+    if (otherCharacters.isEmpty) {
+      return basePrompt;
+    }
+
+    // Build relationship context
+    final relationshipContext = _buildRelationshipContext(character, characterModels);
+    
+    // Build topic context
+    final topicContext = _buildTopicContext(conversationMemory);
+    
+    // Build emotional context
+    final emotionalContext = _buildEmotionalContext(character.id, conversationMemory);
+    
+    // Build conversation flow context
+    final flowContext = _buildConversationFlowContext(conversationMemory);
+
+    final enhancedInstruction = '''
+
+=== ENHANCED GROUP CONVERSATION CONTEXT ===
+You are ${character.name} participating in a dynamic group conversation with: ${otherCharacters.join(', ')}.
+
+RELATIONSHIP DYNAMICS:
+$relationshipContext
+
+CURRENT CONVERSATION STATE:
+- Overall mood: ${conversationMemory.dominantMood}
+- Tension level: ${(conversationMemory.overallTension * 100).round()}%
+- Active topics: ${conversationMemory.activeTopics.map((t) => t.topic).join(', ')}
+
+TOPIC CONTEXT:
+$topicContext
+
+YOUR EMOTIONAL STATE:
+$emotionalContext
+
+CONVERSATION FLOW:
+$flowContext
+
+NATURAL RESPONSE GUIDELINES:
+- Respond as ${character.name} would, considering the relationship dynamics above
+- Be aware of the conversation's emotional undertone and respond appropriately
+- Reference or build upon previous points when relevant
+- Show your unique perspective and expertise areas
+- React naturally to agreements, disagreements, or challenges
+- Maintain conversational flow - don't be overly formal or robotic
+- Let your personality shine through in both content and tone
+- Consider the current tension level in your response style
+
+Remember: This is a natural conversation between historical figures. Be authentic to your character while engaging meaningfully with others.
+''';
+
+    return basePrompt + enhancedInstruction;
+  }
+
+  /// Build legacy system prompt for backward compatibility
   static String _buildGroupSystemPrompt(
     CharacterModel character, 
     List<GroupChatMessage> conversationContext,
@@ -318,7 +532,161 @@ Guidelines:
     return basePrompt + groupInstruction;
   }
 
-  /// Build conversation context for AI model
+  /// Build relationship context based on personality analysis
+  static String _buildRelationshipContext(
+    CharacterModel character,
+    Map<String, CharacterModel> characterModels,
+  ) {
+    final relationships = <String>[];
+    
+    for (final otherEntry in characterModels.entries) {
+      if (otherEntry.key == character.id) continue;
+      
+      final otherCharacter = otherEntry.value;
+      final analysis = PersonalityDynamicsAnalyzer.analyzePersonalityCompatibility(
+        character, 
+        otherCharacter,
+      );
+      
+      final interactionStyle = analysis['interactionStyle'] as String;
+      final conflictPotential = analysis['conflictPotential'] as double;
+      final agreementPotential = analysis['agreementPotential'] as double;
+      
+      String relationshipDesc = '';
+      if (conflictPotential > 0.6) {
+        relationshipDesc = 'likely to clash or debate with';
+      } else if (agreementPotential > 0.6) {
+        relationshipDesc = 'naturally aligned with';
+      } else if (interactionStyle == 'debative') {
+        relationshipDesc = 'enjoys intellectual discourse with';
+      } else {
+        relationshipDesc = 'has neutral dynamics with';
+      }
+      
+      relationships.add('- ${otherCharacter.name}: You are $relationshipDesc them');
+    }
+    
+    return relationships.join('\n');
+  }
+
+  /// Build topic context from conversation memory
+  static String _buildTopicContext(ConversationMemory memory) {
+    if (memory.activeTopics.isEmpty) {
+      return 'No specific topics are currently being discussed in depth.';
+    }
+    
+    final topicDescriptions = memory.activeTopics.map((topic) {
+      final intensityDesc = topic.intensity > 0.7 ? 'intensely' : 
+                           topic.intensity > 0.4 ? 'moderately' : 'lightly';
+      return '- ${topic.topic}: Being discussed $intensityDesc (${topic.sentiment} sentiment)';
+    }).toList();
+    
+    return topicDescriptions.join('\n');
+  }
+
+  /// Build emotional context for specific character
+  static String _buildEmotionalContext(String characterId, ConversationMemory memory) {
+    final characterState = memory.characterStates[characterId];
+    if (characterState == null) {
+      return 'Your emotional state is neutral - engage naturally with the conversation.';
+    }
+    
+    final moodDesc = {
+      'agitated': 'You are feeling agitated or provoked by recent comments',
+      'challenging': 'You are in a challenging mood, ready to question or debate',
+      'supportive': 'You are feeling supportive and agreeable',
+      'engaged': 'You are intellectually engaged and curious',
+      'thoughtful': 'You are in a contemplative, thoughtful state',
+    }[characterState.mood] ?? 'You are feeling neutral';
+    
+    final intensityDesc = characterState.intensity > 0.7 ? 'strongly' :
+                         characterState.intensity > 0.4 ? 'moderately' : 'mildly';
+    
+    String positionsDesc = '';
+    if (characterState.positionsOnTopics.isNotEmpty) {
+      final positions = characterState.positionsOnTopics.entries
+          .map((e) => '${e.key} (${e.value})')
+          .join(', ');
+      positionsDesc = '\nYour positions: $positions';
+    }
+    
+    return '$moodDesc ($intensityDesc).$positionsDesc';
+  }
+
+  /// Build conversation flow context
+  static String _buildConversationFlowContext(ConversationMemory memory) {
+    if (memory.conversationFlow.isEmpty) {
+      return 'The conversation is just beginning - set a natural tone.';
+    }
+    
+    final flowPatterns = memory.conversationFlow.map((pattern) {
+      switch (pattern) {
+        case 'debate_emerged':
+          return 'A debate has emerged in the conversation';
+        case 'agreement_cascade':
+          return 'There has been a series of agreements';
+        case 'topic_development':
+          return 'Topics are being developed thoughtfully';
+        default:
+          return pattern;
+      }
+    }).join(', ');
+    
+    return 'Recent conversation patterns: $flowPatterns';
+  }
+
+  /// Build enhanced conversation context with emotional and relational awareness
+  static List<Map<String, dynamic>> _buildEnhancedConversationContext(
+    List<GroupChatMessage> messages,
+    CharacterModel character,
+    ConversationMemory conversationMemory,
+  ) {
+    final contextMessages = <Map<String, dynamic>>[];
+    
+    // Take more recent messages for better context
+    final recentMessages = messages.reversed.take(20).toList().reversed.toList();
+    
+    for (final msg in recentMessages) {
+      if (msg.isUser) {
+        contextMessages.add({
+          'role': 'user',
+          'content': msg.content,
+          'timestamp': msg.timestamp.toIso8601String(),
+        });
+      } else {
+        // Enhanced context for AI messages
+        final role = msg.characterId == character.id ? 'assistant' : 'user';
+        String content;
+        
+        if (msg.characterId == character.id) {
+          // Own previous message
+          content = msg.content;
+        } else {
+          // Other character's message with enhanced context
+          final characterState = conversationMemory.characterStates[msg.characterId];
+          String emotionalContext = '';
+          
+          if (characterState != null && characterState.mood != 'neutral') {
+            emotionalContext = ' [${characterState.mood}]';
+          }
+          
+          content = '${msg.characterName}$emotionalContext: ${msg.content}';
+        }
+        
+        contextMessages.add({
+          'role': role,
+          'content': content,
+          'timestamp': msg.timestamp.toIso8601String(),
+          'characterId': msg.characterId,
+          'characterName': msg.characterName,
+        });
+      }
+    }
+    
+    return contextMessages;
+  }
+
+  /// Build legacy conversation context for backward compatibility
   static List<Map<String, dynamic>> _buildConversationContext(
     List<GroupChatMessage> messages,
     CharacterModel character,

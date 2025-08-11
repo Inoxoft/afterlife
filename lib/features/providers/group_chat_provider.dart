@@ -360,8 +360,12 @@ class GroupChatProvider extends BaseProvider {
 
   /// Send a message to a specific group
   Future<void> sendMessageToGroup(String groupId, String message) async {
-    final group = _groupCache[groupId] ?? 
-                 _groupChats.firstWhere((g) => g.id == groupId);
+    // Get the most recent group state from service first, then fall back to cache/list
+    var group = GroupChatService.getActiveGroup(groupId) ??
+                _groupCache[groupId] ?? 
+                (_groupChats.where((g) => g.id == groupId).isNotEmpty 
+                    ? _groupChats.firstWhere((g) => g.id == groupId) 
+                    : null);
 
     if (group == null) {
       setError('Group not found');
@@ -379,20 +383,16 @@ class GroupChatProvider extends BaseProvider {
         groupChat: group,
       );
 
-      // Update group with all responses
-      var updatedGroup = group;
-      for (final response in responses) {
-        updatedGroup = updatedGroup.addMessage(response);
-      }
-
-      // Update in provider
-      final index = _groupChats.indexWhere((g) => g.id == groupId);
-      if (index >= 0) {
-        _groupChats[index] = updatedGroup;
-        _groupCache[groupId] = updatedGroup;
-        
-        // Update service state
-        GroupChatService.updateActiveGroup(groupId, updatedGroup);
+      // Get the updated group from service (it has the latest state)
+      final updatedGroup = GroupChatService.getActiveGroup(groupId);
+      
+      if (updatedGroup != null) {
+        // Update in provider
+        final index = _groupChats.indexWhere((g) => g.id == groupId);
+        if (index >= 0) {
+          _groupChats[index] = updatedGroup;
+          _groupCache[groupId] = updatedGroup;
+        }
         
         // Save to storage
         await _saveGroupChats();
