@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/responsive_utils.dart';
@@ -95,9 +97,13 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
     try {
       // Load famous characters
       _famousCharacters = FamousCharacterPrompts.getAllCharacters();
-      print('🔧 [CharacterSelection] Loaded ${_famousCharacters.length} famous characters');
+      if (kDebugMode) {
+        print('🔧 [CharacterSelection] Loaded ${_famousCharacters.length} famous characters');
+      }
     } catch (e) {
-      print('❌ [CharacterSelection] Error loading famous characters: $e');
+      if (kDebugMode) {
+        print('❌ [CharacterSelection] Error loading famous characters: $e');
+      }
       _famousCharacters = [];
     }
     
@@ -105,9 +111,13 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
       // Load user characters
       final charactersProvider = Provider.of<CharactersProvider>(context, listen: false);
       _userCharacters = charactersProvider.characters;
-      print('🔧 [CharacterSelection] Loaded ${_userCharacters.length} user characters');
+      if (kDebugMode) {
+        print('🔧 [CharacterSelection] Loaded ${_userCharacters.length} user characters');
+      }
     } catch (e) {
-      print('❌ [CharacterSelection] Error loading user characters: $e');
+      if (kDebugMode) {
+        print('❌ [CharacterSelection] Error loading user characters: $e');
+      }
       _userCharacters = [];
     }
   }
@@ -181,7 +191,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
 
   Widget _buildAppBar(AppLocalizations localizations, double fontScale) {
     return Container(
-      padding: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
+      padding: ResponsiveUtils.getScreenPadding(context),
       child: Row(
         children: [
           // Back button
@@ -256,9 +266,11 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
       children: [
         // Group details section
         _buildGroupDetailsSection(localizations, fontScale),
+        SizedBox(height: 12 * fontScale),
         
         // Character selection tabs
         _buildCharacterTabs(localizations, fontScale),
+        SizedBox(height: 8 * fontScale),
         
         // Character list (takes full available space)
         Expanded(child: _buildCharacterList(localizations, fontScale)),
@@ -267,9 +279,10 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
   }
 
   Widget _buildGroupDetailsSection(AppLocalizations localizations, double fontScale) {
+    final padding = ResponsiveUtils.getScreenPadding(context);
     return Container(
-      margin: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0),
+      padding: EdgeInsets.all(16 * fontScale),
       decoration: AppTheme.containerDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,6 +302,8 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
           TextField(
             controller: _groupNameController,
             onChanged: (_) => setState(() {}),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => FocusScope.of(context).unfocus(),
             decoration: InputDecoration(
               hintText: localizations.enterGroupName,
               hintStyle: UkrainianFontUtils.latoWithUkrainianSupport(
@@ -322,7 +337,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
             ),
             style: UkrainianFontUtils.latoWithUkrainianSupport(
               text: _groupNameController.text,
-              fontSize: 16 * fontScale,
+              fontSize: 15 * fontScale,
               color: AppTheme.silverMist,
             ),
           ),
@@ -369,13 +384,19 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
                         ),
                       ),
                       const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () => _toggleCharacterSelection(characterId),
-                        child: Icon(
+                      IconButton(
+                        onPressed: () => _toggleCharacterSelection(characterId),
+                        icon: Icon(
                           Icons.close,
                           size: 16 * fontScale,
                           color: AppTheme.warmGold,
                         ),
+                        tooltip: localizations.delete,
+                        constraints: BoxConstraints(
+                          minWidth: math.max(44.0, 32 * fontScale),
+                          minHeight: math.max(44.0, 32 * fontScale),
+                        ),
+                        padding: const EdgeInsets.all(4),
                       ),
                     ],
                   ),
@@ -389,12 +410,11 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
   }
 
   Widget _buildCharacterTabs(AppLocalizations localizations, double fontScale) {
+    final padding = ResponsiveUtils.getScreenPadding(context);
     return Consumer<CharactersProvider>(
       builder: (context, charactersProvider, child) {
         return Container(
-          margin: EdgeInsets.symmetric(
-            horizontal: ResponsiveUtils.getScreenPadding(context).horizontal,
-          ),
+          margin: EdgeInsets.fromLTRB(padding.left, 0, padding.right, 0),
           child: Row(
             children: [
               _buildTab(
@@ -421,43 +441,49 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
     final isSelected = _selectedTabIndex == index;
     
     return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedTabIndex = index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: isSelected 
-                ? AppTheme.warmGold.withValues(alpha: 0.2)
-                : AppTheme.midnightPurple.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: title,
+        child: GestureDetector(
+          onTap: () => setState(() => _selectedTabIndex = index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: EdgeInsets.symmetric(vertical: 12 * fontScale, horizontal: 12),
+            decoration: BoxDecoration(
               color: isSelected 
-                  ? AppTheme.warmGold.withValues(alpha: 0.7)
-                  : AppTheme.warmGold.withValues(alpha: 0.3),
-              width: isSelected ? 2 : 1,
+                  ? AppTheme.warmGold.withValues(alpha: 0.2)
+                  : AppTheme.midnightPurple.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected 
+                    ? AppTheme.warmGold.withValues(alpha: 0.7)
+                    : AppTheme.warmGold.withValues(alpha: 0.3),
+                width: isSelected ? 2 : 1,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              Text(
-                title,
-                style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: title,
-                  fontSize: 14 * fontScale,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? AppTheme.warmGold : AppTheme.silverMist,
+            child: Column(
+              children: [
+                Text(
+                  title,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: title,
+                    fontSize: 14 * fontScale,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? AppTheme.warmGold : AppTheme.silverMist,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$count ${count == 1 ? 'character' : 'characters'}',
-                style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: '$count ${count == 1 ? 'character' : 'characters'}',
-                  fontSize: 12 * fontScale,
-                  color: AppTheme.silverMist.withValues(alpha: 0.7),
+                SizedBox(height: 2 * fontScale),
+                Text(
+                  '($count)',
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: '($count)',
+                    fontSize: 11 * fontScale,
+                    color: AppTheme.silverMist.withValues(alpha: 0.7),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -470,8 +496,9 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
         // Get current characters without triggering state changes
         final userCharacters = charactersProvider.characters;
         final characters = _selectedTabIndex == 0 ? _famousCharacters : userCharacters;
-        
-        print('🔧 [CharacterSelection] Building list - Tab: $_selectedTabIndex, Count: ${characters.length}');
+        if (kDebugMode) {
+          print('🔧 [CharacterSelection] Building list - Tab: $_selectedTabIndex, Count: ${characters.length}');
+        }
         
         if (characters.isEmpty) {
           return _buildEmptyState(localizations, fontScale);
@@ -482,11 +509,15 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
             // Character list with smooth scrolling
             ListView.builder(
               physics: const BouncingScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsets.only(
-                left: ResponsiveUtils.getScreenPadding(context).horizontal,
-                right: ResponsiveUtils.getScreenPadding(context).horizontal,
+                left: ResponsiveUtils.getScreenPadding(context).left,
+                right: ResponsiveUtils.getScreenPadding(context).right,
                 top: 0,
-                bottom: 100, // Space for floating button
+                bottom:  
+                    100 +
+                    (_errorMessage != null ? 80 : 0) +
+                    ResponsiveUtils.getScreenPadding(context).bottom,
               ),
               itemCount: characters.length,
               itemBuilder: (context, index) {
@@ -521,7 +552,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
               top: 0,
               left: 0,
               right: 0,
-              height: 20,
+              height: math.max(16.0, math.min(32.0, 24 * fontScale)),
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -1273,11 +1304,19 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
   }
 
   Widget _buildFloatingActionButton(AppLocalizations localizations, double fontScale) {
-    return Positioned(
-      left: ResponsiveUtils.getScreenPadding(context).horizontal,
-      right: ResponsiveUtils.getScreenPadding(context).horizontal,
-      bottom: MediaQuery.of(context).padding.bottom + 16,
-      child: Column(
+    final padding = ResponsiveUtils.getScreenPadding(context);
+    final bool isEnabled = _canCreateGroup && !_isCreatingGroup;
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: padding.left,
+            right: padding.right,
+            bottom: 16,
+          ),
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Error message floating above button
@@ -1314,7 +1353,13 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
           ],
           
           // Floating Create/Update button with completely transparent background
-          Container(
+          Semantics(
+            button: true,
+            enabled: isEnabled,
+            label: widget.existingGroup != null 
+                ? localizations.updateGroup
+                : localizations.createGroup,
+            child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
@@ -1336,42 +1381,47 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: _canCreateGroup && !_isCreatingGroup ? _createOrUpdateGroup : null,
+                onTap: isEnabled ? _createOrUpdateGroup : null,
                 borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: _isCreatingGroup
-                      ? Center(
-                          child: SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: AppTheme.warmGold,
-                              strokeWidth: 2,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: isEnabled ? 1.0 : 0.6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    child: _isCreatingGroup
+                        ? Center(
+                            child: SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: AppTheme.warmGold,
+                                strokeWidth: 2,
+                              ),
                             ),
-                          ),
-                        )
-                      : Text(
-                          widget.existingGroup != null 
-                              ? localizations.updateGroup
-                              : localizations.createGroup,
-                          style: UkrainianFontUtils.latoWithUkrainianSupport(
-                            text: widget.existingGroup != null 
+                          )
+                        : Text(
+                            widget.existingGroup != null 
                                 ? localizations.updateGroup
                                 : localizations.createGroup,
-                            fontSize: 16 * fontScale,
-                            fontWeight: FontWeight.bold,
-                            color: _canCreateGroup 
-                                ? AppTheme.warmGold 
-                                : AppTheme.warmGold.withValues(alpha: 0.5),
+                            style: UkrainianFontUtils.latoWithUkrainianSupport(
+                              text: widget.existingGroup != null 
+                                  ? localizations.updateGroup
+                                  : localizations.createGroup,
+                              fontSize: 16 * fontScale,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.warmGold,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                  ),
                 ),
               ),
             ),
           ),
+          ),
         ],
+          ),
+        ),
       ),
     );
   }

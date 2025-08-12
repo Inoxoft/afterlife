@@ -543,6 +543,9 @@ class _GroupChatTypingIndicatorState extends State<GroupChatTypingIndicator>
         ),
         child: Row(
           children: [
+            // Soft avatars row for typing characters
+            _buildTypingAvatars(widget.fontScale),
+            SizedBox(width: 8.0 * widget.fontScale),
             // Typing indicator dots
             Container(
               width: 40 * widget.fontScale,
@@ -574,6 +577,54 @@ class _GroupChatTypingIndicatorState extends State<GroupChatTypingIndicator>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTypingAvatars(double fontScale) {
+    final names = widget.typingCharacterNames.toList();
+    final maxToShow = names.length > 4 ? 4 : names.length;
+
+    return SizedBox(
+      height: 28 * fontScale,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(maxToShow, (index) {
+          final name = names[index];
+          final initial = name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
+
+          return Container(
+            width: 28 * fontScale,
+            height: 28 * fontScale,
+            margin: EdgeInsets.only(right: index == maxToShow - 1 ? 0 : 4 * fontScale),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.midnightPurple.withValues(alpha: 0.35),
+              border: Border.all(
+                color: AppTheme.warmGold.withValues(alpha: 0.25),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.deepNavy.withValues(alpha: 0.25),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                initial,
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: initial,
+                  fontSize: 12 * fontScale,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.silverMist,
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

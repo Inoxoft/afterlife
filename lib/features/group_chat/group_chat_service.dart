@@ -274,6 +274,7 @@ class GroupChatService {
   }
 
   /// Legacy method for backward compatibility
+  @Deprecated('Use sendMessageToGroupStream for incremental responses and natural UI updates')
   static Future<List<GroupChatMessage>> sendMessageToGroup({
     required String groupId,
     required String userMessage,

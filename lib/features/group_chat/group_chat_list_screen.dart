@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/responsive_utils.dart';
@@ -29,6 +30,7 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
   
   // State
   bool _isFirstLoad = true;
+  GroupChatModel? _previewSelectedGroup;
 
   // Cached widgets for performance
   late final Widget _particleBackground = const Opacity(
@@ -106,6 +108,10 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
       if (mounted) {
         setState(() {
           _isFirstLoad = false;
+          // Initialize preview selection for wide layout
+          if (_previewSelectedGroup == null && provider.groupChats.isNotEmpty) {
+            _previewSelectedGroup = provider.groupChats.first;
+          }
         });
       }
     }
@@ -144,7 +150,7 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
     
     return Container(
-      padding: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
+      padding: ResponsiveUtils.getScreenPadding(context),
       child: Row(
         children: [
           // Back button
@@ -214,65 +220,387 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
           return _buildEmptyState(localizations);
         }
 
+        final size = MediaQuery.of(context).size;
+        final isLandscape = size.width > size.height;
+        final isTabletOrDesktop = ResponsiveUtils.isTabletOrDesktop(context);
+        final useWide = _shouldUseWideLayout(context);
+
         return FadeTransition(
           opacity: _fadeAnimation,
           child: SlideTransition(
             position: _slideAnimation,
-            child: _buildGroupList(provider, localizations),
+            child: (isTabletOrDesktop && isLandscape)
+                ? _buildHorizontalRow(provider, localizations)  // Force horizontal scroll in landscape
+                : (useWide 
+                    ? _buildWideLayout(provider, localizations)  // Side-by-side only in portrait wide screens
+                    : _buildGroupList(provider, localizations)), // Regular list/grid
           ),
         );
       },
     );
   }
 
-  Widget _buildGroupList(GroupChatProvider provider, AppLocalizations localizations) {
+  bool _shouldUseWideLayout(BuildContext context) {
+    // Only use wide layout for portrait orientation on wide screens
+    // Landscape should always use horizontal scroll instead
+    final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
+    
+    // Don't use wide layout in landscape - that's for horizontal scroll
+    if (isLandscape) return false;
+    
+    // Use wide layout for portrait on really wide screens
+    final isReallyWide = size.width >= 1000;
+    return isReallyWide || (ResponsiveUtils.shouldUseWideLayout(context) && !isLandscape);
+  }
+
+  Widget _buildGroupList(
+    GroupChatProvider provider,
+    AppLocalizations localizations, {
+    bool selectForPreview = false,
+  }) {
     final gridAxisCount = ResponsiveUtils.getGridAxisCount(context);
     final isTabletOrDesktop = ResponsiveUtils.isTabletOrDesktop(context);
     
+    // Note: Landscape is now handled in _buildContent, so this is only for portrait/narrow screens
     if (isTabletOrDesktop) {
-      return _buildGridView(provider, localizations, gridAxisCount);
+      return _buildGridView(provider, localizations, gridAxisCount, selectForPreview: selectForPreview);
     } else {
-      return _buildListView(provider, localizations);
+      return _buildListView(provider, localizations, selectForPreview: selectForPreview);
     }
   }
 
-  Widget _buildListView(GroupChatProvider provider, AppLocalizations localizations) {
-    return ListView.builder(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
-      itemCount: provider.groupChats.length,
-      itemBuilder: (context, index) {
-        final group = provider.groupChats[index];
-        return _GroupChatListCard(
-          group: group,
-          onTap: () => _openGroupChat(group),
-          onEdit: () => _editGroup(group),
-          onDelete: () => _deleteGroup(group),
-        );
-      },
+  Widget _buildListView(
+    GroupChatProvider provider,
+    AppLocalizations localizations, {
+    bool selectForPreview = false,
+  }) {
+    return RefreshIndicator(
+      onRefresh: _loadGroupChats,
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        padding: ResponsiveUtils
+            .getScreenPadding(context)
+            .add(const EdgeInsets.only(bottom: 88)),
+        itemCount: provider.groupChats.length,
+        itemBuilder: (context, index) {
+          final group = provider.groupChats[index];
+          final isSelected = selectForPreview && _previewSelectedGroup?.id == group.id;
+          return _GroupChatListCard(
+            group: group,
+            onTap: () => selectForPreview ? _selectPreviewGroup(group) : _openGroupChat(group),
+            onEdit: () => _editGroup(group),
+            onDelete: () => _deleteGroup(group),
+            isSelected: isSelected,
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildGridView(GroupChatProvider provider, AppLocalizations localizations, int gridAxisCount) {
-    return GridView.builder(
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: gridAxisCount,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.2,
+  Widget _buildGridView(
+    GroupChatProvider provider,
+    AppLocalizations localizations,
+    int gridAxisCount, {
+    bool selectForPreview = false,
+  }) {
+    return RefreshIndicator(
+      onRefresh: _loadGroupChats,
+      child: GridView.builder(
+        physics: const BouncingScrollPhysics(),
+        padding: ResponsiveUtils
+            .getScreenPadding(context)
+            .add(const EdgeInsets.only(bottom: 88)),
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: _getTileMaxWidth(context),
+          crossAxisSpacing: ResponsiveUtils.getGridSpacing(context),
+          mainAxisSpacing: ResponsiveUtils.getGridSpacing(context),
+          childAspectRatio: _getAdjustedAspectRatio(context),
+        ),
+        itemCount: provider.groupChats.length,
+        itemBuilder: (context, index) {
+          final group = provider.groupChats[index];
+          final isSelected = selectForPreview && _previewSelectedGroup?.id == group.id;
+          return _GroupChatGridCard(
+            group: group,
+            onTap: () => selectForPreview ? _selectPreviewGroup(group) : _openGroupChat(group),
+            onEdit: () => _editGroup(group),
+            onDelete: () => _deleteGroup(group),
+            isSelected: isSelected,
+          );
+        },
       ),
-      itemCount: provider.groupChats.length,
-      itemBuilder: (context, index) {
-        final group = provider.groupChats[index];
-        return _GroupChatGridCard(
-          group: group,
-          onTap: () => _openGroupChat(group),
-          onEdit: () => _editGroup(group),
-          onDelete: () => _deleteGroup(group),
-        );
-      },
+    );
+  }
+
+  double _getAdjustedAspectRatio(BuildContext context) {
+    final base = ResponsiveUtils.getGridChildAspectRatio(context);
+    final deviceType = ResponsiveUtils.getDeviceType(context);
+    final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
+
+    double ratio = base;
+    // Make cards taller in tablet/desktop, especially in landscape to show more text
+    if (deviceType == DeviceType.tablet) {
+      ratio = base - (isLandscape ? 0.25 : 0.15);
+    } else if (deviceType == DeviceType.desktop || deviceType == DeviceType.tv) {
+      ratio = base - (isLandscape ? 0.2 : 0.1);
+    }
+
+    return ratio.clamp(0.5, 2.0);
+  }
+
+  double _getTileMaxWidth(BuildContext context) {
+    final deviceType = ResponsiveUtils.getDeviceType(context);
+    final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
+
+    // Use dynamic tile width to keep 2 columns in wide landscape for readability
+    final horizontalPadding = ResponsiveUtils.getScreenPadding(context).horizontal;
+    final availableWidth = (size.width - horizontalPadding).clamp(300.0, size.width);
+
+    switch (deviceType) {
+      case DeviceType.mobile:
+        // 1–2 columns
+        return isLandscape ? availableWidth / 2 : 380;
+      case DeviceType.tablet:
+        // Prefer 2 columns in landscape, 2–3 in portrait
+        return isLandscape ? (availableWidth / 2) : 460;
+      case DeviceType.desktop:
+        // Force 2 columns in landscape so cards are big and text readable
+        return isLandscape ? (availableWidth / 2) : 520;
+      case DeviceType.tv:
+        return isLandscape ? (availableWidth / 2) : 640;
+    }
+  }
+
+  Widget _buildHorizontalRow(
+    GroupChatProvider provider,
+    AppLocalizations localizations, {
+    bool selectForPreview = false,
+  }) {
+    final padding = ResponsiveUtils.getScreenPadding(context);
+    final size = MediaQuery.of(context).size;
+
+    // Large square-ish cards; adapt by device width
+    double cardSide = (size.width * 0.32).clamp(260.0, 520.0);
+
+    return SizedBox(
+      height: cardSide + padding.vertical, // ensure single row height
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: padding.left, vertical: padding.top),
+        itemBuilder: (context, index) {
+          final group = provider.groupChats[index];
+          return SizedBox(
+            width: cardSide,
+            child: _GroupChatGridCard(
+              group: group,
+              onTap: () => selectForPreview ? _selectPreviewGroup(group) : _openGroupChat(group),
+              onEdit: () => _editGroup(group),
+              onDelete: () => _deleteGroup(group),
+              isSelected: selectForPreview && _previewSelectedGroup?.id == group.id,
+            ),
+          );
+        },
+        separatorBuilder: (context, index) => SizedBox(width: ResponsiveUtils.getGridSpacing(context)),
+        itemCount: provider.groupChats.length,
+      ),
+    );
+  }
+
+  Widget _buildWideLayout(GroupChatProvider provider, AppLocalizations localizations) {
+    final padding = ResponsiveUtils.getScreenPadding(context);
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+
+    // Ensure preview selection is valid
+    _previewSelectedGroup ??= provider.groupChats.isNotEmpty ? provider.groupChats.first : null;
+
+    return Row(
+      children: [
+        // Left pane: list/grid
+        Expanded(
+          flex: 5,
+          child: Container(
+            padding: EdgeInsets.only(left: padding.left, right: padding.left / 2),
+            child: _buildGroupList(provider, localizations, selectForPreview: true),
+          ),
+        ),
+        // Right pane: preview
+        Expanded(
+          flex: 7,
+          child: Container(
+            padding: EdgeInsets.only(right: padding.right, left: padding.right / 2),
+            child: _previewSelectedGroup == null
+                ? _buildEmptyPreview(localizations)
+                : _buildGroupPreview(_previewSelectedGroup!, fontScale, localizations),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _selectPreviewGroup(GroupChatModel group) {
+    setState(() {
+      _previewSelectedGroup = group;
+    });
+  }
+
+  Widget _buildEmptyPreview(AppLocalizations localizations) {
+    return Center(
+      child: Text(
+        'Select a group to preview',
+        style: UkrainianFontUtils.latoWithUkrainianSupport(
+          text: 'Select a group to preview',
+          fontSize: 16,
+          color: AppTheme.silverMist.withValues(alpha: 0.7),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupPreview(
+    GroupChatModel group,
+    double fontScale,
+    AppLocalizations localizations,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16 * fontScale),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                Icon(Icons.groups, color: AppTheme.warmGold, size: 20 * fontScale),
+                SizedBox(width: 8 * fontScale),
+                Expanded(
+                  child: Text(
+                    group.name,
+                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                      text: group.name,
+                      fontSize: 20 * fontScale,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.warmGold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () => _openGroupChat(group),
+                  icon: const Icon(Icons.chat),
+                  label: Text(
+                    localizations.openChat,
+                    style: UkrainianFontUtils.latoWithUkrainianSupport(
+                      text: localizations.openChat,
+                      fontSize: 12 * fontScale,
+                      color: AppTheme.deepNavy,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.warmGold,
+                    foregroundColor: AppTheme.deepNavy,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12 * fontScale),
+            // Stats
+            Text(
+              '${group.characterCount} ${localizations.members} • ${group.messageCount} ${localizations.messages}',
+              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                text: '${group.characterCount} ${localizations.members} • ${group.messageCount} ${localizations.messages}',
+                fontSize: 12 * fontScale,
+                color: AppTheme.silverMist.withValues(alpha: 0.7),
+              ),
+            ),
+            SizedBox(height: 12 * fontScale),
+            // Last message
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppTheme.deepNavy.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.warmGold.withValues(alpha: 0.2),
+                  ),
+                ),
+                padding: EdgeInsets.all(12 * fontScale),
+                child: SingleChildScrollView(
+                  child: Text(
+                    group.lastMessage?.content ?? 'No messages yet',
+                    style: UkrainianFontUtils.latoWithUkrainianSupport(
+                      text: group.lastMessage?.content ?? 'No messages yet',
+                      fontSize: 14 * fontScale,
+                      color: AppTheme.silverMist,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 12 * fontScale),
+            // Actions
+            Row(
+              children: [
+                _buildActionButton(Icons.edit, localizations.editGroup, () => _editGroup(group), fontScale),
+                SizedBox(width: 8 * fontScale),
+                _buildActionButton(Icons.delete_outline, localizations.delete, () => _deleteGroup(group), fontScale, isDestructive: true),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+    IconData icon,
+    String tooltip,
+    VoidCallback onPressed,
+    double fontScale, {
+    bool isDestructive = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDestructive 
+            ? AppTheme.errorColor.withValues(alpha: 0.1)
+            : AppTheme.warmGold.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDestructive 
+              ? AppTheme.errorColor.withValues(alpha: 0.3)
+              : AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(
+          icon,
+          size: 18 * fontScale,
+          color: isDestructive ? AppTheme.errorColor : AppTheme.warmGold,
+        ),
+        tooltip: tooltip,
+        constraints: BoxConstraints(
+          minWidth: math.max(44.0, 36 * fontScale),
+          minHeight: math.max(44.0, 36 * fontScale),
+        ),
+      ),
     );
   }
 
@@ -502,12 +830,14 @@ class _GroupChatListCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final bool isSelected;
 
   const _GroupChatListCard({
     required this.group,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
+    this.isSelected = false,
   });
 
   @override
@@ -518,11 +848,15 @@ class _GroupChatListCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 16 * fontScale),
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withValues(alpha: 0.4),
+        color: isSelected
+            ? AppTheme.midnightPurple.withValues(alpha: 0.5)
+            : AppTheme.midnightPurple.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.warmGold.withValues(alpha: 0.3),
-          width: 1,
+          color: isSelected
+              ? AppTheme.warmGold.withValues(alpha: 0.6)
+              : AppTheme.warmGold.withValues(alpha: 0.3),
+          width: isSelected ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
@@ -582,9 +916,7 @@ class _GroupChatListCard extends StatelessWidget {
                       // Last message preview
                       if (group.lastMessage != null)
                         Text(
-                          group.lastMessage!.content.length > 60 
-                              ? '${group.lastMessage!.content.substring(0, 60)}...'
-                              : group.lastMessage!.content,
+                          group.lastMessage!.content,
                           style: UkrainianFontUtils.latoWithUkrainianSupport(
                             text: group.lastMessage!.content,
                             fontSize: 14 * fontScale,
@@ -629,7 +961,7 @@ class _GroupChatListCard extends StatelessWidget {
                     SizedBox(height: 8 * fontScale),
                     _buildActionButton(
                       Icons.delete_outline,
-                      'Delete',
+                      localizations.delete,
                       onDelete,
                       fontScale,
                       isDestructive: true,
@@ -702,8 +1034,8 @@ class _GroupChatListCard extends StatelessWidget {
         ),
         tooltip: tooltip,
         constraints: BoxConstraints(
-          minWidth: 36 * fontScale,
-          minHeight: 36 * fontScale,
+          minWidth: math.max(44.0, 36 * fontScale),
+          minHeight: math.max(44.0, 36 * fontScale),
         ),
       ),
     );
@@ -731,12 +1063,14 @@ class _GroupChatGridCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final bool isSelected;
 
   const _GroupChatGridCard({
     required this.group,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
+    this.isSelected = false,
   });
 
   @override
@@ -746,11 +1080,15 @@ class _GroupChatGridCard extends StatelessWidget {
     
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.midnightPurple.withValues(alpha: 0.4),
+        color: isSelected
+            ? AppTheme.midnightPurple.withValues(alpha: 0.5)
+            : AppTheme.midnightPurple.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.warmGold.withValues(alpha: 0.3),
-          width: 1,
+          color: isSelected
+              ? AppTheme.warmGold.withValues(alpha: 0.6)
+              : AppTheme.warmGold.withValues(alpha: 0.3),
+          width: isSelected ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
@@ -806,7 +1144,7 @@ class _GroupChatGridCard extends StatelessWidget {
                                    size: 16 * fontScale, 
                                    color: AppTheme.errorColor),
                               SizedBox(width: 8 * fontScale),
-                              Text('Delete', 
+                              Text(localizations.delete, 
                                    style: TextStyle(color: AppTheme.errorColor)),
                             ],
                           ),
@@ -853,9 +1191,7 @@ class _GroupChatGridCard extends StatelessWidget {
                 // Last message preview
                 if (group.lastMessage != null) ...[
                   Text(
-                    group.lastMessage!.content.length > 40 
-                        ? '${group.lastMessage!.content.substring(0, 40)}...'
-                        : group.lastMessage!.content,
+                    group.lastMessage!.content,
                     style: UkrainianFontUtils.latoWithUkrainianSupport(
                       text: group.lastMessage!.content,
                       fontSize: 12 * fontScale,

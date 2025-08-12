@@ -362,9 +362,9 @@ class GroupChatProvider extends BaseProvider {
   Future<void> sendMessageToGroup(String groupId, String message) async {
     // Get the most recent group state from service first, then fall back to cache/list
     var group = GroupChatService.getActiveGroup(groupId) ??
-                _groupCache[groupId] ?? 
-                (_groupChats.where((g) => g.id == groupId).isNotEmpty 
-                    ? _groupChats.firstWhere((g) => g.id == groupId) 
+                _groupCache[groupId] ??
+                (_groupChats.where((g) => g.id == groupId).isNotEmpty
+                    ? _groupChats.firstWhere((g) => g.id == groupId)
                     : null);
 
     if (group == null) {
@@ -373,48 +373,86 @@ class GroupChatProvider extends BaseProvider {
     }
 
     try {
-      // Set typing state
+      // 1) Optimistic UI: show user message instantly
+      final userMsg = GroupChatMessage.user(
+        content: message,
+        timestamp: DateTime.now(),
+        status: MessageStatus.sent,
+      );
+
+      var localUpdatedGroup = group.addMessage(userMsg);
+
+      // Update local collections and stream immediately
+      final existingIndex = _groupChats.indexWhere((g) => g.id == groupId);
+      if (existingIndex >= 0) {
+        _groupChats[existingIndex] = localUpdatedGroup;
+      }
+      _groupCache[groupId] = localUpdatedGroup;
+      _messageStreamController?.add(localUpdatedGroup.messages);
+      notifyListeners();
+
+      // Set typing state for characters
       _setTypingState(true);
-      
-      // Send message via service
-      final responses = await GroupChatService.sendMessageToGroup(
+
+      // 2) Use streaming API so responses arrive one-by-one
+      final responseStream = await GroupChatService.sendMessageToGroupStream(
         groupId: groupId,
         userMessage: message,
         groupChat: group,
       );
 
-      // Get the updated group from service (it has the latest state)
-      final updatedGroup = GroupChatService.getActiveGroup(groupId);
-      
-      if (updatedGroup != null) {
-        // Update in provider
-        final index = _groupChats.indexWhere((g) => g.id == groupId);
-        if (index >= 0) {
-          _groupChats[index] = updatedGroup;
-          _groupCache[groupId] = updatedGroup;
+      await for (final streamedMessage in responseStream) {
+        // Skip duplicate user message from service stream (we already added it)
+        if (streamedMessage.isUser) {
+          continue;
         }
-        
-        // Save to storage
-        await _saveGroupChats();
-        
-        // Update message stream
-        _messageStreamController?.add(updatedGroup.messages);
-        
-        // Re-sort groups by last message time
-        _sortGroupChats();
-        
-        notifyListeners();
+
+        // Update typing indicators based on thinking messages
+        if (streamedMessage.status == MessageStatus.characterTyping &&
+            streamedMessage.characterId != null) {
+          _typingCharacterIds = {
+            ..._typingCharacterIds,
+            streamedMessage.characterId!,
+          };
+          notifyListeners();
+        }
+
+        // Pull the latest group from service which is the source of truth
+        final latest = GroupChatService.getActiveGroup(groupId);
+        if (latest != null) {
+          if (existingIndex >= 0) {
+            _groupChats[existingIndex] = latest;
+          }
+          _groupCache[groupId] = latest;
+          _messageStreamController?.add(latest.messages);
+          _sortGroupChats();
+          notifyListeners();
+        }
+
+        // Clear typing flag for this character when a real message arrives
+        if (streamedMessage.status != MessageStatus.characterTyping &&
+            streamedMessage.characterId != null &&
+            _typingCharacterIds.contains(streamedMessage.characterId)) {
+          _typingCharacterIds.remove(streamedMessage.characterId);
+          notifyListeners();
+        }
       }
 
-      logUserAction('sent message to group', context: {
+      // Persist groups after streaming completes
+      await _saveGroupChats();
+
+      logUserAction('sent message to group (streamed)', context: {
         'groupId': groupId,
         'messageLength': message.length,
-        'responseCount': responses.length,
       });
     } catch (e) {
       setError('Error sending message: $e', error: e);
     } finally {
       _setTypingState(false);
+      if (_typingCharacterIds.isNotEmpty) {
+        _typingCharacterIds.clear();
+        notifyListeners();
+      }
     }
   }
 

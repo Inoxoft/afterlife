@@ -212,12 +212,16 @@ class _GroupChatScreenState extends State<GroupChatScreen>
             
             // Main content
             SafeArea(
-              child: Column(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: Column(
                 children: [
                   _buildAppBar(),
                   Expanded(child: _buildChatContent()),
                   _buildInputArea(),
                 ],
+                ),
               ),
             ),
           ],
@@ -230,7 +234,12 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
     
     return Container(
-      padding: EdgeInsets.all(ResponsiveUtils.getScreenPadding(context).horizontal),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.getScreenPadding(context).left,
+        vertical: 10 * fontScale,
+      ).copyWith(
+        right: ResponsiveUtils.getScreenPadding(context).right,
+      ),
       child: Row(
         children: [
           // Back button
@@ -350,6 +359,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           child: ListView.builder(
             controller: _scrollController,
             physics: const BouncingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: EdgeInsets.only(
               top: 16,
               bottom: 16,
@@ -378,6 +388,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         ),
         
         // Typing indicator
+        SizedBox(height: 4 * ResponsiveUtils.getFontSizeScale(context)),
         Consumer<GroupChatProvider>(
           builder: (context, provider, child) {
             if (provider.isTyping) {
@@ -429,6 +440,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                 maxLines: null,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(),
+                onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   hintText: localizations.sendMessage,
                   hintStyle: UkrainianFontUtils.latoWithUkrainianSupport(
@@ -658,7 +670,8 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           child: ElevatedButton(
             onPressed: () {
               _messageController.text = starter;
-              _sendMessage();
+              _inputFocusNode.requestFocus();
+              setState(() {});
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.midnightPurple.withValues(alpha: 0.5),
@@ -738,7 +751,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _buildGroupMenuSheet(),
+      builder: (context) => SafeArea(child: _buildGroupMenuSheet()),
     );
   }
 
@@ -854,9 +867,90 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   }
 
   void _deleteGroup() {
-    // TODO: Implement delete group with confirmation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Delete group functionality coming soon')),
-    );
+    final localizations = AppLocalizations.of(context);
+    final group = _groupChat;
+    if (group == null) return;
+
+    FocusScope.of(context).unfocus();
+
+    showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final fontScale = ResponsiveUtils.getFontSizeScale(context);
+        return AlertDialog(
+          backgroundColor: AppTheme.deepNavy,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: AppTheme.warmGold.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          title: Text(
+            localizations.deleteGroup,
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: localizations.deleteGroup,
+              fontSize: 20 * fontScale,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.warmGold,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete "${group.name}"? This action cannot be undone.',
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: 'Are you sure you want to delete "${group.name}"? This action cannot be undone.',
+              fontSize: 14 * fontScale,
+              color: AppTheme.silverMist,
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                localizations.cancel,
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.cancel,
+                  fontSize: 14 * fontScale,
+                  color: AppTheme.silverMist,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.errorColor,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                localizations.delete,
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: localizations.delete,
+                  fontSize: 14 * fontScale,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ).then((confirmed) async {
+      if (confirmed != true) return;
+      final provider = Provider.of<GroupChatProvider>(context, listen: false);
+      try {
+        await provider.deleteGroupChat(group.id);
+        if (!mounted) return;
+        Navigator.of(context).pop(); // Leave chat screen back to list
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting group: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    });
   }
 }

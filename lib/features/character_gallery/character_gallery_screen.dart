@@ -673,22 +673,43 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           return _buildGroupChatsEmptyState(localizations);
         }
 
+        final size = MediaQuery.of(context).size;
+        final isLandscape = size.width > size.height;
         final deviceType = ResponsiveUtils.getDeviceType(context);
-        final shouldUseGrid = deviceType == DeviceType.tablet || 
-                             deviceType == DeviceType.desktop || 
-                             deviceType == DeviceType.tv;
+        // Only use grid in portrait. In landscape we want a horizontal scroller with big cards.
+        final shouldUseGrid = !isLandscape && (
+          deviceType == DeviceType.tablet ||
+          deviceType == DeviceType.desktop ||
+          deviceType == DeviceType.tv
+        );
                              
+        if (isLandscape) {
+          // Landscape: horizontal row of large cards you can swipe through
+          return Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _buildHorizontalGroupChats(provider, localizations),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Center(child: _buildCreateGroupChatButton(localizations)),
+              ),
+            ],
+          );
+        }
+
+        // Portrait: keep previous behavior (grid on tablets/desktop, list on mobile)
         return Column(
           children: [
-            // Group chats list
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: _buildGroupChatsList(provider, localizations),
               ),
             ),
-            
-            // Create group chat button
             Padding(
               padding: EdgeInsets.all(shouldUseGrid ? 24 : 20),
               child: shouldUseGrid
@@ -742,9 +763,13 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   Widget _buildGroupChatsList(GroupChatProvider provider, AppLocalizations localizations) {
     // For Group Chats, use grid layout for tablets and above, even in portrait
     final deviceType = ResponsiveUtils.getDeviceType(context);
-    final shouldUseGrid = deviceType == DeviceType.tablet || 
-                         deviceType == DeviceType.desktop || 
-                         deviceType == DeviceType.tv;
+    final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
+    final shouldUseGrid = !isLandscape && (
+      deviceType == DeviceType.tablet ||
+      deviceType == DeviceType.desktop ||
+      deviceType == DeviceType.tv
+    );
     
     if (shouldUseGrid) {
       return GridView.builder(
@@ -771,6 +796,43 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         },
       );
     }
+  }
+
+  // Horizontal scroller with large square-ish group cards for landscape mode
+  Widget _buildHorizontalGroupChats(
+    GroupChatProvider provider,
+    AppLocalizations localizations,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    double cardWidth;
+    if (screenWidth > 1400) {
+      cardWidth = 380;
+    } else if (screenWidth > 1200) {
+      cardWidth = 340;
+    } else if (screenWidth > 900) {
+      cardWidth = 320;
+    } else {
+      cardWidth = 280;
+    }
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      itemCount: provider.groupChats.length,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      itemBuilder: (context, index) {
+        final group = provider.groupChats[index];
+        return Container(
+          width: cardWidth,
+          margin: const EdgeInsets.only(right: 24),
+          child: _GroupChatSquareCard(
+            group: group,
+            localizations: localizations,
+            onTap: () => _openGroupChat(group),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildGroupChatCard(GroupChatModel group, AppLocalizations localizations) {
