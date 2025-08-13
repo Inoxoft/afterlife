@@ -84,10 +84,19 @@ class LocalLLMService {
     return _modelStatusController!.stream;
   }
 
+  // Initialization guard
+  static bool _initializing = false;
+
   // Initialize the service
   static Future<void> initialize() async {
+    if (_isInitialized) return;
+    if (_initializing) return;
+    
+    _initializing = true;
     try {
-      AppLogger.debug('Initializing LocalLLMService', tag: 'LocalLLMService');
+      if (kDebugMode) {
+        AppLogger.debug('Initializing LocalLLMService', tag: 'LocalLLMService');
+      }
 
       // Initialize flutter_gemma plugin
       _gemmaPlugin = FlutterGemmaPlugin.instance;
@@ -108,15 +117,22 @@ class LocalLLMService {
         await _initializeModel();
       }
 
-      AppLogger.serviceInitialized('LocalLLMService');
-      AppLogger.debug(
-        'Enabled: $_isEnabled, Status: $_modelStatus',
-        tag: 'LocalLLMService'
-      );
+      _isInitialized = true;
+      
+      if (kDebugMode) {
+        AppLogger.serviceInitialized('LocalLLMService');
+        AppLogger.debug(
+          'Enabled: $_isEnabled, Status: $_modelStatus',
+          tag: 'LocalLLMService'
+        );
+      }
     } catch (e) {
       AppLogger.serviceError('LocalLLMService', 'initialization error', e);
       _modelStatus = ModelDownloadStatus.error;
       _downloadError = e.toString();
+      _isInitialized = true; // Mark as initialized even on error to prevent retries
+    } finally {
+      _initializing = false;
     }
   }
 
@@ -146,20 +162,34 @@ class LocalLLMService {
 
   // Verify download file size
   static bool _verifyDownload(int actualSize, int expectedSize) {
-    // Allow 10% tolerance for file size
-    final tolerance = expectedSize * 0.10;
+    // Allow 1% tolerance for file size (stricter verification)
+    final tolerance = expectedSize * 0.01;
     return (actualSize - expectedSize).abs() <= tolerance;
   }
 
   // Initialize the model
   static Future<void> _initializeModel() async {
     if (_modelPath == null || !await File(_modelPath!).exists()) {
-      print('Cannot initialize model: file not found at $_modelPath');
+      if (kDebugMode) {
+        AppLogger.warning('Cannot initialize model: file not found at $_modelPath', tag: 'LocalLLMService');
+      }
       return;
     }
 
     try {
-      print('Initializing Hammer2.1 model at: $_modelPath');
+      if (kDebugMode) {
+        AppLogger.debug('Initializing Hammer2.1 model at: $_modelPath', tag: 'LocalLLMService');
+      }
+
+      // Close existing instances to prevent memory leaks
+      if (_chat?.session != null) {
+        await _chat!.session!.close();
+      }
+      if (_model != null) {
+        await _model!.close();
+      }
+      _chat = null;
+      _model = null;
 
       // Set model path in the model manager
       await _gemmaPlugin.modelManager.setModelPath(_modelPath!);
@@ -182,11 +212,11 @@ class LocalLLMService {
         supportImage: false,
       );
 
-      _isInitialized = true;
-      print('Hammer2.1 model initialized successfully');
+      if (kDebugMode) {
+        AppLogger.debug('Hammer2.1 model initialized successfully', tag: 'LocalLLMService');
+      }
     } catch (e) {
-      print('Model initialization error: $e');
-      _isInitialized = false;
+      AppLogger.serviceError('LocalLLMService', 'model initialization error', e);
       _model = null;
       _chat = null;
       throw Exception('Failed to initialize model: $e');
@@ -223,7 +253,7 @@ class LocalLLMService {
         }
       }
     } catch (e) {
-      print('Error updating settings: $e');
+      AppLogger.serviceError('LocalLLMService', 'settings update error', e);
       throw Exception('Failed to update settings: $e');
     }
   }
@@ -234,7 +264,9 @@ class LocalLLMService {
     String? huggingFaceToken,
   }) async {
     if (_modelStatus == ModelDownloadStatus.downloading) {
-      print('Model download already in progress');
+      if (kDebugMode) {
+        AppLogger.debug('Model download already in progress', tag: 'LocalLLMService');
+      }
       return false;
     }
 
@@ -245,11 +277,14 @@ class LocalLLMService {
       _downloadError = null;
       _modelStatusController?.add(_modelStatus);
 
-      // Get download directory
-      final directory = await getApplicationDocumentsDirectory();
-      final modelPath = '${directory.path}/${ModelConfig.filename}';
+              // Get download directory
+        final directory = await getApplicationDocumentsDirectory();
+        final modelPath = '${directory.path}/${ModelConfig.filename}';
+        final tempPath = '${modelPath}.part';
 
-      print('Downloading ${ModelConfig.displayName} to: $modelPath');
+        if (kDebugMode) {
+          AppLogger.debug('Downloading ${ModelConfig.displayName} to: $modelPath', tag: 'LocalLLMService');
+        }
 
       // Enable wakelock
       await WakelockPlus.enable();
@@ -258,8 +293,16 @@ class LocalLLMService {
       final client = http.Client();
 
       try {
-        // Make request
+        // Make request with token if available
         final request = http.Request('GET', Uri.parse(ModelConfig.url));
+        
+        // Add Hugging Face token if provided or stored
+        final token = huggingFaceToken ?? _huggingFaceToken;
+        if (token?.isNotEmpty == true) {
+          request.headers['Authorization'] = 'Bearer $token';
+        }
+        request.headers['User-Agent'] = 'afterlife-app/1.0';
+        
         final response = await client.send(request);
 
         if (response.statusCode != 200) {
@@ -272,44 +315,66 @@ class LocalLLMService {
         final contentLength =
             response.contentLength ?? ModelConfig.fileSizeBytes;
 
-        // Create file
-        final file = File(modelPath);
-        final sink = file.openWrite();
+        // Create temporary file for atomic write
+        final tempFile = File(tempPath);
+        final sink = tempFile.openWrite();
 
         int downloadedBytes = 0;
 
-        // Download with progress tracking
-        await for (final chunk in response.stream) {
-          if (_shouldCancelDownload) {
-            await sink.close();
-            if (await file.exists()) {
-              await file.delete();
+        try {
+          // Download with progress tracking
+          await for (final chunk in response.stream) {
+            if (_shouldCancelDownload) {
+              await sink.close();
+              if (await tempFile.exists()) {
+                await tempFile.delete();
+              }
+              // Set proper state instead of error
+              _modelStatus = ModelDownloadStatus.notDownloaded;
+              _downloadProgress = 0.0;
+              _downloadError = null;
+              _modelStatusController?.add(_modelStatus);
+              _downloadProgressController?.add(_downloadProgress);
+              if (kDebugMode) {
+                AppLogger.debug('Download cancelled by user', tag: 'LocalLLMService');
+              }
+              return false;
             }
-            throw Exception('Download cancelled by user');
+
+            sink.add(chunk);
+            downloadedBytes += chunk.length;
+
+            // Update progress
+            _downloadProgress = downloadedBytes / contentLength;
+            _downloadProgressController?.add(_downloadProgress);
+
+            // Optional: Add small delay to prevent UI blocking
+            if (downloadedBytes % (1024 * 1024) == 0) {
+              await Future.delayed(Duration(milliseconds: 1));
+            }
           }
 
-          sink.add(chunk);
-          downloadedBytes += chunk.length;
+          await sink.close();
 
-          // Update progress
-          _downloadProgress = downloadedBytes / contentLength;
-          _downloadProgressController?.add(_downloadProgress);
-
-          // Optional: Add small delay to prevent UI blocking
-          if (downloadedBytes % (1024 * 1024) == 0) {
-            await Future.delayed(Duration(milliseconds: 1));
+          // Verify file size
+          final actualSize = await tempFile.length();
+          if (kDebugMode) {
+            AppLogger.debug('Downloaded file size: $actualSize bytes', tag: 'LocalLLMService');
           }
-        }
 
-        await sink.close();
+          if (!_verifyDownload(actualSize, ModelConfig.fileSizeBytes)) {
+            await tempFile.delete();
+            throw Exception('Downloaded file size verification failed');
+          }
 
-        // Verify file size
-        final actualSize = await file.length();
-        print('Downloaded file size: $actualSize bytes');
-
-        if (!_verifyDownload(actualSize, ModelConfig.fileSizeBytes)) {
-          await file.delete();
-          throw Exception('Downloaded file size verification failed');
+          // Atomic move: rename temp file to final name
+          await tempFile.rename(modelPath);
+        } catch (e) {
+          await sink.close();
+          if (await tempFile.exists()) {
+            await tempFile.delete();
+          }
+          rethrow;
         }
 
         // Save model path
@@ -322,14 +387,16 @@ class LocalLLMService {
         _modelStatusController?.add(_modelStatus);
         _downloadProgressController?.add(1.0);
 
-        print('Model download completed successfully');
+        if (kDebugMode) {
+          AppLogger.debug('Model download completed successfully', tag: 'LocalLLMService');
+        }
         return true;
       } finally {
         client.close();
         await WakelockPlus.disable();
       }
     } catch (e) {
-      print('Model download error: $e');
+      AppLogger.serviceError('LocalLLMService', 'model download error', e);
       _modelStatus = ModelDownloadStatus.error;
       _downloadError = e.toString();
       _modelStatusController?.add(_modelStatus);
@@ -340,17 +407,23 @@ class LocalLLMService {
   // Stop download
   static void stopDownload() {
     _shouldCancelDownload = true;
-    print('Download cancellation requested');
+    if (kDebugMode) {
+      AppLogger.debug('Download cancellation requested', tag: 'LocalLLMService');
+    }
   }
 
   // Enable local LLM
   static Future<bool> enableLocalLLM() async {
     try {
-      print('Enabling local LLM...');
+      if (kDebugMode) {
+        AppLogger.debug('Enabling local LLM...', tag: 'LocalLLMService');
+      }
 
       if (_modelStatus != ModelDownloadStatus.downloaded ||
           _modelPath == null) {
-        print('Cannot enable local LLM: model not downloaded');
+        if (kDebugMode) {
+          AppLogger.warning('Cannot enable local LLM: model not downloaded', tag: 'LocalLLMService');
+        }
         return false;
       }
 
@@ -360,10 +433,12 @@ class LocalLLMService {
 
       await _initializeModel();
 
-      print('Local LLM enabled: $_isInitialized');
+      if (kDebugMode) {
+        AppLogger.debug('Local LLM enabled: $_isInitialized', tag: 'LocalLLMService');
+      }
       return _isInitialized;
     } catch (e) {
-      print('Enable local LLM error: $e');
+      AppLogger.serviceError('LocalLLMService', 'enable local LLM error', e);
       return false;
     }
   }
@@ -371,7 +446,9 @@ class LocalLLMService {
   // Disable local LLM
   static Future<void> disableLocalLLM() async {
     try {
-      print('Disabling local LLM...');
+      if (kDebugMode) {
+        AppLogger.debug('Disabling local LLM...', tag: 'LocalLLMService');
+      }
 
       _isEnabled = false;
       _isInitialized = false;
@@ -389,9 +466,11 @@ class LocalLLMService {
       final prefs = await PreferencesService.getPrefs();
       await prefs.setBool('local_llm_enabled', false);
 
-      print('Local LLM disabled');
+      if (kDebugMode) {
+        AppLogger.debug('Local LLM disabled', tag: 'LocalLLMService');
+      }
     } catch (e) {
-      print('Disable local LLM error: $e');
+      AppLogger.serviceError('LocalLLMService', 'disable local LLM error', e);
     }
   }
 
@@ -405,7 +484,9 @@ class LocalLLMService {
     }
 
     try {
-      print('Sending message to local LLM: $message');
+      if (kDebugMode) {
+        AppLogger.debug('Sending message to local LLM: $message', tag: 'LocalLLMService');
+      }
 
       // Create message with system prompt if provided
       final prompt =
@@ -415,10 +496,12 @@ class LocalLLMService {
       await _chat!.addQueryChunk(Message.text(text: prompt, isUser: true));
       final response = await _chat!.generateChatResponse();
 
-      print('Local LLM response received');
+      if (kDebugMode) {
+        AppLogger.debug('Local LLM response received', tag: 'LocalLLMService');
+      }
       return response;
     } catch (e) {
-      print('Local LLM error: $e');
+      AppLogger.serviceError('LocalLLMService', 'local LLM error', e);
       throw Exception('Failed to get response from local LLM: $e');
     }
   }
@@ -433,7 +516,9 @@ class LocalLLMService {
     }
 
     try {
-      print('Sending streaming message to local LLM: $message');
+      if (kDebugMode) {
+        AppLogger.debug('Sending streaming message to local LLM: $message', tag: 'LocalLLMService');
+      }
 
       // Create message with system prompt if provided
       final prompt =
@@ -445,7 +530,7 @@ class LocalLLMService {
         yield chunk;
       }
     } catch (e) {
-      print('Local LLM streaming error: $e');
+      AppLogger.serviceError('LocalLLMService', 'local LLM streaming error', e);
       throw Exception('Failed to get streaming response from local LLM: $e');
     }
   }
@@ -494,9 +579,11 @@ class LocalLLMService {
       await prefs.remove('local_llm_model_path');
 
       _modelStatusController?.add(_modelStatus);
-      print('Model deleted successfully');
+      if (kDebugMode) {
+        AppLogger.debug('Model deleted successfully', tag: 'LocalLLMService');
+      }
     } catch (e) {
-      print('Error deleting model: $e');
+      AppLogger.serviceError('LocalLLMService', 'delete model error', e);
     }
   }
 
@@ -540,7 +627,9 @@ class LocalLLMService {
   // Public method to manually initialize the model
   static Future<bool> initializeModel() async {
     if (_modelStatus != ModelDownloadStatus.downloaded || _modelPath == null) {
-      print('Cannot initialize model: not downloaded or path is null');
+      if (kDebugMode) {
+        AppLogger.warning('Cannot initialize model: not downloaded or path is null', tag: 'LocalLLMService');
+      }
       return false;
     }
 
@@ -561,7 +650,7 @@ class LocalLLMService {
       _downloadProgressController = null;
       _modelStatusController = null;
     } catch (e) {
-      print('Dispose error: $e');
+      AppLogger.serviceError('LocalLLMService', 'dispose error', e);
     }
   }
 }
