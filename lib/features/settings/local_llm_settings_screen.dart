@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/services/preferences_service.dart';
 import '../../core/services/local_llm_service.dart';
-import '../../core/services/hybrid_chat_service.dart';
 import 'dart:async';
 
 class LocalLLMSettingsScreen extends StatefulWidget {
@@ -15,8 +13,6 @@ class LocalLLMSettingsScreen extends StatefulWidget {
 class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   bool _isLoading = false;
   String? _errorMessage;
-  bool _isEnabled = false;
-  LLMProvider _preferredProvider = LLMProvider.auto;
 
   // Model download state
   ModelDownloadStatus _modelStatus = ModelDownloadStatus.notDownloaded;
@@ -73,20 +69,15 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
     try {
       final settings = LocalLLMService.getSettings();
-      final prefs = await PreferencesService.getPrefs();
 
       if (mounted) {
         setState(() {
-          _isEnabled = settings['enabled'] ?? false;
           _modelStatus = ModelDownloadStatus.values.firstWhere(
             (e) => e.name == settings['modelStatus'],
             orElse: () => ModelDownloadStatus.notDownloaded,
           );
           _downloadProgress = settings['downloadProgress'] ?? 0.0;
           _downloadError = settings['downloadError'];
-          _preferredProvider =
-              LLMProvider.values[prefs.getInt('preferred_llm_provider') ??
-                  LLMProvider.auto.index];
 
           _isLoading = false;
         });
@@ -103,9 +94,6 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
   Future<void> _saveSettings() async {
     try {
-      await LocalLLMService.updateSettings({'enabled': _isEnabled});
-
-      await _savePreferredProvider();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -121,12 +109,6 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
         });
       }
     }
-  }
-
-  Future<void> _savePreferredProvider() async {
-    final prefs = await PreferencesService.getPrefs();
-    await prefs.setInt('preferred_llm_provider', _preferredProvider.index);
-    HybridChatService.setPreferredProvider(_preferredProvider);
   }
 
   Future<void> _downloadModel() async {
@@ -249,8 +231,6 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                     const SizedBox(height: 16),
                     _buildModelCard(),
                     const SizedBox(height: 16),
-                    _buildProviderSettings(),
-                    const SizedBox(height: 16),
                     _buildDownloadSection(),
                   ],
                 ),
@@ -350,7 +330,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       case ModelDownloadStatus.downloading:
         return 'Downloading...';
       case ModelDownloadStatus.downloaded:
-        return _isEnabled ? 'Ready' : 'Downloaded (Disabled)';
+        return 'Ready';
       case ModelDownloadStatus.error:
         return 'Error';
     }
@@ -363,70 +343,13 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       case ModelDownloadStatus.downloading:
         return Colors.blue;
       case ModelDownloadStatus.downloaded:
-        return _isEnabled ? Colors.green : Colors.grey;
+        return Colors.green;
       case ModelDownloadStatus.error:
         return Colors.red;
     }
   }
 
-  Widget _buildProviderSettings() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'AI Provider Settings',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: const Text('Enable Local AI'),
-              subtitle: const Text('Use local AI when available'),
-              value: _isEnabled,
-              onChanged:
-                  _modelStatus == ModelDownloadStatus.downloaded
-                      ? (value) {
-                        if (mounted) {
-                          setState(() {
-                            _isEnabled = value;
-                          });
-                        }
-                      }
-                      : null,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Preferred Provider',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            DropdownButton<LLMProvider>(
-              value: _preferredProvider,
-              isExpanded: true,
-              items:
-                  LLMProvider.values.map((provider) {
-                    return DropdownMenuItem(
-                      value: provider,
-                      child: Text(
-                        HybridChatService.getProviderDisplayName(provider),
-                      ),
-                    );
-                  }).toList(),
-              onChanged: (value) {
-                if (value != null && mounted) {
-                  setState(() {
-                    _preferredProvider = value;
-                  });
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Removed AI Provider Settings: provider always Auto (smart selection)
 
   Widget _buildDownloadSection() {
     if (_modelStatus == ModelDownloadStatus.downloaded) {

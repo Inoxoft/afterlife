@@ -417,9 +417,10 @@ class HybridChatService {
 
   /// Set preferred provider
   static void setPreferredProvider(LLMProvider provider) {
-    _preferredProvider = provider;
+    // Provider selection is fixed to Auto (smart selection)
+    _preferredProvider = LLMProvider.auto;
     if (kDebugMode) {
-      print('Preferred provider set to: $provider');
+      print('Preferred provider set to: LLMProvider.auto');
     }
   }
 

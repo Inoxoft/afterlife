@@ -113,7 +113,11 @@ class LocalLLMService {
       await _checkModelStatus();
 
       // If model is downloaded and enabled, initialize it
-      if (_modelStatus == ModelDownloadStatus.downloaded && _isEnabled) {
+      if (_modelStatus == ModelDownloadStatus.downloaded) {
+        // Auto-enable when a valid model file is present
+        _isEnabled = true;
+        final prefs = await PreferencesService.getPrefs();
+        await prefs.setBool('local_llm_enabled', true);
         await _initializeModel();
       }
 
@@ -130,7 +134,7 @@ class LocalLLMService {
       AppLogger.serviceError('LocalLLMService', 'initialization error', e);
       _modelStatus = ModelDownloadStatus.error;
       _downloadError = e.toString();
-      _isInitialized = true; // Mark as initialized even on error to prevent retries
+      _isInitialized = false;
     } finally {
       _initializing = false;
     }
@@ -215,10 +219,12 @@ class LocalLLMService {
       if (kDebugMode) {
         AppLogger.debug('Hammer2.1 model initialized successfully', tag: 'LocalLLMService');
       }
+      _isInitialized = true;
     } catch (e) {
       AppLogger.serviceError('LocalLLMService', 'model initialization error', e);
       _model = null;
       _chat = null;
+      _isInitialized = false;
       throw Exception('Failed to initialize model: $e');
     }
   }
@@ -390,6 +396,9 @@ class LocalLLMService {
         if (kDebugMode) {
           AppLogger.debug('Model download completed successfully', tag: 'LocalLLMService');
         }
+
+        // Auto-enable and initialize immediately after successful download
+        await enableLocalLLM();
         return true;
       } finally {
         client.close();
@@ -434,9 +443,9 @@ class LocalLLMService {
       await _initializeModel();
 
       if (kDebugMode) {
-        AppLogger.debug('Local LLM enabled: $_isInitialized', tag: 'LocalLLMService');
+        AppLogger.debug('Local LLM enabled. Available: $isAvailable', tag: 'LocalLLMService');
       }
-      return _isInitialized;
+      return isAvailable;
     } catch (e) {
       AppLogger.serviceError('LocalLLMService', 'enable local LLM error', e);
       return false;
@@ -571,12 +580,14 @@ class LocalLLMService {
 
       _modelStatus = ModelDownloadStatus.notDownloaded;
       _modelPath = null;
+      _isEnabled = false;
       _isInitialized = false;
       _downloadProgress = 0.0;
       _downloadError = null;
 
       final prefs = await PreferencesService.getPrefs();
       await prefs.remove('local_llm_model_path');
+      await prefs.setBool('local_llm_enabled', false);
 
       _modelStatusController?.add(_modelStatus);
       if (kDebugMode) {
