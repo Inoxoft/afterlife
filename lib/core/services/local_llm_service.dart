@@ -18,18 +18,20 @@ enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
 // Model configuration for Hammer2.1
 class ModelConfig {
+  // Gemma 3n E2B AI Edge preview (.task)
   static const String url =
-      'https://huggingface.co/litert-community/Hammer2.1-1.5b/resolve/main/Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
+      'https://huggingface.co/google/gemma-3n-E2B-it-litert-preview/resolve/main/gemma-3n-e2b-it_dynamic_int4.task';
   static const String filename =
-      'Hammer2.1-1.5b_multi-prefill-seq_q8_ekv1280.task';
-  static const String displayName = 'Hammer2.1-1.5b (CPU) 1.6Gb';
-  static const int fileSizeBytes = 1597556473;
-  static const int maxTokens = 4096;
+      'gemma-3n-e2b-it_dynamic_int4.task';
+  static const String displayName = 'Gemma 3n E2B (AI Edge) ~2.9GB';
+  // Approximate size for verification and UI; HF may report exact Content-Length
+  static const int fileSizeBytes = 2991 * 1024 * 1024; // ~2.9 GB
+  static const int maxTokens = 32768; // Gemma 3n preview context per model card
   static const double temperature = 0.7;
   static const int topK = 40;
   static const double topP = 0.95;
   static const PreferredBackend preferredBackend = PreferredBackend.cpu;
-  static const ModelType modelType = ModelType.deepSeek;
+  static const ModelType modelType = ModelType.deepSeek; // Use supported enum; Gemma 3n .task
 }
 
 class LocalLLMService {
@@ -182,7 +184,7 @@ class LocalLLMService {
 
     try {
       if (kDebugMode) {
-        AppLogger.debug('Initializing Hammer2.1 model at: $_modelPath', tag: 'LocalLLMService');
+        AppLogger.debug('Initializing Gemma 3n model at: $_modelPath', tag: 'LocalLLMService');
       }
 
       // Close existing instances to prevent memory leaks
@@ -203,7 +205,7 @@ class LocalLLMService {
         modelType: ModelConfig.modelType,
         maxTokens: ModelConfig.maxTokens,
         preferredBackend: ModelConfig.preferredBackend,
-        supportImage: false, // Hammer2.1 doesn't support images
+        supportImage: true, // Gemma 3n supports vision tokens
       );
 
       // Create chat session
@@ -213,11 +215,11 @@ class LocalLLMService {
         topK: ModelConfig.topK,
         topP: ModelConfig.topP,
         tokenBuffer: 256,
-        supportImage: false,
+        supportImage: true,
       );
 
       if (kDebugMode) {
-        AppLogger.debug('Hammer2.1 model initialized successfully', tag: 'LocalLLMService');
+        AppLogger.debug('Gemma 3n model initialized successfully', tag: 'LocalLLMService');
       }
       _isInitialized = true;
     } catch (e) {
@@ -242,7 +244,7 @@ class LocalLLMService {
         'maxTokens': ModelConfig.maxTokens,
         'fileSizeGB': (ModelConfig.fileSizeBytes / (1024 * 1024 * 1024))
             .toStringAsFixed(1),
-        'supportImage': false,
+        'supportImage': true,
       },
     };
   }
@@ -285,8 +287,9 @@ class LocalLLMService {
 
               // Get download directory
         final directory = await getApplicationDocumentsDirectory();
-        final modelPath = '${directory.path}/${ModelConfig.filename}';
-        final tempPath = '${modelPath}.part';
+        String dynamicFilename = ModelConfig.filename;
+        String modelPath = '${directory.path}/' + dynamicFilename;
+        String tempPath = '${modelPath}.part';
 
         if (kDebugMode) {
           AppLogger.debug('Downloading ${ModelConfig.displayName} to: $modelPath', tag: 'LocalLLMService');
@@ -300,7 +303,8 @@ class LocalLLMService {
 
       try {
         // Make request with token if available
-        final request = http.Request('GET', Uri.parse(ModelConfig.url));
+        Uri targetUri = Uri.parse(ModelConfig.url);
+        final request = http.Request('GET', targetUri);
         
         // Add Hugging Face token if provided or stored
         final token = huggingFaceToken ?? _huggingFaceToken;
@@ -308,13 +312,45 @@ class LocalLLMService {
           request.headers['Authorization'] = 'Bearer $token';
         }
         request.headers['User-Agent'] = 'afterlife-app/1.0';
+        request.headers['Accept'] = 'application/octet-stream';
         
-        final response = await client.send(request);
+        http.StreamedResponse response = await client.send(request);
 
         if (response.statusCode != 200) {
+          if (response.statusCode == 401 || response.statusCode == 403) {
+            throw Exception(
+              'Access denied (HTTP ${response.statusCode}). This model requires accepting the license and an access token. Visit https://huggingface.co/google/gemma-3n-E2B-it-litert-preview to accept, then add your token in Settings.',
+            );
+          }
+          // If 404, try to resolve the actual .task filename via the Hugging Face API
+          if (response.statusCode == 404) {
+            final alt = await _resolveHuggingFaceTaskFile(ModelConfig.url, token);
+            if (alt != null) {
+              // Update paths with the discovered filename
+              dynamicFilename = alt.$2;
+              modelPath = '${directory.path}/' + dynamicFilename;
+              tempPath = '${modelPath}.part';
+              if (kDebugMode) {
+                AppLogger.debug('Resolved .task filename via HF API: $dynamicFilename', tag: 'LocalLLMService');
+              }
+              final retryReq = http.Request('GET', Uri.parse(alt.$1));
+              if (token?.isNotEmpty == true) {
+                retryReq.headers['Authorization'] = 'Bearer $token';
+              }
+              retryReq.headers['User-Agent'] = 'afterlife-app/1.0';
+              retryReq.headers['Accept'] = 'application/octet-stream';
+              response = await client.send(retryReq);
+              if (response.statusCode != 200) {
+                throw Exception('Failed to download model after resolving filename: HTTP ${response.statusCode}');
+              }
+            } else {
+              throw Exception('Failed to download model: HTTP 404 (no .task file found in repo)');
+            }
+          } else {
           throw Exception(
             'Failed to download model: HTTP ${response.statusCode}',
           );
+          }
         }
 
         // Get content length
@@ -368,7 +404,8 @@ class LocalLLMService {
             AppLogger.debug('Downloaded file size: $actualSize bytes', tag: 'LocalLLMService');
           }
 
-          if (!_verifyDownload(actualSize, ModelConfig.fileSizeBytes)) {
+          final expected = response.contentLength ?? ModelConfig.fileSizeBytes;
+          if (!_verifyDownload(actualSize, expected)) {
             await tempFile.delete();
             throw Exception('Downloaded file size verification failed');
           }
@@ -410,6 +447,44 @@ class LocalLLMService {
       _downloadError = e.toString();
       _modelStatusController?.add(_modelStatus);
       return false;
+    }
+  }
+
+  // Attempt to resolve the actual .task filename via Hugging Face API
+  // Returns (downloadUrl, filename) or null if not found
+  static Future<(String, String)?> _resolveHuggingFaceTaskFile(
+    String configuredUrl,
+    String? token,
+  ) async {
+    try {
+      final uri = Uri.parse(configuredUrl);
+      if (uri.host != 'huggingface.co' || uri.pathSegments.length < 2) {
+        return null;
+      }
+      final org = uri.pathSegments[0];
+      final repo = uri.pathSegments[1];
+      final apiUrl = Uri.parse('https://huggingface.co/api/models/$org/$repo?full=1');
+      final resp = await http.get(
+        apiUrl,
+        headers: {
+          if (token?.isNotEmpty == true) 'Authorization': 'Bearer $token',
+          'User-Agent': 'afterlife-app/1.0',
+          'Accept': 'application/json',
+        },
+      );
+      if (resp.statusCode != 200) return null;
+      final json = resp.body;
+      // Very lightweight parsing to find a .task filename (avoid full JSON decode dependency)
+      final regex = RegExp(r'"rfilename"\s*:\s*"([^"]+\.task)"');
+      final match = regex.firstMatch(json);
+      if (match != null) {
+        final fname = match.group(1)!;
+        final dl = 'https://huggingface.co/$org/$repo/resolve/main/$fname';
+        return (dl, fname);
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 

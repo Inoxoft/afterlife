@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/local_llm_service.dart';
 import 'dart:async';
@@ -19,6 +20,11 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   double _downloadProgress = 0.0;
   String? _downloadError;
 
+  // Hugging Face token state
+  final TextEditingController _hfTokenController = TextEditingController();
+  bool _hasHfToken = false;
+  bool _isSavingToken = false;
+
   // Stream subscriptions
   StreamSubscription<double>? _progressSubscription;
   StreamSubscription<ModelDownloadStatus>? _statusSubscription;
@@ -34,6 +40,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   void dispose() {
     _progressSubscription?.cancel();
     _statusSubscription?.cancel();
+    _hfTokenController.dispose();
     super.dispose();
   }
 
@@ -69,6 +76,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
     try {
       final settings = LocalLLMService.getSettings();
+      final status = LocalLLMService.getStatus();
 
       if (mounted) {
         setState(() {
@@ -78,6 +86,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           );
           _downloadProgress = settings['downloadProgress'] ?? 0.0;
           _downloadError = settings['downloadError'];
+          _hasHfToken = (status['hasHuggingFaceToken'] == true);
 
           _isLoading = false;
         });
@@ -87,6 +96,42 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
         setState(() {
           _errorMessage = 'Failed to load settings: $e';
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveHuggingFaceToken() async {
+    if (_isSavingToken) return;
+    setState(() {
+      _isSavingToken = true;
+    });
+    try {
+      final token = _hfTokenController.text.trim();
+      await LocalLLMService.setHuggingFaceToken(token.isEmpty ? null : token);
+      if (mounted) {
+        setState(() {
+          _hasHfToken = token.isNotEmpty;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              token.isNotEmpty ? 'Hugging Face token saved' : 'Token cleared',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save token: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingToken = false;
         });
       }
     }
@@ -152,7 +197,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           (context) => AlertDialog(
             title: const Text('Delete Model'),
             content: const Text(
-              'Are you sure you want to delete the downloaded Hammer2.1 model? This will free up 1.6GB of storage.',
+              'Are you sure you want to delete the downloaded Gemma 3n model? This will free up ~2.9GB of storage.',
             ),
             actions: [
               TextButton(
@@ -231,10 +276,99 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                     const SizedBox(height: 16),
                     _buildModelCard(),
                     const SizedBox(height: 16),
+                    _buildHfTokenSection(),
+                    const SizedBox(height: 16),
                     _buildDownloadSection(),
                   ],
                 ),
               ),
+    );
+  }
+
+  Widget _buildHfTokenSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Hugging Face Access Token',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(_hasHfToken ? Icons.verified : Icons.info_outline,
+                    color: _hasHfToken ? Colors.green : Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _hasHfToken
+                        ? 'Token is set. You can replace or clear it below.'
+                        : 'Paste your Hugging Face token. Required to download protected models.',
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _hfTokenController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'hf_xxx token',
+                hintText: 'Paste token from huggingface.co/settings/tokens',
+                border: const OutlineInputBorder(),
+                suffixIcon: _isSavingToken
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _isSavingToken ? null : _saveHuggingFaceToken,
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save Token'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.midnightPurple,
+                    foregroundColor: AppTheme.silverMist,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: _isSavingToken
+                      ? null
+                      : () {
+                          _hfTokenController.clear();
+                          _saveHuggingFaceToken();
+                        },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Clear'),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => launchUrlString(
+                    'https://huggingface.co/settings/tokens',
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  icon: const Icon(Icons.vpn_key),
+                  label: const Text('Get Token'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -364,7 +498,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              const Text('The Hammer2.1 model is ready to use!'),
+              const Text('The Gemma 3n model is ready to use!'),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _deleteModel,
@@ -392,15 +526,29 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'To use local AI, you need to download the Hammer2.1 model:',
-              style: TextStyle(fontSize: 14),
+            const Text('To use local AI, download the Gemma 3n (AI Edge) model:', style: TextStyle(fontSize: 14)),
+            const SizedBox(height: 8),
+            const Text('This model requires accepting Google’s license and using a Hugging Face access token.', style: TextStyle(fontSize: 12)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                TextButton.icon(
+                  onPressed: () => launchUrlString('https://huggingface.co/google/gemma-3n-E2B-it-litert-preview', mode: LaunchMode.externalApplication),
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Open License Page'),
+                ),
+                TextButton.icon(
+                  onPressed: () => launchUrlString('https://huggingface.co/settings/tokens', mode: LaunchMode.externalApplication),
+                  icon: const Icon(Icons.vpn_key),
+                  label: const Text('Open HF Tokens'),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              '• Hammer2.1 is an open-source model (no authentication required)',
-            ),
-            const Text('• 1.6GB of free storage space needed'),
+            const Text('• Requires HF login + license acceptance'),
+            const Text('• ~2.9GB of free storage space needed'),
             const Text('• Runs locally on your device for privacy'),
             const Text('• Optimized for mobile devices with fast inference'),
             const SizedBox(height: 16),
@@ -441,7 +589,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                       : ElevatedButton.icon(
                         onPressed: _downloadModel,
                         icon: const Icon(Icons.download),
-                        label: const Text('Download Hammer2.1 Model (1.6GB)'),
+                        label: const Text('Download Gemma 3n (AI Edge) Model (~2.9GB)'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.midnightPurple,
                           foregroundColor: AppTheme.silverMist,
