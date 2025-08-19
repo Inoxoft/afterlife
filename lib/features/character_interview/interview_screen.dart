@@ -102,9 +102,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
         _interviewProvider.addAIMessage(localizations.processingFiles);
         _isProcessingFile = true;
       });
-
+      print(localizations.processingFiles);
       final files = await FileProcessorService.pickFile();
-
+      print('LOSHARA');
+      print(files);
       if (files == null || files.isEmpty) {
         setState(() {
           _interviewProvider.addAIMessage(localizations.noFilesSelected);
