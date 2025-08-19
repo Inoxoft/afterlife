@@ -1152,4 +1152,121 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Hello! I\'m ready to create a detailed character card for you. You can either:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhich would you prefer?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Create Group Chat';
+
+  @override
+  String get editGroupChat => 'Edit Group Chat';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get enterGroupName => 'Enter group name...';
+
+  @override
+  String get selectedCharacters => 'Selected Characters';
+
+  @override
+  String get famousCharacters => 'Famous Characters';
+
+  @override
+  String get yourCharacters => 'Your Characters';
+
+  @override
+  String get noFamousCharacters => 'No famous characters available';
+
+  @override
+  String get noUserCharacters => 'No user characters available';
+
+  @override
+  String get createGroup => 'Create Group';
+
+  @override
+  String get updateGroup => 'Update Group';
+
+  @override
+  String get groupCreationError => 'Please select 2-6 characters and enter a group name';
+
+  @override
+  String get groupCreationFailed => 'Failed to create group. Please try again.';
+
+  @override
+  String get groupChats => 'Group Chats';
+
+  @override
+  String get noGroupChats => 'No group chats yet';
+
+  @override
+  String get createFirstGroup => 'Create your first group chat';
+
+  @override
+  String get startGroupChat => 'Start Group Chat';
+
+  @override
+  String get addMembers => 'Add Members';
+
+  @override
+  String get removeMembers => 'Remove Members';
+
+  @override
+  String get leaveGroup => 'Leave Group';
+
+  @override
+  String get deleteGroup => 'Delete Group';
+
+  @override
+  String get groupSettings => 'Group Settings';
+
+  @override
+  String get conversationStarters => 'Conversation Starters';
+
+  @override
+  String get charactersTyping => 'Characters are typing...';
+
+  @override
+  String get characterTyping => '{character} is typing...';
+
+  @override
+  String get sendMessage => 'Send message...';
+
+  @override
+  String get groupChatWith => 'Group chat with {characters}';
+
+  @override
+  String get lastActive => 'Last active {time}';
+
+  @override
+  String get membersCount => '{count} members';
+
+  @override
+  String get messageCount => '{count} messages';
+
+  @override
+  String get goBack => 'Go Back';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get groupsCreated => 'groups created';
+
+  @override
+  String get members => 'members';
+
+  @override
+  String get messages => 'messages';
+
+
+
+  @override
+  String get createFirstGroupChat => 'Create your first group chat to start conversations with multiple AI characters.';
+
+  @override
+  String get openChat => 'Open Chat';
+
+  @override
+  String get editGroup => 'Edit Group';
 }

@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
@@ -12,6 +12,10 @@ import '../settings/settings_screen.dart';
 import '../character_interview/interview_screen.dart';
 import '../character_chat/chat_screen.dart';
 import '../character_prompts/famous_character_profile_screen.dart';
+import '../group_chat/group_chat_screen.dart';
+import '../group_chat/models/group_chat_model.dart';
+import '../group_chat/character_selection_screen.dart';
+import '../providers/group_chat_provider.dart';
 import '../../core/utils/responsive_utils.dart';
 import '../widgets/background_painters.dart';
 
@@ -25,7 +29,7 @@ class PulseRingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint =
         Paint()
-          ..color = color.withOpacity(0.3 * (1 - progress))
+          ..color = color.withValues(alpha: 0.3 * (1 - progress))
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0 * (1 + progress);
 
@@ -53,16 +57,83 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   int _selectedIndex = 0;
   late final PageController _pageController;
 
+  // Add scroll controllers for each tab
+  late final ScrollController _exploreScrollController;
+  late final ScrollController _yourTwinsScrollController;
+
+  // Animation controller for header visibility
+  late final AnimationController _headerAnimationController;
+  late final Animation<double> _headerOpacityAnimation;
+  late final Animation<double> _headerHeightAnimation;
+
+  bool _isHeaderVisible = true;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+
+    // Initialize scroll controllers
+    _exploreScrollController = ScrollController();
+    _yourTwinsScrollController = ScrollController();
+
+    // Initialize header animation controller
+    _headerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _headerOpacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _headerHeightAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Add scroll listeners
+    _exploreScrollController.addListener(_onScroll);
+    _yourTwinsScrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _exploreScrollController.dispose();
+    _yourTwinsScrollController.dispose();
+    _headerAnimationController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    final ScrollController currentController =
+        _selectedIndex == 0
+            ? _exploreScrollController
+            : _yourTwinsScrollController;
+
+    const double threshold = 50.0; // Scroll threshold to hide header
+
+    if (currentController.hasClients) {
+      final bool shouldHideHeader = currentController.offset > threshold;
+
+      if (shouldHideHeader && _isHeaderVisible) {
+        setState(() {
+          _isHeaderVisible = false;
+        });
+        _headerAnimationController.forward();
+      } else if (!shouldHideHeader && !_isHeaderVisible) {
+        setState(() {
+          _isHeaderVisible = true;
+        });
+        _headerAnimationController.reverse();
+      }
+    }
   }
 
   // Cache text styles for better performance
@@ -84,6 +155,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       BottomNavigationBarItem(
         icon: const Icon(Icons.person_outline, size: 24),
         label: localizations.yourTwins,
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.group, size: 24),
+        label: localizations.groupChats,
       ),
       BottomNavigationBarItem(
         icon: const Icon(Icons.add_circle_outline, size: 24),
@@ -315,36 +390,64 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header section with enhanced styling
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    ResponsiveUtils.getScreenPadding(context).left,
-                    32,
-                    ResponsiveUtils.getScreenPadding(context).right,
-                    24,
-                  ),
-                  child: Text(
-                    _selectedIndex == 0
-                        ? localizations.exploreDigitalTwins
-                        : localizations.yourDigitalTwins,
-                    style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                      text:
-                          _selectedIndex == 0
-                              ? localizations.exploreDigitalTwins
-                              : localizations.yourDigitalTwins,
-                      fontSize: 24 * ResponsiveUtils.getFontSizeScale(context),
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3.0,
-                      color: AppTheme.silverMist,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 10.0,
-                          color: AppTheme.warmGold.withValues(alpha: 0.8),
-                          offset: const Offset(0, 2),
+                // Animated header section
+                AnimatedBuilder(
+                  animation: _headerAnimationController,
+                  builder: (context, child) {
+                    return ClipRect(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: _isHeaderVisible ? null : 0,
+                        child: Opacity(
+                          opacity:
+                              _headerOpacityAnimation.value == 0.0
+                                  ? 1.0 - _headerAnimationController.value
+                                  : 1.0,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              ResponsiveUtils.getScreenPadding(context).left,
+                              32,
+                              ResponsiveUtils.getScreenPadding(context).right,
+                              24,
+                            ),
+                            child: Text(
+                              _selectedIndex == 0
+                                  ? localizations.exploreDigitalTwins
+                                  : _selectedIndex == 1
+                                      ? localizations.yourDigitalTwins
+                                      : localizations.groupChats,
+                              style:
+                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
+                                    text:
+                                        _selectedIndex == 0
+                                            ? localizations.exploreDigitalTwins
+                                            : _selectedIndex == 1
+                                                ? localizations.yourDigitalTwins
+                                                : localizations.groupChats,
+                                    fontSize:
+                                        24 *
+                                        ResponsiveUtils.getFontSizeScale(
+                                          context,
+                                        ),
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 3.0,
+                                    color: AppTheme.silverMist,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 10.0,
+                                        color: AppTheme.warmGold.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
 
                 // Main content area with PageView
@@ -359,6 +462,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     children: [
                       _buildExploreTab(localizations, famousPeople),
                       _buildYourTwinsTab(localizations),
+                      _buildGroupChatsTab(localizations),
                     ],
                   ),
                 ),
@@ -429,13 +533,21 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   }
 
   void _onTabTapped(int index) {
-    // Animate to the selected page
-    if (index < 2) {
+    // Animate to the selected page for the first 3 tabs (Explore, Your Twins, Group Chats)
+    if (index < 3) {
       _pageController.animateToPage(
         index,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+
+      // Reset header visibility when changing tabs
+      if (!_isHeaderVisible) {
+        setState(() {
+          _isHeaderVisible = true;
+        });
+        _headerAnimationController.reverse();
+      }
     }
 
     setState(() {
@@ -443,19 +555,27 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     });
 
     // Handle "Create" tab action
-    if (index == 2) {
+    if (index == 3) {
       _onAddCharacter(context);
     }
     // Handle "Settings" tab action
-    else if (index == 3) {
+    else if (index == 4) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const SettingsScreen()),
       ).then((_) {
         // Reset selected index to previous tab when returning from settings
         setState(() {
-          _selectedIndex = _selectedIndex < 2 ? _selectedIndex : 1;
+          _selectedIndex = _selectedIndex < 3 ? _selectedIndex : 2;
         });
+
+        // Reset header visibility when returning from settings
+        if (!_isHeaderVisible) {
+          setState(() {
+            _isHeaderVisible = true;
+          });
+          _headerAnimationController.reverse();
+        }
       });
     }
   }
@@ -470,16 +590,39 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            localizations.interactWithHistoricalFigures,
-            style: UkrainianFontUtils.latoWithUkrainianSupport(
-              text: localizations.interactWithHistoricalFigures,
-              fontSize: 16,
-              color: AppTheme.silverMist.withValues(alpha: 0.8),
-              letterSpacing: 0.5,
-            ),
+          // Animated subtitle that also hides with the header
+          AnimatedBuilder(
+            animation: _headerAnimationController,
+            builder: (context, child) {
+              return ClipRect(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: _isHeaderVisible ? null : 0,
+                  child: Opacity(
+                    opacity:
+                        _headerOpacityAnimation.value == 0.0
+                            ? 1.0 - _headerAnimationController.value
+                            : 1.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizations.interactWithHistoricalFigures,
+                          style: UkrainianFontUtils.latoWithUkrainianSupport(
+                            text: localizations.interactWithHistoricalFigures,
+                            fontSize: 16,
+                            color: AppTheme.silverMist.withValues(alpha: 0.8),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-          const SizedBox(height: 24),
           Expanded(
             child:
                 ResponsiveUtils.shouldUseWideLayout(context)
@@ -487,6 +630,359 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     : _buildGridGallery(famousPeople, isExploreTab: true),
           ),
         ],
+      ),
+    );
+  }
+
+  // Group Chats tab with user's group conversations
+  Widget _buildGroupChatsTab(AppLocalizations localizations) {
+    return Consumer<GroupChatProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppTheme.warmGold,
+                    ),
+                    strokeWidth: 2,
+                    backgroundColor: AppTheme.deepNavy,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  localizations.accessingDataStorage,
+                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                    text: localizations.accessingDataStorage,
+                    fontSize: 14,
+                    color: AppTheme.warmGold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (provider.groupChats.isEmpty) {
+          return _buildGroupChatsEmptyState(localizations);
+        }
+
+        final size = MediaQuery.of(context).size;
+        final isLandscape = size.width > size.height;
+        final deviceType = ResponsiveUtils.getDeviceType(context);
+        // Only use grid in portrait. In landscape we want a horizontal scroller with big cards.
+        final shouldUseGrid = !isLandscape && (
+          deviceType == DeviceType.tablet ||
+          deviceType == DeviceType.desktop ||
+          deviceType == DeviceType.tv
+        );
+                             
+        if (isLandscape) {
+          // Landscape: horizontal row of large cards you can swipe through
+          return Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _buildHorizontalGroupChats(provider, localizations),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Center(child: _buildCreateGroupChatButton(localizations)),
+              ),
+            ],
+          );
+        }
+
+        // Portrait: keep previous behavior (grid on tablets/desktop, list on mobile)
+        return Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildGroupChatsList(provider, localizations),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(shouldUseGrid ? 24 : 20),
+              child: shouldUseGrid
+                  ? Center(child: _buildCreateGroupChatButton(localizations))
+                  : _buildCreateGroupChatButton(localizations),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildGroupChatsEmptyState(AppLocalizations localizations) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.group_outlined,
+            size: 80,
+            color: AppTheme.warmGold.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            localizations.noGroupChats,
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: localizations.noGroupChats,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.warmGold,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            localizations.createFirstGroup,
+            style: UkrainianFontUtils.latoWithUkrainianSupport(
+              text: localizations.createFirstGroup,
+              fontSize: 16,
+              color: AppTheme.silverMist.withValues(alpha: 0.8),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          _buildCreateGroupChatButton(localizations),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGroupChatsList(GroupChatProvider provider, AppLocalizations localizations) {
+    // For Group Chats, use grid layout for tablets and above, even in portrait
+    final deviceType = ResponsiveUtils.getDeviceType(context);
+    final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
+    final shouldUseGrid = !isLandscape && (
+      deviceType == DeviceType.tablet ||
+      deviceType == DeviceType.desktop ||
+      deviceType == DeviceType.tv
+    );
+    
+    if (shouldUseGrid) {
+      return GridView.builder(
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: ResponsiveUtils.getGridCrossAxisCount(context),
+          childAspectRatio: ResponsiveUtils.getGridChildAspectRatio(context),
+          crossAxisSpacing: ResponsiveUtils.getGridSpacing(context),
+          mainAxisSpacing: ResponsiveUtils.getGridSpacing(context),
+        ),
+        itemCount: provider.groupChats.length,
+        itemBuilder: (context, index) {
+          final group = provider.groupChats[index];
+          return _buildGroupChatCard(group, localizations);
+        },
+      );
+    } else {
+      return ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        itemCount: provider.groupChats.length,
+        itemBuilder: (context, index) {
+          final group = provider.groupChats[index];
+          return _buildGroupChatCard(group, localizations);
+        },
+      );
+    }
+  }
+
+  // Horizontal scroller with large square-ish group cards for landscape mode
+  Widget _buildHorizontalGroupChats(
+    GroupChatProvider provider,
+    AppLocalizations localizations,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    double cardWidth;
+    if (screenWidth > 1400) {
+      cardWidth = 380;
+    } else if (screenWidth > 1200) {
+      cardWidth = 340;
+    } else if (screenWidth > 900) {
+      cardWidth = 320;
+    } else {
+      cardWidth = 280;
+    }
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      itemCount: provider.groupChats.length,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      itemBuilder: (context, index) {
+        final group = provider.groupChats[index];
+        return Container(
+          width: cardWidth,
+          margin: const EdgeInsets.only(right: 24),
+          child: _GroupChatSquareCard(
+            group: group,
+            localizations: localizations,
+            onTap: () => _openGroupChat(group),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGroupChatCard(GroupChatModel group, AppLocalizations localizations) {
+    final deviceType = ResponsiveUtils.getDeviceType(context);
+    final shouldUseGrid = deviceType == DeviceType.tablet || 
+                         deviceType == DeviceType.desktop || 
+                         deviceType == DeviceType.tv;
+    
+    // Use different card styles based on layout
+    if (shouldUseGrid) {
+      return _GroupChatSquareCard(
+        group: group,
+        localizations: localizations,
+        onTap: () => _openGroupChat(group),
+      );
+    } else {
+      return _buildGroupChatListCard(group, localizations);
+    }
+  }
+
+  // List-style card for mobile/narrow screens
+  Widget _buildGroupChatListCard(GroupChatModel group, AppLocalizations localizations) {
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: AppTheme.midnightPurple.withValues(alpha: 0.7),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppTheme.warmGold.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () => _openGroupChat(group),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      group.name,
+                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        text: group.name,
+                        fontSize: 18 * fontScale,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.warmGold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(
+                    Icons.group,
+                    color: AppTheme.warmGold.withValues(alpha: 0.7),
+                    size: 20 * fontScale,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                localizations.membersCount.replaceAll('{count}', group.characterIds.length.toString()),
+                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                  text: '${group.characterIds.length} members',
+                  fontSize: 14 * fontScale,
+                  color: AppTheme.silverMist.withValues(alpha: 0.7),
+                ),
+              ),
+              if (group.messages.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  group.messages.last.content,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: group.messages.last.content,
+                    fontSize: 12 * fontScale,
+                    color: AppTheme.silverMist.withValues(alpha: 0.5),
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreateGroupChatButton(AppLocalizations localizations) {
+    final deviceType = ResponsiveUtils.getDeviceType(context);
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+    final shouldUseGrid = deviceType == DeviceType.tablet || 
+                         deviceType == DeviceType.desktop || 
+                         deviceType == DeviceType.tv;
+    
+    return Container(
+      constraints: shouldUseGrid 
+          ? const BoxConstraints(maxWidth: 400)
+          : null,
+      width: shouldUseGrid ? null : double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _createNewGroupChat,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.warmGold,
+          foregroundColor: AppTheme.deepNavy,
+          padding: EdgeInsets.symmetric(
+            vertical: shouldUseGrid ? 20 : 16,
+            horizontal: shouldUseGrid ? 24 : 16,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: Icon(
+          Icons.add_circle_outline,
+          size: (shouldUseGrid ? 22 : 20) * fontScale,
+        ),
+        label: Text(
+          localizations.createGroupChat,
+          style: UkrainianFontUtils.latoWithUkrainianSupport(
+            text: localizations.createGroupChat,
+            fontSize: (shouldUseGrid ? 18 : 16) * fontScale,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.deepNavy,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _createNewGroupChat() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CharacterSelectionScreen(),
+      ),
+    );
+  }
+
+  void _openGroupChat(GroupChatModel group) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GroupChatScreen(groupId: group.id),
       ),
     );
   }
@@ -546,6 +1042,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   Widget _buildGridGallery(List<dynamic> items, {required bool isExploreTab}) {
     return GridView.builder(
       key: PageStorageKey(isExploreTab ? 'exploreTab' : 'yourTwinsTab'),
+      controller:
+          isExploreTab ? _exploreScrollController : _yourTwinsScrollController,
       padding: EdgeInsets.symmetric(
         horizontal: ResponsiveUtils.getGridSpacing(context),
         vertical: 24,
@@ -807,6 +1305,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         // Horizontal scrolling gallery
         Expanded(
           child: ListView.builder(
+            controller:
+                isExploreTab
+                    ? _exploreScrollController
+                    : _yourTwinsScrollController,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: items.length,
@@ -1246,8 +1748,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
             color: AppTheme.warmGold,
             boxShadow: [
               BoxShadow(
-                color: AppTheme.warmGold.withOpacity(
-                  0.5 * _glowAnimation.value,
+                color: AppTheme.warmGold.withValues(
+                  alpha: 0.5 * _glowAnimation.value,
                 ),
                 blurRadius: 4 * _glowAnimation.value,
                 spreadRadius: 1 * _glowAnimation.value,
@@ -1326,7 +1828,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    final Color accentColor = widget.character.accentColor ?? AppTheme.warmGold;
+    final Color accentColor = widget.character.accentColor;
     final String formattedDate = _formatDate(widget.character.createdAt);
 
     return GestureDetector(
@@ -1625,7 +2127,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
             color: color,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.5 * _glowAnimation.value),
+                color: color.withValues(alpha: 0.5 * _glowAnimation.value),
                 blurRadius: 4 * _glowAnimation.value,
                 spreadRadius: 1 * _glowAnimation.value,
               ),
@@ -1715,7 +2217,7 @@ class StarfieldPainter extends CustomPainter {
       final y = star.y * size.height;
 
       final Paint starPaint =
-          Paint()..color = star.color.withOpacity(star.opacity);
+          Paint()..color = star.color.withValues(alpha: star.opacity);
 
       canvas.drawCircle(Offset(x, y), star.size, starPaint);
 
@@ -1749,4 +2251,316 @@ class _Star {
     required this.opacity,
     required this.color,
   });
+}
+
+// Square card widget for group chats on wide screens
+class _GroupChatSquareCard extends StatefulWidget {
+  final GroupChatModel group;
+  final AppLocalizations localizations;
+  final VoidCallback onTap;
+
+  const _GroupChatSquareCard({
+    Key? key,
+    required this.group,
+    required this.localizations,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<_GroupChatSquareCard> createState() => _GroupChatSquareCardState();
+}
+
+class _GroupChatSquareCardState extends State<_GroupChatSquareCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _glowAnimation;
+  late Animation<double> _scaleAnimation;
+  bool _isHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _glowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.03,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuad));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accentColor = AppTheme.warmGold;
+    final fontScale = ResponsiveUtils.getFontSizeScale(context);
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: MouseRegion(
+        onEnter: (_) => setState(() {
+          _isHovering = true;
+          _controller.forward();
+        }),
+        onExit: (_) => setState(() {
+          _isHovering = false;
+          _controller.reverse();
+        }),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _isHovering ? _scaleAnimation.value : 1.0,
+              child: Stack(
+                children: [
+                  // Main card with glowing effect
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppTheme.midnightPurple, AppTheme.deepNavy],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _isHovering
+                              ? accentColor.withValues(alpha: 0.8)
+                              : accentColor.withValues(alpha: 0.4),
+                          blurRadius: _isHovering ? 20 : 12,
+                          spreadRadius: _isHovering ? 3 : 1,
+                          offset: Offset(0, _isHovering ? 8 : 4),
+                        ),
+                        BoxShadow(
+                          color: AppTheme.deepNavy.withValues(alpha: 0.6),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: _isHovering
+                            ? accentColor.withValues(alpha: 0.9)
+                            : accentColor.withValues(alpha: 0.6),
+                        width: _isHovering ? 2.5 : 2.0,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: child,
+                    ),
+                  ),
+
+                  // Pulse ring animation when hovering
+                  if (_isHovering)
+                    AnimatedBuilder(
+                      animation: _glowAnimation,
+                      builder: (context, _) {
+                        return Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: CustomPaint(
+                              painter: PulseRingPainter(
+                                progress: _glowAnimation.value,
+                                color: accentColor,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                // Background gradient
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppTheme.deepNavy, AppTheme.midnightPurple],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Group icon in the center
+                Positioned.fill(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Center(
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accentColor.withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: accentColor.withValues(alpha: 0.6),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.groups,
+                          size: 40,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Gradient overlay for better text contrast
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          AppTheme.deepNavy.withValues(alpha: 0.7),
+                          AppTheme.deepNavy.withValues(alpha: 0.9),
+                        ],
+                        stops: const [0.6, 0.85, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Card content at bottom
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Group name
+                        Text(
+                          widget.group.name,
+                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            text: widget.group.name,
+                            fontSize: 22 * fontScale,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            color: AppTheme.warmGold,
+                            shadows: [
+                              Shadow(
+                                color: AppTheme.warmGold.withValues(alpha: 0.5),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Member count
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.people_outline,
+                              size: 16 * fontScale,
+                              color: AppTheme.silverMist.withValues(alpha: 0.8),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.localizations.membersCount.replaceAll('{count}', widget.group.characterIds.length.toString()),
+                              style: UkrainianFontUtils.latoWithUkrainianSupport(
+                                text: '${widget.group.characterIds.length} members',
+                                fontSize: 14 * fontScale,
+                                color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Last message (if any)
+                        if (widget.group.messages.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            widget.group.messages.last.content,
+                            style: UkrainianFontUtils.latoWithUkrainianSupport(
+                              text: widget.group.messages.last.content,
+                              fontSize: 12 * fontScale,
+                              color: AppTheme.silverMist.withValues(alpha: 0.6),
+                              letterSpacing: 0.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Activity indicator (pulsing dot)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: _buildActivityIndicator(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityIndicator() {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: widget.group.messages.isNotEmpty 
+                ? AppTheme.warmGold
+                : AppTheme.silverMist.withValues(alpha: 0.5),
+            boxShadow: [
+              BoxShadow(
+                color: (widget.group.messages.isNotEmpty 
+                    ? AppTheme.warmGold 
+                    : AppTheme.silverMist).withValues(
+                  alpha: 0.5 * (_isHovering ? _glowAnimation.value : 0.3),
+                ),
+                blurRadius: 4 * (_isHovering ? _glowAnimation.value : 1),
+                spreadRadius: 1 * (_isHovering ? _glowAnimation.value : 1),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

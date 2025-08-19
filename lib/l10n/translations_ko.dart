@@ -971,4 +971,119 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       '안녕하세요! 상세한 캐릭터 카드를 만들 준비가 되었습니다. 다음 중 하나를 선택할 수 있습니다:\n\n1. 당신의 성격과 경험에 대한 질문에 답하기\n2. 당신의 정보가 포함된 파일(PDF, TXT, DOC 또는 이메일) 업로드하기\n\n어떤 것을 선호하시나요?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => '그룹 채팅 생성';
+
+  @override
+  String get editGroupChat => '그룹 채팅 편집';
+
+  @override
+  String get groupName => '그룹 이름';
+
+  @override
+  String get enterGroupName => '그룹 이름을 입력하세요...';
+
+  @override
+  String get selectedCharacters => '선택된 캐릭터';
+
+  @override
+  String get famousCharacters => '유명한 캐릭터';
+
+  @override
+  String get yourCharacters => '당신의 캐릭터';
+
+  @override
+  String get noFamousCharacters => '유명한 캐릭터가 없습니다';
+
+  @override
+  String get noUserCharacters => '사용자 캐릭터가 없습니다';
+
+  @override
+  String get createGroup => '그룹 생성';
+
+  @override
+  String get updateGroup => '그룹 업데이트';
+
+  @override
+  String get groupCreationError => '2-6명의 캐릭터를 선택하고 그룹 이름을 입력하세요';
+
+  @override
+  String get groupCreationFailed => '그룹 생성에 실패했습니다. 다시 시도하세요.';
+
+  @override
+  String get groupChats => '그룹 채팅';
+
+  @override
+  String get noGroupChats => '아직 그룹 채팅이 없습니다';
+
+  @override
+  String get createFirstGroup => '첫 번째 그룹 채팅을 만드세요';
+
+  @override
+  String get startGroupChat => '그룹 채팅 시작';
+
+  @override
+  String get addMembers => '멤버 추가';
+
+  @override
+  String get removeMembers => '멤버 제거';
+
+  @override
+  String get leaveGroup => '그룹 나가기';
+
+  @override
+  String get deleteGroup => '그룹 삭제';
+
+  @override
+  String get groupSettings => '그룹 설정';
+
+  @override
+  String get conversationStarters => '대화 시작하기';
+
+  @override
+  String get charactersTyping => '캐릭터들이 입력 중...';
+
+  @override
+  String get characterTyping => '{character}가 입력 중...';
+
+  @override
+  String get sendMessage => '메시지 보내기...';
+
+  @override
+  String get groupChatWith => '{characters}와의 그룹 채팅';
+
+  @override
+  String get lastActive => '마지막 활동 {time}';
+
+  @override
+  String get membersCount => '{count}명의 멤버';
+
+  @override
+  String get messageCount => '{count}개의 메시지';
+
+  @override
+  String get goBack => '뒤로 가기';
+
+  @override
+  String get retry => '다시 시도';
+
+  @override
+  String get groupsCreated => '생성된 그룹';
+
+  @override
+  String get members => '멤버';
+
+  @override
+  String get messages => '메시지';
+
+  @override
+  String get createFirstGroupChat => '여러 AI 캐릭터와 대화를 시작하려면 첫 번째 그룹 채팅을 만드세요.';
+
+  @override
+  String get openChat => '채팅 열기';
+
+  @override
+  String get editGroup => '그룹 편집';
 }

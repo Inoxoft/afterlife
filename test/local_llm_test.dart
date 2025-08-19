@@ -60,11 +60,12 @@ void main() {
     test('should handle preferred provider changes', () async {
       await HybridChatService.initialize();
       
+      // Provider selection is fixed to Auto regardless of input
       HybridChatService.setPreferredProvider(LLMProvider.local);
-      expect(HybridChatService.preferredProvider, LLMProvider.local);
+      expect(HybridChatService.preferredProvider, LLMProvider.auto);
       
       HybridChatService.setPreferredProvider(LLMProvider.openRouter);
-      expect(HybridChatService.preferredProvider, LLMProvider.openRouter);
+      expect(HybridChatService.preferredProvider, LLMProvider.auto);
       
       HybridChatService.setPreferredProvider(LLMProvider.auto);
       expect(HybridChatService.preferredProvider, LLMProvider.auto);

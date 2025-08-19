@@ -60,8 +60,7 @@ class FamousCharacterService {
       createdAt: DateTime.now(),
       chatHistory: _chatHistories[characterName] ?? [],
       model: selectedModel,
-      // You can add imageUrl from famous character prompts if available
-      // imageUrl: FamousCharacterPrompts.getImageUrl(characterName),
+      imageUrl: FamousCharacterPrompts.getImageUrl(characterName),
     );
 
     _virtualCharacters[characterName] = virtualCharacter;

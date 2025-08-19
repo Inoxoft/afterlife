@@ -370,8 +370,10 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    AppTheme.warmGold.withOpacity(0.15),
-                                    AppTheme.midnightPurple.withOpacity(0.3),
+                                    AppTheme.warmGold.withValues(alpha: 0.1),
+                                    AppTheme.midnightPurple.withValues(
+                                      alpha: 0.7,
+                                    ),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -383,7 +385,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.warmGold.withOpacity(0.1),
+                                    color: AppTheme.warmGold.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     blurRadius: 10,
                                     spreadRadius: 2,
                                   ),
@@ -421,7 +425,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.warmGold.withOpacity(0.1),
+                                      color: AppTheme.warmGold.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: AppTheme.warmGold.withValues(
@@ -443,8 +449,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.midnightPurple
-                                          .withOpacity(0.3),
+                                      color: AppTheme.midnightPurple.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: AppTheme.warmGold.withValues(
@@ -467,8 +474,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                             bottom: 16,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold
-                                                .withOpacity(0.15),
+                                            color: AppTheme.warmGold.withValues(
+                                              alpha: 0.15,
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               6,
                                             ),
@@ -498,8 +506,9 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                         Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold
-                                                .withOpacity(0.1),
+                                            color: AppTheme.warmGold.withValues(
+                                              alpha: 0.1,
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               6,
                                             ),
@@ -525,7 +534,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: AppTheme.warmGold
-                                                      .withOpacity(0.15),
+                                                      .withValues(alpha: 0.3),
                                                   borderRadius:
                                                       BorderRadius.circular(4),
                                                 ),
@@ -561,7 +570,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: AppTheme.warmGold
-                                                      .withOpacity(0.15),
+                                                      .withValues(alpha: 0.3),
                                                   borderRadius:
                                                       BorderRadius.circular(4),
                                                 ),

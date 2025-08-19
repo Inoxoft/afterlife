@@ -215,9 +215,7 @@ class CharacterModel {
       'imageUrl': imageUrl,
       'userImagePath': userImagePath,
       'iconImagePath': iconImagePath,
-      'iconCodePoint': icon?.codePoint,
-      'iconFontFamily': icon?.fontFamily,
-      'iconFontPackage': icon?.fontPackage,
+      // Icon serialization disabled for release builds to avoid tree-shaking issues
       'createdAt': createdAt.toIso8601String(),
       'accentColor': accentColor.toARGB32(),
       'chatHistory': chatHistory,
@@ -251,20 +249,9 @@ class CharacterModel {
         accentColor = Color(int.parse(_defaultAccentColor));
       }
 
-      // Parse the icon safely
+      // For release builds, we'll skip icon restoration from JSON to avoid tree-shaking issues
+      // Icons will need to be re-selected by users if they were customized
       IconData? icon;
-      try {
-        if (json['iconCodePoint'] != null) {
-          icon = IconData(
-            json['iconCodePoint'] as int,
-            fontFamily: json['iconFontFamily'] as String?,
-            fontPackage: json['iconFontPackage'] as String?,
-          );
-        }
-      } catch (e) {
-        // Icon parsing failed, use null
-        icon = null;
-      }
 
       // Parse chat history safely
       List<Map<String, dynamic>> chatHistory = [];
@@ -277,32 +264,32 @@ class CharacterModel {
       }
 
       // Get system prompt
-      final systemPrompt = json['systemPrompt'] as String;
-      final characterName = json['name'] as String;
+      final systemPrompt = json['systemPrompt']?.toString() ?? '';
+      final characterName = json['name']?.toString() ?? 'Unknown Character';
 
       // Handle local prompt - generate if not present (backwards compatibility)
       String localPrompt;
       if (json['localPrompt'] != null) {
-        localPrompt = json['localPrompt'] as String;
+        localPrompt = json['localPrompt']?.toString() ?? '';
       } else {
         // Generate local prompt for existing characters
         localPrompt = generateLocalPrompt(systemPrompt, characterName);
       }
 
       return CharacterModel(
-        id: json['id'] as String,
+        id: json['id']?.toString() ?? '',
         name: characterName,
         systemPrompt: systemPrompt,
         localPrompt: localPrompt,
-        imageUrl: json['imageUrl'] as String?,
-        userImagePath: json['userImagePath'] as String?,
-        iconImagePath: json['iconImagePath'] as String?,
+        imageUrl: json['imageUrl']?.toString(),
+        userImagePath: json['userImagePath']?.toString(),
+        iconImagePath: json['iconImagePath']?.toString(),
         icon: icon,
         createdAt: createdAt,
         accentColor: accentColor,
         chatHistory: chatHistory,
-        additionalInfo: json['additionalInfo'] as String?,
-        model: json['model'] as String?,
+        additionalInfo: json['additionalInfo']?.toString(),
+        model: json['model']?.toString(),
       );
     } catch (e) {
       throw FormatException('Invalid character data: $e');

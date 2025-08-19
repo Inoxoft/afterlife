@@ -975,4 +975,119 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'こんにちは！詳細なキャラクターカードを作成する準備ができています。以下のいずれかをお選びください：\n\n1. あなたの性格や経験に関する質問にお答えください\n2. あなたの情報を含むファイル（PDF、TXT、DOC、またはメール）をアップロードしてください\n\nどちらがお好みですか？';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'グループチャット作成';
+
+  @override
+  String get editGroupChat => 'グループチャット編集';
+
+  @override
+  String get groupName => 'グループ名';
+
+  @override
+  String get enterGroupName => 'グループ名を入力...';
+
+  @override
+  String get selectedCharacters => '選択されたキャラクター';
+
+  @override
+  String get famousCharacters => '有名なキャラクター';
+
+  @override
+  String get yourCharacters => 'あなたのキャラクター';
+
+  @override
+  String get noFamousCharacters => '有名なキャラクターがありません';
+
+  @override
+  String get noUserCharacters => 'ユーザーキャラクターがありません';
+
+  @override
+  String get createGroup => 'グループ作成';
+
+  @override
+  String get updateGroup => 'グループ更新';
+
+  @override
+  String get groupCreationError => '2-6人のキャラクターを選択し、グループ名を入力してください';
+
+  @override
+  String get groupCreationFailed => 'グループ作成に失敗しました。再試行してください。';
+
+  @override
+  String get groupChats => 'グループチャット';
+
+  @override
+  String get noGroupChats => 'グループチャットがまだありません';
+
+  @override
+  String get createFirstGroup => '最初のグループチャットを作成';
+
+  @override
+  String get startGroupChat => 'グループチャット開始';
+
+  @override
+  String get addMembers => 'メンバー追加';
+
+  @override
+  String get removeMembers => 'メンバー削除';
+
+  @override
+  String get leaveGroup => 'グループ退出';
+
+  @override
+  String get deleteGroup => 'グループ削除';
+
+  @override
+  String get groupSettings => 'グループ設定';
+
+  @override
+  String get conversationStarters => '会話スターター';
+
+  @override
+  String get charactersTyping => 'キャラクターが入力中...';
+
+  @override
+  String get characterTyping => '{character}が入力中...';
+
+  @override
+  String get sendMessage => 'メッセージを送信...';
+
+  @override
+  String get groupChatWith => '{characters}とのグループチャット';
+
+  @override
+  String get lastActive => '最後のアクティブ {time}';
+
+  @override
+  String get membersCount => '{count}人のメンバー';
+
+  @override
+  String get messageCount => '{count}件のメッセージ';
+
+  @override
+  String get goBack => '戻る';
+
+  @override
+  String get retry => '再試行';
+
+  @override
+  String get groupsCreated => '作成されたグループ';
+
+  @override
+  String get members => 'メンバー';
+
+  @override
+  String get messages => 'メッセージ';
+
+  @override
+  String get createFirstGroupChat => '最初のグループチャットを作成して、複数のAIキャラクターとの会話を始めましょう。';
+
+  @override
+  String get openChat => 'チャットを開く';
+
+  @override
+  String get editGroup => 'グループを編集';
 }

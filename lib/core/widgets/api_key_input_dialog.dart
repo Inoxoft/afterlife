@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../utils/env_config.dart';
+import '../utils/app_logger.dart';
 
 /// A dialog that allows users to input their API key manually
 class ApiKeyInputDialog extends StatefulWidget {
@@ -139,12 +140,13 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
 
       // Verify the key was properly saved
       final savedKey = EnvConfig.get('OPENROUTER_API_KEY');
-      print(
+      AppLogger.debug(
         'Verification - Retrieved key: ${savedKey != null ? '${savedKey.substring(0, 4)}...' : 'null'}',
+        tag: 'ApiKeyInputDialog'
       );
 
       if (savedKey != apiKey) {
-        print('Warning: Saved key does not match input key');
+        AppLogger.warning('Saved key does not match input key', tag: 'ApiKeyInputDialog');
       }
 
       // Call the callback if provided

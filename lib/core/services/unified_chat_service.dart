@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../utils/env_config.dart';
+import '../utils/app_logger.dart';
+import 'base_service.dart';
 
 enum ChatContext { general, character, interview }
 
@@ -25,49 +27,48 @@ class UnifiedChatService {
 
   // Initialize the service
   static Future<void> initialize() async {
-    if (_isInitialized) return;
+    await StaticServiceInitializer.initializeService(
+      serviceName: 'UnifiedChatService',
+      isInitialized: () => _isInitialized,
+      markInitialized: () => _isInitialized = true,
+      dependencies: [
+        () => EnvConfig.initialize(),
+      ],
+      initializeLogic: () async {
+        // Get API key from environment
+        _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
 
-    try {
-      // Initialize environment configuration
-      await EnvConfig.initialize();
+        // Check if we're using a default key or a user key
+        _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
 
-      // Get API key from environment
-      _apiKey = EnvConfig.get('OPENROUTER_API_KEY');
-
-      // Check if we're using a default key or a user key
-      _isUsingDefaultKey = !(await EnvConfig.hasUserApiKey());
-
-      if (_apiKey == null || _apiKey!.isEmpty) {
-        if (kDebugMode) {
-          print(
-            'Warning: No OpenRouter API key found. The application will not function properly.',
-          );
-          print(
-            'Please set OPENROUTER_API_KEY in your .env file or in Settings.',
-          );
+        if (_apiKey == null || _apiKey!.isEmpty) {
+          if (kDebugMode) {
+            AppLogger.warning(
+              'No OpenRouter API key found - application will not function properly',
+              tag: 'UnifiedChatService'
+            );
+            AppLogger.info(
+              'Please set OPENROUTER_API_KEY in your .env file or in Settings',
+              tag: 'UnifiedChatService'
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            AppLogger.debug(
+              'Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} API key',
+              tag: 'UnifiedChatService'
+            );
+          }
         }
-      } else {
-        if (kDebugMode) {
-          print(
-            'API key loaded successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
-          );
-        }
-      }
-
-      _isInitialized = true;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error initializing unified chat service: $e');
-      }
-      _isInitialized = true; // Mark as initialized to prevent repeated attempts
-    }
+      },
+    );
   }
 
   // Method to refresh API key from the latest source
   static Future<void> refreshApiKey() async {
     try {
       if (kDebugMode) {
-        print('Unified Chat Service: Refreshing API key...');
+        AppLogger.debug('Refreshing API key', tag: 'UnifiedChatService');
       }
 
       // Get the latest key directly
@@ -78,18 +79,19 @@ class UnifiedChatService {
 
       if (_apiKey == null || _apiKey!.isEmpty) {
         if (kDebugMode) {
-          print('Warning: No API key found after refresh');
+          AppLogger.warning('No API key found after refresh', tag: 'UnifiedChatService');
         }
       } else {
         if (kDebugMode) {
-          print(
+          AppLogger.debug(
             'API key refreshed successfully - Using ${_isUsingDefaultKey ? 'default' : 'user\'s'} key',
+            tag: 'UnifiedChatService'
           );
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error refreshing API key: $e');
+        AppLogger.error('Error refreshing API key', tag: 'UnifiedChatService', error: e);
       }
     }
   }
@@ -116,9 +118,17 @@ class UnifiedChatService {
     // Validate API key
     if (_apiKey == null || _apiKey!.isEmpty) {
       if (kDebugMode) {
-        print('Error: API key is missing. Cannot send message.');
+        AppLogger.error('API key is missing - cannot send message', tag: 'UnifiedChatService');
       }
-      return 'Error: Unable to connect to AI service. Please check your API key configuration.';
+      return 'Error: No API key configured. Please add your OpenRouter API key in Settings to use AI features.';
+    }
+
+    // Additional validation for API key format
+    if (!_isValidApiKeyFormat(_apiKey!)) {
+      if (kDebugMode) {
+        AppLogger.error('API key format appears invalid', tag: 'UnifiedChatService');
+      }
+      return 'Error: API key format appears invalid. Please check your OpenRouter API key in Settings.';
     }
 
     try {
@@ -363,7 +373,22 @@ class UnifiedChatService {
             'API Error in $debugPrefix: ${response.statusCode}: ${response.body}',
           );
         }
-        return 'I apologize, I encountered a server error. Please try again.';
+
+        // Handle specific API errors with better user feedback
+        switch (response.statusCode) {
+          case 401:
+            return 'Error: Invalid API key. Please check your OpenRouter API key in Settings.';
+          case 403:
+            return 'Error: API key does not have permission for this request. Please check your OpenRouter account.';
+          case 429:
+            return 'Error: Rate limit exceeded. Please try again in a few moments.';
+          case 500:
+          case 502:
+          case 503:
+            return 'Error: AI service is temporarily unavailable. Please try again later.';
+          default:
+            return 'Error: AI service returned an error (${response.statusCode}). Please try again.';
+        }
       }
     } on TimeoutException catch (e) {
       if (kDebugMode) {
@@ -387,6 +412,16 @@ class UnifiedChatService {
       }
       return 'I apologize, but I encountered an issue connecting to my servers. Please try again in a moment.';
     }
+  }
+
+  // Validate API key format (basic check for OpenRouter keys)
+  static bool _isValidApiKeyFormat(String apiKey) {
+    // OpenRouter API keys typically start with 'sk-or-' and are base64-like
+    if (apiKey.length < 10) return false;
+    if (!apiKey.startsWith('sk-or-') && !apiKey.startsWith('sk-')) return false;
+    // Basic pattern check for common API key formats
+    final pattern = RegExp(r'^sk-[A-Za-z0-9_-]+$');
+    return pattern.hasMatch(apiKey);
   }
 
   // ========== BACKWARD COMPATIBILITY METHODS ==========
@@ -450,13 +485,12 @@ class UnifiedChatService {
   // Method for logging diagnostic info
   static void logDiagnostics() {
     if (kDebugMode) {
-      print('=== Unified Chat Service Diagnostics ===');
-      print('Is initialized: $_isInitialized');
-      print('Is using default key: $_isUsingDefaultKey');
-      print(
-        'API key status: ${_apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)")}',
-      );
-      print('=============================');
+      AppLogger.debug('=== Unified Chat Service Diagnostics ===', tag: 'UnifiedChatService');
+      AppLogger.debug('Is initialized: $_isInitialized', tag: 'UnifiedChatService');
+      AppLogger.debug('Is using default key: $_isUsingDefaultKey', tag: 'UnifiedChatService');
+      final keyStatus = _apiKey == null ? "NULL" : (_apiKey!.isEmpty ? "EMPTY" : "SET (${_apiKey!.substring(0, min(4, _apiKey!.length))}...)");
+      AppLogger.debug('API key status: $keyStatus', tag: 'UnifiedChatService');
+      AppLogger.debug('=============================', tag: 'UnifiedChatService');
     }
   }
 

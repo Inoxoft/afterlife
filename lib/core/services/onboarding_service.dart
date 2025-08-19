@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'preferences_service.dart';
 import 'package:flutter/foundation.dart';
+import '../utils/app_logger.dart';
 
 class OnboardingService {
   static const String _onboardingCompleteKey = 'onboarding_completed';
@@ -7,11 +9,11 @@ class OnboardingService {
   /// Check if the user has completed onboarding
   static Future<bool> hasCompletedOnboarding() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       return prefs.getBool(_onboardingCompleteKey) ?? false;
     } catch (e) {
       if (kDebugMode) {
-        print('OnboardingService: Error checking onboarding status: $e');
+        AppLogger.error('Error checking onboarding status', tag: 'OnboardingService', error: e);
       }
       return false;
     }
@@ -20,15 +22,15 @@ class OnboardingService {
   /// Mark onboarding as complete
   static Future<bool> markOnboardingComplete() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       final success = await prefs.setBool(_onboardingCompleteKey, true);
       if (kDebugMode) {
-        print('OnboardingService: Onboarding marked as complete: $success');
+        AppLogger.debug('Onboarding marked as complete: $success', tag: 'OnboardingService');
       }
       return success;
     } catch (e) {
       if (kDebugMode) {
-        print('OnboardingService: Error marking onboarding complete: $e');
+        AppLogger.error('Error marking onboarding complete', tag: 'OnboardingService', error: e);
       }
       return false;
     }
@@ -37,15 +39,15 @@ class OnboardingService {
   /// Reset onboarding (for testing or user preference)
   static Future<bool> resetOnboarding() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       final success = await prefs.setBool(_onboardingCompleteKey, false);
       if (kDebugMode) {
-        print('OnboardingService: Onboarding reset: $success');
+        AppLogger.debug('Onboarding reset: $success', tag: 'OnboardingService');
       }
       return success;
     } catch (e) {
       if (kDebugMode) {
-        print('OnboardingService: Error resetting onboarding: $e');
+        AppLogger.error('Error resetting onboarding', tag: 'OnboardingService', error: e);
       }
       return false;
     }
@@ -54,15 +56,15 @@ class OnboardingService {
   /// Clear onboarding preference entirely
   static Future<bool> clearOnboardingPreference() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       final success = await prefs.remove(_onboardingCompleteKey);
       if (kDebugMode) {
-        print('OnboardingService: Onboarding preference cleared: $success');
+        AppLogger.debug('Onboarding preference cleared: $success', tag: 'OnboardingService');
       }
       return success;
     } catch (e) {
       if (kDebugMode) {
-        print('OnboardingService: Error clearing onboarding preference: $e');
+        AppLogger.error('Error clearing onboarding preference', tag: 'OnboardingService', error: e);
       }
       return false;
     }

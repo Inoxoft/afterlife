@@ -9366,4 +9366,135 @@ Stay in character at all times. Never break character or admit you are an AI. ''
   static void setSelectedModel(String characterName, String modelId) {
     _selectedModels[characterName] = modelId;
   }
+
+  /// Get all available characters as a list
+  static List<Map<String, dynamic>> getAllCharacters() {
+    return prompts.keys.map((name) {
+      return {
+        'id': 'famous_$name',
+        'name': name,
+        'type': 'famous',
+        'profession': _getProfession(name),
+        'imageUrl': getImageUrl(name),
+        'years': _getYears(name),
+      };
+    }).toList();
+  }
+
+  /// Get profession for a famous character
+  static String _getProfession(String name) {
+    // Map character names to their professions
+    const professions = {
+      'Albert Einstein': 'Physicist',
+      'Ronald Reagan': 'President & Actor',
+      'Alan Turing': 'Computer Scientist',
+      'Marilyn Monroe': 'Actress, Model & Singer',
+      'Kobe Bryant': 'Basketball Player',
+      'Kurt Cobain': 'Musician & Singer',
+      'Nelson Mandela': 'Political Leader & Activist',
+      'Bob Marley': 'Musician & Singer',
+      'Bruce Lee': 'Martial Artist & Actor',
+      'Martin Luther King Jr.': 'Civil Rights Leader',
+      'Marie Curie': 'Physicist & Chemist',
+      'Abraham Lincoln': 'President',
+      'Cleopatra': 'Pharaoh of Egypt',
+      'Elvis Presley': 'Singer & Performer',
+      'Stephen Hawking': 'Theoretical Physicist',
+      'David Bowie': 'Musician & Artist',
+      'Tupac Shakur': 'Rapper & Activist',
+      'Winston Churchill': 'Prime Minister',
+      'Nikola Tesla': 'Inventor & Engineer',
+      'William Shakespeare': 'Playwright & Poet',
+      'Julius Caesar': 'Roman General & Dictator',
+      'Steve Jobs': 'Tech Entrepreneur',
+      'Princess Diana': 'British Royal & Humanitarian',
+      'Freddie Mercury': 'Singer & Performer',
+      'Muhammad Ali': 'Boxer & Activist',
+      'Carl Sagan': 'Astronomer & Science Communicator',
+      'Mahatma Gandhi': 'Independence Leader',
+      'Vincent van Gogh': 'Painter',
+      'Leonardo da Vinci': 'Polymath & Artist',
+      'Socrates': 'Philosopher',
+      'Avici': 'DJ & Music Producer',
+    };
+    return professions[name] ?? 'Historical Figure';
+  }
+
+  /// Get image URL for a famous character
+  static String getImageUrl(String name) {
+    // Map character names to their image assets
+    const imageUrls = {
+      'Albert Einstein': 'assets/images/einstein.png',
+      'Ronald Reagan': 'assets/images/reagan.png',
+      'Alan Turing': 'assets/images/turing.png',
+      'Marilyn Monroe': 'assets/images/monroe.png',
+      'Kobe Bryant': 'assets/images/kobe_bryant.png',
+      'Kurt Cobain': 'assets/images/kurt_cobain.png',
+      'Nelson Mandela': 'assets/images/nelson_mandela.png',
+      'Bob Marley': 'assets/images/bob_marley.png',
+      'Bruce Lee': 'assets/images/bruce_lee.png',
+      'Martin Luther King Jr.': 'assets/images/martin_luther.png',
+      'Marie Curie': 'assets/images/marie_curie.png',
+      'Abraham Lincoln': 'assets/images/abraham_lincoln.png',
+      'Cleopatra': 'assets/images/cleopatra.png',
+      'Elvis Presley': 'assets/images/elvis_presley.png',
+      'Stephen Hawking': 'assets/images/stephen_hawking.png',
+      'David Bowie': 'assets/images/david_bowie.png',
+      'Tupac Shakur': 'assets/images/tupac.png',
+      'Winston Churchill': 'assets/images/winston_churchill.png',
+      'Nikola Tesla': 'assets/images/nikola_tesla.png',
+      'William Shakespeare': 'assets/images/william_shakespeare.png',
+      'Julius Caesar': 'assets/images/caesar.png',
+      'Steve Jobs': 'assets/images/steve_jobs.png',
+      'Princess Diana': 'assets/images/diana_princess.png',
+      'Freddie Mercury': 'assets/images/freddie_mercury.png',
+      'Muhammad Ali': 'assets/images/muhammad_ali.png',
+      'Carl Sagan': 'assets/images/carl_sagan.png',
+      'Mahatma Gandhi': 'assets/images/gandhi.png',
+      'Vincent van Gogh': 'assets/images/vincent_van_gogh.png',
+      'Leonardo da Vinci': 'assets/images/da_vinci.png',
+      'Socrates': 'assets/images/socrates.png',
+      'Avici': 'assets/images/avici.png',
+    };
+    return imageUrls[name] ?? 'assets/images/afterlife_icon.png';
+  }
+
+  /// Get years for a famous character
+  static String _getYears(String name) {
+    // Map character names to their life years
+    const years = {
+      'Albert Einstein': '1879-1955',
+      'Ronald Reagan': '1911-2004',
+      'Alan Turing': '1912-1954',
+      'Marilyn Monroe': '1926-1962',
+      'Kobe Bryant': '1978-2020',
+      'Kurt Cobain': '1967-1994',
+      'Nelson Mandela': '1918-2013',
+      'Bob Marley': '1945-1981',
+      'Bruce Lee': '1940-1973',
+      'Martin Luther King Jr.': '1929-1968',
+      'Marie Curie': '1867-1934',
+      'Abraham Lincoln': '1809-1865',
+      'Cleopatra': '69-30 BC',
+      'Elvis Presley': '1935-1977',
+      'Stephen Hawking': '1942-2018',
+      'David Bowie': '1947-2016',
+      'Tupac Shakur': '1971-1996',
+      'Winston Churchill': '1874-1965',
+      'Nikola Tesla': '1856-1943',
+      'William Shakespeare': '1564-1616',
+      'Julius Caesar': '100-44 BC',
+      'Steve Jobs': '1955-2011',
+      'Princess Diana': '1961-1997',
+      'Freddie Mercury': '1946-1991',
+      'Muhammad Ali': '1942-2016',
+      'Carl Sagan': '1934-1996',
+      'Mahatma Gandhi': '1869-1948',
+      'Vincent van Gogh': '1853-1890',
+      'Leonardo da Vinci': '1452-1519',
+      'Socrates': '470-399 BC',
+      'Avici': '1989-2018',
+    };
+    return years[name] ?? 'Unknown';
+  }
 }
