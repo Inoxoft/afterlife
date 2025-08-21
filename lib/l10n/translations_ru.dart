@@ -358,6 +358,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get getFreeApiKeyAt => 'Получите свой бесплатный API ключ на ';
   @override
+  String get addCreditToUseAdvancedModels => 'Добавьте \$1-2 кредита для использования продвинутых моделей';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouter требует кредиты для доступа к платным моделям как GPT-4, Claude и др. Бесплатные модели доступны без кредитов.';
+  @override
   String get localAiModel => 'Локальная Модель ИИ';
   @override
   String get privateWorksOffline => 'Приватная, работает офлайн';
@@ -599,6 +603,24 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get apiKeyShouldStartWithSk => 'API-ключ должен начинаться с "sk-"';
 
+  @override
+  String get howToGetApiKey => 'Как получить ваш API ключ:';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'Посетите openrouter.ai и зарегистрируйтесь/войдите';
+
+  @override
+  String get goToKeysSection => 'Перейдите в раздел "Keys" в вашей панели';
+
+  @override
+  String get createNewApiKey => 'Создайте новый API ключ';
+
+  @override
+  String get getApiKeyHere => 'Получите ваш API ключ здесь:';
+
+  @override
+  String get updateKey => 'Обновить ключ';
+
   // Interview and character creation
   @override
   String get invalidCharacterCardFormat => 'Неверный формат карточки персонажа';
@@ -645,8 +667,6 @@ class AppLocalizationsRu extends AppLocalizations {
   // Additional UI strings
   @override
   String get skipForNow => 'Пропустить пока';
-  @override
-  String get updateKey => 'Обновить ключ';
   @override
   String get removeKey => 'Удалить ключ';
   @override
@@ -875,4 +895,261 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Привет! Я готов создать подробную карточку персонажа для вас. Вы можете:\n\n1. Ответить на мои вопросы о вашей личности и опыте\n2. Загрузить файл (PDF, TXT, DOC или email) с вашей информацией\n\nЧто бы вы предпочли?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Создать групповой чат';
+
+  @override
+  String get editGroupChat => 'Редактировать групповой чат';
+
+  @override
+  String get groupName => 'Название группы';
+
+  @override
+  String get enterGroupName => 'Введите название группы...';
+
+  @override
+  String get selectedCharacters => 'Выбранные персонажи';
+
+  @override
+  String get famousCharacters => 'Знаменитые персонажи';
+
+  @override
+  String get yourCharacters => 'Ваши персонажи';
+
+  @override
+  String get noFamousCharacters => 'Нет знаменитых персонажей';
+
+  @override
+  String get noUserCharacters => 'Нет пользовательских персонажей';
+
+  @override
+  String get createGroup => 'Создать группу';
+
+  @override
+  String get updateGroup => 'Обновить группу';
+
+  @override
+  String get groupCreationError => 'Выберите 2-6 персонажей и введите название группы';
+
+  @override
+  String get groupCreationFailed => 'Не удалось создать группу. Попробуйте снова.';
+
+  @override
+  String get groupChats => 'Групповые чаты';
+
+  @override
+  String get noGroupChats => 'Пока нет групповых чатов';
+
+  @override
+  String get createFirstGroup => 'Создайте свой первый групповой чат';
+
+  @override
+  String get startGroupChat => 'Начать групповой чат';
+
+  @override
+  String get addMembers => 'Добавить участников';
+
+  @override
+  String get removeMembers => 'Удалить участников';
+
+  @override
+  String get leaveGroup => 'Покинуть группу';
+
+  @override
+  String get deleteGroup => 'Удалить группу';
+
+  @override
+  String get groupSettings => 'Настройки группы';
+
+  @override
+  String get conversationStarters => 'Начало разговора';
+
+  @override
+  String get charactersTyping => 'Персонажи печатают...';
+
+  @override
+  String get characterTyping => '{character} печатает...';
+
+  @override
+  String get sendMessage => 'Отправить сообщение...';
+
+  @override
+  String get groupChatWith => 'Групповой чат с {characters}';
+
+  @override
+  String get lastActive => 'Последняя активность {time}';
+
+  @override
+  String get membersCount => '{count} участников';
+
+  @override
+  String get messageCount => '{count} сообщений';
+
+  @override
+  String get goBack => 'Назад';
+
+  @override
+  String get retry => 'Повторить';
+
+  @override
+  String get groupsCreated => 'групп создано';
+
+  @override
+  String get members => 'участники';
+
+  @override
+  String get messages => 'сообщения';
+
+  @override
+  String get createFirstGroupChat => 'Создайте свой первый групповой чат, чтобы начать разговоры с несколькими ИИ персонажами.';
+
+  @override
+  String get openChat => 'Открыть чат';
+
+  @override
+  String get editGroup => 'Редактировать группу';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => 'Настройки Локального ИИ';
+
+  @override
+  String get huggingFaceAccessToken => 'Токен Доступа Hugging Face';
+
+  @override
+  String get tokenIsSet => 'Токен установлен. Вы можете заменить или очистить его ниже.';
+
+  @override
+  String get pasteHuggingFaceToken => 'Вставьте ваш токен Hugging Face. Требуется для загрузки защищённых моделей.';
+
+  @override
+  String get hfTokenPlaceholder => 'токен hf_xxx';
+
+  @override
+  String get hfTokenHint => 'Вставьте токен из huggingface.co/settings/tokens';
+
+  @override
+  String get saveToken => 'Сохранить Токен';
+
+  @override
+  String get clearToken => 'Очистить';
+
+  @override
+  String get getToken => 'Получить Токен';
+
+  @override
+  String get status => 'Статус';
+
+  @override
+  String get size => 'Размер';
+
+  @override
+  String get supportsImages => 'Поддержка Изображений';
+
+  @override
+  String get maxTokens => 'Максимум Токенов';
+
+  @override
+  String get yes => 'Да';
+
+  @override
+  String get no => 'Нет';
+
+  @override
+  String get notDownloaded => 'Не Загружено';
+
+  @override
+  String get downloading => 'Загрузка...';
+
+  @override
+  String get ready => 'Готово';
+
+  @override
+  String get error => 'Ошибка';
+
+  @override
+  String get downloadingProgress => 'Загрузка...';
+
+  @override
+  String get modelManagement => 'Управление Моделью';
+
+  @override
+  String get gemmaModelReady => 'Модель Gemma 3n готова к использованию!';
+
+  @override
+  String get deleteModel => 'Удалить Модель';
+
+  @override
+  String get downloadModelSection => 'Загрузить Модель';
+
+  @override
+  String get downloadGemmaModel => 'Для использования локального ИИ загрузите модель Gemma 3n (AI Edge):';
+
+  @override
+  String get modelRequiresLicense => 'Эта модель требует принятия лицензии Google и использования токена доступа Hugging Face.';
+
+  @override
+  String get requiresHfLogin => '• Требуется вход в HF + принятие лицензии';
+
+  @override
+  String get storageSpaceNeeded => '• Необходимо ~2.9ГБ свободного места';
+
+  @override
+  String get runsLocallyPrivacy => '• Работает локально на вашем устройстве для приватности';
+
+  @override
+  String get optimizedMobileInference => '• Оптимизировано для мобильных устройств с быстрым выводом';
+
+  @override
+  String get openLicensePage => 'Открыть Страницу Лицензии';
+
+  @override
+  String get openHfTokens => 'Открыть Токены HF';
+
+  @override
+  String get cancelDownload => 'Отменить Загрузку';
+
+  @override
+  String get downloadCancelledByUser => 'Загрузка отменена пользователем';
+
+  @override
+  String get downloadGemmaModelButton => 'Загрузить Модель Gemma 3n (AI Edge) (~2.9ГБ)';
+
+  @override
+  String get huggingFaceTokenSaved => 'Токен Hugging Face сохранён';
+
+  @override
+  String get tokenCleared => 'Токен очищен';
+
+  @override
+  String get localLlmSettingsSaved => 'Настройки локального LLM успешно сохранены';
+
+  @override
+  String get modelDownloadedSuccessfully => 'Модель успешно загружена!';
+
+  @override
+  String get modelDownloadFailed => 'Ошибка загрузки модели. Попробуйте снова.';
+
+  @override
+  String get deleteModelConfirmation => 'Вы уверены, что хотите удалить загруженную модель Gemma 3n? Это освободит ~2.9ГБ места.';
+
+  @override
+  String get modelDeletedSuccessfully => 'Модель успешно удалена';
+
+  @override
+  String get localAiSettingsDescription => 'Настроить локальную модель ИИ для офлайн использования';
+
+  @override
+  String failedToLoadSettings(String error) => 'Ошибка загрузки настроек: $error';
+
+  @override
+  String failedToSaveToken(String error) => 'Ошибка сохранения токена: $error';
+
+  @override
+  String failedToDownloadModel(String error) => 'Ошибка загрузки модели: $error';
+
+  @override
+  String failedToDeleteModel(String error) => 'Ошибка удаления модели: $error';
 }

@@ -357,6 +357,10 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get getFreeApiKeyAt => '無料のAPIキーを取得：';
   @override
+  String get addCreditToUseAdvancedModels => '高度なモデルを使用するには1-2ドルのクレジットを追加';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouterはGPT-4、Claudeなどの有料モデルにアクセスするためにクレジットが必要です。無料モデルはクレジットなしで利用できます。';
+  @override
   String get localAiModel => 'ローカルAIモデル';
   @override
   String get privateWorksOffline => 'プライベート、オフラインで動作';
@@ -705,6 +709,24 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get apiKeyShouldStartWithSk => 'APIキーは "sk-" で始まる必要があります';
 
+  @override
+  String get howToGetApiKey => 'APIキーの取得方法：';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'openrouter.aiにアクセスしてサインアップ/ログインしてください';
+
+  @override
+  String get goToKeysSection => 'ダッシュボードの「Keys」セクションに移動';
+
+  @override
+  String get createNewApiKey => '新しいAPIキーを作成';
+
+  @override
+  String get getApiKeyHere => 'APIキーをここで取得：';
+
+  @override
+  String get updateKey => 'キーを更新';
+
   // Interview and character creation
   @override
   String get invalidCharacterCardFormat => '無効なキャラクターカード形式';
@@ -763,9 +785,6 @@ class AppLocalizationsJa extends AppLocalizations {
   // Additional UI strings
   @override
   String get skipForNow => '今はスキップ';
-
-  @override
-  String get updateKey => 'キーを更新';
 
   @override
   String get removeKey => 'キーを削除';
@@ -975,4 +994,261 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'こんにちは！詳細なキャラクターカードを作成する準備ができています。以下のいずれかをお選びください：\n\n1. あなたの性格や経験に関する質問にお答えください\n2. あなたの情報を含むファイル（PDF、TXT、DOC、またはメール）をアップロードしてください\n\nどちらがお好みですか？';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'グループチャット作成';
+
+  @override
+  String get editGroupChat => 'グループチャット編集';
+
+  @override
+  String get groupName => 'グループ名';
+
+  @override
+  String get enterGroupName => 'グループ名を入力...';
+
+  @override
+  String get selectedCharacters => '選択されたキャラクター';
+
+  @override
+  String get famousCharacters => '有名なキャラクター';
+
+  @override
+  String get yourCharacters => 'あなたのキャラクター';
+
+  @override
+  String get noFamousCharacters => '有名なキャラクターがありません';
+
+  @override
+  String get noUserCharacters => 'ユーザーキャラクターがありません';
+
+  @override
+  String get createGroup => 'グループ作成';
+
+  @override
+  String get updateGroup => 'グループ更新';
+
+  @override
+  String get groupCreationError => '2-6人のキャラクターを選択し、グループ名を入力してください';
+
+  @override
+  String get groupCreationFailed => 'グループ作成に失敗しました。再試行してください。';
+
+  @override
+  String get groupChats => 'グループチャット';
+
+  @override
+  String get noGroupChats => 'グループチャットがまだありません';
+
+  @override
+  String get createFirstGroup => '最初のグループチャットを作成';
+
+  @override
+  String get startGroupChat => 'グループチャット開始';
+
+  @override
+  String get addMembers => 'メンバー追加';
+
+  @override
+  String get removeMembers => 'メンバー削除';
+
+  @override
+  String get leaveGroup => 'グループ退出';
+
+  @override
+  String get deleteGroup => 'グループ削除';
+
+  @override
+  String get groupSettings => 'グループ設定';
+
+  @override
+  String get conversationStarters => '会話スターター';
+
+  @override
+  String get charactersTyping => 'キャラクターが入力中...';
+
+  @override
+  String get characterTyping => '{character}が入力中...';
+
+  @override
+  String get sendMessage => 'メッセージを送信...';
+
+  @override
+  String get groupChatWith => '{characters}とのグループチャット';
+
+  @override
+  String get lastActive => '最後のアクティブ {time}';
+
+  @override
+  String get membersCount => '{count}人のメンバー';
+
+  @override
+  String get messageCount => '{count}件のメッセージ';
+
+  @override
+  String get goBack => '戻る';
+
+  @override
+  String get retry => '再試行';
+
+  @override
+  String get groupsCreated => '作成されたグループ';
+
+  @override
+  String get members => 'メンバー';
+
+  @override
+  String get messages => 'メッセージ';
+
+  @override
+  String get createFirstGroupChat => '最初のグループチャットを作成して、複数のAIキャラクターとの会話を始めましょう。';
+
+  @override
+  String get openChat => 'チャットを開く';
+
+  @override
+  String get editGroup => 'グループを編集';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => 'ローカルAI設定';
+
+  @override
+  String get huggingFaceAccessToken => 'Hugging Faceアクセストークン';
+
+  @override
+  String get tokenIsSet => 'トークンが設定されています。以下で置き換えまたはクリアできます。';
+
+  @override
+  String get pasteHuggingFaceToken => 'Hugging Faceトークンを貼り付けてください。保護されたモデルのダウンロードに必要です。';
+
+  @override
+  String get hfTokenPlaceholder => 'hf_xxxトークン';
+
+  @override
+  String get hfTokenHint => 'huggingface.co/settings/tokensからトークンを貼り付け';
+
+  @override
+  String get saveToken => 'トークンを保存';
+
+  @override
+  String get clearToken => 'クリア';
+
+  @override
+  String get getToken => 'トークンを取得';
+
+  @override
+  String get status => '状態';
+
+  @override
+  String get size => 'サイズ';
+
+  @override
+  String get supportsImages => '画像サポート';
+
+  @override
+  String get maxTokens => '最大トークン数';
+
+  @override
+  String get yes => 'はい';
+
+  @override
+  String get no => 'いいえ';
+
+  @override
+  String get notDownloaded => 'ダウンロードされていません';
+
+  @override
+  String get downloading => 'ダウンロード中...';
+
+  @override
+  String get ready => '準備完了';
+
+  @override
+  String get error => 'エラー';
+
+  @override
+  String get downloadingProgress => 'ダウンロード中...';
+
+  @override
+  String get modelManagement => 'モデル管理';
+
+  @override
+  String get gemmaModelReady => 'Gemma 3nモデルが使用可能です！';
+
+  @override
+  String get deleteModel => 'モデルを削除';
+
+  @override
+  String get downloadModelSection => 'モデルをダウンロード';
+
+  @override
+  String get downloadGemmaModel => 'ローカルAIを使用するには、Gemma 3n (AI Edge)モデルをダウンロードしてください：';
+
+  @override
+  String get modelRequiresLicense => 'このモデルはGoogleのライセンス同意とHugging Faceアクセストークンの使用が必要です。';
+
+  @override
+  String get requiresHfLogin => '• HFログイン + ライセンス同意が必要';
+
+  @override
+  String get storageSpaceNeeded => '• 約2.9GBの空きストレージが必要';
+
+  @override
+  String get runsLocallyPrivacy => '• プライバシーのためデバイス上でローカル実行';
+
+  @override
+  String get optimizedMobileInference => '• 高速推論でモバイルデバイス向けに最適化';
+
+  @override
+  String get openLicensePage => 'ライセンスページを開く';
+
+  @override
+  String get openHfTokens => 'HFトークンを開く';
+
+  @override
+  String get cancelDownload => 'ダウンロードをキャンセル';
+
+  @override
+  String get downloadCancelledByUser => 'ユーザーによってダウンロードがキャンセルされました';
+
+  @override
+  String get downloadGemmaModelButton => 'Gemma 3n (AI Edge)モデルをダウンロード (~2.9GB)';
+
+  @override
+  String get huggingFaceTokenSaved => 'Hugging Faceトークンが保存されました';
+
+  @override
+  String get tokenCleared => 'トークンがクリアされました';
+
+  @override
+  String get localLlmSettingsSaved => 'ローカルLLM設定が正常に保存されました';
+
+  @override
+  String get modelDownloadedSuccessfully => 'モデルが正常にダウンロードされました！';
+
+  @override
+  String get modelDownloadFailed => 'モデルのダウンロードに失敗しました。再試行してください。';
+
+  @override
+  String get deleteModelConfirmation => 'ダウンロードしたGemma 3nモデルを削除してもよろしいですか？約2.9GBのストレージが解放されます。';
+
+  @override
+  String get modelDeletedSuccessfully => 'モデルが正常に削除されました';
+
+  @override
+  String get localAiSettingsDescription => 'オフライン使用のためのローカルAIモデルを設定';
+
+  @override
+  String failedToLoadSettings(String error) => '設定の読み込みに失敗しました：$error';
+
+  @override
+  String failedToSaveToken(String error) => 'トークンの保存に失敗しました：$error';
+
+  @override
+  String failedToDownloadModel(String error) => 'モデルのダウンロードに失敗しました：$error';
+
+  @override
+  String failedToDeleteModel(String error) => 'モデルの削除に失敗しました：$error';
 }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/services/preferences_service.dart';
 
 class LanguageProvider with ChangeNotifier {
   static const String _languageKey = 'user_language';
@@ -37,20 +37,19 @@ class LanguageProvider with ChangeNotifier {
 
   Future<void> initializeLanguage() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await PreferencesService.getPrefs();
       final savedLanguageCode = prefs.getString(_languageKey);
       if (savedLanguageCode != null) {
         _currentLocale = Locale(savedLanguageCode);
         notifyListeners();
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> setLanguage(String languageCode) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      
+      final prefs = await PreferencesService.getPrefs();
+
       // Ensure proper UTF-8 encoding for Cyrillic languages (Ukrainian and Russian)
       if (languageCode == 'uk' || languageCode == 'ru') {
         // Use explicit UTF-8 encoding for Cyrillic languages
@@ -60,11 +59,10 @@ class LanguageProvider with ChangeNotifier {
       } else {
         await prefs.setString(_languageKey, languageCode);
       }
-      
+
       _currentLocale = Locale(languageCode);
       notifyListeners();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   static List<Locale> get supportedLocales => const [
@@ -79,6 +77,12 @@ class LanguageProvider with ChangeNotifier {
     Locale('ru'),
   ];
 
-  static List<String> get supportedLanguageCodes => 
-    supportedLocales.map((locale) => locale.languageCode).toList();
-} 
+  static List<String> get supportedLanguageCodes =>
+      supportedLocales.map((locale) => locale.languageCode).toList();
+
+  @override
+  void dispose() {
+    // Clean up any resources if needed
+    super.dispose();
+  }
+}

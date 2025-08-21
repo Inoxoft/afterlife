@@ -47,25 +47,25 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
       'isLocal': true,
     },
     {
-      'id': 'google/gemini-2.0-flash-001',
-      'name': 'Gemini 2.0 Flash',
+      'id': 'google/gemini-2.5-pro',
+      'name': 'Gemini 2.5 Pro',
       'provider': 'Google',
       'description':
-          'Fast responses with good quality, ideal for most conversations.',
+          'Fast, high-quality responses with strong multimodal support.',
       'recommended': true,
     },
     {
-      'id': 'anthropic/claude-3-5-sonnet',
-      'name': 'Claude 3.5 Sonnet',
+      'id': 'anthropic/claude-sonnet-4',
+      'name': 'Claude 4 Sonnet',
       'provider': 'Anthropic',
-      'description': 'High quality responses with strong reasoning abilities.',
+      'description': 'Latest Claude with enhanced reasoning and capabilities.',
       'recommended': true,
     },
     {
-      'id': 'google/gemini-2.0-pro-001',
-      'name': 'Gemini 2.0 Pro',
-      'provider': 'Google',
-      'description': 'Higher quality responses, but may be slower than Flash.',
+      'id': 'openai/gpt-5-chat',
+      'name': 'GPT-5 Chat',
+      'provider': 'OpenAI',
+      'description': 'Long-context, strong reasoning and coding. Via OpenRouter.',
       'recommended': false,
     },
     {
@@ -82,13 +82,7 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
       'description': 'Open-source model with good all-around capabilities.',
       'recommended': false,
     },
-    {
-      'id': 'openai/gpt-4o',
-      'name': 'GPT-4o',
-      'provider': 'OpenAI',
-      'description': 'Powerful model with excellent language understanding.',
-      'recommended': false,
-    },
+    // Keep free model(s) separate elsewhere
   ];
 
   @override

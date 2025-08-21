@@ -1,9 +1,10 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../utils/env_config.dart';
+import '../utils/app_logger.dart';
+import '../../l10n/app_localizations.dart';
 
 /// A dialog that allows users to input their API key manually
 class ApiKeyInputDialog extends StatefulWidget {
@@ -95,9 +96,10 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   }
 
   Future<void> _saveApiKey(String apiKey) async {
+    final localizations = AppLocalizations.of(context);
     if (apiKey.trim().isEmpty) {
       setState(() {
-        _errorText = 'API key cannot be empty';
+        _errorText = localizations.apiKeyCannotBeEmpty;
         _isSubmitting = false;
       });
       return;
@@ -109,7 +111,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
     // Only validate format if it's a new key (not masked)
     if (!skipValidation && !apiKey.startsWith('sk-')) {
       setState(() {
-        _errorText = 'API key should start with "sk-"';
+        _errorText = localizations.apiKeyShouldStartWithSk;
         _isSubmitting = false;
       });
       return;
@@ -139,12 +141,13 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
 
       // Verify the key was properly saved
       final savedKey = EnvConfig.get('OPENROUTER_API_KEY');
-      print(
+      AppLogger.debug(
         'Verification - Retrieved key: ${savedKey != null ? '${savedKey.substring(0, 4)}...' : 'null'}',
+        tag: 'ApiKeyInputDialog'
       );
 
       if (savedKey != apiKey) {
-        print('Warning: Saved key does not match input key');
+        AppLogger.warning('Saved key does not match input key', tag: 'ApiKeyInputDialog');
       }
 
       // Call the callback if provided
@@ -157,7 +160,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
       }
     } catch (e) {
       setState(() {
-        _errorText = 'Error saving API key: $e';
+        _errorText = '${localizations.errorSavingApiKey}: $e';
         _isSubmitting = false;
       });
     }
@@ -165,6 +168,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return AlertDialog(
       backgroundColor: AppTheme.deepIndigo,
       shape: RoundedRectangleBorder(
@@ -175,7 +179,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         ),
       ),
       title: Text(
-        widget.isFromSettings ? 'OpenRouter API Key' : 'API Key Required',
+        widget.isFromSettings ? localizations.openRouterApiKey : localizations.apiKeyRequired,
         style: const TextStyle(color: Colors.white),
       ),
       content:
@@ -191,9 +195,8 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                 children: [
                   Text(
                     widget.isFromSettings
-                        ? 'Update your OpenRouter API key for AI functionality:'
-                        : 'The application requires an OpenRouter API key to function. '
-                            'Please enter your API key below:',
+                        ? localizations.updateApiKeyDescription
+                        : localizations.apiKeyRequiredDescription,
                     style: const TextStyle(color: Colors.white70),
                   ),
                   const SizedBox(height: 16),
@@ -204,7 +207,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: AppTheme.midnightPurple.withValues(alpha: 0.3),
-                      hintText: 'Enter API Key (sk-...)',
+                      hintText: localizations.enterApiKey,
                       hintStyle: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
                       ),
@@ -218,7 +221,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                                     alpha: 0.7,
                                   ),
                                 ),
-                                tooltip: 'Clear current key',
+                                tooltip: localizations.clearCurrentKey,
                                 onPressed: () async {
                                   setState(() {
                                     _controller.text = '';
@@ -292,7 +295,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              'To replace with a different key, clear the field first and enter new key',
+                              localizations.replaceKeyInstructions,
                               style: TextStyle(
                                 color: Colors.amber.withValues(alpha: 0.8),
                                 fontSize: 12,
@@ -324,7 +327,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'How to get your API key:',
+                              localizations.howToGetApiKey,
                               style: TextStyle(
                                 color: AppTheme.warmGold,
                                 fontSize: 14,
@@ -335,18 +338,27 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '1. Visit openrouter.ai and sign up/login',
+                          '1. ${localizations.visitOpenRouterAndSignUp}',
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '2. Go to "Keys" section in your dashboard',
+                          '2. ${localizations.goToKeysSection}',
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '3. Create a new API key',
+                          '3. ${localizations.createNewApiKey}',
                           style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '4. ${localizations.addCreditToUseAdvancedModels}',
+                          style: TextStyle(
+                            color: AppTheme.warmGold.withValues(alpha: 0.9),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         GestureDetector(
@@ -363,7 +375,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: '→ Get your API key here: ',
+                                  text: '→ ${localizations.getApiKeyHere} ',
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 12,
@@ -415,7 +427,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Using your custom API key',
+                            localizations.usingCustomApiKey,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.green.shade300,
@@ -432,7 +444,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
           onPressed:
               _isSubmitting ? null : () => Navigator.of(context).pop(false),
           child: Text(
-            widget.isFromSettings ? 'Cancel' : 'Skip for now',
+            widget.isFromSettings ? localizations.cancel : localizations.skipForNow,
             style: TextStyle(color: Colors.white70),
           ),
         ),
@@ -470,7 +482,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                       }
                     },
             child: Text(
-              'Remove Key',
+              localizations.removeKey,
               style: TextStyle(color: Colors.redAccent),
             ),
           ),
@@ -493,8 +505,8 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                   )
                   : Text(
                     widget.isFromSettings && _currentKey != null
-                        ? 'Update Key'
-                        : 'Save Key',
+                        ? localizations.updateKey
+                        : localizations.saveKey,
                   ),
         ),
       ],

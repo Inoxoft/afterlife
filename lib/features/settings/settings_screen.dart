@@ -1,8 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../core/services/preferences_service.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
 import '../../../core/services/onboarding_service.dart';
 import '../providers/characters_provider.dart';
@@ -194,8 +193,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
 
                     _buildSettingCard(
-                      title: 'Local AI Settings',
-                      subtitle: 'Configure local AI model for offline usage',
+                      title: localizations.localAiSettings,
+                      subtitle: localizations.localAiSettingsDescription,
                       icon: Icons.offline_bolt,
                       onTap: () => _navigateToLocalLLMSettings(context),
                     ),
@@ -341,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await charactersProvider.clearAll();
 
                     // Also clear settings
-                    final prefs = await SharedPreferences.getInstance();
+                    final prefs = await PreferencesService.getPrefs();
                     await prefs.clear();
 
                     // Reload settings after clearing

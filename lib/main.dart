@@ -1,5 +1,5 @@
-import 'dart:math';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,86 +7,232 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/env_config.dart';
 import 'core/utils/app_optimizer.dart';
+import 'core/utils/app_logger.dart';
 import 'features/providers/characters_provider.dart';
 import 'features/providers/language_provider.dart';
+import 'features/providers/group_chat_provider.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/character_interview/chat_service.dart' as interview_chat;
 import 'features/providers/chat_service.dart' as providers_chat;
 import 'features/character_prompts/famous_character_prompts.dart';
 import 'l10n/app_localizations.dart';
 import 'core/services/hybrid_chat_service.dart';
+import 'core/services/preferences_service.dart';
 import 'core/utils/ukrainian_font_utils.dart';
 
 class AppInitializationError extends Error {
   final String message;
-  AppInitializationError(this.message);
+  final Object? originalError;
+  AppInitializationError(this.message, [this.originalError]);
+
+  @override
+  String toString() =>
+      'AppInitializationError: $message${originalError != null ? ' (caused by: $originalError)' : ''}';
 }
 
-Future<void> _initializeApp() async {
-  // Initialize all app optimizations
-  await AppOptimizer.initializeApp();
+class InitializationResult {
+  final bool success;
+  final String? errorMessage;
+  final Object? error;
+  final List<String> warnings;
 
-  // Initialize environment configuration
+  const InitializationResult({
+    required this.success,
+    this.errorMessage,
+    this.error,
+    this.warnings = const [],
+  });
+
+  factory InitializationResult.success([List<String> warnings = const []]) =>
+      InitializationResult(success: true, warnings: warnings);
+
+  factory InitializationResult.failure(String message, [Object? error]) =>
+      InitializationResult(success: false, errorMessage: message, error: error);
+}
+
+Future<InitializationResult> _initializeApp() async {
+  final warnings = <String>[];
+
   try {
-    await EnvConfig.initialize();
-  } catch (e) {}
+    // Initialize all app optimizations
+    await AppOptimizer.initializeApp();
 
-  // Initialize services
+    // Initialize shared preferences service first (many other services depend on it)
+    try {
+      await PreferencesService.initialize();
+    } catch (e) {
+      AppLogger.serviceError('PreferencesService', 'initialization failed', e);
+      warnings.add('Preferences service failed to initialize');
+      // Don't fail completely - app can still work with degraded functionality
+    }
+
+    // Initialize environment configuration with proper error handling
+    try {
+      await EnvConfig.initialize();
+    } catch (e) {
+      AppLogger.serviceError('EnvConfig', 'initialization failed', e);
+      warnings.add('Configuration service failed to initialize');
+      // Don't fail completely - app can still work with default settings
+    }
+
+    // Initialize services with dependency management
+    final serviceResults = await _initializeServices();
+    warnings.addAll(serviceResults.warnings);
+
+    if (!serviceResults.success && serviceResults.errorMessage != null) {
+      return InitializationResult.failure(
+        'Critical services failed to initialize: ${serviceResults.errorMessage}',
+        serviceResults.error,
+      );
+    }
+
+    return InitializationResult.success(warnings);
+  } catch (e, stackTrace) {
+    AppLogger.critical('App initialization failed', error: e);
+    return InitializationResult.failure('Application failed to start', e);
+  }
+}
+
+Future<InitializationResult> _initializeServices() async {
+  final warnings = <String>[];
+  bool hasCriticalFailure = false;
+  Object? lastError;
+
   try {
     // Initialize hybrid chat service (this will initialize LocalLLMService)
-    await HybridChatService.initialize();
+    try {
+      await HybridChatService.initialize();
+    } catch (e) {
+      AppLogger.serviceError('HybridChatService', 'initialization failed', e);
+      warnings.add('AI chat service initialization failed');
+      hasCriticalFailure = true;
+      lastError = e;
+    }
 
     // Initialize character interview chat service
-    await interview_chat.ChatService.initialize();
-    interview_chat.ChatService.logDiagnostics();
+    try {
+      await interview_chat.ChatService.initialize();
+      interview_chat.ChatService.logDiagnostics();
+    } catch (e) {
+      AppLogger.serviceError(
+        'InterviewChatService',
+        'initialization failed',
+        e,
+      );
+      warnings.add('Character interview service failed');
+      // Not critical - app can work without this
+    }
 
     // Initialize providers chat service (if available)
     if (const bool.fromEnvironment(
       'USE_PROVIDER_CHAT_SERVICE',
       defaultValue: false,
     )) {
-      await providers_chat.ChatService.initialize();
-      providers_chat.ChatService.logDiagnostics();
+      try {
+        await providers_chat.ChatService.initialize();
+        providers_chat.ChatService.logDiagnostics();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Provider chat service initialization failed: $e');
+        }
+        warnings.add('Provider chat service failed');
+        // Not critical
+      }
     }
 
     // Initialize and clean famous character prompts
-    FamousCharacterPrompts.initialize();
-  } catch (e) {}
+    try {
+      FamousCharacterPrompts.initialize();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Famous character prompts initialization failed: $e');
+      }
+      warnings.add('Character prompts failed to load');
+      // Not critical - can work without famous characters
+    }
+
+    if (hasCriticalFailure) {
+      return InitializationResult.failure(
+        'Essential services failed to start',
+        lastError,
+      );
+    }
+
+    return InitializationResult.success(warnings);
+  } catch (e) {
+    return InitializationResult.failure(
+      'Unexpected error during service initialization',
+      e,
+    );
+  }
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize the hybrid chat service
-  await HybridChatService.initialize();
-
   runZonedGuarded(
     () async {
       try {
-        // We only need to initialize the app once
-        await _initializeApp();
+        final initResult = await _initializeApp();
+
+        if (!initResult.success) {
+          // Show error screen with detailed information
+          runApp(
+            ErrorApp(
+              error: initResult.errorMessage ?? 'Unknown initialization error',
+              technicalDetails: initResult.error?.toString(),
+              canRetry: true,
+            ),
+          );
+          return;
+        }
+
+        // Show warnings to user if any (in debug mode or development)
+        if (initResult.warnings.isNotEmpty) {
+          AppLogger.warning(
+            'App started with warnings: ${initResult.warnings.join(', ')}',
+          );
+        }
 
         runApp(
           MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (_) => CharactersProvider()),
               ChangeNotifierProvider(create: (_) => LanguageProvider()),
+              ChangeNotifierProvider(create: (_) => GroupChatProvider()),
             ],
-            child: const MyApp(),
+            child: MyApp(initializationWarnings: initResult.warnings),
           ),
         );
       } catch (e, stackTrace) {
-        runApp(const ErrorApp(error: 'Initialization Error'));
+        AppLogger.critical('Critical error in main', error: e);
+        runApp(
+          ErrorApp(
+            error: 'Critical Application Error',
+            technicalDetails: e.toString(),
+            canRetry: true,
+          ),
+        );
       }
     },
     (error, stackTrace) {
-      runApp(ErrorApp(error: error.toString()));
+      AppLogger.critical('Uncaught error', error: error);
+      // Last resort error handler
+      runApp(
+        ErrorApp(
+          error: 'Unexpected Error',
+          technicalDetails: error.toString(),
+          canRetry: false,
+        ),
+      );
     },
   );
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final List<String> initializationWarnings;
+
+  const MyApp({super.key, this.initializationWarnings = const []});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -222,8 +368,15 @@ class _MyAppState extends State<MyApp> {
 
 class ErrorApp extends StatelessWidget {
   final String error;
+  final String? technicalDetails;
+  final bool canRetry;
 
-  const ErrorApp({super.key, required this.error});
+  const ErrorApp({
+    super.key,
+    required this.error,
+    this.technicalDetails,
+    this.canRetry = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -255,10 +408,18 @@ class ErrorApp extends StatelessWidget {
                   style: const TextStyle(color: Colors.white70),
                   textAlign: TextAlign.center,
                 ),
+                if (technicalDetails != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    technicalDetails!,
+                    style: const TextStyle(color: Colors.white54),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () => SystemNavigator.pop(),
-                  child: const Text('Restart App'),
+                  child: Text(canRetry ? 'Restart App' : 'Exit App'),
                 ),
               ],
             ),

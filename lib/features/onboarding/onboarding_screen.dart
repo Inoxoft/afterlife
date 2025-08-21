@@ -292,7 +292,7 @@ class StarfieldPainter extends CustomPainter {
     for (final star in _stars) {
       final x = star.x * size.width;
       final y = star.y * size.height;
-      _starPaint.color = Colors.white.withOpacity(star.opacity);
+      _starPaint.color = Colors.white.withValues(alpha: star.opacity);
       canvas.drawCircle(Offset(x, y), star.size, _starPaint);
     }
   }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/local_llm_service.dart';
-import '../../core/services/hybrid_chat_service.dart';
 import 'dart:async';
+import '../../core/widgets/adaptive_text.dart';
+import '../../l10n/app_localizations.dart';
 
 class LocalLLMSettingsScreen extends StatefulWidget {
   const LocalLLMSettingsScreen({Key? key}) : super(key: key);
@@ -16,13 +16,18 @@ class LocalLLMSettingsScreen extends StatefulWidget {
 class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   bool _isLoading = false;
   String? _errorMessage;
-  bool _isEnabled = false;
-  LLMProvider _preferredProvider = LLMProvider.auto;
 
   // Model download state
   ModelDownloadStatus _modelStatus = ModelDownloadStatus.notDownloaded;
   double _downloadProgress = 0.0;
+  // Optional error detail; displayed via snackbars elsewhere
+  // ignore: unused_field
   String? _downloadError;
+
+  // Hugging Face token state
+  final TextEditingController _hfTokenController = TextEditingController();
+  bool _hasHfToken = false;
+  bool _isSavingToken = false;
 
   // Stream subscriptions
   StreamSubscription<double>? _progressSubscription;
@@ -39,6 +44,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   void dispose() {
     _progressSubscription?.cancel();
     _statusSubscription?.cancel();
+    _hfTokenController.dispose();
     super.dispose();
   }
 
@@ -74,20 +80,17 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
     try {
       final settings = LocalLLMService.getSettings();
-      final prefs = await SharedPreferences.getInstance();
+      final status = LocalLLMService.getStatus();
 
       if (mounted) {
         setState(() {
-          _isEnabled = settings['enabled'] ?? false;
           _modelStatus = ModelDownloadStatus.values.firstWhere(
             (e) => e.name == settings['modelStatus'],
             orElse: () => ModelDownloadStatus.notDownloaded,
           );
           _downloadProgress = settings['downloadProgress'] ?? 0.0;
           _downloadError = settings['downloadError'];
-          _preferredProvider =
-              LLMProvider.values[prefs.getInt('preferred_llm_provider') ??
-                  LLMProvider.auto.index];
+          _hasHfToken = (status['hasHuggingFaceToken'] == true);
 
           _isLoading = false;
         });
@@ -95,8 +98,44 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load settings: $e';
+          _errorMessage = AppLocalizations.of(context).failedToLoadSettings(e.toString());
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveHuggingFaceToken() async {
+    if (_isSavingToken) return;
+    setState(() {
+      _isSavingToken = true;
+    });
+    try {
+      final token = _hfTokenController.text.trim();
+      await LocalLLMService.setHuggingFaceToken(token.isEmpty ? null : token);
+      if (mounted) {
+        setState(() {
+          _hasHfToken = token.isNotEmpty;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              token.isNotEmpty ? AppLocalizations.of(context).huggingFaceTokenSaved : AppLocalizations.of(context).tokenCleared,
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).failedToSaveToken(e.toString())), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingToken = false;
         });
       }
     }
@@ -104,30 +143,21 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
   Future<void> _saveSettings() async {
     try {
-      await LocalLLMService.updateSettings({'enabled': _isEnabled});
-
-      await _savePreferredProvider();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Local LLM settings saved successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).localLlmSettingsSaved),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to save settings: $e';
+          _errorMessage = AppLocalizations.of(context).failedToSaveSettingsWithDetails(e.toString());
         });
       }
     }
-  }
-
-  Future<void> _savePreferredProvider() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('preferred_llm_provider', _preferredProvider.index);
-    HybridChatService.setPreferredProvider(_preferredProvider);
   }
 
   Future<void> _downloadModel() async {
@@ -144,12 +174,12 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Model downloaded successfully!')),
+            SnackBar(content: Text(AppLocalizations.of(context).modelDownloadedSuccessfully)),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to download model. Please try again.'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context).modelDownloadFailed),
               backgroundColor: Colors.red,
             ),
           );
@@ -158,7 +188,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to download model: $e';
+          _errorMessage = AppLocalizations.of(context).failedToDownloadModel(e.toString());
         });
       }
     }
@@ -169,18 +199,18 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Delete Model'),
-            content: const Text(
-              'Are you sure you want to delete the downloaded Hammer2.1 model? This will free up 1.6GB of storage.',
+            title: Text(AppLocalizations.of(context).deleteModel),
+            content: Text(
+              AppLocalizations.of(context).deleteModelConfirmation,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete'),
+                child: Text(AppLocalizations.of(context).delete),
               ),
             ],
           ),
@@ -196,13 +226,13 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Model deleted successfully')),
+            SnackBar(content: Text(AppLocalizations.of(context).modelDeletedSuccessfully)),
           );
         }
       } catch (e) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'Failed to delete model: $e';
+            _errorMessage = AppLocalizations.of(context).failedToDeleteModel(e.toString());
           });
         }
       }
@@ -213,7 +243,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Local AI Settings'),
+        title: Text(AppLocalizations.of(context).localAiSettings),
         backgroundColor: AppTheme.midnightPurple,
         foregroundColor: AppTheme.silverMist,
         actions: [
@@ -250,7 +280,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                     const SizedBox(height: 16),
                     _buildModelCard(),
                     const SizedBox(height: 16),
-                    _buildProviderSettings(),
+                    _buildHfTokenSection(),
                     const SizedBox(height: 16),
                     _buildDownloadSection(),
                   ],
@@ -259,9 +289,97 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     );
   }
 
+  Widget _buildHfTokenSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).huggingFaceAccessToken,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(_hasHfToken ? Icons.verified : Icons.info_outline,
+                    color: _hasHfToken ? Colors.green : Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _hasHfToken
+                        ? AppLocalizations.of(context).tokenIsSet
+                        : AppLocalizations.of(context).pasteHuggingFaceToken,
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _hfTokenController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).hfTokenPlaceholder,
+                hintText: AppLocalizations.of(context).hfTokenHint,
+                border: const OutlineInputBorder(),
+                suffixIcon: _isSavingToken
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _isSavingToken ? null : _saveHuggingFaceToken,
+                  icon: const Icon(Icons.save),
+                  label: Text(AppLocalizations.of(context).saveToken),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.midnightPurple,
+                    foregroundColor: AppTheme.silverMist,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _isSavingToken
+                      ? null
+                      : () {
+                          _hfTokenController.clear();
+                          _saveHuggingFaceToken();
+                        },
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(AppLocalizations.of(context).clearToken),
+                ),
+                TextButton.icon(
+                  onPressed: () => launchUrlString(
+                    'https://huggingface.co/settings/tokens',
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  icon: const Icon(Icons.vpn_key),
+                  label: Text(AppLocalizations.of(context).getToken),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildModelCard() {
+    // Read status to ensure up-to-date info if needed later
+    // ignore: unused_local_variable
     final status = LocalLLMService.getStatus();
-    final isAvailable = status['isAvailable'] ?? false;
     final settings = LocalLLMService.getSettings();
     final modelConfig = settings['modelConfig'] ?? {};
 
@@ -277,7 +395,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    modelConfig['displayName'] ?? 'Hammer2.1-1.5b (CPU) 1.6Gb',
+                    modelConfig['displayName'] ?? 'Gemma 3n E2B (AI Edge) ~2.9GB',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -287,22 +405,22 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildStatusRow('Status', _getStatusText(), _getStatusColor()),
+            _buildStatusRow(AppLocalizations.of(context).status, _getStatusText(), _getStatusColor()),
             const SizedBox(height: 8),
             _buildStatusRow(
-              'Size',
+              AppLocalizations.of(context).size,
               '${modelConfig['fileSizeGB'] ?? '1.6'} GB',
               Colors.grey[600],
             ),
             const SizedBox(height: 8),
             _buildStatusRow(
-              'Supports Images',
-              modelConfig['supportImage'] == true ? 'Yes' : 'No',
+              AppLocalizations.of(context).supportsImages,
+              modelConfig['supportImage'] == true ? AppLocalizations.of(context).yes : AppLocalizations.of(context).no,
               Colors.grey[600],
             ),
             const SizedBox(height: 8),
             _buildStatusRow(
-              'Max Tokens',
+              AppLocalizations.of(context).maxTokens,
               '${modelConfig['maxTokens'] ?? '1024'}',
               Colors.grey[600],
             ),
@@ -317,7 +435,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Downloading... ${(_downloadProgress * 100).toStringAsFixed(1)}%',
+                '${AppLocalizations.of(context).downloadingProgress} ${(_downloadProgress * 100).toStringAsFixed(1)}%',
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
@@ -329,15 +447,28 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
   Widget _buildStatusRow(String label, String value, Color? color) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-        Text(
-          value,
-          style: TextStyle(
-            color: color ?? Colors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+        Expanded(
+          flex: 1,
+          child: Text(
+            label,
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 2,
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: TextStyle(
+              color: color ?? Colors.black,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -347,13 +478,13 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   String _getStatusText() {
     switch (_modelStatus) {
       case ModelDownloadStatus.notDownloaded:
-        return 'Not Downloaded';
+        return AppLocalizations.of(context).notDownloaded;
       case ModelDownloadStatus.downloading:
-        return 'Downloading...';
+        return AppLocalizations.of(context).downloading;
       case ModelDownloadStatus.downloaded:
-        return _isEnabled ? 'Ready' : 'Downloaded (Disabled)';
+        return AppLocalizations.of(context).ready;
       case ModelDownloadStatus.error:
-        return 'Error';
+        return AppLocalizations.of(context).error;
     }
   }
 
@@ -364,70 +495,13 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
       case ModelDownloadStatus.downloading:
         return Colors.blue;
       case ModelDownloadStatus.downloaded:
-        return _isEnabled ? Colors.green : Colors.grey;
+        return Colors.green;
       case ModelDownloadStatus.error:
         return Colors.red;
     }
   }
 
-  Widget _buildProviderSettings() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'AI Provider Settings',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: const Text('Enable Local AI'),
-              subtitle: const Text('Use local AI when available'),
-              value: _isEnabled,
-              onChanged:
-                  _modelStatus == ModelDownloadStatus.downloaded
-                      ? (value) {
-                        if (mounted) {
-                          setState(() {
-                            _isEnabled = value;
-                          });
-                        }
-                      }
-                      : null,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Preferred Provider',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            DropdownButton<LLMProvider>(
-              value: _preferredProvider,
-              isExpanded: true,
-              items:
-                  LLMProvider.values.map((provider) {
-                    return DropdownMenuItem(
-                      value: provider,
-                      child: Text(
-                        HybridChatService.getProviderDisplayName(provider),
-                      ),
-                    );
-                  }).toList(),
-              onChanged: (value) {
-                if (value != null && mounted) {
-                  setState(() {
-                    _preferredProvider = value;
-                  });
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Removed AI Provider Settings: provider always Auto (smart selection)
 
   Widget _buildDownloadSection() {
     if (_modelStatus == ModelDownloadStatus.downloaded) {
@@ -437,17 +511,17 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Model Management',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context).modelManagement,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              const Text('The Hammer2.1 model is ready to use!'),
+              Text(AppLocalizations.of(context).gemmaModelReady),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _deleteModel,
                 icon: const Icon(Icons.delete),
-                label: const Text('Delete Model'),
+                label: Text(AppLocalizations.of(context).deleteModel),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
@@ -465,22 +539,36 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Download Model',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).downloadModelSection,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'To use local AI, you need to download the Hammer2.1 model:',
-              style: TextStyle(fontSize: 14),
+            Text(AppLocalizations.of(context).downloadGemmaModel, style: const TextStyle(fontSize: 14)),
+            const SizedBox(height: 8),
+            Text(AppLocalizations.of(context).modelRequiresLicense, style: const TextStyle(fontSize: 12)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                TextButton.icon(
+                  onPressed: () => launchUrlString('https://huggingface.co/google/gemma-3n-E2B-it-litert-preview', mode: LaunchMode.externalApplication),
+                  icon: const Icon(Icons.open_in_new),
+                  label: Text(AppLocalizations.of(context).openLicensePage),
+                ),
+                TextButton.icon(
+                  onPressed: () => launchUrlString('https://huggingface.co/settings/tokens', mode: LaunchMode.externalApplication),
+                  icon: const Icon(Icons.vpn_key),
+                  label: Text(AppLocalizations.of(context).openHfTokens),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              '• Hammer2.1 is an open-source model (no authentication required)',
-            ),
-            const Text('• 1.6GB of free storage space needed'),
-            const Text('• Runs locally on your device for privacy'),
-            const Text('• Optimized for mobile devices with fast inference'),
+            Text(AppLocalizations.of(context).requiresHfLogin),
+            Text(AppLocalizations.of(context).storageSpaceNeeded),
+            Text(AppLocalizations.of(context).runsLocallyPrivacy),
+            Text(AppLocalizations.of(context).optimizedMobileInference),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -494,12 +582,12 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                               if (mounted) {
                                 setState(() {
                                   _modelStatus = ModelDownloadStatus.error;
-                                  _downloadError = 'Download cancelled by user';
+                                  _downloadError = AppLocalizations.of(context).downloadCancelledByUser;
                                 });
                               }
                             },
                             icon: const Icon(Icons.stop),
-                            label: const Text('Cancel Download'),
+                            label: Text(AppLocalizations.of(context).cancelDownload),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
@@ -508,7 +596,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Downloading... ${(_downloadProgress * 100).toStringAsFixed(1)}%',
+                            '${AppLocalizations.of(context).downloadingProgress} ${(_downloadProgress * 100).toStringAsFixed(1)}%',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,
@@ -516,14 +604,32 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                           ),
                         ],
                       )
-                      : ElevatedButton.icon(
+                      : ElevatedButton(
                         onPressed: _downloadModel,
-                        icon: const Icon(Icons.download),
-                        label: const Text('Download Hammer2.1 Model (1.6GB)'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.midnightPurple,
                           foregroundColor: AppTheme.silverMist,
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(Icons.download),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: AdaptiveText(
+                                text: AppLocalizations.of(context).downloadGemmaModelButton,
+                                baseStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxFontSize: 16,
+                                minFontSize: 12,
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
             ),

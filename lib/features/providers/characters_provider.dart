@@ -1,27 +1,20 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/character_model.dart';
+import '../../core/providers/base_provider.dart';
+import '../../core/services/preferences_service.dart';
 
-class CharactersProvider with ChangeNotifier {
+class CharactersProvider extends BaseProvider {
   static const String _storageKey = 'characters';
 
-  // Cache for shared preferences to avoid repeated access
-  SharedPreferences? _prefsCache;
-
   List<CharacterModel> _characters = [];
-  bool _isLoading = false;
   String? _selectedCharacterId;
-  String? _lastError;
 
   // Memory cache for characters by ID for faster lookups
   final Map<String, CharacterModel> _characterCache = {};
 
   List<CharacterModel> get characters => List.unmodifiable(_characters);
-  bool get isLoading => _isLoading;
-  String? get lastError => _lastError;
-  bool get hasError => _lastError != null;
 
   CharacterModel? get selectedCharacter {
     if (_selectedCharacterId == null) {
@@ -51,50 +44,39 @@ class CharactersProvider with ChangeNotifier {
     _loadCharacters();
   }
 
-  // Get shared preferences instance with caching
+  // Get shared preferences instance (now uses centralized service)
   Future<SharedPreferences> _getPrefs() async {
-    if (_prefsCache != null) {
-      return _prefsCache!;
-    }
-    _prefsCache = await SharedPreferences.getInstance();
-    return _prefsCache!;
+    return await PreferencesService.getPrefs();
   }
 
   Future<void> _loadCharacters() async {
-    _isLoading = true;
-    _lastError = null;
-    notifyListeners();
+    await executeWithState(
+      operation: () async {
+        final prefs = await _getPrefs();
+        final charactersJson = prefs.getStringList(_storageKey) ?? [];
 
-    try {
-      final prefs = await _getPrefs();
-      final charactersJson = prefs.getStringList(_storageKey) ?? [];
-
-      if (charactersJson.isEmpty) {
-        _characters = [];
-      } else {
-        try {
-          _characters = await compute(_parseCharactersJson, charactersJson);
-
-          // Update cache
-          _characterCache.clear();
-          for (var char in _characters) {
-            _characterCache[char.id] = char;
-          }
-        } catch (e) {
-          _lastError = 'Error parsing characters: $e';
+        if (charactersJson.isEmpty) {
           _characters = [];
-        }
-      }
+        } else {
+          try {
+            _characters = await compute(_parseCharactersJson, charactersJson);
 
-      _sortCharacters();
-      _updateSelectedCharacter();
-    } catch (e) {
-      _lastError = 'Error loading characters: $e';
-      _characters = [];
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+            // Update cache
+            _characterCache.clear();
+            for (var char in _characters) {
+              _characterCache[char.id] = char;
+            }
+          } catch (e) {
+            setError('Error parsing characters: $e', error: e);
+            _characters = [];
+          }
+        }
+
+        _sortCharacters();
+        _updateSelectedCharacter();
+      },
+      operationName: 'load characters',
+    );
   }
 
   // Parse character JSON in an isolate for better performance
@@ -134,9 +116,9 @@ class CharactersProvider with ChangeNotifier {
 
       // Then save the new list
       await prefs.setStringList(_storageKey, charactersJson);
-      _lastError = null;
+      clearError();
     } catch (e) {
-      _lastError = 'Error saving characters: $e';
+      setError('Error saving characters: $e', error: e);
       rethrow;
     }
   }
@@ -157,7 +139,7 @@ class CharactersProvider with ChangeNotifier {
       await _saveCharacters();
       notifyListeners();
     } catch (e) {
-      print('Error in addCharacter: $e');
+      setError('Error adding character: $e', error: e);
       rethrow;
     }
   }
@@ -175,7 +157,7 @@ class CharactersProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      _lastError = 'Error updating character: $e';
+      setError('Error updating character: $e', error: e);
       rethrow;
     }
   }
@@ -212,7 +194,7 @@ class CharactersProvider with ChangeNotifier {
       await _saveCharacters();
       notifyListeners();
     } catch (e) {
-      _lastError = 'Error updating character field: $e';
+      setError('Error updating character field: $e', error: e);
       rethrow;
     }
   }
@@ -225,7 +207,7 @@ class CharactersProvider with ChangeNotifier {
       await _saveCharacters();
       notifyListeners();
     } catch (e) {
-      _lastError = 'Error deleting character: $e';
+      setError('Error deleting character: $e', error: e);
       rethrow;
     }
   }
@@ -254,7 +236,7 @@ class CharactersProvider with ChangeNotifier {
 
       await updateCharacter(updatedCharacter);
     } catch (e) {
-      _lastError = 'Error adding message: $e';
+      setError('Error adding message: $e', error: e);
       rethrow;
     }
   }
@@ -286,15 +268,13 @@ class CharactersProvider with ChangeNotifier {
       await _saveCharacters();
       notifyListeners();
     } catch (e) {
-      _lastError = 'Error adding message to character: $e';
+      setError('Error adding message to character: $e', error: e);
       rethrow;
     }
   }
 
-  void clearError() {
-    _lastError = null;
-    notifyListeners();
-  }
+  // This method is now inherited from BaseProvider
+  // void clearError() is already available
 
   Future<CharacterModel?> loadCharacterById(String id) async {
     try {
@@ -385,11 +365,20 @@ class CharactersProvider with ChangeNotifier {
       final prefs = await _getPrefs();
       await prefs.remove(_storageKey);
 
-      _lastError = null;
+      clearError();
       notifyListeners();
     } catch (e) {
-      _lastError = 'Error clearing all data: $e';
+      setError('Error clearing all data: $e', error: e);
       rethrow;
     }
+  }
+
+  @override
+  void dispose() {
+    // Clear caches to prevent memory leaks
+    _characterCache.clear();
+    _characters.clear();
+    _selectedCharacterId = null;
+    super.dispose();
   }
 }

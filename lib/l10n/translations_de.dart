@@ -384,6 +384,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get getFreeApiKeyAt =>
       'Holen Sie sich Ihren kostenlosen API-Schlüssel bei ';
   @override
+  String get addCreditToUseAdvancedModels => '1-2 \$ Guthaben hinzufügen für erweiterte Modelle';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouter benötigt Guthaben für kostenpflichtige Modelle wie GPT-4, Claude, etc. Kostenlose Modelle sind ohne Guthaben verfügbar.';
+  @override
   String get localAiModel => 'Lokales KI-Modell';
   @override
   String get privateWorksOffline => 'Privat, funktioniert offline';
@@ -859,6 +863,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get apiKeyShouldStartWithSk =>
       'API-Schlüssel sollte mit "sk-" beginnen';
 
+  @override
+  String get howToGetApiKey => 'So erhalten Sie Ihren API-Schlüssel:';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'Besuchen Sie openrouter.ai und melden Sie sich an/registrieren Sie sich';
+
+  @override
+  String get goToKeysSection => 'Gehen Sie zum Bereich "Keys" in Ihrem Dashboard';
+
+  @override
+  String get createNewApiKey => 'Erstellen Sie einen neuen API-Schlüssel';
+
+  @override
+  String get getApiKeyHere => 'Holen Sie sich Ihren API-Schlüssel hier:';
+
+  @override
+  String get updateKey => 'Schlüssel aktualisieren';
+
   // Interview and character creation
   @override
   String get invalidCharacterCardFormat => 'Ungültiges Charakterkarten-Format';
@@ -920,9 +942,6 @@ class AppLocalizationsDe extends AppLocalizations {
   // Additional UI strings
   @override
   String get skipForNow => 'Vorerst überspringen';
-
-  @override
-  String get updateKey => 'Schlüssel aktualisieren';
 
   @override
   String get removeKey => 'Schlüssel entfernen';
@@ -1047,4 +1066,261 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Hallo! Ich bin bereit, eine detaillierte Charakterkarte für dich zu erstellen. Du kannst entweder:\n\n1. Meine Fragen zu deiner Persönlichkeit und deinen Erfahrungen beantworten\n2. Eine Datei (PDF, TXT, DOC oder E-Mail) mit deinen Informationen hochladen\n\nWas würdest du bevorzugen?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Gruppenchat erstellen';
+
+  @override
+  String get editGroupChat => 'Gruppenchat bearbeiten';
+
+  @override
+  String get groupName => 'Gruppenname';
+
+  @override
+  String get enterGroupName => 'Gruppenname eingeben...';
+
+  @override
+  String get selectedCharacters => 'Ausgewählte Charaktere';
+
+  @override
+  String get famousCharacters => 'Berühmte Charaktere';
+
+  @override
+  String get yourCharacters => 'Deine Charaktere';
+
+  @override
+  String get noFamousCharacters => 'Keine berühmten Charaktere verfügbar';
+
+  @override
+  String get noUserCharacters => 'Keine Benutzercharaktere verfügbar';
+
+  @override
+  String get createGroup => 'Gruppe erstellen';
+
+  @override
+  String get updateGroup => 'Gruppe aktualisieren';
+
+  @override
+  String get groupCreationError => 'Bitte wähle 2-6 Charaktere aus und gib einen Gruppennamen ein';
+
+  @override
+  String get groupCreationFailed => 'Gruppenerstellung fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get groupChats => 'Gruppenchats';
+
+  @override
+  String get noGroupChats => 'Noch keine Gruppenchats';
+
+  @override
+  String get createFirstGroup => 'Erstelle deinen ersten Gruppenchat';
+
+  @override
+  String get startGroupChat => 'Gruppenchat starten';
+
+  @override
+  String get addMembers => 'Mitglieder hinzufügen';
+
+  @override
+  String get removeMembers => 'Mitglieder entfernen';
+
+  @override
+  String get leaveGroup => 'Gruppe verlassen';
+
+  @override
+  String get deleteGroup => 'Gruppe löschen';
+
+  @override
+  String get groupSettings => 'Gruppeneinstellungen';
+
+  @override
+  String get conversationStarters => 'Gesprächsstarter';
+
+  @override
+  String get charactersTyping => 'Charaktere tippen...';
+
+  @override
+  String get characterTyping => '{character} tippt...';
+
+  @override
+  String get sendMessage => 'Nachricht senden...';
+
+  @override
+  String get groupChatWith => 'Gruppenchat mit {characters}';
+
+  @override
+  String get lastActive => 'Zuletzt aktiv {time}';
+
+  @override
+  String get membersCount => '{count} Mitglieder';
+
+  @override
+  String get messageCount => '{count} Nachrichten';
+
+  @override
+  String get goBack => 'Zurück';
+
+  @override
+  String get retry => 'Wiederholen';
+
+  @override
+  String get groupsCreated => 'Gruppen erstellt';
+
+  @override
+  String get members => 'Mitglieder';
+
+  @override
+  String get messages => 'Nachrichten';
+
+  @override
+  String get createFirstGroupChat => 'Erstellen Sie Ihren ersten Gruppenchat, um Gespräche mit mehreren KI-Charakteren zu führen.';
+
+  @override
+  String get openChat => 'Chat öffnen';
+
+  @override
+  String get editGroup => 'Gruppe bearbeiten';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => 'Lokale KI-Einstellungen';
+
+  @override
+  String get huggingFaceAccessToken => 'Hugging Face Zugriffstoken';
+
+  @override
+  String get tokenIsSet => 'Token ist gesetzt. Sie können es unten ersetzen oder löschen.';
+
+  @override
+  String get pasteHuggingFaceToken => 'Fügen Sie Ihr Hugging Face Token ein. Erforderlich zum Herunterladen geschützter Modelle.';
+
+  @override
+  String get hfTokenPlaceholder => 'hf_xxx Token';
+
+  @override
+  String get hfTokenHint => 'Token von huggingface.co/settings/tokens einfügen';
+
+  @override
+  String get saveToken => 'Token Speichern';
+
+  @override
+  String get clearToken => 'Löschen';
+
+  @override
+  String get getToken => 'Token Holen';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get size => 'Größe';
+
+  @override
+  String get supportsImages => 'Unterstützt Bilder';
+
+  @override
+  String get maxTokens => 'Max Tokens';
+
+  @override
+  String get yes => 'Ja';
+
+  @override
+  String get no => 'Nein';
+
+  @override
+  String get notDownloaded => 'Nicht Heruntergeladen';
+
+  @override
+  String get downloading => 'Herunterladen...';
+
+  @override
+  String get ready => 'Bereit';
+
+  @override
+  String get error => 'Fehler';
+
+  @override
+  String get downloadingProgress => 'Herunterladen...';
+
+  @override
+  String get modelManagement => 'Modellverwaltung';
+
+  @override
+  String get gemmaModelReady => 'Das Gemma 3n Modell ist bereit zur Verwendung!';
+
+  @override
+  String get deleteModel => 'Modell Löschen';
+
+  @override
+  String get downloadModelSection => 'Modell Herunterladen';
+
+  @override
+  String get downloadGemmaModel => 'Für lokale KI laden Sie das Gemma 3n (AI Edge) Modell herunter:';
+
+  @override
+  String get modelRequiresLicense => 'Dieses Modell erfordert die Annahme von Googles Lizenz und die Verwendung eines Hugging Face Zugriffstokens.';
+
+  @override
+  String get requiresHfLogin => '• Erfordert HF-Anmeldung + Lizenzannahme';
+
+  @override
+  String get storageSpaceNeeded => '• ~2.9GB freier Speicherplatz benötigt';
+
+  @override
+  String get runsLocallyPrivacy => '• Läuft lokal auf Ihrem Gerät für Privatsphäre';
+
+  @override
+  String get optimizedMobileInference => '• Optimiert für mobile Geräte mit schneller Inferenz';
+
+  @override
+  String get openLicensePage => 'Lizenzseite Öffnen';
+
+  @override
+  String get openHfTokens => 'HF Tokens Öffnen';
+
+  @override
+  String get cancelDownload => 'Download Abbrechen';
+
+  @override
+  String get downloadGemmaModelButton => 'Gemma 3n (AI Edge) Modell Herunterladen (~2.9GB)';
+
+  @override
+  String get deleteModelConfirmation => 'Sind Sie sicher, dass Sie das heruntergeladene Gemma 3n Modell löschen möchten? Dies wird ~2.9GB Speicherplatz freigeben.';
+
+  @override
+  String get huggingFaceTokenSaved => 'Hugging Face Token gespeichert';
+
+  @override
+  String get tokenCleared => 'Token gelöscht';
+
+  @override
+  String get localLlmSettingsSaved => 'Lokale LLM-Einstellungen erfolgreich gespeichert';
+
+  @override
+  String get modelDownloadedSuccessfully => 'Modell erfolgreich heruntergeladen!';
+
+  @override
+  String get modelDownloadFailed => 'Modell-Download fehlgeschlagen. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get modelDeletedSuccessfully => 'Modell erfolgreich gelöscht';
+
+  @override
+  String get downloadCancelledByUser => 'Download vom Benutzer abgebrochen';
+
+  @override
+  String get localAiSettingsDescription => 'Lokales KI-Modell für Offline-Nutzung konfigurieren';
+
+  @override
+  String failedToLoadSettings(String error) => 'Fehler beim Laden der Einstellungen: $error';
+
+  @override
+  String failedToSaveToken(String error) => 'Fehler beim Speichern des Tokens: $error';
+
+  @override
+  String failedToDownloadModel(String error) => 'Fehler beim Herunterladen des Modells: $error';
+
+  @override
+  String failedToDeleteModel(String error) => 'Fehler beim Löschen des Modells: $error';
 }

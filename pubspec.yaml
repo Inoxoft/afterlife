@@ -35,7 +35,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   provider: ^6.0.5
   shared_preferences: ^2.2.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   http: ^1.2.0
   file_selector: ^1.0.0
   path: ^1.8.3
@@ -74,46 +74,43 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/einstein.png   # Einstein mask image
-    - assets/images/monroe.png     # Monroe mask image
-    - assets/images/turing.png     # Turing mask image
-    - assets/images/reagan.png     # Reagan mask image
+    # Core app images
     - assets/images/afterlife_icon.png
     - assets/images/einstein_mask.png  # Einstein with LLM armor illustration
     - assets/images/perspective_mask.png
-    # Famous character portraits
-    - assets/images/kobe_bryant.png
-    - assets/images/kurt_cobain.png
-    - assets/images/nelson_mandela.png
+    
+    # Character portraits (alphabetically organized for easier maintenance)
+    - assets/images/abraham_lincoln.png
+    - assets/images/avici.png
     - assets/images/bob_marley.png
     - assets/images/bruce_lee.png
-    - assets/images/martin_luther.png
-    - assets/images/marie_curie.png
-    - assets/images/abraham_lincoln.png
-    - assets/images/cleopatra.png
-    - assets/images/avici.png
-    - assets/images/tupac.png
-    - assets/images/david_bowie.png
-    - assets/images/stephen_hawking.png
-    - assets/images/elvis_presley.png
-    - assets/images/winston_churchill.png
-    - assets/images/nikola_tesla.png
-    - assets/images/william_shakespeare.png
     - assets/images/caesar.png
-    - assets/images/steve_jobs.png
-    - assets/images/diana_princess.png
-    - assets/images/freddie_mercury.png
-    - assets/images/muhammad_ali.png
     - assets/images/carl_sagan.png
-    - assets/images/vincent_van_gogh.png
+    - assets/images/cleopatra.png
     - assets/images/da_vinci.png
-    - assets/images/socrates.png
+    - assets/images/david_bowie.png
+    - assets/images/diana_princess.png
+    - assets/images/einstein.png
+    - assets/images/elvis_presley.png
+    - assets/images/freddie_mercury.png
     - assets/images/gandhi.png
-    # Additional character images (may not be used yet)
-    - assets/images/jane_austen.png
-    - assets/images/edgar_allan_poe.png
-    - assets/images/mark_twain.png
-    - assets/images/oscar_wilde.png
+    - assets/images/kobe_bryant.png
+    - assets/images/kurt_cobain.png
+    - assets/images/marie_curie.png
+    - assets/images/martin_luther.png
+    - assets/images/monroe.png
+    - assets/images/muhammad_ali.png
+    - assets/images/nelson_mandela.png
+    - assets/images/nikola_tesla.png
+    - assets/images/reagan.png
+    - assets/images/socrates.png
+    - assets/images/stephen_hawking.png
+    - assets/images/steve_jobs.png
+    - assets/images/tupac.png
+    - assets/images/turing.png
+    - assets/images/vincent_van_gogh.png
+    - assets/images/william_shakespeare.png
+    - assets/images/winston_churchill.png
   #
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
@@ -124,6 +121,7 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
+    # Custom fonts optimized for Flutter (only .ttf files needed)
     - family: Cinzel
       fonts:
         - asset: assets/fonts/cinzel-v25-latin_latin-ext-regular.ttf

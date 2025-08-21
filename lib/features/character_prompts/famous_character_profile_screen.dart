@@ -600,8 +600,8 @@ class _FamousCharacterProfileScreenState
             final localizations = AppLocalizations.of(context);
             setState(() {
               _selectedModel = id;
-              FamousCharacterPrompts.setSelectedModel(widget.name, id);
             });
+            FamousCharacterPrompts.setSelectedModel(widget.name, id);
             // Show a confirmation to the user
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

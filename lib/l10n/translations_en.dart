@@ -504,6 +504,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get getFreeApiKeyAt => 'Get your free API key at ';
   @override
+  String get addCreditToUseAdvancedModels => 'Add \$1-2 credit to use advanced models';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouter requires credits to access paid models like GPT-4, Claude, etc. Free models are available without credits.';
+  @override
   String get localAiModel => 'Local AI Model';
   @override
   String get privateWorksOffline => 'Private, works offline';
@@ -969,6 +973,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get apiKeyShouldStartWithSk => 'API key should start with "sk-"';
 
+  @override
+  String get howToGetApiKey => 'How to get your API key:';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'Visit openrouter.ai and sign up/login';
+
+  @override
+  String get goToKeysSection => 'Go to "Keys" section in your dashboard';
+
+  @override
+  String get createNewApiKey => 'Create a new API key';
+
+  @override
+  String get getApiKeyHere => 'Get your API key here:';
+
+  @override
+  String get updateKey => 'Update Key';
+
   // Interview and character creation
   @override
   String get invalidCharacterCardFormat => 'Invalid character card format';
@@ -1028,9 +1050,6 @@ class AppLocalizationsEn extends AppLocalizations {
   // Additional UI strings
   @override
   String get skipForNow => 'Skip for now';
-
-  @override
-  String get updateKey => 'Update Key';
 
   @override
   String get removeKey => 'Remove Key';
@@ -1152,4 +1171,263 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get interviewWelcomeMessage =>
       'Hello! I\'m ready to create a detailed character card for you. You can either:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhich would you prefer?';
+
+  // Group Chat
+  @override
+  String get createGroupChat => 'Create Group Chat';
+
+  @override
+  String get editGroupChat => 'Edit Group Chat';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get enterGroupName => 'Enter group name...';
+
+  @override
+  String get selectedCharacters => 'Selected Characters';
+
+  @override
+  String get famousCharacters => 'Famous Characters';
+
+  @override
+  String get yourCharacters => 'Your Characters';
+
+  @override
+  String get noFamousCharacters => 'No famous characters available';
+
+  @override
+  String get noUserCharacters => 'No user characters available';
+
+  @override
+  String get createGroup => 'Create Group';
+
+  @override
+  String get updateGroup => 'Update Group';
+
+  @override
+  String get groupCreationError => 'Please select 2-6 characters and enter a group name';
+
+  @override
+  String get groupCreationFailed => 'Failed to create group. Please try again.';
+
+  @override
+  String get groupChats => 'Group Chats';
+
+  @override
+  String get noGroupChats => 'No group chats yet';
+
+  @override
+  String get createFirstGroup => 'Create your first group chat';
+
+  @override
+  String get startGroupChat => 'Start Group Chat';
+
+  @override
+  String get addMembers => 'Add Members';
+
+  @override
+  String get removeMembers => 'Remove Members';
+
+  @override
+  String get leaveGroup => 'Leave Group';
+
+  @override
+  String get deleteGroup => 'Delete Group';
+
+  @override
+  String get groupSettings => 'Group Settings';
+
+  @override
+  String get conversationStarters => 'Conversation Starters';
+
+  @override
+  String get charactersTyping => 'Characters are typing...';
+
+  @override
+  String get characterTyping => '{character} is typing...';
+
+  @override
+  String get sendMessage => 'Send message...';
+
+  @override
+  String get groupChatWith => 'Group chat with {characters}';
+
+  @override
+  String get lastActive => 'Last active {time}';
+
+  @override
+  String get membersCount => '{count} members';
+
+  @override
+  String get messageCount => '{count} messages';
+
+  @override
+  String get goBack => 'Go Back';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get groupsCreated => 'groups created';
+
+  @override
+  String get members => 'members';
+
+  @override
+  String get messages => 'messages';
+
+
+
+  @override
+  String get createFirstGroupChat => 'Create your first group chat to start conversations with multiple AI characters.';
+
+  @override
+  String get openChat => 'Open Chat';
+
+  @override
+  String get editGroup => 'Edit Group';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => 'Local AI Settings';
+
+  @override
+  String get huggingFaceAccessToken => 'Hugging Face Access Token';
+
+  @override
+  String get tokenIsSet => 'Token is set. You can replace or clear it below.';
+
+  @override
+  String get pasteHuggingFaceToken => 'Paste your Hugging Face token. Required to download protected models.';
+
+  @override
+  String get hfTokenPlaceholder => 'hf_xxx token';
+
+  @override
+  String get hfTokenHint => 'Paste token from huggingface.co/settings/tokens';
+
+  @override
+  String get saveToken => 'Save Token';
+
+  @override
+  String get clearToken => 'Clear';
+
+  @override
+  String get getToken => 'Get Token';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get size => 'Size';
+
+  @override
+  String get supportsImages => 'Supports Images';
+
+  @override
+  String get maxTokens => 'Max Tokens';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get notDownloaded => 'Not Downloaded';
+
+  @override
+  String get downloading => 'Downloading...';
+
+  @override
+  String get ready => 'Ready';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get downloadingProgress => 'Downloading...';
+
+  @override
+  String get modelManagement => 'Model Management';
+
+  @override
+  String get gemmaModelReady => 'The Gemma 3n model is ready to use!';
+
+  @override
+  String get deleteModel => 'Delete Model';
+
+  @override
+  String get downloadModelSection => 'Download Model';
+
+  @override
+  String get downloadGemmaModel => 'To use local AI, download the Gemma 3n (AI Edge) model:';
+
+  @override
+  String get modelRequiresLicense => 'This model requires accepting Google\'s license and using a Hugging Face access token.';
+
+  @override
+  String get requiresHfLogin => '• Requires HF login + license acceptance';
+
+  @override
+  String get storageSpaceNeeded => '• ~2.9GB of free storage space needed';
+
+  @override
+  String get runsLocallyPrivacy => '• Runs locally on your device for privacy';
+
+  @override
+  String get optimizedMobileInference => '• Optimized for mobile devices with fast inference';
+
+  @override
+  String get openLicensePage => 'Open License Page';
+
+  @override
+  String get openHfTokens => 'Open HF Tokens';
+
+  @override
+  String get cancelDownload => 'Cancel Download';
+
+  @override
+  String get downloadGemmaModelButton => 'Download Gemma 3n (AI Edge) Model (~2.9GB)';
+
+  @override
+  String get deleteModelConfirmation => 'Are you sure you want to delete the downloaded Gemma 3n model? This will free up ~2.9GB of storage.';
+
+  @override
+  String get huggingFaceTokenSaved => 'Hugging Face token saved';
+
+  @override
+  String get tokenCleared => 'Token cleared';
+
+  @override
+  String get localLlmSettingsSaved => 'Local LLM settings saved successfully';
+
+  @override
+  String get modelDownloadedSuccessfully => 'Model downloaded successfully!';
+
+  @override
+  String get modelDownloadFailed => 'Failed to download model. Please try again.';
+
+  @override
+  String get modelDeletedSuccessfully => 'Model deleted successfully';
+
+  @override
+  String get downloadCancelledByUser => 'Download cancelled by user';
+
+  @override
+  String get localAiSettingsDescription => 'Configure local AI model for offline usage';
+
+  @override
+  String failedToLoadSettings(String error) => 'Failed to load settings: $error';
+
+  @override
+  String failedToSaveToken(String error) => 'Failed to save token: $error';
+
+  @override
+  String failedToDownloadModel(String error) => 'Failed to download model: $error';
+
+  @override
+  String failedToDeleteModel(String error) => 'Failed to delete model: $error';
 }

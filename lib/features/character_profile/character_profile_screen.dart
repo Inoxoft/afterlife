@@ -682,23 +682,23 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Define the models for user-created twins
     final models = [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'provider': 'Local Device',
         'recommended': true,
         'isLocal': true,
       },
       {
-        'id': 'google/gemini-2.0-flash-001',
-        'name': 'Gemini 2.0 Flash',
+        'id': 'google/gemini-2.5-pro',
+        'name': 'Gemini 2.5 Pro',
         'description': localizations.speedMultimodalSupport,
         'provider': 'Google Cloud',
         'recommended': true,
       },
       {
-        'id': 'openai/gpt-4o',
-        'name': 'GPT-4o',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Superior multilingual and vision capabilities via OpenRouter',
         'provider': 'OpenRouter',
@@ -712,14 +712,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         'free': true,
         'recommended': false,
       },
-      {
-        'id': 'mistralai/mistral-small-3.1-24b-instruct:free',
-        'name': 'Mistral Small 3.1',
-        'description': localizations.lightweightInstructionTuned,
-        'provider': 'apidog',
-        'free': true,
-        'recommended': false,
-      },
+      // Keep existing free options as-is
     ];
 
     return Column(
@@ -2669,31 +2662,19 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
-      'local/hammer-2.1': {
-        'name': 'Local Hammer 2.1',
+      'local/gemma-3n-e2b-it': {
+        'name': 'Local Gemma 3n E2B IT',
         'provider': 'Local Device',
       },
-      'google/gemini-2.0-flash-001': {
-        'name': 'Gemini 2.0 Flash',
+      'google/gemini-2.5-pro': {
+        'name': 'Gemini 2.5 Pro',
         'provider': 'Google',
       },
-      'anthropic/claude-3-5-sonnet': {
-        'name': 'Claude 3.5 Sonnet',
+      'anthropic/claude-sonnet-4': {
+        'name': 'Claude 4 Sonnet',
         'provider': 'Anthropic',
       },
-      'google/gemini-2.0-pro-001': {
-        'name': 'Gemini 2.0 Pro',
-        'provider': 'Google',
-      },
-      'anthropic/claude-3-opus': {
-        'name': 'Claude 3 Opus',
-        'provider': 'Anthropic',
-      },
-      'meta-llama/llama-3-70b-instruct': {
-        'name': 'Llama 3 70B',
-        'provider': 'Meta',
-      },
-      'openai/gpt-4o': {'name': 'GPT-4o', 'provider': 'OpenAI'},
+      'openai/gpt-5-chat': {'name': 'GPT-5 Chat', 'provider': 'OpenAI'},
       'qwen/qwen3-235b-a22b-07-25:free': {
         'name': 'Qwen 3 235B',
         'provider': 'OpenRouter',
@@ -2720,8 +2701,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'local/hammer-2.1':
-          'Privacy-first local AI with multimodal support (1.6GB)',
+      'local/gemma-3n-e2b-it':
+          'Privacy-first local AI with multimodal support (2.9GB)',
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',
       'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',

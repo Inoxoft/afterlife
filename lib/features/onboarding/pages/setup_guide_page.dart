@@ -84,13 +84,6 @@ class SetupGuidePage extends StatelessWidget {
       ),
     );
 
-    final buttonsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: animationController,
-        curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic),
-      ),
-    );
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
@@ -171,33 +164,56 @@ class SetupGuidePage extends StatelessWidget {
                         ],
                         actionText: l10n.setUpApiKey,
                         onTap: () => _showApiKeyDialog(context),
-                        infoWidget: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: l10n.getFreeApiKeyAt,
-                                style: TextStyle(
-                                  color: AppTheme.silverMist.withValues(
-                                    alpha: 0.8,
+                        infoWidget: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: l10n.getFreeApiKeyAt,
+                                    style: TextStyle(
+                                      color: AppTheme.silverMist.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                  fontSize: 12,
-                                ),
+                                  TextSpan(
+                                    text: 'openrouter.ai',
+                                    style: TextStyle(
+                                      color: AppTheme.warmGold,
+                                      fontSize: 12,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    recognizer:
+                                        TapGestureRecognizer()
+                                          ..onTap =
+                                              () => _openOpenRouterLink(context),
+                                  ),
+                                ],
                               ),
-                              TextSpan(
-                                text: 'openrouter.ai',
-                                style: TextStyle(
-                                  color: AppTheme.warmGold,
-                                  fontSize: 12,
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap =
-                                          () => _openOpenRouterLink(context),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.addCreditToUseAdvancedModels,
+                              style: TextStyle(
+                                color: AppTheme.warmGold.withValues(alpha: 0.9),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              l10n.openRouterRequiresCredits,
+                              style: TextStyle(
+                                color: AppTheme.silverMist.withValues(alpha: 0.7),
+                                fontSize: 10,
+                                height: 1.2,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 

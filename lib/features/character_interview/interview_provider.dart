@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../core/utils/app_logger.dart';
 import 'package:provider/provider.dart';
 import 'message_model.dart';
 import 'chat_service.dart';
@@ -125,7 +126,7 @@ class InterviewProvider with ChangeNotifier {
         'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
       );
     } else {
-      print('Character card summary is null or empty');
+              AppLogger.warning('Character card summary is null or empty', tag: 'InterviewProvider');
     }
 
     try {
@@ -447,7 +448,7 @@ $languageInstruction""";
         }
       }
     } catch (e) {
-      print('🔍 DEBUG: Error in sendMessage: $e');
+      if (kDebugMode) AppLogger.error('Error in sendMessage', tag: 'InterviewProvider', error: e);
       _handleErrorState("Error sending message: $e");
     }
   }
