@@ -10,7 +10,6 @@ import 'models/group_chat_model.dart';
 import '../providers/group_chat_provider.dart';
 import 'character_selection_screen.dart';
 import 'group_chat_screen.dart';
-import '../providers/characters_provider.dart';
 
 class GroupChatListScreen extends StatefulWidget {
   const GroupChatListScreen({Key? key}) : super(key: key);
@@ -28,9 +27,19 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   
+  // Header animation controller
+  late AnimationController _headerAnimationController;
+  late Animation<double> _headerOpacityAnimation;
+  late Animation<double> _headerHeightAnimation;
+  
   // State
   bool _isFirstLoad = true;
   GroupChatModel? _previewSelectedGroup;
+  
+  // Scroll controllers
+  late ScrollController _listScrollController;
+  late ScrollController _gridScrollController;
+  late ScrollController _horizontalScrollController;
 
   // Cached widgets for performance
   late final Widget _particleBackground = const Opacity(
@@ -49,8 +58,20 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
   @override
   void initState() {
     super.initState();
+    _initializeScrollControllers();
     _initializeAnimations();
     _loadGroupChats();
+  }
+
+  void _initializeScrollControllers() {
+    _listScrollController = ScrollController();
+    _gridScrollController = ScrollController();
+    _horizontalScrollController = ScrollController();
+    
+    // Add scroll listeners
+    _listScrollController.addListener(_onScroll);
+    _gridScrollController.addListener(_onScroll);
+    _horizontalScrollController.addListener(_onScroll);
   }
 
   void _initializeAnimations() {
@@ -64,6 +85,12 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
       vsync: this,
     );
 
+    // Initialize header animation controller
+    _headerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
@@ -72,6 +99,20 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
       begin: const Offset(0.0, 0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack));
+
+    _headerOpacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _headerHeightAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     if (_isFirstLoad) {
       Future.delayed(const Duration(milliseconds: 200), () {
@@ -85,8 +126,12 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
 
   @override
   void dispose() {
+    _listScrollController.dispose();
+    _gridScrollController.dispose();
+    _horizontalScrollController.dispose();
     _fadeController.dispose();
     _slideController.dispose();
+    _headerAnimationController.dispose();
     super.dispose();
   }
 
@@ -134,7 +179,7 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
             SafeArea(
               child: Column(
                 children: [
-                  _buildAppBar(localizations),
+                  _buildAnimatedAppBar(localizations),
                   Expanded(child: _buildContent(localizations)),
                 ],
               ),
@@ -146,66 +191,123 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
     );
   }
 
-  Widget _buildAppBar(AppLocalizations localizations) {
+  Widget _buildAnimatedAppBar(AppLocalizations localizations) {
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
     
-    return Container(
-      padding: ResponsiveUtils.getScreenPadding(context),
-      child: Row(
-        children: [
-          // Back button
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.midnightPurple.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.warmGold.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: AppTheme.warmGold,
-                size: 20 * fontScale,
-              ),
-            ),
-          ),
-          
-          const SizedBox(width: 16),
-          
-          // Title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  localizations.groupChats,
-                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                    text: localizations.groupChats,
-                    fontSize: 24 * fontScale,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.warmGold,
-                  ),
+    return AnimatedBuilder(
+      animation: _headerAnimationController,
+      builder: (context, child) {
+        return ClipRect(
+          child: SizeTransition(
+            sizeFactor: _headerHeightAnimation,
+            axisAlignment: -1.0,
+            child: FadeTransition(
+              opacity: _headerOpacityAnimation,
+              child: Container(
+                padding: EdgeInsets.fromLTRB(
+                  ResponsiveUtils.getScreenPadding(context).left,
+                  24,
+                  ResponsiveUtils.getScreenPadding(context).right,
+                  16,
                 ),
-                Consumer<GroupChatProvider>(
-                  builder: (context, provider, child) {
-                    return Text(
-                      '${provider.groupChats.length} ${localizations.groupsCreated}',
-                      style: UkrainianFontUtils.latoWithUkrainianSupport(
-                        text: '${provider.groupChats.length} ${localizations.groupsCreated}',
-                        fontSize: 12 * fontScale,
-                        color: AppTheme.silverMist.withValues(alpha: 0.7),
+                child: Row(
+                  children: [
+                    // Back button
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.midnightPurple.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.warmGold.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
-                    );
-                  },
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: AppTheme.warmGold,
+                          size: 20 * fontScale,
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 16),
+                    
+                    // Title
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            localizations.groupChats,
+                            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                              text: localizations.groupChats,
+                              fontSize: 24 * fontScale,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.warmGold,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 10.0,
+                                  color: AppTheme.warmGold.withValues(alpha: 0.8),
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Consumer<GroupChatProvider>(
+                            builder: (context, provider, child) {
+                              return Text(
+                                '${provider.groupChats.length} ${localizations.groupsCreated}',
+                                style: UkrainianFontUtils.latoWithUkrainianSupport(
+                                  text: '${provider.groupChats.length} ${localizations.groupsCreated}',
+                                  fontSize: 12 * fontScale,
+                                  color: AppTheme.silverMist.withValues(alpha: 0.7),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  void _onScroll() {
+    // Check all controllers to see which one is currently active
+    ScrollController? activeController;
+    
+    if (_listScrollController.hasClients && _listScrollController.position.isScrollingNotifier.value) {
+      activeController = _listScrollController;
+    } else if (_gridScrollController.hasClients && _gridScrollController.position.isScrollingNotifier.value) {
+      activeController = _gridScrollController;
+    } else if (_horizontalScrollController.hasClients && _horizontalScrollController.position.isScrollingNotifier.value) {
+      activeController = _horizontalScrollController;
+    } else if (_listScrollController.hasClients) {
+      activeController = _listScrollController;
+    } else if (_gridScrollController.hasClients) {
+      activeController = _gridScrollController;
+    } else if (_horizontalScrollController.hasClients) {
+      activeController = _horizontalScrollController;
+    }
+    
+    if (activeController == null) return;
+
+    const double hideRange = 120.0; // pixels to fully hide header
+    final double clampedOffset =
+        activeController.offset.clamp(0.0, hideRange);
+    final double targetValue = (clampedOffset / hideRange).clamp(0.0, 1.0);
+    _headerAnimationController.animateTo(
+      targetValue,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
     );
   }
 
@@ -278,6 +380,7 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
     return RefreshIndicator(
       onRefresh: _loadGroupChats,
       child: ListView.builder(
+        controller: _listScrollController,
         physics: const BouncingScrollPhysics(),
         padding: ResponsiveUtils
             .getScreenPadding(context)
@@ -307,6 +410,7 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
     return RefreshIndicator(
       onRefresh: _loadGroupChats,
       child: GridView.builder(
+        controller: _gridScrollController,
         physics: const BouncingScrollPhysics(),
         padding: ResponsiveUtils
             .getScreenPadding(context)
@@ -388,6 +492,7 @@ class _GroupChatListScreenState extends State<GroupChatListScreen>
     return SizedBox(
       height: cardSide + padding.vertical, // ensure single row height
       child: ListView.separated(
+        controller: _horizontalScrollController,
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: padding.left, vertical: padding.top),

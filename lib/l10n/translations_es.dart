@@ -481,6 +481,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get getFreeApiKeyAt => 'Obtén tu clave API gratuita en ';
   @override
+  String get addCreditToUseAdvancedModels => 'Añadir \$1-2 de crédito para usar modelos avanzados';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouter requiere créditos para acceder a modelos pagos como GPT-4, Claude, etc. Los modelos gratuitos están disponibles sin créditos.';
+  @override
   String get localAiModel => 'Modelo de IA Local';
   @override
   String get privateWorksOffline => 'Privado, funciona sin conexión';
@@ -950,6 +954,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get apiKeyShouldStartWithSk => 'La clave API debe empezar con "sk-"';
 
   @override
+  String get howToGetApiKey => 'Cómo obtener tu clave API:';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'Visita openrouter.ai e inicia sesión/regístrate';
+
+  @override
+  String get goToKeysSection => 'Ve a la sección "Keys" en tu panel';
+
+  @override
+  String get createNewApiKey => 'Crea una nueva clave API';
+
+  @override
+  String get getApiKeyHere => 'Obtén tu clave API aquí:';
+
+  @override
+  String get updateKey => 'Actualizar Clave';
+
+  @override
   String get invalidCharacterCardFormat =>
       'Formato de tarjeta de personaje inválido';
 
@@ -1008,9 +1030,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get skipForNow => 'Omitir por ahora';
-
-  @override
-  String get updateKey => 'Actualizar Clave';
 
   @override
   String get removeKey => 'Eliminar Clave';
@@ -1247,4 +1266,146 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get editGroup => 'Editar Grupo';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => 'Configuración de IA Local';
+
+  @override
+  String get huggingFaceAccessToken => 'Token de Acceso de Hugging Face';
+
+  @override
+  String get tokenIsSet => 'Token configurado. Puedes reemplazarlo o borrarlo abajo.';
+
+  @override
+  String get pasteHuggingFaceToken => 'Pega tu token de Hugging Face. Requerido para descargar modelos protegidos.';
+
+  @override
+  String get hfTokenPlaceholder => 'token hf_xxx';
+
+  @override
+  String get hfTokenHint => 'Pega el token desde huggingface.co/settings/tokens';
+
+  @override
+  String get saveToken => 'Guardar Token';
+
+  @override
+  String get clearToken => 'Limpiar';
+
+  @override
+  String get getToken => 'Obtener Token';
+
+  @override
+  String get status => 'Estado';
+
+  @override
+  String get size => 'Tamaño';
+
+  @override
+  String get supportsImages => 'Soporta Imágenes';
+
+  @override
+  String get maxTokens => 'Tokens Máximos';
+
+  @override
+  String get yes => 'Sí';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get notDownloaded => 'No Descargado';
+
+  @override
+  String get downloading => 'Descargando...';
+
+  @override
+  String get ready => 'Listo';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get downloadingProgress => 'Descargando...';
+
+  @override
+  String get modelManagement => 'Gestión del Modelo';
+
+  @override
+  String get gemmaModelReady => '¡El modelo Gemma 3n está listo para usar!';
+
+  @override
+  String get deleteModel => 'Eliminar Modelo';
+
+  @override
+  String get downloadModelSection => 'Descargar Modelo';
+
+  @override
+  String get downloadGemmaModel => 'Para usar IA local, descarga el modelo Gemma 3n (AI Edge):';
+
+  @override
+  String get modelRequiresLicense => 'Este modelo requiere aceptar la licencia de Google y usar un token de acceso de Hugging Face.';
+
+  @override
+  String get requiresHfLogin => '• Requiere inicio de sesión en HF + aceptación de licencia';
+
+  @override
+  String get storageSpaceNeeded => '• Se necesitan ~2.9GB de espacio libre de almacenamiento';
+
+  @override
+  String get runsLocallyPrivacy => '• Se ejecuta localmente en tu dispositivo para privacidad';
+
+  @override
+  String get optimizedMobileInference => '• Optimizado para dispositivos móviles con inferencia rápida';
+
+  @override
+  String get openLicensePage => 'Abrir Página de Licencia';
+
+  @override
+  String get openHfTokens => 'Abrir Tokens HF';
+
+  @override
+  String get cancelDownload => 'Cancelar Descarga';
+
+  @override
+  String get downloadGemmaModelButton => 'Descargar Modelo Gemma 3n (AI Edge) (~2.9GB)';
+
+  @override
+  String get deleteModelConfirmation => '¿Estás seguro de que quieres eliminar el modelo Gemma 3n descargado? Esto liberará ~2.9GB de almacenamiento.';
+
+  @override
+  String get huggingFaceTokenSaved => 'Token de Hugging Face guardado';
+
+  @override
+  String get tokenCleared => 'Token borrado';
+
+  @override
+  String get localLlmSettingsSaved => 'Configuración de LLM local guardada exitosamente';
+
+  @override
+  String get modelDownloadedSuccessfully => '¡Modelo descargado exitosamente!';
+
+  @override
+  String get modelDownloadFailed => 'Error al descargar el modelo. Por favor intenta de nuevo.';
+
+  @override
+  String get modelDeletedSuccessfully => 'Modelo eliminado exitosamente';
+
+  @override
+  String get downloadCancelledByUser => 'Descarga cancelada por el usuario';
+
+  @override
+  String get localAiSettingsDescription => 'Configurar modelo de IA local para uso sin conexión';
+
+  @override
+  String failedToLoadSettings(String error) => 'Error al cargar configuración: $error';
+
+  @override
+  String failedToSaveToken(String error) => 'Error al guardar token: $error';
+
+  @override
+  String failedToDownloadModel(String error) => 'Error al descargar modelo: $error';
+
+  @override
+  String failedToDeleteModel(String error) => 'Error al eliminar modelo: $error';
 }

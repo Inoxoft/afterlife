@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>afterlife</string>
+	<string>Afterlife</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,6 +26,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app requires local network access for model inference services.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We use access to Photo Library in order for user to upload custom profile images</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

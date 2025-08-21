@@ -13,10 +13,10 @@ class UnifiedChatService {
       'https://openrouter.ai/api/v1/chat/completions';
   static const Duration _requestTimeout = Duration(seconds: 120);
 
-  // Default models per context
-  static const String _defaultGeneralModel = 'anthropic/claude-3.5-sonnet';
-  static const String _defaultCharacterModel = 'anthropic/claude-3.5-sonnet';
-  static const String _defaultInterviewModel = 'google/gemini-2.5-flash';
+  // Default models per context (updated to newest OpenRouter models)
+  static const String _defaultGeneralModel = 'anthropic/claude-sonnet-4';
+  static const String _defaultCharacterModel = 'anthropic/claude-sonnet-4';
+  static const String _defaultInterviewModel = 'google/gemini-2.5-pro';
 
   static const double _defaultTemperature = 0.7;
   static const int _defaultMaxTokens = 25000;

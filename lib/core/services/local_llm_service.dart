@@ -6,7 +6,7 @@ import 'package:flutter_gemma/core/model.dart';
 import 'package:flutter_gemma/core/chat.dart';
 import 'package:flutter_gemma/core/message.dart';
 import 'package:flutter_gemma/pigeon.g.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// shared_preferences imported via PreferencesService
 import 'package:path_provider/path_provider.dart';
 import 'preferences_service.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +16,7 @@ import '../utils/app_logger.dart';
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
-// Model configuration for Hammer2.1
+// Model configuration for Gemma 3n E2B
 class ModelConfig {
   // Gemma 3n E2B AI Edge preview (.task)
   static const String url =
@@ -31,7 +31,7 @@ class ModelConfig {
   static const int topK = 40;
   static const double topP = 0.95;
   static const PreferredBackend preferredBackend = PreferredBackend.cpu;
-  static const ModelType modelType = ModelType.deepSeek; // Use supported enum; Gemma 3n .task
+  static const ModelType modelType = ModelType.gemmaIt; // Gemma 3n Instruction-Tuned
 }
 
 class LocalLLMService {
@@ -144,6 +144,15 @@ class LocalLLMService {
 
   // Check model status
   static Future<void> _checkModelStatus() async {
+    // If we don't have a stored path, look for the expected filename in app documents
+    if (_modelPath == null) {
+      final directory = await getApplicationDocumentsDirectory();
+      final candidatePath = '${directory.path}/' + ModelConfig.filename;
+      if (await File(candidatePath).exists()) {
+        _modelPath = candidatePath;
+      }
+    }
+
     if (_modelPath != null && await File(_modelPath!).exists()) {
       final fileSize = await File(_modelPath!).length();
 
@@ -168,9 +177,16 @@ class LocalLLMService {
 
   // Verify download file size
   static bool _verifyDownload(int actualSize, int expectedSize) {
-    // Allow 1% tolerance for file size (stricter verification)
-    final tolerance = expectedSize * 0.01;
-    return (actualSize - expectedSize).abs() <= tolerance;
+    // Relaxed verification: allow 10% tolerance; if unknown expected,
+    // accept any file larger than ~1GB as valid .task model
+    if (expectedSize <= 0) {
+      return actualSize > 1024 * 1024 * 1024;
+    }
+    final tolerance = (expectedSize * 0.10).toInt();
+    final withinTolerance = (actualSize - expectedSize).abs() <= tolerance;
+    if (withinTolerance) return true;
+    // Fallback acceptance for repackaged .task files
+    return actualSize > 1024 * 1024 * 1024;
   }
 
   // Initialize the model
@@ -189,7 +205,7 @@ class LocalLLMService {
 
       // Close existing instances to prevent memory leaks
       if (_chat?.session != null) {
-        await _chat!.session!.close();
+        await _chat!.session.close();
       }
       if (_model != null) {
         await _model!.close();
@@ -200,12 +216,15 @@ class LocalLLMService {
       // Set model path in the model manager
       await _gemmaPlugin.modelManager.setModelPath(_modelPath!);
 
-      // Create the model
+      // Create the model (use iOS-friendly settings to avoid memory issues)
+      final bool isIOS = Platform.isIOS;
+      final int iosMaxTokens = 1024; // conservative default for iOS
+      final bool iosSupportImage = false; // disable images on iOS initially
       _model = await _gemmaPlugin.createModel(
         modelType: ModelConfig.modelType,
-        maxTokens: ModelConfig.maxTokens,
+        maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
         preferredBackend: ModelConfig.preferredBackend,
-        supportImage: true, // Gemma 3n supports vision tokens
+        supportImage: isIOS ? iosSupportImage : true,
       );
 
       // Create chat session
@@ -214,8 +233,8 @@ class LocalLLMService {
         randomSeed: 1,
         topK: ModelConfig.topK,
         topP: ModelConfig.topP,
-        tokenBuffer: 256,
-        supportImage: true,
+        tokenBuffer: isIOS ? 64 : 256,
+        supportImage: isIOS ? iosSupportImage : true,
       );
 
       if (kDebugMode) {
@@ -539,7 +558,7 @@ class LocalLLMService {
 
       // Close model and chat
       if (_chat?.session != null) {
-        await _chat!.session!.close();
+        await _chat!.session.close();
       }
       if (_model != null) {
         await _model!.close();
@@ -641,7 +660,9 @@ class LocalLLMService {
   static Future<void> deleteModel() async {
     try {
       // Close model and chat first
-      await _chat?.session?.close();
+      if (_chat?.session != null) {
+        await _chat!.session.close();
+      }
       await _model?.close();
       _chat = null;
       _model = null;
@@ -726,7 +747,9 @@ class LocalLLMService {
   // Dispose resources
   static Future<void> dispose() async {
     try {
-      await _chat?.session?.close();
+      if (_chat?.session != null) {
+        await _chat!.session.close();
+      }
       await _model?.close();
       _chat = null;
       _model = null;

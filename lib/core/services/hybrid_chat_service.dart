@@ -284,8 +284,21 @@ class HybridChatService {
 
   /// Determine which provider to actually use
   static Future<LLMProvider> _determineProvider(LLMProvider requested) async {
-    final localStatus = LocalLLMService.getStatus();
-    final isLocalAvailable = localStatus['isAvailable'] as bool;
+    var localStatus = LocalLLMService.getStatus();
+    var isLocalAvailable = localStatus['isAvailable'] as bool;
+
+    // If requested local but not available, try to enable/initialize on the fly
+    if (requested == LLMProvider.local && !isLocalAvailable) {
+      // Attempt to initialize if model is downloaded
+      final modelStatus = localStatus['modelStatus'];
+      if (modelStatus == 'downloaded') {
+        try {
+          await LocalLLMService.enableLocalLLM();
+          localStatus = LocalLLMService.getStatus();
+          isLocalAvailable = localStatus['isAvailable'] as bool;
+        } catch (_) {}
+      }
+    }
 
     switch (requested) {
       case LLMProvider.local:

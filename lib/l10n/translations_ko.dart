@@ -358,6 +358,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get getFreeApiKeyAt => '무료 API 키를 받으세요: ';
   @override
+  String get addCreditToUseAdvancedModels => '고급 모델 사용을 위해 \$1-2 크레딧 추가';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouter는 GPT-4, Claude 등 유료 모델에 액세스하려면 크레딧이 필요합니다. 무료 모델은 크레딧 없이 사용할 수 있습니다.';
+  @override
   String get localAiModel => '로컬 AI 모델';
   @override
   String get privateWorksOffline => '비공개, 오프라인에서 작동';
@@ -842,6 +846,24 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get apiKeyShouldStartWithSk => 'API 키는 "sk-"로 시작해야 합니다';
 
+  @override
+  String get howToGetApiKey => 'API 키 얻는 방법:';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'openrouter.ai를 방문하여 가입/로그인하세요';
+
+  @override
+  String get goToKeysSection => '대시보드의 "Keys" 섹션으로 이동';
+
+  @override
+  String get createNewApiKey => '새 API 키 생성';
+
+  @override
+  String get getApiKeyHere => '여기서 API 키 받기:';
+
+  @override
+  String get updateKey => '키 업데이트';
+
   // Interview and character creation
   @override
   String get invalidCharacterCardFormat => '유효하지 않은 캐릭터 카드 형식';
@@ -897,9 +919,6 @@ class AppLocalizationsKo extends AppLocalizations {
   // Additional UI strings
   @override
   String get skipForNow => '지금은 건너뛰기';
-
-  @override
-  String get updateKey => '키 업데이트';
 
   @override
   String get removeKey => '키 제거';
@@ -1086,4 +1105,146 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editGroup => '그룹 편집';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => '로컬 AI 설정';
+
+  @override
+  String get huggingFaceAccessToken => 'Hugging Face 액세스 토큰';
+
+  @override
+  String get tokenIsSet => '토큰이 설정되었습니다. 아래에서 교체하거나 삭제할 수 있습니다.';
+
+  @override
+  String get pasteHuggingFaceToken => 'Hugging Face 토큰을 붙여넣으세요. 보호된 모델 다운로드에 필요합니다.';
+
+  @override
+  String get hfTokenPlaceholder => 'hf_xxx 토큰';
+
+  @override
+  String get hfTokenHint => 'huggingface.co/settings/tokens에서 토큰 붙여넣기';
+
+  @override
+  String get saveToken => '토큰 저장';
+
+  @override
+  String get clearToken => '삭제';
+
+  @override
+  String get getToken => '토큰 가져오기';
+
+  @override
+  String get status => '상태';
+
+  @override
+  String get size => '크기';
+
+  @override
+  String get supportsImages => '이미지 지원';
+
+  @override
+  String get maxTokens => '최대 토큰 수';
+
+  @override
+  String get yes => '예';
+
+  @override
+  String get no => '아니요';
+
+  @override
+  String get notDownloaded => '다운로드되지 않음';
+
+  @override
+  String get downloading => '다운로드 중...';
+
+  @override
+  String get ready => '준비 완료';
+
+  @override
+  String get error => '오류';
+
+  @override
+  String get downloadingProgress => '다운로드 중...';
+
+  @override
+  String get modelManagement => '모델 관리';
+
+  @override
+  String get gemmaModelReady => 'Gemma 3n 모델이 사용 준비되었습니다!';
+
+  @override
+  String get deleteModel => '모델 삭제';
+
+  @override
+  String get downloadModelSection => '모델 다운로드';
+
+  @override
+  String get downloadGemmaModel => '로컬 AI를 사용하려면 Gemma 3n (AI Edge) 모델을 다운로드하세요:';
+
+  @override
+  String get modelRequiresLicense => '이 모델은 Google 라이선스 동의와 Hugging Face 액세스 토큰 사용이 필요합니다.';
+
+  @override
+  String get requiresHfLogin => '• HF 로그인 + 라이선스 동의 필요';
+
+  @override
+  String get storageSpaceNeeded => '• 약 2.9GB의 여유 저장 공간 필요';
+
+  @override
+  String get runsLocallyPrivacy => '• 개인정보 보호를 위해 기기에서 로컬 실행';
+
+  @override
+  String get optimizedMobileInference => '• 빠른 추론으로 모바일 기기에 최적화';
+
+  @override
+  String get openLicensePage => '라이선스 페이지 열기';
+
+  @override
+  String get openHfTokens => 'HF 토큰 열기';
+
+  @override
+  String get cancelDownload => '다운로드 취소';
+
+  @override
+  String get downloadCancelledByUser => '사용자가 다운로드를 취소했습니다';
+
+  @override
+  String get downloadGemmaModelButton => 'Gemma 3n (AI Edge) 모델 다운로드 (~2.9GB)';
+
+  @override
+  String get huggingFaceTokenSaved => 'Hugging Face 토큰이 저장되었습니다';
+
+  @override
+  String get tokenCleared => '토큰이 삭제되었습니다';
+
+  @override
+  String get localLlmSettingsSaved => '로컬 LLM 설정이 성공적으로 저장되었습니다';
+
+  @override
+  String get modelDownloadedSuccessfully => '모델이 성공적으로 다운로드되었습니다!';
+
+  @override
+  String get modelDownloadFailed => '모델 다운로드에 실패했습니다. 다시 시도해주세요.';
+
+  @override
+  String get deleteModelConfirmation => '다운로드된 Gemma 3n 모델을 삭제하시겠습니까? 약 2.9GB의 저장 공간이 확보됩니다.';
+
+  @override
+  String get modelDeletedSuccessfully => '모델이 성공적으로 삭제되었습니다';
+
+  @override
+  String get localAiSettingsDescription => '오프라인 사용을 위한 로컬 AI 모델 구성';
+
+  @override
+  String failedToLoadSettings(String error) => '설정 로드 실패: $error';
+
+  @override
+  String failedToSaveToken(String error) => '토큰 저장 실패: $error';
+
+  @override
+  String failedToDownloadModel(String error) => '모델 다운로드 실패: $error';
+
+  @override
+  String failedToDeleteModel(String error) => '모델 삭제 실패: $error';
 }

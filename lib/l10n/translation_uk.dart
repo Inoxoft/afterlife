@@ -351,6 +351,10 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get getFreeApiKeyAt => 'Отримайте свій безкоштовний API ключ на ';
   @override
+  String get addCreditToUseAdvancedModels => 'Додайте \$1-2 кредиту для використання розширених моделей';
+  @override
+  String get openRouterRequiresCredits => 'OpenRouter потребує кредитів для доступу до платних моделей як GPT-4, Claude тощо. Безкоштовні моделі доступні без кредитів.';
+  @override
   String get localAiModel => 'Локальна Модель ШІ';
   @override
   String get privateWorksOffline => 'Приватна, працює офлайн';
@@ -729,6 +733,24 @@ class AppLocalizationsUk extends AppLocalizations {
   String get apiKeyShouldStartWithSk => 'API-ключ повинен починатися з "sk-"';
 
   @override
+  String get howToGetApiKey => 'Як отримати ваш API ключ:';
+
+  @override
+  String get visitOpenRouterAndSignUp => 'Відвідайте openrouter.ai та зареєструйтесь/увійдіть';
+
+  @override
+  String get goToKeysSection => 'Перейдіть до розділу "Keys" в вашій панелі';
+
+  @override
+  String get createNewApiKey => 'Створіть новий API ключ';
+
+  @override
+  String get getApiKeyHere => 'Отримайте ваш API ключ тут:';
+
+  @override
+  String get updateKey => 'Оновити ключ';
+
+  @override
   String get invalidCharacterCardFormat => 'Недійсний формат картки персонажа';
   @override
   String get characterDataIncomplete => 'Дані персонажа неповні';
@@ -771,8 +793,6 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get skipForNow => 'Поки що пропустити';
-  @override
-  String get updateKey => 'Оновити ключ';
   @override
   String get removeKey => 'Видалити ключ';
   @override
@@ -997,4 +1017,146 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get members => 'учасники';
+
+  // Local LLM Settings
+  @override
+  String get localAiSettings => 'Налаштування Локального ШІ';
+
+  @override
+  String get huggingFaceAccessToken => 'Токен Доступу Hugging Face';
+
+  @override
+  String get tokenIsSet => 'Токен встановлено. Ви можете замінити або видалити його нижче.';
+
+  @override
+  String get pasteHuggingFaceToken => 'Вставте ваш токен Hugging Face. Потрібен для завантаження захищених моделей.';
+
+  @override
+  String get hfTokenPlaceholder => 'токен hf_xxx';
+
+  @override
+  String get hfTokenHint => 'Вставте токен з huggingface.co/settings/tokens';
+
+  @override
+  String get saveToken => 'Зберегти Токен';
+
+  @override
+  String get clearToken => 'Очистити';
+
+  @override
+  String get getToken => 'Отримати Токен';
+
+  @override
+  String get status => 'Статус';
+
+  @override
+  String get size => 'Розмір';
+
+  @override
+  String get supportsImages => 'Підтримує Зображення';
+
+  @override
+  String get maxTokens => 'Макс Токенів';
+
+  @override
+  String get yes => 'Так';
+
+  @override
+  String get no => 'Ні';
+
+  @override
+  String get notDownloaded => 'Не Завантажено';
+
+  @override
+  String get downloading => 'Завантажується...';
+
+  @override
+  String get ready => 'Готово';
+
+  @override
+  String get error => 'Помилка';
+
+  @override
+  String get downloadingProgress => 'Завантажується...';
+
+  @override
+  String get modelManagement => 'Управління Моделлю';
+
+  @override
+  String get gemmaModelReady => 'Модель Gemma 3n готова до використання!';
+
+  @override
+  String get deleteModel => 'Видалити Модель';
+
+  @override
+  String get downloadModelSection => 'Завантажити Модель';
+
+  @override
+  String get downloadGemmaModel => 'Для використання локального ШІ завантажте модель Gemma 3n (AI Edge):';
+
+  @override
+  String get modelRequiresLicense => 'Ця модель вимагає прийняття ліцензії Google та використання токена доступу Hugging Face.';
+
+  @override
+  String get requiresHfLogin => '• Вимагає входу в HF + прийняття ліцензії';
+
+  @override
+  String get storageSpaceNeeded => '• Потрібно ~2.9ГБ вільного місця для зберігання';
+
+  @override
+  String get runsLocallyPrivacy => '• Працює локально на вашому пристрої для конфіденційності';
+
+  @override
+  String get optimizedMobileInference => '• Оптимізовано для мобільних пристроїв з швидким виведенням';
+
+  @override
+  String get openLicensePage => 'Відкрити Сторінку Ліцензії';
+
+  @override
+  String get openHfTokens => 'Відкрити HF Токени';
+
+  @override
+  String get cancelDownload => 'Скасувати Завантаження';
+
+  @override
+  String get downloadGemmaModelButton => 'Завантажити Модель Gemma 3n (AI Edge) (~2.9ГБ)';
+
+  @override
+  String get deleteModelConfirmation => 'Ви впевнені, що хочете видалити завантажену модель Gemma 3n? Це звільнить ~2.9ГБ сховища.';
+
+  @override
+  String get huggingFaceTokenSaved => 'Токен Hugging Face збережено';
+
+  @override
+  String get tokenCleared => 'Токен очищено';
+
+  @override
+  String get localLlmSettingsSaved => 'Налаштування локального LLM успішно збережено';
+
+  @override
+  String get modelDownloadedSuccessfully => 'Модель успішно завантажено!';
+
+  @override
+  String get modelDownloadFailed => 'Не вдалося завантажити модель. Будь ласка, спробуйте ще раз.';
+
+  @override
+  String get modelDeletedSuccessfully => 'Модель успішно видалено';
+
+  @override
+  String get downloadCancelledByUser => 'Завантаження скасовано користувачем';
+
+  @override
+  String get localAiSettingsDescription => 'Налаштувати локальну модель ШІ для офлайн використання';
+
+  @override
+  String failedToLoadSettings(String error) => 'Не вдалося завантажити налаштування: $error';
+
+  @override
+  String failedToSaveToken(String error) => 'Не вдалося зберегти токен: $error';
+
+  @override
+  String failedToDownloadModel(String error) => 'Не вдалося завантажити модель: $error';
+
+  @override
+  String failedToDeleteModel(String error) => 'Не вдалося видалити модель: $error';
 }

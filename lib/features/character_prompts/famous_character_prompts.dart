@@ -1,3 +1,4 @@
+// ignore_for_file: unused_import
 import 'dart:math';
 import 'text_cleaner.dart';
 import 'package:flutter/material.dart';
@@ -8161,28 +8162,28 @@ Stay in character at all times. Never break character or admit you are an AI. ''
   static final Map<String, List<Map<String, dynamic>>> characterModels = {
     'Albert Einstein': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'Claude 3.5 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description':
             'Scientific reasoning and theoretical physics discussions',
         'recommended': true,
       },
       {
-        'id': 'openai/gpt-4o',
-        'name': 'GPT-4o',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description': 'Complex mathematical concepts and thought experiments',
         'recommended': false,
       },
       {
-        'id': 'google/gemini-1.5-pro',
-        'name': 'Gemini 1.5 Pro',
+        'id': 'google/gemini-2.5-pro',
+        'name': 'Gemini 2.5 Pro',
         'description': 'Deep philosophical insights about science and reality',
         'recommended': false,
       },
@@ -8195,21 +8196,21 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Alan Turing': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'openai/gpt-4o',
-        'name': 'GPT-4o',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description': 'Computer science and cryptography discussions',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'Claude 3.5 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Logic puzzles and mathematical computations',
         'recommended': false,
       },
@@ -8228,27 +8229,27 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Marilyn Monroe': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'Claude 3.5 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Charismatic and emotionally expressive conversations',
         'recommended': true,
       },
       {
-        'id': 'openai/gpt-4o',
-        'name': 'GPT-4o',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description': 'Hollywood glamour and artistic sensitivity',
         'recommended': false,
       },
       {
-        'id': 'google/gemini-1.5-pro',
-        'name': 'Gemini 1.5 Pro',
+        'id': 'google/gemini-2.5-pro',
+        'name': 'Gemini 2.5 Pro',
         'description': 'Vulnerable authenticity behind the public persona',
         'recommended': false,
       },
@@ -8261,27 +8262,27 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Ronald Reagan': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'Claude 3.5 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Presidential rhetoric and conservative philosophy',
         'recommended': true,
       },
       {
-        'id': 'openai/gpt-4o',
-        'name': 'GPT-4o',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description': 'Cold War politics and economic policy insights',
         'recommended': false,
       },
       {
-        'id': 'google/gemini-1.5-pro',
-        'name': 'Gemini 1.5 Pro',
+        'id': 'google/gemini-2.5-pro',
+        'name': 'Gemini 2.5 Pro',
         'description': 'Hollywood charm meets political leadership',
         'recommended': false,
       },
@@ -8294,22 +8295,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Kobe Bryant': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8328,22 +8329,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Kurt Cobain': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8362,22 +8363,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Nelson Mandela': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8396,22 +8397,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Bob Marley': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8430,22 +8431,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Bruce Lee': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8464,22 +8465,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Martin Luther King Jr.': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8498,22 +8499,22 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Marie Curie': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
       {
-        'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'id': 'openai/gpt-5-chat',
+        'name': 'GPT-5 Chat',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8532,9 +8533,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Abraham Lincoln': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8546,8 +8547,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8566,9 +8567,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Cleopatra': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8580,8 +8581,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8600,9 +8601,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Avicii': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8614,8 +8615,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8634,9 +8635,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Tupac Shakur': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8648,8 +8649,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8668,9 +8669,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'David Bowie': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8682,8 +8683,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8702,9 +8703,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Stephen Hawking': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8716,8 +8717,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8736,9 +8737,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Elvis Presley': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8750,8 +8751,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8770,9 +8771,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Winston Churchill': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8784,8 +8785,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8804,9 +8805,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Nikola Tesla': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8818,8 +8819,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8838,9 +8839,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'William Shakespeare': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8852,8 +8853,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8872,9 +8873,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Julius Caesar': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8886,8 +8887,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8906,9 +8907,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Steve Jobs': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8920,8 +8921,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8940,9 +8941,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Princess Diana': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8954,8 +8955,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -8974,9 +8975,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Freddie Mercury': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -8988,8 +8989,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9008,9 +9009,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Muhammad Ali': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9022,8 +9023,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9042,9 +9043,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Carl Sagan': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9056,8 +9057,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9076,9 +9077,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Mahatma Gandhi': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9090,8 +9091,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9110,9 +9111,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Vincent van Gogh': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9124,8 +9125,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9144,9 +9145,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Leonardo da Vinci': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9158,8 +9159,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9178,9 +9179,9 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     ],
     'Socrates': [
       {
-        'id': 'local/hammer-2.1',
-        'name': 'Local Hammer 2.1',
-        'description': 'Privacy-first local AI with multimodal support (1.6GB)',
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n E2B IT',
+        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9192,8 +9193,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
         'recommended': true,
       },
       {
-        'id': 'anthropic/claude-3.7-sonnet',
-        'name': 'Claude 3.7 Sonnet',
+        'id': 'anthropic/claude-sonnet-4',
+        'name': 'Claude 4 Sonnet',
         'description': 'Precise structured outputs, strong alignment',
         'recommended': false,
       },
@@ -9355,7 +9356,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
             () =>
                 models.isNotEmpty
                     ? models.first
-                    : {'id': 'google/gemini-2.0-flash-001'},
+                    : {'id': 'google/gemini-2.5-pro'},
       );
       _selectedModels[characterName] = recommendedModel['id'];
     }

@@ -215,6 +215,8 @@ abstract class AppLocalizations {
   String get fastResponses;
   String get setUpApiKey;
   String get getFreeApiKeyAt;
+  String get addCreditToUseAdvancedModels;
+  String get openRouterRequiresCredits;
   String get localAiModel;
   String get privateWorksOffline;
   String get completePrivacyDataStaysLocal;
@@ -337,6 +339,12 @@ abstract class AppLocalizations {
   String get usingCustomApiKey;
   String get replaceKeyInstructions;
   String get apiKeyShouldStartWithSk;
+  String get howToGetApiKey;
+  String get visitOpenRouterAndSignUp;
+  String get goToKeysSection;
+  String get createNewApiKey;
+  String get getApiKeyHere;
+  String get updateKey;
 
   // Interview and character creation
   String get invalidCharacterCardFormat;
@@ -359,7 +367,6 @@ abstract class AppLocalizations {
 
   // Additional UI strings
   String get skipForNow;
-  String get updateKey;
   String get removeKey;
   String get saveKey;
   String get usingDefaultApiKey;
@@ -478,6 +485,55 @@ abstract class AppLocalizations {
   String get createFirstGroupChat;
   String get openChat;
   String get editGroup;
+
+  // Local LLM Settings
+  String get localAiSettings;
+  String get huggingFaceAccessToken;
+  String get tokenIsSet;
+  String get pasteHuggingFaceToken;
+  String get hfTokenPlaceholder;
+  String get hfTokenHint;
+  String get saveToken;
+  String get clearToken;
+  String get getToken;
+  String get status;
+  String get size;
+  String get supportsImages;
+  String get maxTokens;
+  String get yes;
+  String get no;
+  String get notDownloaded;
+  String get downloading;
+  String get ready;
+  String get error;
+  String get downloadingProgress;
+  String get modelManagement;
+  String get gemmaModelReady;
+  String get deleteModel;
+  String get downloadModelSection;
+  String get downloadGemmaModel;
+  String get modelRequiresLicense;
+  String get requiresHfLogin;
+  String get storageSpaceNeeded;
+  String get runsLocallyPrivacy;
+  String get optimizedMobileInference;
+  String get openLicensePage;
+  String get openHfTokens;
+  String get cancelDownload;
+  String get downloadGemmaModelButton;
+  String get deleteModelConfirmation;
+  String get huggingFaceTokenSaved;
+  String get tokenCleared;
+  String get localLlmSettingsSaved;
+  String get modelDownloadedSuccessfully;
+  String get modelDownloadFailed;
+  String get modelDeletedSuccessfully;
+  String get downloadCancelledByUser;
+  String get localAiSettingsDescription;
+  String failedToLoadSettings(String error);
+  String failedToSaveToken(String error);
+  String failedToDownloadModel(String error);
+  String failedToDeleteModel(String error);
 }
 
 class _AppLocalizationsDelegate

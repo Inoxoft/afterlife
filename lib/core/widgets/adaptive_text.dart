@@ -62,16 +62,29 @@ class AdaptiveText extends StatelessWidget {
       adjustedConstraints,
     );
 
-    return Padding(
-      padding: padding,
-      child: Text(
-        text,
-        style: baseStyle.copyWith(fontSize: optimalFontSize),
-        maxLines: maxLines,
-        textAlign: textAlign,
-        overflow: TextOverflow.clip,
-      ),
+    final textWidget = Text(
+      text,
+      style: baseStyle.copyWith(fontSize: optimalFontSize),
+      maxLines: maxLines,
+      textAlign: textAlign,
+      overflow: TextOverflow.clip,
+      softWrap: maxLines == 1 ? false : true,
     );
+
+    // For single-line text, always allow scaleDown to guarantee fit
+    Widget child = maxLines == 1
+        ? FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: textAlign == TextAlign.center
+                ? Alignment.center
+                : textAlign == TextAlign.right
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+            child: textWidget,
+          )
+        : textWidget;
+
+    return Padding(padding: padding, child: child);
   }
 
   /// Uses binary search to find the optimal font size that fits in constraints
@@ -107,6 +120,17 @@ class AdaptiveText extends StatelessWidget {
     );
 
     textPainter.layout(maxWidth: constraints.maxWidth);
+    // For single-line text, ensure it fits within available width
+    if (maxLines == 1) {
+      final fitsWidth = textPainter.size.width <= constraints.maxWidth + 0.1;
+      if (!constraints.maxHeight.isFinite) return fitsWidth;
+      return fitsWidth && textPainter.height <= constraints.maxHeight;
+    }
+
+    // If height is unbounded for multi-line, rely on didExceedMaxLines
+    if (!constraints.maxHeight.isFinite) {
+      return !textPainter.didExceedMaxLines;
+    }
     return textPainter.height <= constraints.maxHeight;
   }
 }
@@ -123,8 +147,8 @@ extension AdaptiveTextPresets on AdaptiveText {
       text: text,
       baseStyle: baseStyle,
       maxFontSize: isHorizontalLayout ? 22 : 18,
-      minFontSize: isHorizontalLayout ? 14 : 12,
-      maxLines: 2,
+      minFontSize: isHorizontalLayout ? 9 : 6,
+      maxLines: 1,
       textAlign: TextAlign.start,
     );
   }
@@ -139,8 +163,8 @@ extension AdaptiveTextPresets on AdaptiveText {
       text: text,
       baseStyle: baseStyle,
       maxFontSize: isHorizontalLayout ? 13 : 11,
-      minFontSize: isHorizontalLayout ? 9 : 8,
-      maxLines: 2,
+      minFontSize: isHorizontalLayout ? 8 : 7,
+      maxLines: 1,
       textAlign: TextAlign.start,
     );
   }

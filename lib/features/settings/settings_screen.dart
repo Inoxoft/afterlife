@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -194,8 +193,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
 
                     _buildSettingCard(
-                      title: 'Local AI Settings',
-                      subtitle: 'Configure local AI model for offline usage',
+                      title: localizations.localAiSettings,
+                      subtitle: localizations.localAiSettingsDescription,
                       icon: Icons.offline_bolt,
                       onTap: () => _navigateToLocalLLMSettings(context),
                     ),

@@ -17,7 +17,9 @@ import '../group_chat/models/group_chat_model.dart';
 import '../group_chat/character_selection_screen.dart';
 import '../providers/group_chat_provider.dart';
 import '../../core/utils/responsive_utils.dart';
-import '../widgets/background_painters.dart';
+// ignore: unused_import
+import '../widgets/background_painters.dart'; // used by StarfieldPainter below
+import '../../core/widgets/adaptive_text.dart';
 
 class PulseRingPainter extends CustomPainter {
   final double progress;
@@ -117,30 +119,25 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             ? _exploreScrollController
             : _yourTwinsScrollController;
 
-    const double threshold = 50.0; // Scroll threshold to hide header
+    if (!currentController.hasClients) return;
 
-    if (currentController.hasClients) {
-      final bool shouldHideHeader = currentController.offset > threshold;
-
-      if (shouldHideHeader && _isHeaderVisible) {
-        setState(() {
-          _isHeaderVisible = false;
-        });
-        _headerAnimationController.forward();
-      } else if (!shouldHideHeader && !_isHeaderVisible) {
-        setState(() {
-          _isHeaderVisible = true;
-        });
-        _headerAnimationController.reverse();
-      }
-    }
+    const double hideRange = 120.0; // pixels to fully hide header
+    final double clampedOffset =
+        currentController.offset.clamp(0.0, hideRange);
+    final double targetValue = (clampedOffset / hideRange).clamp(0.0, 1.0);
+    _headerAnimationController.animateTo(
+      targetValue,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+    );
   }
 
-  // Cache text styles for better performance
+  // Cache text styles for potential future reuse (kept for theme consistency)
+  // ignore: unused_field
   late final TextStyle _titleStyle = AppTheme.titleStyle;
-
+  // ignore: unused_field
   late final TextStyle _subtitleStyle = AppTheme.subtitleStyle;
-
+  // ignore: unused_field
   late final TextStyle _captionStyle = AppTheme.captionStyle;
 
   // Cached bottom navigation items for better performance
@@ -395,14 +392,11 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                   animation: _headerAnimationController,
                   builder: (context, child) {
                     return ClipRect(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        height: _isHeaderVisible ? null : 0,
-                        child: Opacity(
-                          opacity:
-                              _headerOpacityAnimation.value == 0.0
-                                  ? 1.0 - _headerAnimationController.value
-                                  : 1.0,
+                      child: SizeTransition(
+                        sizeFactor: _headerHeightAnimation,
+                        axisAlignment: -1.0,
+                        child: FadeTransition(
+                          opacity: _headerOpacityAnimation,
                           child: Padding(
                             padding: EdgeInsets.fromLTRB(
                               ResponsiveUtils.getScreenPadding(context).left,
@@ -410,38 +404,43 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                               ResponsiveUtils.getScreenPadding(context).right,
                               24,
                             ),
-                            child: Text(
-                              _selectedIndex == 0
-                                  ? localizations.exploreDigitalTwins
-                                  : _selectedIndex == 1
-                                      ? localizations.yourDigitalTwins
-                                      : localizations.groupChats,
-                              style:
-                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                    text:
-                                        _selectedIndex == 0
-                                            ? localizations.exploreDigitalTwins
-                                            : _selectedIndex == 1
-                                                ? localizations.yourDigitalTwins
-                                                : localizations.groupChats,
-                                    fontSize:
-                                        24 *
-                                        ResponsiveUtils.getFontSizeScale(
-                                          context,
-                                        ),
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 3.0,
-                                    color: AppTheme.silverMist,
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 10.0,
-                                        color: AppTheme.warmGold.withValues(
-                                          alpha: 0.8,
-                                        ),
-                                        offset: const Offset(0, 2),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 220),
+                              switchInCurve: Curves.easeOut,
+                              switchOutCurve: Curves.easeIn,
+                              child: Text(
+                                _selectedIndex == 0
+                                    ? localizations.exploreDigitalTwins
+                                    : _selectedIndex == 1
+                                        ? localizations.yourDigitalTwins
+                                        : localizations.groupChats,
+                                key: ValueKey<int>(
+                                  _selectedIndex <= 2 ? _selectedIndex : 0,
+                                ),
+                                style: UkrainianFontUtils
+                                    .cinzelWithUkrainianSupport(
+                                  text: _selectedIndex == 0
+                                      ? localizations.exploreDigitalTwins
+                                      : _selectedIndex == 1
+                                          ? localizations.yourDigitalTwins
+                                          : localizations.groupChats,
+                                  fontSize: 24 *
+                                      ResponsiveUtils.getFontSizeScale(
+                                        context,
                                       ),
-                                    ],
-                                  ),
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 3.0,
+                                  color: AppTheme.silverMist,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 10.0,
+                                      color: AppTheme.warmGold
+                                          .withValues(alpha: 0.8),
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -540,13 +539,16 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-
-      // Reset header visibility when changing tabs
+      // Always show header smoothly when changing tabs
+      _headerAnimationController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
       if (!_isHeaderVisible) {
         setState(() {
           _isHeaderVisible = true;
         });
-        _headerAnimationController.reverse();
       }
     }
 
@@ -568,13 +570,16 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         setState(() {
           _selectedIndex = _selectedIndex < 3 ? _selectedIndex : 2;
         });
-
-        // Reset header visibility when returning from settings
+        // Show header when returning from settings
+        _headerAnimationController.animateTo(
+          0.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
         if (!_isHeaderVisible) {
           setState(() {
             _isHeaderVisible = true;
           });
-          _headerAnimationController.reverse();
         }
       });
     }
@@ -595,14 +600,11 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             animation: _headerAnimationController,
             builder: (context, child) {
               return ClipRect(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: _isHeaderVisible ? null : 0,
-                  child: Opacity(
-                    opacity:
-                        _headerOpacityAnimation.value == 0.0
-                            ? 1.0 - _headerAnimationController.value
-                            : 1.0,
+                child: SizeTransition(
+                  sizeFactor: _headerHeightAnimation,
+                  axisAlignment: -1.0,
+                  child: FadeTransition(
+                    opacity: _headerOpacityAnimation,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -611,7 +613,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                           style: UkrainianFontUtils.latoWithUkrainianSupport(
                             text: localizations.interactWithHistoricalFigures,
                             fontSize: 16,
-                            color: AppTheme.silverMist.withValues(alpha: 0.8),
+                            color:
+                                AppTheme.silverMist.withValues(alpha: 0.8),
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -1243,6 +1246,8 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     }
   }
 
+  // Kept for potential reuse
+  // ignore: unused_element
   String _formatDate(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
@@ -1250,8 +1255,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
     if (difference.inDays == 0) return localizations.today;
     if (difference.inDays == 1) return localizations.yesterday;
-    if (difference.inDays < 7)
+    if (difference.inDays < 7) {
       return '${difference.inDays} ${localizations.daysAgo}';
+    }
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
@@ -1261,7 +1267,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     required CharacterModel character,
     required bool isHorizontalLayout,
   }) {
-    final localizations = AppLocalizations.of(context);
+    // Access localizations within closures via AppLocalizations.of(context)
 
     return _YourTwinCardWidget(
       key: key,
@@ -1302,7 +1308,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           ),
         ],
 
-        // Horizontal scrolling gallery
+        // Horizontal scrolling gallery with smoother scroll physics
         Expanded(
           child: ListView.builder(
             controller:
@@ -1310,6 +1316,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
                     ? _exploreScrollController
                     : _yourTwinsScrollController,
             scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(
+              decelerationRate: ScrollDecelerationRate.fast,
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -1592,25 +1601,27 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Digital twin name
-                        Text(
-                          widget.name,
-                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        // Digital twin name (adaptive, no ellipsis)
+                        AdaptiveTextPresets.characterName(
+                          text: widget.name,
+                          baseStyle: UkrainianFontUtils
+                              .cinzelWithUkrainianSupport(
                             text: widget.name,
-                            fontSize: widget.isHorizontalLayout ? 22 : 18,
+                            fontSize:
+                                widget.isHorizontalLayout ? 22 : 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
                             color: AppTheme.warmGold,
                             shadows: [
                               Shadow(
-                                color: AppTheme.warmGold.withValues(alpha: 0.5),
+                                color: AppTheme.warmGold
+                                    .withValues(alpha: 0.5),
                                 blurRadius: 4,
                                 offset: const Offset(0, 1),
                               ),
                             ],
                           ),
-                          maxLines: widget.isHorizontalLayout ? 2 : 1,
-                          overflow: TextOverflow.ellipsis,
+                          isHorizontalLayout: widget.isHorizontalLayout,
                         ),
 
                         SizedBox(height: widget.isHorizontalLayout ? 8 : 6),
@@ -1621,25 +1632,26 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             // Pulsing indicator
                             _buildPulsingDot(),
                             const SizedBox(width: 8),
-                            Text(
-                              widget.years,
-                              style:
-                                  UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                    text: widget.years,
-                                    fontSize:
-                                        widget.isHorizontalLayout ? 16 : 14,
-                                    color: AppTheme.warmGold,
-                                    letterSpacing: 0.5,
-                                    shadows: [
-                                      Shadow(
-                                        color: AppTheme.warmGold.withValues(
-                                          alpha: 0.5,
-                                        ),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
+                            Expanded(
+                              child: AdaptiveTextPresets.metadata(
+                                text: widget.years,
+                                baseStyle: UkrainianFontUtils
+                                    .cinzelWithUkrainianSupport(
+                                  text: widget.years,
+                                  fontSize: widget.isHorizontalLayout ? 16 : 14,
+                                  color: AppTheme.warmGold,
+                                  letterSpacing: 0.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: AppTheme.warmGold
+                                          .withValues(alpha: 0.5),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                isHorizontalLayout: widget.isHorizontalLayout,
+                              ),
                             ),
                           ],
                         ),
@@ -1662,18 +1674,18 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                               width: 1,
                             ),
                           ),
-                          child: Text(
-                            widget.profession,
-                            style:
-                                UkrainianFontUtils.cinzelWithUkrainianSupport(
-                                  text: widget.profession,
-                                  fontSize: widget.isHorizontalLayout ? 13 : 11,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
-                                  color: AppTheme.warmGold,
-                                ),
-                            maxLines: widget.isHorizontalLayout ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
+                          child: AdaptiveTextPresets.label(
+                            text: widget.profession,
+                            baseStyle: UkrainianFontUtils
+                                .cinzelWithUkrainianSupport(
+                              text: widget.profession,
+                              fontSize:
+                                  widget.isHorizontalLayout ? 13 : 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: AppTheme.warmGold,
+                            ),
+                            isHorizontalLayout: widget.isHorizontalLayout,
                           ),
                         ),
                       ],
@@ -1980,25 +1992,27 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Character name
-                        Text(
-                          widget.character.name,
-                          style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                        // Character name (adaptive, no ellipsis)
+                        AdaptiveTextPresets.characterName(
+                          text: widget.character.name,
+                          baseStyle: UkrainianFontUtils
+                              .cinzelWithUkrainianSupport(
                             text: widget.character.name,
-                            fontSize: widget.isHorizontalLayout ? 22 : 18,
+                            fontSize:
+                                widget.isHorizontalLayout ? 22 : 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
                             color: AppTheme.warmGold,
                             shadows: [
                               Shadow(
-                                color: AppTheme.warmGold.withValues(alpha: 0.5),
+                                color: AppTheme.warmGold
+                                    .withValues(alpha: 0.5),
                                 blurRadius: 4,
                                 offset: const Offset(0, 1),
                               ),
                             ],
                           ),
-                          maxLines: widget.isHorizontalLayout ? 2 : 1,
-                          overflow: TextOverflow.ellipsis,
+                          isHorizontalLayout: widget.isHorizontalLayout,
                         ),
 
                         SizedBox(height: widget.isHorizontalLayout ? 8 : 6),
@@ -2009,16 +2023,21 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
                             // Pulsing indicator
                             _buildPulsingDot(accentColor),
                             const SizedBox(width: 8),
-                            Text(
-                              '${AppLocalizations.of(context).created} $formattedDate',
-                              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                            Expanded(
+                              child: AdaptiveTextPresets.metadata(
                                 text:
                                     '${AppLocalizations.of(context).created} $formattedDate',
-                                fontSize: widget.isHorizontalLayout ? 14 : 12,
-                                color: AppTheme.silverMist.withValues(
-                                  alpha: 0.8,
+                                baseStyle: UkrainianFontUtils
+                                    .cinzelWithUkrainianSupport(
+                                  text:
+                                      '${AppLocalizations.of(context).created} $formattedDate',
+                                  fontSize:
+                                      widget.isHorizontalLayout ? 14 : 12,
+                                  color: AppTheme.silverMist
+                                      .withValues(alpha: 0.8),
+                                  letterSpacing: 0.5,
                                 ),
-                                letterSpacing: 0.5,
+                                isHorizontalLayout: widget.isHorizontalLayout,
                               ),
                             ),
                           ],
@@ -2143,12 +2162,10 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
       'local/gemma-3n-e2b-it': 'Gemma 3 (Local)',
       'local/deepseek-r1-distill-qwen-1.5b': 'DeepSeek R1 (Local)',
       'local/hammer2.1-1.5b': 'Hammer2.1 (Local)',
-      'google/gemini-2.0-flash-001': 'Gemini 2.0 Flash',
-      'anthropic/claude-3-5-sonnet': 'Claude 3.5 Sonnet',
-      'google/gemini-2.0-pro-001': 'Gemini 2.0 Pro',
-      'anthropic/claude-3-opus': 'Claude 3 Opus',
+      'google/gemini-2.5-pro': 'Gemini 2.5 Pro',
+      'anthropic/claude-sonnet-4': 'Claude 4 Sonnet',
+      'openai/gpt-5-chat': 'GPT-5 Chat',
       'meta-llama/llama-3-70b-instruct': 'Llama 3 70B',
-      'openai/gpt-4o': 'GPT-4o',
     };
 
     return modelNames[modelId] ?? 'AI Model';
@@ -2172,10 +2189,13 @@ class StarfieldPainter extends CustomPainter {
   final int starCount;
   final List<_Star> _stars = [];
   final Random _random = Random(42);
+  // ignore: unused_field
   final Paint _goldStarPaint =
       Paint()..color = AppTheme.warmGold.withValues(alpha: 0.8);
+  // ignore: unused_field
   final Paint _purpleStarPaint =
       Paint()..color = AppTheme.gentlePurple.withValues(alpha: 0.6);
+  // ignore: unused_field
   final Paint _silverStarPaint =
       Paint()..color = AppTheme.silverMist.withValues(alpha: 0.7);
 
