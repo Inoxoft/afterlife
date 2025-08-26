@@ -1,4 +1,4 @@
-import 'dart:math';
+// Removed unused import
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -1108,7 +1108,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       (context) =>
                           CharacterChatScreen(characterId: _character!.id),
                 ),
-              );
+              ).then((_) {
+                // After closing chat, return to gallery by popping profile
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              });
             },
             icon: Icon(Icons.chat_bubble_outline, size: 20 * fontScale),
             label: Text(

@@ -87,7 +87,7 @@ Future<InitializationResult> _initializeApp() async {
     }
 
     return InitializationResult.success(warnings);
-  } catch (e, stackTrace) {
+  } catch (e) {
     AppLogger.critical('App initialization failed', error: e);
     return InitializationResult.failure('Application failed to start', e);
   }
@@ -204,7 +204,7 @@ Future<void> main() async {
             child: MyApp(initializationWarnings: initResult.warnings),
           ),
         );
-      } catch (e, stackTrace) {
+      } catch (e) {
         AppLogger.critical('Critical error in main', error: e);
         runApp(
           ErrorApp(
@@ -245,6 +245,9 @@ class _MyAppState extends State<MyApp> {
     // Initialize language on app start
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LanguageProvider>().initializeLanguage();
+      // Wire CharactersProvider into GroupChatProvider so user twins are available in group chats
+      final charactersProvider = context.read<CharactersProvider>();
+      context.read<GroupChatProvider>().setCharactersProvider(charactersProvider);
     });
   }
 

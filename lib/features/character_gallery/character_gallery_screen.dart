@@ -566,11 +566,11 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
         context,
         MaterialPageRoute(builder: (context) => const SettingsScreen()),
       ).then((_) {
-        // Reset selected index to previous tab when returning from settings
+        // Always return to Explore tab after settings
+        _pageController.jumpToPage(0);
         setState(() {
-          _selectedIndex = _selectedIndex < 3 ? _selectedIndex : 2;
+          _selectedIndex = 0;
         });
-        // Show header when returning from settings
         _headerAnimationController.animateTo(
           0.0,
           duration: const Duration(milliseconds: 200),
@@ -987,7 +987,13 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       MaterialPageRoute(
         builder: (context) => GroupChatScreen(groupId: group.id),
       ),
-    );
+    ).then((_) {
+      // Always return to Explore tab after closing any chat
+      _pageController.jumpToPage(0);
+      setState(() {
+        _selectedIndex = 0;
+      });
+    });
   }
 
   // Your Twins tab with user's digital twins
@@ -1229,7 +1235,13 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       MaterialPageRoute(
         builder: (context) => CharacterChatScreen(characterId: character.id),
       ),
-    );
+    ).then((_) {
+      // Always return to Explore tab after closing any chat
+      _pageController.jumpToPage(0);
+      setState(() {
+        _selectedIndex = 0;
+      });
+    });
   }
 
   void _onAddCharacter(BuildContext context) async {
@@ -1237,6 +1249,12 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       context,
       MaterialPageRoute(builder: (context) => const InterviewScreen()),
     );
+
+    // Always return to Explore tab after closing Interview
+    _pageController.jumpToPage(0);
+    setState(() {
+      _selectedIndex = 0;
+    });
 
     if (result != null && result is CharacterModel) {
       await Provider.of<CharactersProvider>(

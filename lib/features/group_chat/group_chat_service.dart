@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import '../../core/services/hybrid_chat_service.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/services/preferences_service.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
 import '../character_prompts/famous_character_service.dart';
-import '../character_prompts/famous_character_prompts.dart';
 import '../chat/models/message_status.dart';
 import 'models/group_chat_model.dart';
 import 'models/group_chat_message.dart';
@@ -14,7 +13,6 @@ import 'character_response_coordinator.dart';
 import 'enhanced_conversation_coordinator.dart';
 import 'personality_dynamics_analyzer.dart';
 import 'conversation_memory_system.dart';
-import 'dynamic_timing_controller.dart';
 
 /// Service for managing group conversations with multiple AI characters
 class GroupChatService {
@@ -198,7 +196,11 @@ class GroupChatService {
   ) async {
     try {
       for (final responseInfo in responseSchedule) {
-        final characterId = responseInfo['characterId'] as String;
+        final characterId = responseInfo['characterId'] as String?;
+        if (characterId == null || !characterModels.containsKey(characterId)) {
+          // Skip invalid entries
+          continue;
+        }
         final delay = responseInfo['delay'] as int;
         final showThinking = responseInfo['showThinking'] as bool? ?? false;
         final thinkingDuration = responseInfo['thinkingDuration'] as int? ?? 0;
@@ -295,28 +297,7 @@ class GroupChatService {
   }
 
   /// Determine which characters should respond to the user message
-  static Future<List<String>> _determineRespondingCharacters({
-    required String groupId,
-    required GroupChatModel groupChat,
-    required String userMessage,
-  }) async {
-    // Build character models map for the coordinator
-    final characterModels = <String, CharacterModel>{};
-    for (final characterId in groupChat.characterIds) {
-      final character = await _getCharacterById(characterId);
-      if (character != null) {
-        characterModels[characterId] = character;
-      }
-    }
-
-    // Use the sophisticated character response coordinator
-    return await CharacterResponseCoordinator.determineRespondingCharacters(
-      groupChat: groupChat,
-      userMessage: userMessage,
-      characterModels: characterModels,
-      lastRespondingCharacterId: _lastRespondingCharacter[groupId],
-    );
-  }
+  // Removed unused _determineRespondingCharacters (legacy)
 
   /// Get enhanced AI response from a specific character with personality and context awareness
   static Future<GroupChatMessage?> _getEnhancedCharacterResponse({
@@ -351,11 +332,16 @@ class GroupChatService {
         characterModels,
       );
 
+      // Add language instruction if user selected non-English language
+      final languageInstruction = await _buildLanguageInstruction(character);
+      final systemPromptWithLanguage =
+          enhancedSystemPrompt + (languageInstruction ?? '');
+
       // Get AI response using HybridChatService
       final aiResponse = await HybridChatService.sendMessageToCharacter(
         characterId: characterId,
         message: userMessage,
-        systemPrompt: enhancedSystemPrompt,
+        systemPrompt: systemPromptWithLanguage,
         chatHistory: contextMessages,
         model: character.model,
         localPrompt: character.localPrompt,
@@ -394,39 +380,7 @@ class GroupChatService {
   }
 
   /// Legacy method for backward compatibility
-  static Future<GroupChatMessage?> _getCharacterResponse({
-    required String groupId,
-    required String characterId,
-    required String userMessage,
-    required List<GroupChatMessage> conversationContext,
-  }) async {
-    // Build minimal character models map for compatibility
-    final characterModels = <String, CharacterModel>{};
-    final character = await _getCharacterById(characterId);
-    if (character != null) {
-      characterModels[characterId] = character;
-    }
-
-    // Create minimal conversation memory
-    final minimalMemory = ConversationMemory(
-      groupId: groupId,
-      activeTopics: [],
-      characterStates: {},
-      conversationFlow: [],
-      overallTension: 0.0,
-      dominantMood: 'neutral',
-      lastUpdate: DateTime.now(),
-    );
-
-    return _getEnhancedCharacterResponse(
-      groupId: groupId,
-      characterId: characterId,
-      userMessage: userMessage,
-      conversationContext: conversationContext,
-      conversationMemory: minimalMemory,
-      characterModels: characterModels,
-    );
-  }
+  // Removed unused _getCharacterResponse (legacy)
 
   /// Build enhanced system prompt with personality, memory, and relationship context
   static String _buildEnhancedGroupSystemPrompt(
@@ -498,40 +452,47 @@ Remember: This is a natural conversation between historical figures. Be authenti
     return basePrompt + enhancedInstruction;
   }
 
-  /// Build legacy system prompt for backward compatibility
-  static String _buildGroupSystemPrompt(
-    CharacterModel character, 
-    List<GroupChatMessage> conversationContext,
-  ) {
-    final basePrompt = character.systemPrompt;
-    
-    // Get other character names in the conversation
-    final otherCharacters = conversationContext
-        .where((m) => !m.isUser && m.characterId != character.id)
-        .map((m) => m.characterName)
-        .toSet()
-        .toList();
+  /// Build language instruction based on user's selected language.
+  /// If language is English (default), returns null.
+  static Future<String?> _buildLanguageInstruction(CharacterModel character) async {
+    try {
+      final prefs = await PreferencesService.getPrefs();
+      final code = prefs.getString('user_language') ?? 'en';
+      if (code == 'en') return null;
 
-    if (otherCharacters.isEmpty) {
-      return basePrompt;
+      final name = _languageNameFromCode(code);
+      // Keep accent/stylistic hints tied to the original character persona
+      return '\n\n### LANGUAGE INSTRUCTIONS:\nPlease respond in $name. Maintain a subtle stylistic flavor consistent with ${character.name}\'s native speech patterns and historical context. Use natural, conversational phrasing; avoid translating proper names.\n';
+    } catch (_) {
+      return null;
     }
-
-    final groupInstruction = '''
-
-IMPORTANT GROUP CONVERSATION CONTEXT:
-You are participating in a group conversation with other historical figures: ${otherCharacters.join(', ')}.
-
-Guidelines:
-- Respond naturally as ${character.name} would in a group discussion
-- You may reference or respond to what others have said
-- Keep your responses conversational and engaging
-- Maintain your unique personality and perspective
-- Don't dominate the conversation - leave room for others to contribute
-- You can agree, disagree, or build upon what others have said
-''';
-
-    return basePrompt + groupInstruction;
   }
+
+  static String _languageNameFromCode(String code) {
+    switch (code) {
+      case 'es':
+        return 'Spanish';
+      case 'fr':
+        return 'French';
+      case 'de':
+        return 'German';
+      case 'it':
+        return 'Italian';
+      case 'ja':
+        return 'Japanese';
+      case 'ko':
+        return 'Korean';
+      case 'uk':
+        return 'Ukrainian';
+      case 'ru':
+        return 'Russian';
+      default:
+        return 'English';
+    }
+  }
+
+  /// Build legacy system prompt for backward compatibility
+  // Removed unused _buildGroupSystemPrompt (legacy)
 
   /// Build relationship context based on personality analysis
   static String _buildRelationshipContext(
@@ -688,32 +649,7 @@ Guidelines:
   }
 
   /// Build legacy conversation context for backward compatibility
-  static List<Map<String, dynamic>> _buildConversationContext(
-    List<GroupChatMessage> messages,
-    CharacterModel character,
-  ) {
-    return messages.map((msg) {
-      if (msg.isUser) {
-        return {
-          'role': 'user',
-          'content': msg.content,
-          'timestamp': msg.timestamp.toIso8601String(),
-        };
-      } else {
-        // For AI messages, include who said it for context
-        final role = msg.characterId == character.id ? 'assistant' : 'user';
-        final content = msg.characterId == character.id 
-            ? msg.content
-            : '${msg.characterName}: ${msg.content}';
-        
-        return {
-          'role': role,
-          'content': content,
-          'timestamp': msg.timestamp.toIso8601String(),
-        };
-      }
-    }).toList();
-  }
+  // Removed unused _buildConversationContext (legacy)
 
   /// Create error message for a character
   static Future<GroupChatMessage?> _createErrorMessage(

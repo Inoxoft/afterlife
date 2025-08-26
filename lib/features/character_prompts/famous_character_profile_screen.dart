@@ -1,4 +1,4 @@
-import 'dart:math';
+// Removed unused import
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
@@ -543,7 +543,12 @@ class _FamousCharacterProfileScreenState
               imageUrl: widget.imageUrl,
             ),
       ),
-    );
+    ).then((_) {
+      // After closing chat, also close profile to return to gallery
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   Widget _buildModelDropdown() {
