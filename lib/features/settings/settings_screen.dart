@@ -15,6 +15,7 @@ import '../character_chat/chat_service.dart' as character_chat;
 import '../character_interview/chat_service.dart' as interview_chat;
 
 import 'local_llm_settings_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -23,15 +24,62 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProviderStateMixin {
   // Remove the _chatFontSize variable and _fontSizeKey
   // Remove all code related to chat font size loading, saving, and UI
   // Remove the _buildSettingCard for chatFontSize
 
+  // Scroll + header animation for smooth hide-on-scroll behavior
+  late final ScrollController _scrollController;
+  late final AnimationController _headerAnimationController;
+  late final Animation<double> _headerOpacityAnimation;
+  late final Animation<double> _headerHeightAnimation;
+
   @override
   void initState() {
     super.initState();
-    // Remove the _loadSettings() call
+    // Initialize scroll + header animation
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+
+    _headerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _headerOpacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _headerHeightAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    const double hideRange = 120.0;
+    final double clampedOffset = _scrollController.offset.clamp(0.0, hideRange);
+    final double targetValue = (clampedOffset / hideRange).clamp(0.0, 1.0);
+    _headerAnimationController.animateTo(
+      targetValue,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _headerAnimationController.dispose();
+    super.dispose();
   }
 
   // Remove the _loadSettings() function
@@ -47,55 +95,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: [
               // Settings header with back button
-              Container(
-                padding: const EdgeInsets.all(16),
-                width: double.infinity,
-                child: Row(
-                  children: [
-                    // Back button with themed styling
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black26,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppTheme.warmGold.withValues(alpha: 0.3),
-                            width: 1,
+              AnimatedBuilder(
+                animation: _headerAnimationController,
+                builder: (context, child) {
+                  return ClipRect(
+                    child: SizeTransition(
+                      sizeFactor: _headerHeightAnimation,
+                      axisAlignment: -1.0,
+                      child: FadeTransition(
+                        opacity: _headerOpacityAnimation,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          width: double.infinity,
+                          child: Row(
+                            children: [
+                              // Back button with themed styling
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black26,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_back,
+                                    color: AppTheme.warmGold,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              // Title and subtitle
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      localizations.settings,
+                                      style: AppTheme.titleStyle.copyWith(fontSize: 28),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      localizations.settingsDescription,
+                                      style: AppTheme.captionStyle,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: AppTheme.warmGold,
-                          size: 24,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // Title and subtitle
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            localizations.settings,
-                            style: AppTheme.titleStyle.copyWith(fontSize: 28),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            localizations.settingsDescription,
-                            style: AppTheme.captionStyle,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
 
               Expanded(
                 child: ListView(
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   children: [
                     // Appearance section
@@ -169,13 +232,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: localizations.privacyPolicyDescription,
                       icon: Icons.privacy_tip_outlined,
                       onTap: () {
-                        // Open privacy policy
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              localizations.privacyPolicyNotAvailable,
-                            ),
-                            backgroundColor: AppTheme.deepIndigo,
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PrivacyPolicyScreen(),
                           ),
                         );
                       },

@@ -111,6 +111,8 @@ flutter:
     - assets/images/vincent_van_gogh.png
     - assets/images/william_shakespeare.png
     - assets/images/winston_churchill.png
+    # Legal / policy documents
+    - assets/privacy/
   #
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package

@@ -584,7 +584,6 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   }
 
   Widget _buildEmptyState(GroupChatModel group) {
-    final localizations = AppLocalizations.of(context);
     final fontScale = ResponsiveUtils.getFontSizeScale(context);
     
     return Center(
@@ -784,18 +783,6 @@ class _GroupChatScreenState extends State<GroupChatScreen>
             fontScale,
           ),
           _buildMenuOption(
-            Icons.person_add,
-            localizations.addMembers,
-            _addMembers,
-            fontScale,
-          ),
-          _buildMenuOption(
-            Icons.person_remove,
-            localizations.removeMembers,
-            _removeMembers,
-            fontScale,
-          ),
-          _buildMenuOption(
             Icons.delete_outline,
             localizations.deleteGroup,
             _deleteGroup,
@@ -852,19 +839,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     });
   }
 
-  void _addMembers() {
-    // TODO: Implement add members functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add members functionality coming soon')),
-    );
-  }
-
-  void _removeMembers() {
-    // TODO: Implement remove members functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Remove members functionality coming soon')),
-    );
-  }
+  // Note: Add/Remove members were removed from the group menu per UX request.
 
   void _deleteGroup() {
     final localizations = AppLocalizations.of(context);

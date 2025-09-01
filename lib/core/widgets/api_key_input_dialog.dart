@@ -169,8 +169,10 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
+    final Size screenSize = MediaQuery.of(context).size;
     return AlertDialog(
       backgroundColor: AppTheme.deepIndigo,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
@@ -182,17 +184,22 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         widget.isFromSettings ? localizations.openRouterApiKey : localizations.apiKeyRequired,
         style: const TextStyle(color: Colors.white),
       ),
-      content:
-          _isLoading
-              ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.warmGold),
-                ),
-              )
-              : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      content: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.warmGold),
+              ),
+            )
+          : ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: screenSize.height * 0.7,
+                maxWidth: screenSize.width * 0.9,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   Text(
                     widget.isFromSettings
                         ? localizations.updateApiKeyDescription
@@ -439,6 +446,8 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                     ),
                 ],
               ),
+            ),
+          ),
       actions: [
         TextButton(
           onPressed:

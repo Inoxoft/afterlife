@@ -7,8 +7,10 @@ import 'personality_dynamics_analyzer.dart';
 
 /// Enhanced conversation coordinator that creates natural, organic conversations
 class EnhancedConversationCoordinator {
+  // ignore: unused_field
   static const int _maxSimultaneousResponses = 3; // Increased for more dynamic conversations
   static const double _baseResponseProbability = 0.4;
+  // ignore: unused_field
   static const int _conversationMemoryWindow = 8; // More context
   
   // Response timing patterns based on personality
@@ -61,11 +63,20 @@ class EnhancedConversationCoordinator {
     );
 
     // Phase 3: Calculate response timing and order
-    final allResponders = [...primaryResponders, ...secondaryResponders];
+    // Combine responders and ensure uniqueness while preserving order
+    final seen = <String>{};
+    final allResponders = <String>[
+      ...primaryResponders.where((id) => seen.add(id)),
+      ...secondaryResponders.where((id) => seen.add(id)),
+    ];
     
     for (int i = 0; i < allResponders.length; i++) {
       final responder = allResponders[i];
-      final character = characterModels[responder]!;
+      final character = characterModels[responder];
+      if (character == null) {
+        // Skip if not in models
+        continue;
+      }
       
       // Calculate personality-based timing
       final timing = _calculateResponseTiming(
@@ -111,7 +122,7 @@ class EnhancedConversationCoordinator {
     final conversationHistory = groupChat.messages;
 
     // Initialize base scores
-    for (final characterId in groupChat.characterIds) {
+    for (final characterId in characterModels.keys) {
       responseScores[characterId] = _baseResponseProbability;
     }
 
@@ -487,7 +498,6 @@ class EnhancedConversationCoordinator {
     Map<String, CharacterModel> characterModels,
   ) {
     final dynamicsType = groupDynamics['groupDynamicsType'] as String;
-    final conflictPotential = groupDynamics['groupAverages']['conflictPotential'] as double;
 
     for (final characterId in scores.keys) {
       final character = characterModels[characterId];
@@ -567,7 +577,17 @@ class EnhancedConversationCoordinator {
       }
     }
 
-    return selectedCharacters;
+    // Guard: ensure only valid characters (present in characterModels)
+    final filtered = selectedCharacters
+        .where((id) => characterModels.containsKey(id))
+        .toList();
+
+    // Fallback: ensure at least one responder
+    if (filtered.isEmpty && characterModels.isNotEmpty) {
+      filtered.add(characterModels.keys.first);
+    }
+
+    return filtered;
   }
 
   /// Determine secondary responders (reactions to primary responses)

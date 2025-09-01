@@ -2,14 +2,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../core/utils/app_logger.dart';
-import 'package:provider/provider.dart';
 import 'message_model.dart';
-import 'chat_service.dart';
 import 'prompts.dart';
 import '../providers/language_provider.dart';
-import '../../l10n/app_localizations.dart';
-import 'package:http/http.dart' as http;
-import 'package:afterlife/features/providers/characters_provider.dart';
 import '../models/character_model.dart';
 import '../../core/services/hybrid_chat_service.dart';
 
@@ -382,6 +377,12 @@ $languageInstruction""";
 
             // Keep as complete since we have an updated character card
             isComplete = true;
+            // Prompt user to confirm or request changes, matching file flow
+            addAIMessage(
+              "Great! I've updated your character card. Review it above and:\n\n"
+              "• Type 'agree' to save your character\n"
+              "• Or describe any changes you'd like me to make",
+            );
             notifyListeners();
           }
         } else {
@@ -441,6 +442,12 @@ $languageInstruction""";
 
             // Mark as complete since AI generated the character card
             isComplete = true;
+            // Prompt user to confirm or request changes, matching file flow
+            addAIMessage(
+              "Perfect! I've created your character card based on our interview. Review it above and:\n\n"
+              "• Type 'agree' to save your character\n"
+              "• Or describe any changes you'd like me to make",
+            );
             notifyListeners();
           }
         } else {
@@ -522,27 +529,7 @@ $languageInstruction""";
     _initialize();
   }
 
-  String _prepareSystemPromptForCharacter(String prompt) {
-    // Remove any ## markers that might confuse the AI
-    String cleanedPrompt = prompt.replaceAll(RegExp(r'##.*?##'), '').trim();
-
-    // Optimize for DeepSeek: Make the prompt more direct and conversational
-    if (!cleanedPrompt.contains("You are") && characterName != null) {
-      cleanedPrompt =
-          "You are $characterName. You will speak and act as this character in all responses.\n\n" +
-          cleanedPrompt;
-    }
-
-    // Add DeepSeek-optimized instructions that prevent reasoning mode
-    if (!cleanedPrompt.contains("impersonate") &&
-        !cleanedPrompt.contains("roleplay") &&
-        !cleanedPrompt.contains("immerse yourself")) {
-      cleanedPrompt +=
-          """\n\nYou must stay completely in character. Never break character, never mention you are an AI, and never show reasoning or thinking processes. Respond naturally as $characterName would. Avoid structured formatting such as bullet points, numbered steps, emojis, or section headings. Use line breaks naturally if needed, but maintain the flow of a realistic conversation.""";
-    }
-
-    return cleanedPrompt;
-  }
+  // Removed unused _prepareSystemPromptForCharacter method
 
   void _handleApiConfigurationError() {
     _removeLoadingMessage();
