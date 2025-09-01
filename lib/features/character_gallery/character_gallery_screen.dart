@@ -62,6 +62,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   // Add scroll controllers for each tab
   late final ScrollController _exploreScrollController;
   late final ScrollController _yourTwinsScrollController;
+  late final ScrollController _groupChatsScrollController;
 
   // Animation controller for header visibility
   late final AnimationController _headerAnimationController;
@@ -78,6 +79,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     // Initialize scroll controllers
     _exploreScrollController = ScrollController();
     _yourTwinsScrollController = ScrollController();
+    _groupChatsScrollController = ScrollController();
 
     // Initialize header animation controller
     _headerAnimationController = AnimationController(
@@ -102,6 +104,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     // Add scroll listeners
     _exploreScrollController.addListener(_onScroll);
     _yourTwinsScrollController.addListener(_onScroll);
+    _groupChatsScrollController.addListener(_onScroll);
   }
 
   @override
@@ -109,6 +112,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     _pageController.dispose();
     _exploreScrollController.dispose();
     _yourTwinsScrollController.dispose();
+    _groupChatsScrollController.dispose();
     _headerAnimationController.dispose();
     super.dispose();
   }
@@ -117,7 +121,9 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     final ScrollController currentController =
         _selectedIndex == 0
             ? _exploreScrollController
-            : _yourTwinsScrollController;
+            : _selectedIndex == 1
+                ? _yourTwinsScrollController
+                : _groupChatsScrollController;
 
     if (!currentController.hasClients) return;
 
@@ -475,7 +481,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
           textTheme: Theme.of(context).textTheme.copyWith(
             bodySmall: UkrainianFontUtils.latoWithUkrainianSupport(
               text: "Sample", // This will be used for tab labels
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -512,15 +518,17 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
               text: "Tab", // Placeholder text for style detection
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.w500,
               color: AppTheme.warmGold,
+              height: 1.1,
             ),
             unselectedLabelStyle: UkrainianFontUtils.latoWithUkrainianSupport(
               text: "Tab", // Placeholder text for style detection
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.w400,
               color: AppTheme.silverMist.withValues(alpha: 0.5),
+              height: 1.1,
             ),
             unselectedItemColor: AppTheme.silverMist.withValues(alpha: 0.5),
             selectedItemColor: AppTheme.warmGold,
@@ -776,6 +784,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     
     if (shouldUseGrid) {
       return GridView.builder(
+        controller: _groupChatsScrollController,
         physics: const BouncingScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: ResponsiveUtils.getGridCrossAxisCount(context),
@@ -791,6 +800,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
       );
     } else {
       return ListView.builder(
+        controller: _groupChatsScrollController,
         physics: const BouncingScrollPhysics(),
         itemCount: provider.groupChats.length,
         itemBuilder: (context, index) {
@@ -819,6 +829,7 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
     }
 
     return ListView.builder(
+      controller: _groupChatsScrollController,
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       itemCount: provider.groupChats.length,
