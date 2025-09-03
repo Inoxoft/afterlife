@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+// import 'package:url_launcher/url_launcher_string.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/local_llm_service.dart';
 import 'dart:async';
@@ -24,10 +24,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   // ignore: unused_field
   String? _downloadError;
 
-  // Hugging Face token state
-  final TextEditingController _hfTokenController = TextEditingController();
-  bool _hasHfToken = false;
-  bool _isSavingToken = false;
+  // Token UI removed; download uses embedded token
 
   // Stream subscriptions
   StreamSubscription<double>? _progressSubscription;
@@ -44,7 +41,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
   void dispose() {
     _progressSubscription?.cancel();
     _statusSubscription?.cancel();
-    _hfTokenController.dispose();
+    // No token controller to dispose
     super.dispose();
   }
 
@@ -80,7 +77,6 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
 
     try {
       final settings = LocalLLMService.getSettings();
-      final status = LocalLLMService.getStatus();
 
       if (mounted) {
         setState(() {
@@ -90,7 +86,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
           );
           _downloadProgress = settings['downloadProgress'] ?? 0.0;
           _downloadError = settings['downloadError'];
-          _hasHfToken = (status['hasHuggingFaceToken'] == true);
+          // Token UI removed
 
           _isLoading = false;
         });
@@ -105,41 +101,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     }
   }
 
-  Future<void> _saveHuggingFaceToken() async {
-    if (_isSavingToken) return;
-    setState(() {
-      _isSavingToken = true;
-    });
-    try {
-      final token = _hfTokenController.text.trim();
-      await LocalLLMService.setHuggingFaceToken(token.isEmpty ? null : token);
-      if (mounted) {
-        setState(() {
-          _hasHfToken = token.isNotEmpty;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              token.isNotEmpty ? AppLocalizations.of(context).huggingFaceTokenSaved : AppLocalizations.of(context).tokenCleared,
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).failedToSaveToken(e.toString())), backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSavingToken = false;
-        });
-      }
-    }
-  }
+  // Token UI removed
 
   Future<void> _saveSettings() async {
     try {
@@ -280,7 +242,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                     const SizedBox(height: 16),
                     _buildModelCard(),
                     const SizedBox(height: 16),
-                    _buildHfTokenSection(),
+                    // Token section removed
                     const SizedBox(height: 16),
                     _buildDownloadSection(),
                   ],
@@ -289,97 +251,10 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
     );
   }
 
-  Widget _buildHfTokenSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context).huggingFaceAccessToken,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(_hasHfToken ? Icons.verified : Icons.info_outline,
-                    color: _hasHfToken ? Colors.green : Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _hasHfToken
-                        ? AppLocalizations.of(context).tokenIsSet
-                        : AppLocalizations.of(context).pasteHuggingFaceToken,
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _hfTokenController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).hfTokenPlaceholder,
-                hintText: AppLocalizations.of(context).hfTokenHint,
-                border: const OutlineInputBorder(),
-                suffixIcon: _isSavingToken
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _isSavingToken ? null : _saveHuggingFaceToken,
-                  icon: const Icon(Icons.save),
-                  label: Text(AppLocalizations.of(context).saveToken),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.midnightPurple,
-                    foregroundColor: AppTheme.silverMist,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: _isSavingToken
-                      ? null
-                      : () {
-                          _hfTokenController.clear();
-                          _saveHuggingFaceToken();
-                        },
-                  icon: const Icon(Icons.delete_outline),
-                  label: Text(AppLocalizations.of(context).clearToken),
-                ),
-                TextButton.icon(
-                  onPressed: () => launchUrlString(
-                    'https://huggingface.co/settings/tokens',
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  icon: const Icon(Icons.vpn_key),
-                  label: Text(AppLocalizations.of(context).getToken),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Token section removed
 
   Widget _buildModelCard() {
-    // Read status to ensure up-to-date info if needed later
-    // ignore: unused_local_variable
-    final status = LocalLLMService.getStatus();
+    // Read settings to ensure up-to-date info if needed later
     final settings = LocalLLMService.getSettings();
     final modelConfig = settings['modelConfig'] ?? {};
 
@@ -546,26 +421,6 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
             const SizedBox(height: 16),
             Text(AppLocalizations.of(context).downloadGemmaModel, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 8),
-            Text(AppLocalizations.of(context).modelRequiresLicense, style: const TextStyle(fontSize: 12)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                TextButton.icon(
-                  onPressed: () => launchUrlString('https://huggingface.co/google/gemma-3n-E2B-it-litert-preview', mode: LaunchMode.externalApplication),
-                  icon: const Icon(Icons.open_in_new),
-                  label: Text(AppLocalizations.of(context).openLicensePage),
-                ),
-                TextButton.icon(
-                  onPressed: () => launchUrlString('https://huggingface.co/settings/tokens', mode: LaunchMode.externalApplication),
-                  icon: const Icon(Icons.vpn_key),
-                  label: Text(AppLocalizations.of(context).openHfTokens),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(AppLocalizations.of(context).requiresHfLogin),
             Text(AppLocalizations.of(context).storageSpaceNeeded),
             Text(AppLocalizations.of(context).runsLocallyPrivacy),
             Text(AppLocalizations.of(context).optimizedMobileInference),

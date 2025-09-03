@@ -149,15 +149,43 @@ class SetupGuidePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Cloud AI Option
+                      // Local AI Option (moved to top and highlighted by default)
+                      _buildOptionCard(
+                        context,
+                        title: l10n.localAiModel,
+                        subtitle: l10n.privateWorksOffline,
+                        icon: Icons.offline_bolt,
+                        isHighlighted: true,
+                        features: [
+                          l10n.completePrivacyDataStaysLocal,
+                          l10n.worksWithoutInternet,
+                          l10n.hammerModelSize,
+                          l10n.optimizedForMobileDevices,
+                        ],
+                        actionText: l10n.downloadModel,
+                        onTap: () => _navigateToLocalLLMSettings(context),
+                        infoWidget: Text(
+                          l10n.freeDownloadNoAccountRequired,
+                          style: TextStyle(
+                            color: AppTheme.silverMist.withValues(alpha: 0.8),
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Cloud AI Option (now second)
                       _buildOptionCard(
                         context,
                         title: l10n.cloudAiModels,
                         subtitle: l10n.bestQualityRequiresInternet,
                         icon: Icons.cloud,
-                        isHighlighted: true,
+                        isHighlighted: false,
                         features: [
-                          l10n.accessToGptClaudeAndMore,
+                          // Reference GPT-5 as example cloud model
+                          'Access to GPT-5, Claude, and more',
                           l10n.advancedReasoningAndKnowledge,
                           l10n.alwaysUpToDateInformation,
                           l10n.fastResponses,
@@ -216,35 +244,6 @@ class SetupGuidePage extends StatelessWidget {
                           ],
                         ),
                       ),
-
-                      const SizedBox(height: 16),
-
-                      // Local AI Option
-                      _buildOptionCard(
-                        context,
-                        title: l10n.localAiModel,
-                        subtitle: l10n.privateWorksOffline,
-                        icon: Icons.offline_bolt,
-                        isHighlighted: false,
-                        features: [
-                          l10n.completePrivacyDataStaysLocal,
-                          l10n.worksWithoutInternet,
-                          l10n.hammerModelSize,
-                          l10n.optimizedForMobileDevices,
-                        ],
-                        actionText: l10n.downloadModel,
-                        onTap: () => _navigateToLocalLLMSettings(context),
-                        infoWidget: Text(
-                          l10n.freeDownloadNoAccountRequired,
-                          style: TextStyle(
-                            color: AppTheme.silverMist.withValues(alpha: 0.8),
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
 
                       // Both options info
                       Container(

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/animated_particles.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../providers/language_provider.dart';
 import '../character_prompts/famous_character_service.dart';
-import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -120,7 +118,18 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(localizations.errorConnecting),
+            backgroundColor: AppTheme.errorColor,
+            action: SnackBarAction(
+              label: localizations.retry,
+              textColor: AppTheme.warmGold,
+              onPressed: () {
+                _messageController.text = message;
+                _sendMessage();
+              },
+            ),
+          ),
         );
       }
 

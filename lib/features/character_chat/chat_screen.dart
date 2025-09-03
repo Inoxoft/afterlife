@@ -1,19 +1,17 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
 import '../models/character_model.dart';
 import '../providers/characters_provider.dart';
-import '../providers/language_provider.dart';
 import '../character_profile/character_profile_screen.dart';
-import 'chat_service.dart';
-import '../chat/models/chat_message.dart';
 import '../chat/widgets/chat_message_bubble.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../../core/utils/responsive_utils.dart';
 import '../../core/services/hybrid_chat_service.dart';
+import '../../core/services/local_llm_service.dart';
+import '../settings/local_llm_settings_screen.dart';
 
 class CharacterChatScreen extends StatefulWidget {
   final String characterId;
@@ -114,6 +112,41 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     );
     final localizations = AppLocalizations.of(context);
 
+    // If using a local model, ensure it's downloaded before sending
+    try {
+      if (_character != null && CharacterModel.isLocalModel(_character!.model)) {
+        if (!LocalLLMService.isInitialized) {
+          await LocalLLMService.initialize();
+        }
+
+        if (LocalLLMService.modelStatus != ModelDownloadStatus.downloaded) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${localizations.localModel} • ${localizations.notDownloaded}',
+                ),
+                action: SnackBarAction(
+                  label: localizations.downloadModel,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LocalLLMSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          }
+          return;
+        }
+      }
+    } catch (_) {
+      // If status check fails, fall through to normal error handling later
+    }
+
     // Clear the input field
     _messageController.clear();
 
@@ -176,7 +209,18 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(localizations.errorConnecting),
+            backgroundColor: AppTheme.errorColor,
+            action: SnackBarAction(
+              label: localizations.retry,
+              textColor: AppTheme.warmGold,
+              onPressed: () {
+                _messageController.text = message;
+                _sendMessage();
+              },
+            ),
+          ),
         );
       }
 

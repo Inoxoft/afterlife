@@ -182,7 +182,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${localizations.errorConnecting}: $e'),
+            content: Text(localizations.errorConnecting),
             backgroundColor: AppTheme.errorColor,
             action: SnackBarAction(
               label: localizations.retry,

@@ -1,10 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 class CharacterModel {
   static const String _defaultAccentColor = '0xFF4ECDC4';
   static const String _characterIdPrefix = 'char_';
-  static const String _defaultModel = 'google/gemini-2.0-flash-001';
+  static const String _defaultModel = 'local/gemma-3n-e2b-it';
 
   final String id;
   final String name;
@@ -167,11 +166,8 @@ class CharacterModel {
     String localPrompt = "You are $characterName. ";
 
     // Extract core personality and background information
-    final sections = <String>[];
     final lines = cleanedPrompt.split('\n');
 
-    // Look for key information sections
-    String currentSection = '';
     final importantInfo = <String>[];
 
     for (final line in lines) {
