@@ -1,4 +1,2 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
-// Include generated local environment config (if present)
-#include? "../Configs/Generated/Development.local.xcconfig"
