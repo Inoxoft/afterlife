@@ -1,0 +1,5 @@
+// Generated from template at build time. Do not edit generated files.
+HUGGINGFACE_API_KEY = HUGGINGFACE_API_KEY_PLACEHOLDER
+HUGGINGFACE_API_BASE_URL = https://api-inference.huggingface.co
+ENVIRONMENT_NAME = Development
+

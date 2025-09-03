@@ -517,7 +517,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get worksWithoutInternet => 'Works without internet';
   @override
-  String get hammerModelSize => '1.6GB Hammer2.1 model';
+  String get hammerModelSize => 'Gemma 3 (Local) ~2.9GB';
   @override
   String get optimizedForMobileDevices => 'Optimized for mobile devices';
   @override

@@ -1545,18 +1545,19 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                             ),
                           ),
                         ),
-                        // Centered mask image with subtle shadow effect
+                        // Centered mask image with consistent alignment across cards
                         Center(
-                          child: Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              vertical: widget.isHorizontalLayout ? 20 : 10,
-                              horizontal: widget.isHorizontalLayout ? 15 : 5,
-                            ),
-                            child: Image.asset(
-                              widget.imageUrl!,
+                          child: FractionallySizedBox(
+                            widthFactor: widget.isHorizontalLayout ? 0.82 : 0.86,
+                            heightFactor: widget.isHorizontalLayout ? 0.72 : 0.68,
+                            child: FittedBox(
                               fit: BoxFit.contain,
+                              alignment: Alignment.center,
+                              child: Image.asset(
+                                widget.imageUrl!,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                              ),
                             ),
                           ),
                         ),

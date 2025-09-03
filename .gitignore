@@ -1,3 +1,7 @@
+Configs/Generated/
+.env*
+*.local.xcconfig
+.cursor/
 # Miscellaneous
 *.class
 *.log

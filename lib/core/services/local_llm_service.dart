@@ -12,6 +12,7 @@ import 'preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../utils/app_logger.dart';
+import '../utils/env_config.dart';
 
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
@@ -38,6 +39,8 @@ class LocalLLMService {
   static LocalLLMService? _instance;
   static LocalLLMService get instance => _instance ??= LocalLLMService._();
   LocalLLMService._();
+
+  // No embedded token; use .env or user-provided token via settings
 
   // Flutter Gemma plugin instance
   static late FlutterGemmaPlugin _gemmaPlugin;
@@ -107,9 +110,13 @@ class LocalLLMService {
       final prefs = await PreferencesService.getPrefs();
       _isEnabled = prefs.getBool('local_llm_enabled') ?? false;
       _modelPath = prefs.getString('local_llm_model_path');
-      _huggingFaceToken = prefs.getString('huggingface_token');
+      // Prefer user-saved token; otherwise read from EnvConfig (.env)
+      final savedToken = prefs.getString('huggingface_token');
+      _huggingFaceToken = (savedToken != null && savedToken.isNotEmpty)
+          ? savedToken
+          : (EnvConfig.get('HUGGINGFACE_TOKEN') ?? '');
       _googleAgreementAccepted =
-          prefs.getBool('google_agreement_accepted') ?? false;
+          prefs.getBool('google_agreement_accepted') ?? true; // assumed accepted
 
       // Check if model file exists
       await _checkModelStatus();
@@ -144,13 +151,42 @@ class LocalLLMService {
 
   // Check model status
   static Future<void> _checkModelStatus() async {
-    // If we don't have a stored path, look for the expected filename in app documents
+    // If we don't have a stored path, try the expected filename first
     if (_modelPath == null) {
       final directory = await getApplicationDocumentsDirectory();
       final candidatePath = '${directory.path}/' + ModelConfig.filename;
       if (await File(candidatePath).exists()) {
         _modelPath = candidatePath;
       }
+    }
+
+    // If the stored path points to a missing file, attempt to rediscover any .task model in Documents
+    if (_modelPath != null && !await File(_modelPath!).exists()) {
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final dir = Directory(directory.path);
+        final candidates = await dir
+            .list(recursive: false, followLinks: false)
+            .where((e) => e is File && e.path.toLowerCase().endsWith('.task'))
+            .cast<File>()
+            .toList();
+        // Prefer a file that matches the configured filename; otherwise take the largest .task file
+        File? chosen;
+        for (final f in candidates) {
+          if (f.path.endsWith('/' + ModelConfig.filename)) {
+            chosen = f;
+            break;
+          }
+        }
+        chosen ??= candidates.isEmpty
+            ? null
+            : (await _pickLargestTaskFile(candidates));
+        if (chosen != null && await chosen.exists()) {
+          _modelPath = chosen.path;
+          final prefs = await PreferencesService.getPrefs();
+          await prefs.setString('local_llm_model_path', _modelPath!);
+        }
+      } catch (_) {}
     }
 
     if (_modelPath != null && await File(_modelPath!).exists()) {
@@ -173,6 +209,20 @@ class LocalLLMService {
       _modelPath = null;
       AppLogger.debug('No model file found', tag: 'LocalLLMService');
     }
+  }
+
+  // Helper to pick the largest .task file (most likely the model)
+  static Future<File> _pickLargestTaskFile(List<File> files) async {
+    File largest = files.first;
+    int maxSize = await largest.length();
+    for (final f in files.skip(1)) {
+      final s = await f.length();
+      if (s > maxSize) {
+        maxSize = s;
+        largest = f;
+      }
+    }
+    return largest;
   }
 
   // Verify download file size
@@ -325,9 +375,9 @@ class LocalLLMService {
         Uri targetUri = Uri.parse(ModelConfig.url);
         final request = http.Request('GET', targetUri);
         
-        // Add Hugging Face token if provided or stored
-        final token = huggingFaceToken ?? _huggingFaceToken;
-        if (token?.isNotEmpty == true) {
+        // Add Hugging Face token if provided or stored (.env/user)
+        final token = (huggingFaceToken ?? _huggingFaceToken ?? '').trim();
+        if (token.isNotEmpty) {
           request.headers['Authorization'] = 'Bearer $token';
         }
         request.headers['User-Agent'] = 'afterlife-app/1.0';
@@ -337,9 +387,7 @@ class LocalLLMService {
 
         if (response.statusCode != 200) {
           if (response.statusCode == 401 || response.statusCode == 403) {
-            throw Exception(
-              'Access denied (HTTP ${response.statusCode}). This model requires accepting the license and an access token. Visit https://huggingface.co/google/gemma-3n-E2B-it-litert-preview to accept, then add your token in Settings.',
-            );
+            throw Exception('Access denied (HTTP ${response.statusCode}). Please ensure HUGGINGFACE_TOKEN in .env (or Settings) has access.');
           }
           // If 404, try to resolve the actual .task filename via the Hugging Face API
           if (response.statusCode == 404) {
@@ -353,7 +401,7 @@ class LocalLLMService {
                 AppLogger.debug('Resolved .task filename via HF API: $dynamicFilename', tag: 'LocalLLMService');
               }
               final retryReq = http.Request('GET', Uri.parse(alt.$1));
-              if (token?.isNotEmpty == true) {
+              if (token.isNotEmpty) {
                 retryReq.headers['Authorization'] = 'Bearer $token';
               }
               retryReq.headers['User-Agent'] = 'afterlife-app/1.0';

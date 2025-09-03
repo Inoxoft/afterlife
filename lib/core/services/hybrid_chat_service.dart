@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:afterlife/core/services/local_llm_service.dart';
+import 'preferences_service.dart';
 import '../utils/app_logger.dart';
 import '../../features/character_interview/chat_service.dart' as interview_chat;
 import '../../features/character_chat/chat_service.dart' as character_chat;
@@ -246,6 +247,21 @@ class HybridChatService {
       promptToUse = systemPrompt;
     }
 
+    // Append language instruction for local models based on saved app language
+    if (actualProvider == LLMProvider.local) {
+      try {
+        final prefs = await PreferencesService.getPrefs();
+        final code = (prefs.getString('user_language') ?? 'en').toLowerCase();
+        if (code != 'en') {
+          final languageName = _languageNameFromCode(code);
+          final endonym = _languageEndonym(code);
+          final instruction =
+              "\n\nLANGUAGE POLICY: Reply only in $languageName ($endonym). Do not include any translations, explanations, or duplicate text in other languages. Do not add English in parentheses. Switch languages only if the user explicitly requests it, otherwise keep strictly to $languageName.";
+          promptToUse = '$promptToUse$instruction';
+        }
+      } catch (_) {}
+    }
+
     // Convert the message format for hybrid service
     // Ensure each message has a valid 'role' field for OpenRouter API
     final messages =
@@ -280,6 +296,52 @@ class HybridChatService {
               : model, // Don't pass local model ID to cloud service
       preferredProvider: actualProvider,
     );
+  }
+
+  static String _languageNameFromCode(String code) {
+    switch (code) {
+      case 'es':
+        return 'Spanish';
+      case 'fr':
+        return 'French';
+      case 'de':
+        return 'German';
+      case 'it':
+        return 'Italian';
+      case 'ja':
+        return 'Japanese';
+      case 'ko':
+        return 'Korean';
+      case 'uk':
+        return 'Ukrainian';
+      case 'ru':
+        return 'Russian';
+      default:
+        return 'English';
+    }
+  }
+
+  static String _languageEndonym(String code) {
+    switch (code) {
+      case 'es':
+        return 'Español';
+      case 'fr':
+        return 'Français';
+      case 'de':
+        return 'Deutsch';
+      case 'it':
+        return 'Italiano';
+      case 'ja':
+        return '日本語';
+      case 'ko':
+        return '한국어';
+      case 'uk':
+        return 'Українська';
+      case 'ru':
+        return 'Русский';
+      default:
+        return 'English';
+    }
   }
 
   /// Determine which provider to actually use

@@ -163,7 +163,17 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(localizations.errorConnecting),
+            backgroundColor: AppTheme.errorColor,
+            action: SnackBarAction(
+              label: localizations.retry,
+              onPressed: () {
+                _messageController.text = message;
+                _sendMessage();
+              },
+            ),
+          ),
         );
       }
 

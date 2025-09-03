@@ -1,5 +1,6 @@
-import 'dart:math';
+// import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../services/preferences_service.dart';
 import '../services/base_service.dart';
 import 'app_logger.dart';
@@ -13,6 +14,7 @@ class EnvConfig {
 
   /// Cache for the user API key to avoid sync/async issues
   static String? _cachedUserApiKey;
+  static String? _cachedHuggingFaceToken;
 
   /// Initialize environment configuration
   static Future<void> initialize() async {
@@ -24,9 +26,21 @@ class EnvConfig {
         () => PreferencesService.initialize(),
       ],
       initializeLogic: () async {
+        // Load .env file (if present)
+        try {
+          await dotenv.load(fileName: '.env', isOptional: true);
+        } catch (e) {
+          if (kDebugMode) {
+            AppLogger.warning('Failed to load .env file (optional): $e', tag: 'EnvConfig');
+          }
+        }
+
         // Get API key from SharedPreferences (user setting)
         final prefs = await PreferencesService.getPrefs();
         _cachedUserApiKey = prefs.getString(_openRouterApiKeyPref);
+
+        // Read HF token from .env
+        _cachedHuggingFaceToken = dotenv.maybeGet('HUGGINGFACE_TOKEN');
 
         if (kDebugMode) {
           dumpApiKeyInfo();
@@ -46,8 +60,11 @@ class EnvConfig {
     if (key == 'OPENROUTER_API_KEY') {
       return _cachedUserApiKey;
     }
+    if (key == 'HUGGINGFACE_TOKEN') {
+      return _cachedHuggingFaceToken;
+    }
 
-    // Return null for any other key as we are no longer using a .env file
+    // Return null for any other key if not found
     return null;
   }
 
@@ -108,9 +125,13 @@ class EnvConfig {
     if (kDebugMode) {
       AppLogger.debug('--- API Key Diagnostics ---', tag: 'EnvConfig');
       final keyDisplay = _cachedUserApiKey != null 
-          ? (_cachedUserApiKey!.isEmpty ? "EMPTY" : "${_cachedUserApiKey!.substring(0, min(4, _cachedUserApiKey!.length))}...")
+          ? (_cachedUserApiKey!.isEmpty ? "EMPTY" : "${_cachedUserApiKey!.substring(0, 4)}...")
           : "NULL";
       AppLogger.debug('Cached User Key: $keyDisplay', tag: 'EnvConfig');
+      final hfDisplay = _cachedHuggingFaceToken != null 
+          ? (_cachedHuggingFaceToken!.isEmpty ? "EMPTY" : "${_cachedHuggingFaceToken!.substring(0, 4)}...")
+          : "NULL";
+      AppLogger.debug('HF Token from .env: $hfDisplay', tag: 'EnvConfig');
       final hasKey = await hasUserApiKey();
       AppLogger.debug('Has user API key in SharedPreferences: $hasKey', tag: 'EnvConfig');
       AppLogger.debug('--------------------------', tag: 'EnvConfig');
