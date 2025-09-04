@@ -31,7 +31,8 @@ class ServiceAvailability {
 
   bool get hasAnyWorkingService =>
       localLLM || interviewChat || characterChat || providerChat;
-  bool get canSendMessages => interviewChat || characterChat || providerChat;
+  // Allow local-only usage when cloud providers are unavailable
+  bool get canSendMessages => localLLM || interviewChat || characterChat || providerChat;
 }
 
 class HybridChatService {
@@ -47,6 +48,19 @@ class HybridChatService {
     characterChat: false,
     providerChat: false,
   );
+
+  // Style guide to steer local models toward concise, in-character answers
+  static const String _localStyleGuide =
+      """
+STYLE:
+- Stay strictly in character; use first-person voice and era-appropriate style.
+- Be concise: 2–4 sentences unless the user asks for depth.
+- No generic encyclopedia summaries; answer directly to the user prompt.
+- Warm, conversational tone; ask a clarifying follow-up when helpful.
+- Do not include role labels (Human/Assistant) or restate the question.
+- If uncertain, say so briefly and suggest what is needed to proceed.
+- Target ≈120 words per reply by default.
+""";
 
   /// Get current service availability
   static ServiceAvailability get serviceAvailability => _serviceAvailability;
@@ -156,11 +170,26 @@ class HybridChatService {
       );
     }
 
-    // Use the explicitly provided provider, otherwise use the global preference
+    // Use the explicitly provided provider when set; otherwise auto-determine
     final provider = preferredProvider ?? _preferredProvider;
 
-    // Determine which provider to use
-    final actualProvider = await _determineProvider(provider);
+    LLMProvider actualProvider;
+    if (preferredProvider != null) {
+      // Respect explicit provider. If local is requested but not available, attempt to enable once.
+      if (preferredProvider == LLMProvider.local) {
+        var localStatus = LocalLLMService.getStatus();
+        var isLocalAvailable = localStatus['isAvailable'] as bool;
+        if (!isLocalAvailable && localStatus['modelStatus'] == 'downloaded') {
+          try {
+            await LocalLLMService.enableLocalLLM();
+          } catch (_) {}
+        }
+      }
+      actualProvider = preferredProvider;
+    } else {
+      // Auto mode: determine best provider
+      actualProvider = await _determineProvider(provider);
+    }
 
     if (kDebugMode) {
       print('Requested provider: $provider, Using provider: $actualProvider');
@@ -215,7 +244,8 @@ class HybridChatService {
         (model.startsWith('local/') ||
             model == 'local' ||
             model.contains('hammer') ||
-            model.contains('gemma'));
+            model.contains('gemma') ||
+            model.contains('llama'));
 
     if (kDebugMode) {
       print('HybridChatService: Model selection debug');
@@ -241,10 +271,11 @@ class HybridChatService {
 
     // Select the appropriate prompt based on provider
     String promptToUse;
-    if (actualProvider == LLMProvider.local && localPrompt != null) {
-      promptToUse = localPrompt;
+    if (actualProvider == LLMProvider.local) {
+      final base = localPrompt ?? systemPrompt ?? '';
+      promptToUse = base.isEmpty ? _localStyleGuide : '$base\n\n$_localStyleGuide';
     } else {
-      promptToUse = systemPrompt;
+      promptToUse = systemPrompt ?? '';
     }
 
     // Append language instruction for local models based on saved app language
@@ -396,6 +427,20 @@ class HybridChatService {
     int? maxTokens,
   }) async {
     try {
+      // Ensure local LLM is ready; attempt on-the-fly enable if possible
+      var localStatus = LocalLLMService.getStatus();
+      if (localStatus['isAvailable'] != true) {
+        if (localStatus['modelStatus'] == 'downloaded') {
+          try {
+            await LocalLLMService.enableLocalLLM();
+            localStatus = LocalLLMService.getStatus();
+          } catch (_) {}
+        }
+        if (localStatus['isAvailable'] != true) {
+          return 'Local model not ready. Please download/enable the local model in Settings.';
+        }
+      }
+
       // Build a comprehensive prompt with conversation context for local models
       final StringBuffer promptBuffer = StringBuffer();
 
@@ -446,10 +491,7 @@ class HybridChatService {
       );
 
       // Clean up the response - remove any leading "Assistant:" if present
-      String cleanedResponse = response.trim();
-      if (cleanedResponse.startsWith('Assistant:')) {
-        cleanedResponse = cleanedResponse.substring(10).trim();
-      }
+      String cleanedResponse = LocalLLMService.cleanLocalResponse(response);
 
       return cleanedResponse;
     } catch (e) {

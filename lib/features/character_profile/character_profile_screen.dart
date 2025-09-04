@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/local_llm_service.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import '../../core/utils/image_utils.dart';
 import '../models/character_model.dart';
@@ -678,13 +679,19 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
   Widget _buildModelOptions() {
     final localizations = AppLocalizations.of(context);
+    // Read current local model size for accurate display
+    final settings = LocalLLMService.getSettings();
+    final mc = settings['modelConfig'] as Map<String, dynamic>?;
+    final String sizeGb = (mc != null && mc['fileSizeGB'] != null)
+        ? mc['fileSizeGB'].toString()
+        : '1.3';
 
     // Define the models for user-created twins
     final models = [
       {
-        'id': 'local/gemma-3n-e2b-it',
-        'name': 'Local Gemma 3n E2B IT',
-        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
+        'id': 'local/llama-3.2-1b-instruct',
+        'name': 'Local Llama 3.2',
+        'description': 'On-device local model (' + sizeGb + 'GB)',
         'provider': 'Local Device',
         'recommended': true,
         'isLocal': true,
@@ -854,25 +861,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                           ),
                         ),
                       ),
-                    if (isLocal)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'PRIVATE',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                    // Remove the PRIVATE pill for local model as per new UX
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -2667,7 +2656,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
-      'local/gemma-3n-e2b-it': {
+      'local/llama-3.2-1b-instruct': {
         'name': 'Local Gemma 3n E2B IT',
         'provider': 'Local Device',
       },
@@ -2706,7 +2695,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'local/gemma-3n-e2b-it':
+      'local/llama-3.2-1b-instruct':
           'Privacy-first local AI with multimodal support (2.9GB)',
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',

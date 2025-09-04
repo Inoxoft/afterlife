@@ -2189,7 +2189,7 @@ class _YourTwinCardWidgetState extends State<_YourTwinCardWidget>
 
   String _getModelDisplayName(String modelId) {
     final Map<String, String> modelNames = {
-      'local/gemma-3n-e2b-it': 'Gemma 3 (Local)',
+      'local/llama-3.2-1b-instruct': 'Llama 3.2 1B (Local)',
       'local/deepseek-r1-distill-qwen-1.5b': 'DeepSeek R1 (Local)',
       'local/hammer2.1-1.5b': 'Hammer2.1 (Local)',
       'google/gemini-2.5-pro': 'Gemini 2.5 Pro',

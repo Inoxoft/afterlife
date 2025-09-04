@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CharacterModel {
   static const String _defaultAccentColor = '0xFF4ECDC4';
   static const String _characterIdPrefix = 'char_';
-  static const String _defaultModel = 'local/gemma-3n-e2b-it';
+  static const String _defaultModel = 'local/llama-3.2-1b-instruct';
 
   final String id;
   final String name;
@@ -116,7 +116,7 @@ class CharacterModel {
     return modelId.startsWith('local/') ||
         modelId == 'local' ||
         modelId.contains('hammer') ||
-        modelId.contains('gemma');
+        modelId.contains('gemma') || modelId.contains('llama');
   }
 
   // Generate optimized local prompt from full prompt

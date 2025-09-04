@@ -11,8 +11,12 @@
 -keep class * extends io.flutter.embedding.android.FlutterActivity
 -keep class * extends io.flutter.embedding.android.FlutterFragmentActivity
 
-# Keep Flutter Gemma plugin classes
--keep class ai.flutter.flutter_gemma.** { *; }
+# Keep Flutter Gemma plugin classes (broaden to avoid R8 stripping in release)
+-keep class **.flutter_gemma.** { *; }
+-keep class **.pigeon.** { *; }
+
+# Keep AI Edge / MediaPipe / TensorFlow runtimes used by plugin
+-keep class com.google.ai.** { *; }
 -keep class com.google.mediapipe.** { *; }
 -keep class org.tensorflow.** { *; }
 

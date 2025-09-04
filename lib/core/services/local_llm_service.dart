@@ -17,22 +17,22 @@ import '../utils/env_config.dart';
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
-// Model configuration for Gemma 3n E2B
+// Model configuration (default: Gemma 3 270M IT, iOS-friendly)
 class ModelConfig {
-  // Gemma 3n E2B AI Edge preview (.task)
+  // Smaller LiteRT .task suitable for iOS memory mapping
   static const String url =
-      'https://huggingface.co/google/gemma-3n-E2B-it-litert-preview/resolve/main/gemma-3n-e2b-it_dynamic_int4.task';
-  static const String filename =
-      'gemma-3n-e2b-it_dynamic_int4.task';
-  static const String displayName = 'Gemma 3n E2B (AI Edge) ~2.9GB';
-  // Approximate size for verification and UI; HF may report exact Content-Length
-  static const int fileSizeBytes = 2991 * 1024 * 1024; // ~2.9 GB
-  static const int maxTokens = 32768; // Gemma 3n preview context per model card
+      'https://huggingface.co/litert-community/Llama-3.2-1B-Instruct/resolve/main/Llama-3.2-1B-Instruct_multi-prefill-seq_q8_ekv1280.task';
+  static const String filename = 'Llama-3.2-1B-Instruct_multi-prefill-seq_q8_ekv1280.task';
+  static const String displayName = 'Llama 3.2 1B Instruct (q8, ekv1280)';
+  // Unknown/large size; relax verification (accept >1GB)
+  static const int fileSizeBytes = 0;
+  static const int maxTokens = 1024; // safe default for iOS
   static const double temperature = 0.7;
   static const int topK = 40;
   static const double topP = 0.95;
-  static const PreferredBackend preferredBackend = PreferredBackend.cpu;
-  static const ModelType modelType = ModelType.gemmaIt; // Gemma 3n Instruction-Tuned
+  static const PreferredBackend preferredBackend = PreferredBackend.gpu;
+  // Use Gemma instruction type as a generic text-only type for compatibility
+  static const ModelType modelType = ModelType.gemmaIt;
 }
 
 class LocalLLMService {
@@ -249,6 +249,27 @@ class LocalLLMService {
     }
 
     try {
+      // On iOS, very large .task files may fail to memory-map (ODML LiteRT) with
+      // "Cannot allocate memory". Proactively guard and provide a clear error.
+      if (Platform.isIOS) {
+        final int fileSizeBytes = await File(_modelPath!).length();
+        // Empirical safe threshold for iOS devices. Recommend <= ~2.0GB.
+        const int iosRecommendedMaxBytes = 2200 * 1024 * 1024; // ~2.2 GB
+        if (fileSizeBytes > iosRecommendedMaxBytes) {
+          final double sizeGb = fileSizeBytes / (1024 * 1024 * 1024);
+          _downloadError =
+              'The selected local model is too large for iOS memory mapping (size: ' +
+              sizeGb.toStringAsFixed(2) +
+              ' GB). Please download and use a smaller iOS .task variant (<= ~2.0 GB).';
+          AppLogger.serviceError(
+            'LocalLLMService',
+            'iOS model too large for memory mapping',
+            _downloadError,
+          );
+          throw Exception(_downloadError);
+        }
+      }
+
       if (kDebugMode) {
         AppLogger.debug('Initializing Gemma 3n model at: $_modelPath', tag: 'LocalLLMService');
       }
@@ -302,6 +323,22 @@ class LocalLLMService {
 
   // Get settings (method needed by settings screen)
   static Map<String, dynamic> getSettings() {
+    // Derive file size from actual downloaded file when available
+    double computedSizeGb = 0.0;
+    try {
+      if (_modelPath != null) {
+        final f = File(_modelPath!);
+        if (f.existsSync()) {
+          computedSizeGb = f.lengthSync() / (1024 * 1024 * 1024);
+        }
+      }
+    } catch (_) {}
+
+    // Fallback to configured size if real size not available
+    if (computedSizeGb <= 0 && ModelConfig.fileSizeBytes > 0) {
+      computedSizeGb = ModelConfig.fileSizeBytes / (1024 * 1024 * 1024);
+    }
+
     return {
       'enabled': _isEnabled,
       'modelStatus': _modelStatus.name,
@@ -311,8 +348,7 @@ class LocalLLMService {
         'displayName': ModelConfig.displayName,
         'filename': ModelConfig.filename,
         'maxTokens': ModelConfig.maxTokens,
-        'fileSizeGB': (ModelConfig.fileSizeBytes / (1024 * 1024 * 1024))
-            .toStringAsFixed(1),
+        'fileSizeGB': computedSizeGb.toStringAsFixed(1),
         'supportImage': true,
       },
     };
@@ -639,9 +675,14 @@ class LocalLLMService {
         AppLogger.debug('Sending message to local LLM: $message', tag: 'LocalLLMService');
       }
 
-      // Create message with system prompt if provided
-      final prompt =
-          systemPrompt != null ? '$systemPrompt\n\nUser: $message' : message;
+      // Build prompt: if systemPrompt already contains the full dialogue
+      // (used by local provider), avoid appending an empty "User:" suffix.
+      final String prompt;
+      if (systemPrompt != null) {
+        prompt = message.isEmpty ? systemPrompt : '$systemPrompt\n\nUser: $message';
+      } else {
+        prompt = message;
+      }
 
       // Add query chunk and get response
       await _chat!.addQueryChunk(Message.text(text: prompt, isUser: true));
@@ -671,9 +712,13 @@ class LocalLLMService {
         AppLogger.debug('Sending streaming message to local LLM: $message', tag: 'LocalLLMService');
       }
 
-      // Create message with system prompt if provided
-      final prompt =
-          systemPrompt != null ? '$systemPrompt\n\nUser: $message' : message;
+      // Build prompt similar to non-streaming path
+      final String prompt;
+      if (systemPrompt != null) {
+        prompt = message.isEmpty ? systemPrompt : '$systemPrompt\n\nUser: $message';
+      } else {
+        prompt = message;
+      }
 
       // Add query chunk and stream response
       await _chat!.addQueryChunk(Message.text(text: prompt, isUser: true));
@@ -809,5 +854,29 @@ class LocalLLMService {
     } catch (e) {
       AppLogger.serviceError('LocalLLMService', 'dispose error', e);
     }
+  }
+
+  // Clean LLM response by removing role labels and framework tokens
+  static String cleanLocalResponse(String raw) {
+    String text = raw.replaceAll('\r\n', '\n').trim();
+
+    // Remove framework-specific tokens often emitted by Gemma
+    text = text.replaceAll('<end_of_turn>', '').trim();
+
+    // If the response contains role sections, take the last Assistant segment
+    final int lastAssistant = text.lastIndexOf('Assistant:');
+    if (lastAssistant >= 0) {
+      text = text.substring(lastAssistant + 'Assistant:'.length).trim();
+    }
+
+    // Drop any lines that start with 'Human:'
+    final lines = text.split('\n');
+    final filtered = lines.where((l) => !l.trim().startsWith('Human:'));
+    text = filtered.join('\n').trim();
+
+    // Remove any remaining leading 'Assistant:' labels
+    text = text.replaceAll(RegExp(r'^\s*Assistant:\s*', multiLine: true), '').trim();
+
+    return text;
   }
 }
