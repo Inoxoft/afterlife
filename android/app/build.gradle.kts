@@ -114,6 +114,10 @@ android {
                 "/META-INF/ASL2.0"
             )
         }
+        // Ensure native libraries are extracted on device (required by some ML runtimes/plugins)
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 

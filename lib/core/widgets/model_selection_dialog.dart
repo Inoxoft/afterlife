@@ -39,10 +39,10 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
   // You can expand this list as needed
   final List<Map<String, dynamic>> _availableModels = [
     {
-      'id': 'local/gemma-3n-e2b-it',
-      'name': 'Local Gemma 3n E2B IT',
+      'id': 'local/llama-3.2-1b-instruct',
+      'name': 'Local Llama 3.2',
       'provider': 'Local Device',
-      'description': 'Privacy-first local AI with multimodal support (3.1GB).',
+      'description': 'On-device local model.',
       'recommended': true,
       'isLocal': true,
     },

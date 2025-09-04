@@ -517,7 +517,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get worksWithoutInternet => 'Works without internet';
   @override
-  String get hammerModelSize => 'Gemma 3 (Local) ~2.9GB';
+  String get hammerModelSize => 'Llama 3.2 1B (Local) ~1.3GB';
   @override
   String get optimizedForMobileDevices => 'Optimized for mobile devices';
   @override
@@ -624,7 +624,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usedForLocalModels =>
-      'Used for local models (DeepSeek, Gemma, etc.)';
+      'Used for local models (Llama, DeepSeek, etc.)';
 
   @override
   String get apiModels => 'API Models';
@@ -695,7 +695,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyFirstLocalAi =>
-      'Privacy-first local AI with multimodal support (3.1GB)';
+      'On-device local model';
 
   @override
   String get speedMultimodalSupport =>

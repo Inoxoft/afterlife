@@ -39,5 +39,26 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      # Ensure consistent deployment target across all pods
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+
+      # Bitcode deprecated; ensure disabled to avoid archive issues
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+
+      # Linker flags to prevent category stripping and to link C++/zlib used by ML runtimes
+      flags = config.build_settings['OTHER_LDFLAGS']
+      flags = ['$(inherited)'] if flags.nil?
+      %w[-ObjC -lc++ -lz].each do |f|
+        flags << f unless flags.include?(f)
+      end
+      config.build_settings['OTHER_LDFLAGS'] = flags
+
+      # Be conservative with dead code stripping in Release for ML/static libs
+      if config.name == 'Release'
+        config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
+        # If you still see symbol missing at runtime, try setting to 'NO'
+      end
+    end
   end
 end
