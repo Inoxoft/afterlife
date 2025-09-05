@@ -1169,6 +1169,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get modelManagement => '모델 관리';
+  @override
+  String get localLlama32 => 'Llama 3.2 로컬';
+  @override
+  String get localLlama32Description =>
+      '기기 내 동작, 텍스트 전용 (~1.3GB). 프라이빗, 오프라인.';
 
   @override
   String get gemmaModelReady => 'Gemma 3n 모델이 사용 준비되었습니다!';

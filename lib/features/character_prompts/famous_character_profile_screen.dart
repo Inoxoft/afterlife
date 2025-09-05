@@ -563,7 +563,9 @@ class _FamousCharacterProfileScreenState
                 context: context,
                 id: model['id'] as String,
                 name: model['name'] as String,
-                description: model['description'] as String,
+                description: (model['id'] == 'local/llama-3.2-1b-instruct')
+                    ? AppLocalizations.of(context).localLlama32Description
+                    : (model['description'] as String),
                 isRecommended: model['recommended'] == true,
                 isLocal: model['isLocal'] == true,
                 isSelected: _selectedModel == model['id'],

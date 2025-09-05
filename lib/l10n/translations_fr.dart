@@ -1346,6 +1346,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get modelManagement => 'Gestion du Modèle';
+  @override
+  String get localLlama32 => 'Llama 3.2 Local';
+  @override
+  String get localLlama32Description =>
+      'Modèle sur l’appareil, texte uniquement (~1.3GB). Privé et hors ligne.';
 
   @override
   String get gemmaModelReady => 'Le modèle Gemma 3n est prêt à utiliser !';

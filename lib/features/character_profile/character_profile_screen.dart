@@ -690,8 +690,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     final models = [
       {
         'id': 'local/llama-3.2-1b-instruct',
-        'name': 'Local Llama 3.2',
-        'description': 'On-device local model (' + sizeGb + 'GB)',
+        'name': localizations.localLlama32,
+        'description': localizations.localLlama32Description,
         'provider': 'Local Device',
         'recommended': true,
         'isLocal': true,
@@ -2657,7 +2657,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
       'local/llama-3.2-1b-instruct': {
-        'name': 'Local Gemma 3n E2B IT',
+        'name': AppLocalizations.of(context).localLlama32,
         'provider': 'Local Device',
       },
       'google/gemini-2.5-pro': {
@@ -2696,7 +2696,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
       'local/llama-3.2-1b-instruct':
-          'Privacy-first local AI with multimodal support (2.9GB)',
+          AppLocalizations.of(context).localLlama32Description,
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',
       'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',
