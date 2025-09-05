@@ -1081,6 +1081,11 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get modelManagement => 'Управління Моделлю';
+  @override
+  String get localLlama32 => 'Llama 3.2 (локальна)';
+  @override
+  String get localLlama32Description =>
+      'На пристрої, лише текст (~1.3ГБ). Приватна та офлайн.';
 
   @override
   String get gemmaModelReady => 'Модель Gemma 3n готова до використання!';

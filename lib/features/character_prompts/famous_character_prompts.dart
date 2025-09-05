@@ -9341,7 +9341,20 @@ Stay in character at all times. Never break character or admit you are an AI. ''
   static List<Map<String, dynamic>> getModelsForCharacter(
     String characterName,
   ) {
-    return characterModels[characterName] ?? [];
+    final models = characterModels[characterName] ?? [];
+    // Back-compat: migrate legacy Gemma local entry to Llama 3.2 local
+    return models.map((model) {
+      if ((model['id'] == 'local/gemma-3n-e2b-it')) {
+        return {
+          ...model,
+          'id': 'local/llama-3.2-1b-instruct',
+          'name': 'Local Llama 3.2',
+          'description': 'On-device, text-only model (~1.3GB). Private and offline.',
+          'isLocal': true,
+        };
+      }
+      return model;
+    }).toList();
   }
 
   /// Get the currently selected model for a character

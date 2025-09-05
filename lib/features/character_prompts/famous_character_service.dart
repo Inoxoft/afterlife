@@ -37,9 +37,13 @@ class FamousCharacterService {
   /// Create a virtual CharacterModel for a famous character
   static void _createVirtualCharacter(String characterName) {
     final systemPrompt = FamousCharacterPrompts.getPrompt(characterName);
-    final selectedModel = FamousCharacterPrompts.getSelectedModel(
+    String selectedModel = FamousCharacterPrompts.getSelectedModel(
       characterName,
     );
+    // Back-compat: migrate legacy Gemma local model id to Llama 3.2 local id
+    if (selectedModel == 'local/gemma-3n-e2b-it') {
+      selectedModel = 'local/llama-3.2-1b-instruct';
+    }
 
     if (systemPrompt == null) return;
 

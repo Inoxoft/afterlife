@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
@@ -42,7 +41,7 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
       'id': 'local/llama-3.2-1b-instruct',
       'name': 'Local Llama 3.2',
       'provider': 'Local Device',
-      'description': 'On-device local model.',
+      'description': 'On-device, text-only model (~1.3GB). Private and offline.',
       'recommended': true,
       'isLocal': true,
     },

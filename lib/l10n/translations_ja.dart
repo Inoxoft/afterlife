@@ -1173,6 +1173,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get modelManagement => 'モデル管理';
+  @override
+  String get localLlama32 => 'Llama 3.2（ローカル）';
+  @override
+  String get localLlama32Description =>
+      'デバイス上で動作、テキスト専用（約1.3GB）。プライベートでオフライン。';
 
   @override
   String get gemmaModelReady => 'Gemma 3nモデルが使用可能です！';

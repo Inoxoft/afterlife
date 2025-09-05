@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'famous_character_prompts.dart';
@@ -116,7 +115,9 @@ class _FamousCharacterModelDialogState
                                   Row(
                                     children: [
                                       Text(
-                                        model['name'] as String,
+                                        (model['id'] == 'local/llama-3.2-1b-instruct')
+                                            ? AppLocalizations.of(context).localLlama32
+                                            : (model['name'] as String),
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -170,7 +171,9 @@ class _FamousCharacterModelDialogState
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    model['description'] as String,
+                                    (model['id'] == 'local/llama-3.2-1b-instruct')
+                                        ? AppLocalizations.of(context).localLlama32Description
+                                        : (model['description'] as String),
                                     style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: 14,

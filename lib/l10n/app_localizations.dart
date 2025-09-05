@@ -508,6 +508,9 @@ abstract class AppLocalizations {
   String get error;
   String get downloadingProgress;
   String get modelManagement;
+  // Model localization
+  String get localLlama32;
+  String get localLlama32Description;
   String get gemmaModelReady;
   String get deleteModel;
   String get downloadModelSection;
