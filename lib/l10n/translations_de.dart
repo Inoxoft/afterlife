@@ -950,6 +950,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveKey => 'Schlüssel speichern';
 
   @override
+  String get exportChat => 'Chat exportieren';
+
+  @override
   String get usingDefaultApiKey =>
       'Verwende Standard-API-Schlüssel aus .env-Datei';
 

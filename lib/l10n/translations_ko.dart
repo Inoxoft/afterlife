@@ -927,6 +927,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get saveKey => '키 저장';
 
   @override
+  String get exportChat => '채팅 내보내기';
+
+  @override
   String get usingDefaultApiKey => '.env 파일의 기본 API 키 사용 중';
 
   // Interview initial message

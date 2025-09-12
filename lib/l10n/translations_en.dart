@@ -1058,6 +1058,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveKey => 'Save Key';
 
   @override
+  String get exportChat => 'Export chat';
+
+  @override
   String get usingDefaultApiKey => 'Using default API key from .env file';
 
   // Interview initial message

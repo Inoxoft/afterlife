@@ -48,6 +48,7 @@ dependencies:
   url_launcher: ^6.2.4
   wakelock_plus: ^1.2.1
   image_picker: ^1.0.7
+  share_plus: ^10.0.2
 
 dev_dependencies:
   flutter_test:

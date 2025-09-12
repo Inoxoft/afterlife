@@ -11,6 +11,7 @@ import '../../core/utils/ukrainian_font_utils.dart';
 import '../../core/utils/responsive_utils.dart';
 import '../../core/services/hybrid_chat_service.dart';
 import '../../core/services/local_llm_service.dart';
+import 'package:share_plus/share_plus.dart';
 import '../settings/local_llm_settings_screen.dart';
 
 class CharacterChatScreen extends StatefulWidget {
@@ -377,11 +378,26 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             );
           },
         ),
-        // Clear chat history button
-        IconButton(
-          icon: const Icon(Icons.delete_outline),
-          tooltip: localizations.clearChatHistory,
-          onPressed: () => _showClearChatDialog(localizations),
+        // Options menu: Export chat or Clear chat
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) {
+            if (value == 'export') {
+              _exportChat();
+            } else if (value == 'clear') {
+              _showClearChatDialog(localizations);
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'export',
+              child: Text(localizations.exportChat),
+            ),
+            PopupMenuItem(
+              value: 'clear',
+              child: Text(localizations.clearChatHistory),
+            ),
+          ],
         ),
       ],
     );
@@ -619,5 +635,24 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         }
       }
     }
+  }
+
+  void _exportChat() {
+    if (_character == null) return;
+
+    final String characterName = _character!.name;
+    final buffer = StringBuffer();
+    buffer.writeln('Conversation with $characterName — Afterlife');
+    buffer.writeln('');
+    for (final msg in _character!.chatHistory) {
+      final isUser = (msg['isUser'] as bool?) ?? false;
+      final content = (msg['content'] as String?) ?? '';
+      final prefix = isUser ? 'You' : characterName;
+      buffer.writeln('$prefix: $content');
+      buffer.writeln('');
+    }
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+    Share.share(text, subject: 'Chat with $characterName');
   }
 }

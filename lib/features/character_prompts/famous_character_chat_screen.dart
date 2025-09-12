@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../chat/widgets/chat_message_bubble.dart';
 
@@ -401,22 +402,25 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         ],
       ),
       actions: [
-        // Clear chat button
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: AppTheme.warmGold.withValues(alpha: 0.3),
-              width: 0.5,
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) {
+            if (value == 'export') {
+              _exportChat();
+            } else if (value == 'clear') {
+              _showClearChatDialog();
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'export',
+              child: Text(localizations.exportChat),
             ),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
-            tooltip: localizations.clearChatHistory,
-            onPressed: _showClearChatDialog,
-          ),
+            PopupMenuItem(
+              value: 'clear',
+              child: Text(localizations.clearChatHistory),
+            ),
+          ],
         ),
       ],
     );
@@ -627,5 +631,21 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(localizations.chatHistoryCleared)));
+  }
+
+  void _exportChat() {
+    final buffer = StringBuffer();
+    buffer.writeln('Conversation with ${widget.characterName} — Afterlife');
+    buffer.writeln('');
+    for (final msg in _messages) {
+      final isUser = (msg['isUser'] as bool?) ?? false;
+      final content = (msg['content'] as String?) ?? '';
+      final prefix = isUser ? 'You' : widget.characterName;
+      buffer.writeln('$prefix: $content');
+      buffer.writeln('');
+    }
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+    Share.share(text, subject: 'Chat with ${widget.characterName}');
   }
 }

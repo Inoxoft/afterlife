@@ -793,6 +793,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get saveKey => 'キーを保存';
 
   @override
+  String get exportChat => 'チャットをエクスポート';
+
+  @override
   String get usingDefaultApiKey => '.envファイルのデフォルトAPIキーを使用中';
 
   // Interview initial message

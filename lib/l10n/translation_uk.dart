@@ -1164,4 +1164,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String failedToDeleteModel(String error) => 'Не вдалося видалити модель: $error';
+
+  @override
+  String get exportChat => 'Експортувати чат';
 }

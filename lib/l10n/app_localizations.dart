@@ -370,6 +370,7 @@ abstract class AppLocalizations {
   String get removeKey;
   String get saveKey;
   String get usingDefaultApiKey;
+  String get exportChat;
 
   // Interview initial message
   String get interviewInitialMessage;
