@@ -583,95 +583,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
           const SizedBox(height: 16),
           _buildModelOptions(),
 
-          // View all models option
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: () async {
-              final result = await ModelSelectionDialog.show(
-                context,
-                currentModel: _character!.model,
-              );
-
-              if (result != null && mounted) {
-                final charactersProvider = Provider.of<CharactersProvider>(
-                  context,
-                  listen: false,
-                );
-
-                final updatedCharacter = CharacterModel(
-                  id: _character!.id,
-                  name: _character!.name,
-                  systemPrompt: _character!.systemPrompt,
-                  imageUrl: _character!.imageUrl,
-                  icon: _character!.icon, // Preserve the icon
-                  createdAt: _character!.createdAt,
-                  accentColor: _character!.accentColor,
-                  chatHistory: _character!.chatHistory,
-                  additionalInfo: _character!.additionalInfo,
-                  model: result,
-                );
-
-                await charactersProvider.updateCharacter(updatedCharacter);
-                _loadCharacter();
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      AppLocalizations.of(context).aiModelUpdatedFor.replaceAll(
-                        '{name}',
-                        _character!.name,
-                      ),
-                    ),
-                  ),
-                );
-              }
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                border: Border(
-                  top: BorderSide(
-                    color: AppTheme.warmGold.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        localizations.viewAllAvailableModels,
-                        style: UkrainianFontUtils.latoWithUkrainianSupport(
-                          text: localizations.viewAllAvailableModels,
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        localizations.exploreMoreAiOptions,
-                        style: UkrainianFontUtils.latoWithUkrainianSupport(
-                          text: localizations.exploreMoreAiOptions,
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppTheme.warmGold,
-                    size: 16,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Removed: View all available models row for simpler layout
         ],
       ),
     );
@@ -1106,9 +1018,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             },
             icon: Icon(Icons.chat_bubble_outline, size: 20 * fontScale),
             label: Text(
-              AppLocalizations.of(context).startChat,
+              'Chat with ${_character!.name.split(' ').first}',
               style: UkrainianFontUtils.latoWithUkrainianSupport(
-                text: AppLocalizations.of(context).startChat,
+                text: 'Chat with ${_character!.name.split(' ').first}',
                 fontSize: 16 * fontScale,
                 fontWeight: FontWeight.bold,
               ),

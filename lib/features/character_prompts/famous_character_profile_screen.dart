@@ -264,6 +264,39 @@ class _FamousCharacterProfileScreenState
               ),
               const SizedBox(height: 24),
 
+              // Quick Start Chat button near the top
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToChat(context),
+                  icon: const Icon(Icons.chat_bubble_outline, size: 20),
+                  label: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Text(
+                      'Chat with ${widget.name.split(' ').first}',
+                      style: UkrainianFontUtils.latoWithUkrainianSupport(
+                        text: 'Chat with ${widget.name.split(' ').first}',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.midnightPurple,
+                      ),
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.warmGold,
+                    foregroundColor: AppTheme.midnightPurple,
+                    elevation: 6,
+                    shadowColor: AppTheme.warmGold.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // Info Card
               Container(
                 padding: const EdgeInsets.all(20),
@@ -369,116 +402,12 @@ class _FamousCharacterProfileScreenState
                     const SizedBox(height: 16),
                     _buildModelDropdown(),
 
-                    // View all models option
-                    const SizedBox(height: 16),
-                    InkWell(
-                      onTap: () {
-                        // This will be implemented later
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              localizations.featureAvailableSoon,
-                            ),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          border: Border(
-                            top: BorderSide(
-                              color: AppTheme.warmGold.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  localizations.viewAllAvailableModels,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  localizations.exploreMoreAiOptions,
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: AppTheme.warmGold,
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    // Removed: view-all models row to minimize scrolling
                   ],
                 ),
               ),
 
-              const SizedBox(height: 24),
-
-              // Start Chat Button
-              Center(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  decoration: BoxDecoration(
-                    color: AppTheme.warmGold,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.warmGold.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _navigateToChat(context),
-                    icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                    label: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Text(
-                        localizations.startConversation,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.black87,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
+              // Removed: bottom Start Conversation (moved near the top)
             ],
           ),
         ),

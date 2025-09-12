@@ -530,139 +530,35 @@ class _GroupChatTypingIndicatorState extends State<GroupChatTypingIndicator>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.typingCharacterNames.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16.0 * widget.fontScale,
-          vertical: 6.0 * widget.fontScale,
-        ),
-        child: Row(
-          children: [
-            // Soft avatars row for typing characters
-            _buildTypingAvatars(widget.fontScale),
-            SizedBox(width: 8.0 * widget.fontScale),
-            // Typing indicator dots
-            Container(
-              width: 40 * widget.fontScale,
-              height: 32 * widget.fontScale,
-              margin: EdgeInsets.only(right: 8.0 * widget.fontScale),
-              decoration: BoxDecoration(
-                color: AppTheme.midnightPurple.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(16 * widget.fontScale),
-                border: Border.all(
-                  color: AppTheme.warmGold.withValues(alpha: 0.3),
-                  width: 1,
-                ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: Container(
+          margin: EdgeInsets.only(
+            left: 16.0 * widget.fontScale,
+            bottom: 6.0 * widget.fontScale,
+          ),
+          width: 10 * widget.fontScale,
+          height: 10 * widget.fontScale,
+          decoration: BoxDecoration(
+            color: AppTheme.warmGold.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(2 * widget.fontScale),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.warmGold.withValues(alpha: 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
               ),
-              child: Center(
-                child: _buildTypingDots(widget.fontScale),
-              ),
-            ),
-            
-            // Typing text
-            Flexible(
-              child: Text(
-                _getTypingText(),
-                style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: _getTypingText(),
-                  fontSize: 12 * widget.fontScale,
-                  color: AppTheme.silverMist.withValues(alpha: 0.7),
-                ).copyWith(fontStyle: FontStyle.italic),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTypingAvatars(double fontScale) {
-    final names = widget.typingCharacterNames.toList();
-    final maxToShow = names.length > 4 ? 4 : names.length;
-
-    return SizedBox(
-      height: 28 * fontScale,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(maxToShow, (index) {
-          final name = names[index];
-          final initial = name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
-
-          return Container(
-            width: 28 * fontScale,
-            height: 28 * fontScale,
-            margin: EdgeInsets.only(right: index == maxToShow - 1 ? 0 : 4 * fontScale),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppTheme.midnightPurple.withValues(alpha: 0.35),
-              border: Border.all(
-                color: AppTheme.warmGold.withValues(alpha: 0.25),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.deepNavy.withValues(alpha: 0.25),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                initial,
-                style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: initial,
-                  fontSize: 12 * fontScale,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.silverMist,
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildTypingDots(double fontScale) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            final value = (_animationController.value + index * 0.3) % 1.0;
-            final opacity = (0.3 + 0.7 * (1 - (value - 0.5).abs() * 2)).clamp(0.0, 1.0);
-            
-            return Container(
-              width: 4 * fontScale,
-              height: 4 * fontScale,
-              margin: EdgeInsets.symmetric(horizontal: 1 * fontScale),
-              decoration: BoxDecoration(
-                color: AppTheme.warmGold.withValues(alpha: opacity),
-                shape: BoxShape.circle,
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
-
-  String _getTypingText() {
-    final names = widget.typingCharacterNames.toList();
-    
-    if (names.length == 1) {
-      return '${names[0]} is typing...';
-    } else if (names.length == 2) {
-      return '${names[0]} and ${names[1]} are typing...';
-    } else {
-      return '${names.length} characters are typing...';
-    }
-  }
+  // Previous implementations for avatars/dots/text were removed to keep
+  // the indicator minimal and non-intrusive per new UI requirement.
 }

@@ -520,6 +520,11 @@ $languageInstruction""";
     notifyListeners();
   }
 
+  /// Public method to cancel current AI thinking/loading state
+  void cancelThinking() {
+    _removeLoadingMessage();
+  }
+
   void resetInterview() {
     _messages.clear();
     characterCardSummary = null;

@@ -8541,7 +8541,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8575,7 +8575,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8609,7 +8609,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8643,7 +8643,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8677,7 +8677,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8711,7 +8711,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8745,7 +8745,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8779,7 +8779,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8813,7 +8813,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8847,7 +8847,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8881,7 +8881,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,
@@ -8915,7 +8915,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       },
       {
         'id': 'anthropic/claude-3.5-sonnet',
-        'name': 'GPT-4.1',
+        'name': 'GPT-5',
         'description':
             'Advanced long-context reasoning, deep conceptual insights',
         'recommended': true,

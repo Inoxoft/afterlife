@@ -30,6 +30,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
   final FocusNode _inputFocusNode = FocusNode();
   CharacterModel? _character;
   bool _isLoading = false;
+  bool _cancelRequested = false;
+  int _currentRunId = 0;
 
   // Cached widgets and values for performance
   late final Widget _particleBackground = const Opacity(
@@ -160,6 +162,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     if (mounted) {
       setState(() {
         _isLoading = true;
+        _cancelRequested = false;
+        _currentRunId++;
       });
 
       // Reload the character to get updated chat history
@@ -169,6 +173,7 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     // Scroll to the bottom after state update
     _scrollToBottom();
 
+    final int runId = _currentRunId;
     try {
       // Create a copy of chat history excluding the message we just added
       // to prevent duplication in the AI request
@@ -192,6 +197,9 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       await Future.delayed(const Duration(milliseconds: 800));
 
       // Add AI response to chat history if not null
+      if (_cancelRequested || runId != _currentRunId) {
+        return;
+      }
       if (response != null) {
         await charactersProvider.addMessageToCharacter(
           characterId: widget.characterId,
@@ -241,6 +249,15 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     }
   }
 
+  void _stopGeneration() {
+    if (!_isLoading) return;
+    setState(() {
+      _cancelRequested = true;
+      _isLoading = false;
+      _currentRunId++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
@@ -272,6 +289,28 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
               children: [
                 // Chat messages
                 Expanded(child: _buildChatList(localizations)),
+
+                // Small typing indicator
+                if (_isLoading)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 16, bottom: 6),
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: AppTheme.warmGold.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.warmGold.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 // Input area
                 _buildInputArea(localizations),
@@ -461,24 +500,32 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             ),
           ),
           SizedBox(width: 8 * fontScale),
-          // Send button
-          IconButton(
-            icon:
-                _isLoading
-                    ? SizedBox(
-                      width: 24 * fontScale,
-                      height: 24 * fontScale,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.warmGold,
-                        ),
-                      ),
-                    )
-                    : Icon(Icons.send, size: 24 * fontScale),
-            color: AppTheme.warmGold,
-            onPressed: _isLoading ? null : _sendMessage,
-          ),
+          // Stop/Send button
+          _isLoading
+              ? Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppTheme.errorColor.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: _stopGeneration,
+                    icon: Icon(
+                      Icons.stop_circle_outlined,
+                      color: AppTheme.errorColor,
+                      size: 22 * fontScale,
+                    ),
+                    tooltip: 'Stop',
+                  ),
+                )
+              : IconButton(
+                  icon: Icon(Icons.send, size: 24 * fontScale),
+                  color: AppTheme.warmGold,
+                  onPressed: _sendMessage,
+                ),
         ],
       ),
     );

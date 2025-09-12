@@ -30,6 +30,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   bool _isLoading = false;
+  bool _cancelRequested = false;
+  int _currentRunId = 0;
   List<Map<String, dynamic>> _messages = [];
   late String _selectedModel;
 
@@ -126,11 +128,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         widget.characterName,
       );
       _isLoading = true;
+      _cancelRequested = false;
+      _currentRunId++;
     });
 
     // Scroll to the bottom after adding user message
     _scrollToBottom();
 
+    final int runId = _currentRunId;
     try {
       // Send the message using the simplified service (like regular character chat)
       final response = await FamousCharacterService.sendMessage(
@@ -141,6 +146,9 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       // Add artificial delay to simulate natural conversation flow
       await Future.delayed(const Duration(milliseconds: 800));
 
+      if (_cancelRequested || runId != _currentRunId) {
+        return;
+      }
       // Update messages from service (will include the AI response)
       if (response != null) {
         setState(() {
@@ -200,6 +208,15 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     }
   }
 
+  void _stopGeneration() {
+    if (!_isLoading) return;
+    setState(() {
+      _cancelRequested = true;
+      _isLoading = false;
+      _currentRunId++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
@@ -216,6 +233,28 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               children: [
                 // Chat messages
                 Expanded(child: _buildChatList(localizations)),
+
+                // Small typing indicator
+                if (_isLoading)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 16, bottom: 6),
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: AppTheme.warmGold.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.warmGold.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 // Input area
                 _buildInputArea(localizations),
@@ -495,29 +534,34 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.warmGold,
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: IconButton(
-              icon:
-                  _isLoading
-                      ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.midnightPurple,
-                          ),
-                        ),
-                      )
-                      : const Icon(Icons.send),
-              color: AppTheme.midnightPurple,
-              onPressed: _isLoading ? null : _sendMessage,
-            ),
-          ),
+          _isLoading
+              ? Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: AppTheme.errorColor.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.stop_circle_outlined),
+                    color: AppTheme.errorColor,
+                    onPressed: _stopGeneration,
+                    tooltip: 'Stop',
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.warmGold,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.send),
+                    color: AppTheme.midnightPurple,
+                    onPressed: _sendMessage,
+                  ),
+                ),
         ],
       ),
     );

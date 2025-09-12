@@ -1439,6 +1439,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
   Widget build(BuildContext context) {
     // Create a custom accent color for the card
     final Color accentColor = AppTheme.warmGold;
+    // Reserve space at the bottom for text so it never overlays the mask image
+    final double reservedFooterHeight = widget.isHorizontalLayout ? 96 : 84;
 
     return GestureDetector(
       onTap: () => _navigateToProfile(context),
@@ -1530,6 +1532,7 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                 // Background image if available
                 if (widget.imageUrl != null)
                   Positioned.fill(
+                    bottom: reservedFooterHeight,
                     child: Stack(
                       children: [
                         // Dramatic background for masks
@@ -1548,8 +1551,8 @@ class _FamousPersonCardState extends State<_FamousPersonCard>
                         // Centered mask image with consistent alignment across cards
                         Center(
                           child: FractionallySizedBox(
-                            widthFactor: widget.isHorizontalLayout ? 0.82 : 0.86,
-                            heightFactor: widget.isHorizontalLayout ? 0.72 : 0.68,
+                            widthFactor: widget.isHorizontalLayout ? 0.86 : 0.90,
+                            heightFactor: widget.isHorizontalLayout ? 0.76 : 0.72,
                             child: FittedBox(
                               fit: BoxFit.contain,
                               alignment: Alignment.center,

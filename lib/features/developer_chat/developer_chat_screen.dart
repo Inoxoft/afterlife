@@ -19,6 +19,8 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   bool _isLoading = false;
+  bool _cancelRequested = false;
+  int _currentRunId = 0;
   List<Map<String, dynamic>> _messages = [];
 
   @override
@@ -85,6 +87,8 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
     // Add user message to chat locally for immediate UI update
     setState(() {
       _isLoading = true;
+      _cancelRequested = false;
+      _currentRunId++;
       _messages.add({
         'content': message,
         'isUser': true,
@@ -95,6 +99,7 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
     // Scroll to the bottom after state update
     _scrollToBottom();
 
+    final int runId = _currentRunId;
     try {
       // Send the message to the developer character
       final response = await FamousCharacterService.sendMessage(
@@ -102,6 +107,9 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
         message: message,
       );
 
+      if (_cancelRequested || runId != _currentRunId) {
+        return;
+      }
       // Add AI response to chat history if not null
       if (response != null) {
         setState(() {
@@ -150,6 +158,15 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
         _scrollToBottom();
       }
     }
+  }
+
+  void _stopGeneration() {
+    if (!_isLoading) return;
+    setState(() {
+      _cancelRequested = true;
+      _isLoading = false;
+      _currentRunId++;
+    });
   }
 
   @override
@@ -249,33 +266,25 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
               ),
             ),
 
-            // Loading indicator
+            // Small typing indicator
             if (_isLoading)
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.warmGold,
-                        ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  margin: const EdgeInsets.only(left: 16, bottom: 6),
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: AppTheme.warmGold.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.warmGold.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Developer is typing...',
-                      style: UkrainianFontUtils.createGlobalTextStyle(
-                        color: AppTheme.silverMist.withValues(alpha: 0.7),
-                        fontSize: 14,
-                        fontFamily: 'Lato',
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -335,18 +344,35 @@ class _DeveloperChatScreenState extends State<DeveloperChatScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Send button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.warmGold,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.send),
-                      color: AppTheme.midnightPurple,
-                      onPressed: _sendMessage,
-                    ),
-                  ),
+                  // Stop/Send button
+                  _isLoading
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: AppTheme.errorColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(25),
+                            border: Border.all(
+                              color: AppTheme.errorColor.withValues(alpha: 0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.stop_circle_outlined),
+                            color: AppTheme.errorColor,
+                            onPressed: _stopGeneration,
+                            tooltip: 'Stop',
+                          ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: AppTheme.warmGold,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.send),
+                            color: AppTheme.midnightPurple,
+                            onPressed: _sendMessage,
+                          ),
+                        ),
                 ],
               ),
             ),

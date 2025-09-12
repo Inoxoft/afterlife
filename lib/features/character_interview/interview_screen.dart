@@ -34,6 +34,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
   final FocusNode _inputFocusNode = FocusNode();
   late InterviewProvider _interviewProvider;
   bool _isProcessingFile = false;
+  
 
   @override
   void initState() {
@@ -304,13 +305,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
                           itemBuilder: (context, index) {
                             final message = provider.messages[index];
                             if (message.isLoading) {
-                              // Display a loading indicator bubble
-                              return ChatMessageBubble(
-                                text: '...',
-                                isUser: false,
-                                showAvatar: true,
-                                avatarText: 'AI',
-                              );
+                              // Render nothing here; small indicator is below
+                              return const SizedBox.shrink();
                             }
                             return ChatMessageBubble(
                               text:
@@ -328,6 +324,34 @@ class _InterviewScreenState extends State<InterviewScreen> {
                         );
                       },
                     ),
+                  ),
+
+                  // Small typing indicator
+                  Consumer<InterviewProvider>(
+                    builder: (context, provider, child) {
+                      if (provider.isAiThinking) {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 16, bottom: 6),
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: AppTheme.warmGold.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.warmGold.withValues(alpha: 0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
                   ),
 
                   // Success message when character is created
@@ -414,17 +438,36 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               ),
                             ),
                             SizedBox(width: 8 * fontScale),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: AppTheme.warmGold,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: IconButton(
-                                icon: Icon(Icons.send, size: 20 * fontScale),
-                                color: AppTheme.midnightPurple,
-                                onPressed: () => _sendMessage(provider),
-                              ),
-                            ),
+                            provider.isAiThinking
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.errorColor.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(25),
+                                      border: Border.all(
+                                        color: AppTheme.errorColor.withValues(alpha: 0.4),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.stop_circle_outlined),
+                                      color: AppTheme.errorColor,
+                                      onPressed: () {
+                                        provider.cancelThinking();
+                                      },
+                                      tooltip: 'Stop',
+                                    ),
+                                  )
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.warmGold,
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.send, size: 20 * fontScale),
+                                      color: AppTheme.midnightPurple,
+                                      onPressed: () => _sendMessage(provider),
+                                    ),
+                                  ),
                           ],
                         ),
                       );
