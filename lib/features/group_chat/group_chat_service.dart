@@ -32,6 +32,8 @@ class GroupChatService {
   // Response coordination state
   static final Map<String, String?> _lastRespondingCharacter = {};
   static final Map<String, Set<String>> _charactersInConversation = {};
+  // Cancellation/run control: increment to invalidate in-flight runs
+  static final Map<String, int> _groupRunId = {};
 
   /// Initialize the service
   static Future<void> initialize() async {
@@ -122,6 +124,10 @@ class GroupChatService {
     final controller = StreamController<GroupChatMessage>();
 
     try {
+      // Start a new run for this group
+      final runId = (_groupRunId[groupId] ?? 0) + 1;
+      _groupRunId[groupId] = runId;
+
       // Add user message immediately
       final userMsg = GroupChatMessage.user(
         content: userMessage,
@@ -174,6 +180,7 @@ class GroupChatService {
         userMessage,
         characterModels,
         updatedMemory,
+        runId,
       );
 
     } catch (e) {
@@ -193,9 +200,15 @@ class GroupChatService {
     String userMessage,
     Map<String, CharacterModel> characterModels,
     ConversationMemory conversationMemory,
+    int runId,
   ) async {
     try {
       for (final responseInfo in responseSchedule) {
+        // Abort if a new run started or cancellation requested
+        if ((_groupRunId[groupId] ?? runId) != runId) {
+          controller.close();
+          return;
+        }
         final characterId = responseInfo['characterId'] as String?;
         if (characterId == null || !characterModels.containsKey(characterId)) {
           // Skip invalid entries
@@ -210,6 +223,12 @@ class GroupChatService {
           await Future.delayed(Duration(milliseconds: delay));
         }
 
+        // Abort after delay too
+        if ((_groupRunId[groupId] ?? runId) != runId) {
+          controller.close();
+          return;
+        }
+
         // Show thinking indicator if appropriate
         if (showThinking && thinkingDuration > 0) {
           final character = characterModels[characterId]!;
@@ -221,12 +240,22 @@ class GroupChatService {
             status: MessageStatus.characterTyping,
             metadata: {'isThinking': true, 'thinkingDuration': thinkingDuration},
           );
+          // Only emit thinking if still current run
+          if ((_groupRunId[groupId] ?? runId) != runId) {
+            controller.close();
+            return;
+          }
           controller.add(thinkingMsg);
 
           // Wait for thinking duration
           await Future.delayed(Duration(milliseconds: thinkingDuration));
         }
 
+        // Abort after thinking too
+        if ((_groupRunId[groupId] ?? runId) != runId) {
+          controller.close();
+          return;
+        }
         try {
           // Get enhanced character response
           final characterResponse = await _getEnhancedCharacterResponse(
@@ -239,6 +268,11 @@ class GroupChatService {
           );
 
           if (characterResponse != null) {
+            // Ensure still same run before emitting and mutating state
+            if ((_groupRunId[groupId] ?? runId) != runId) {
+              controller.close();
+              return;
+            }
             controller.add(characterResponse);
             
             // Update group with character response
@@ -682,6 +716,7 @@ Remember: This is a natural conversation between historical figures. Be authenti
     _activeGroups.remove(groupId);
     _lastRespondingCharacter.remove(groupId);
     _charactersInConversation.remove(groupId);
+    _groupRunId.remove(groupId);
   }
 
   /// Get active group
@@ -692,6 +727,12 @@ Remember: This is a natural conversation between historical figures. Be authenti
   /// Update active group
   static void updateActiveGroup(String groupId, GroupChatModel groupChat) {
     _activeGroups[groupId] = groupChat;
+  }
+
+  /// Cancel current run/stream for a group. Future emissions from the previous
+  /// run will be ignored by checking the runId.
+  static void cancelGroupRun(String groupId) {
+    _groupRunId[groupId] = (_groupRunId[groupId] ?? 0) + 1;
   }
 
   /// Check if service is ready

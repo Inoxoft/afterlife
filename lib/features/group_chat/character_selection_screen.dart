@@ -141,8 +141,21 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
 
   bool get _canCreateGroup {
     return _selectedCharacterIds.length >= 2 && 
-           _selectedCharacterIds.length <= 6 &&
-           _groupNameController.text.trim().isNotEmpty;
+           _selectedCharacterIds.length <= 6;
+  }
+
+  String _generateDefaultGroupName() {
+    final List<String> names = _selectedCharacterIds
+        .map((id) => _getCharacterName(id))
+        .where((n) => n.isNotEmpty)
+        .toList();
+
+    if (names.isEmpty) return 'New Group';
+    if (names.length == 1) return names.first;
+    if (names.length == 2) return '${names[0]} & ${names[1]}';
+    if (names.length == 3) return '${names[0]}, ${names[1]} & ${names[2]}';
+    final remaining = names.length - 2;
+    return '${names[0]}, ${names[1]} & $remaining more';
   }
 
   @override
@@ -1352,7 +1365,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
             ),
           ],
           
-          // Floating Create/Update button with completely transparent background
+          // Floating Create/Update button with solid, visible style
           Semantics(
             button: true,
             enabled: isEnabled,
@@ -1367,11 +1380,10 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
                 color: AppTheme.warmGold.withValues(alpha: 0.8),
                 width: 2,
               ),
-              // Completely transparent background - characters visible behind
-              color: Colors.transparent,
+              color: AppTheme.warmGold,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.warmGold.withValues(alpha: 0.2),
+                  color: AppTheme.warmGold.withValues(alpha: 0.35),
                   blurRadius: 12,
                   spreadRadius: 0,
                   offset: const Offset(0, 4),
@@ -1394,7 +1406,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
-                                color: AppTheme.warmGold,
+                                color: AppTheme.deepNavy,
                                 strokeWidth: 2,
                               ),
                             ),
@@ -1409,7 +1421,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
                                   : localizations.createGroup,
                               fontSize: 16 * fontScale,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.warmGold,
+                              color: AppTheme.deepNavy,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -1491,7 +1503,9 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
         print('🔧 [CharacterSelection] Updating existing group: ${widget.existingGroup!.id}');
         // Update existing group
         final updatedGroup = widget.existingGroup!.copyWith(
-          name: _groupNameController.text.trim(),
+          name: (_groupNameController.text.trim().isNotEmpty
+                  ? _groupNameController.text.trim()
+                  : _generateDefaultGroupName()),
           characterIds: _selectedCharacterIds.toList(),
         );
         
@@ -1513,7 +1527,9 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen>
         print('🔧 [CharacterSelection] - description: "${_descriptionController.text.trim().isNotEmpty ? _descriptionController.text.trim() : null}"');
         
         final newGroup = await groupChatProvider.createGroupChat(
-          name: _groupNameController.text.trim(),
+          name: (_groupNameController.text.trim().isNotEmpty
+              ? _groupNameController.text.trim()
+              : _generateDefaultGroupName()),
           characterIds: _selectedCharacterIds.toList(),
           description: _descriptionController.text.trim().isNotEmpty 
               ? _descriptionController.text.trim() 

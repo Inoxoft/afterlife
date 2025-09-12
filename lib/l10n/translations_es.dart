@@ -1038,6 +1038,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get saveKey => 'Guardar Clave';
 
   @override
+  String get exportChat => 'Exportar chat';
+
+  @override
   String get usingDefaultApiKey =>
       'Usando clave API predeterminada del archivo .env';
 

@@ -672,6 +672,8 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get saveKey => 'Сохранить ключ';
   @override
+  String get exportChat => 'Экспорт чата';
+  @override
   String get usingDefaultApiKey =>
       'Используется API-ключ по умолчанию из .env файла';
 

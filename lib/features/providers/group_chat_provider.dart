@@ -27,6 +27,7 @@ class GroupChatProvider extends BaseProvider {
   bool _isTyping = false;
   Set<String> _typingCharacterIds = {};
   StreamController<List<GroupChatMessage>>? _messageStreamController;
+  StreamSubscription<GroupChatMessage>? _activeResponseSubscription;
 
   // Performance tracking
   final Map<String, DateTime> _lastLoadTimes = {};
@@ -37,6 +38,7 @@ class GroupChatProvider extends BaseProvider {
   bool get isTyping => _isTyping;
   Set<String> get typingCharacterIds => Set.unmodifiable(_typingCharacterIds);
   bool get hasGroups => _groupChats.isNotEmpty;
+  bool get isStreaming => _activeResponseSubscription != null;
 
   /// Selected group
   GroupChatModel? get selectedGroup {
@@ -394,25 +396,27 @@ class GroupChatProvider extends BaseProvider {
       // Set typing state for characters
       _setTypingState(true);
 
+      // Cancel any existing stream before starting a new one
+      await _activeResponseSubscription?.cancel();
+      _activeResponseSubscription = null;
+
       // 2) Use streaming API so responses arrive one-by-one
       final responseStream = await GroupChatService.sendMessageToGroupStream(
         groupId: groupId,
         userMessage: message,
         groupChat: group,
       );
-
-      await for (final streamedMessage in responseStream) {
+      _activeResponseSubscription = responseStream.listen((streamedMessage) async {
         // Skip duplicate user message from service stream (we already added it)
         if (streamedMessage.isUser) {
-          continue;
+          return;
         }
 
         // Update typing indicators based on thinking messages
-        if (streamedMessage.status == MessageStatus.characterTyping &&
-            streamedMessage.characterId != null) {
+        if (streamedMessage.status == MessageStatus.characterTyping) {
           _typingCharacterIds = {
             ..._typingCharacterIds,
-            streamedMessage.characterId!,
+            streamedMessage.characterId,
           };
           notifyListeners();
         }
@@ -431,29 +435,44 @@ class GroupChatProvider extends BaseProvider {
 
         // Clear typing flag for this character when a real message arrives
         if (streamedMessage.status != MessageStatus.characterTyping &&
-            streamedMessage.characterId != null &&
             _typingCharacterIds.contains(streamedMessage.characterId)) {
           _typingCharacterIds.remove(streamedMessage.characterId);
           notifyListeners();
         }
-      }
-
-      // Persist groups after streaming completes
-      await _saveGroupChats();
-
-      logUserAction('sent message to group (streamed)', context: {
-        'groupId': groupId,
-        'messageLength': message.length,
-      });
+      }, onError: (e) {
+        setError('Error sending message: $e', error: e);
+      }, onDone: () async {
+        // Persist groups after streaming completes
+        await _saveGroupChats();
+        _setTypingState(false);
+        _typingCharacterIds.clear();
+        _activeResponseSubscription = null;
+        notifyListeners();
+        logUserAction('sent message to group (streamed)', context: {
+          'groupId': groupId,
+          'messageLength': message.length,
+        });
+      }, cancelOnError: true);
     } catch (e) {
       setError('Error sending message: $e', error: e);
     } finally {
-      _setTypingState(false);
-      if (_typingCharacterIds.isNotEmpty) {
-        _typingCharacterIds.clear();
-        notifyListeners();
-      }
+      // Keep typing state controlled by stream lifecycle/cancel
     }
+  }
+
+  /// Cancel active streaming responses, if any
+  Future<void> cancelStreamingResponses() async {
+    try {
+      await _activeResponseSubscription?.cancel();
+    } catch (_) {}
+    _activeResponseSubscription = null;
+    // Invalidate current run so pending async emissions are ignored
+    GroupChatService.cancelGroupRun(_selectedGroupId ?? selectedGroup?.id ?? '');
+    _setTypingState(false);
+    if (_typingCharacterIds.isNotEmpty) {
+      _typingCharacterIds.clear();
+    }
+    notifyListeners();
   }
 
   /// Set typing indicators
@@ -466,18 +485,14 @@ class GroupChatProvider extends BaseProvider {
   /// Update message status
   Future<void> updateMessageStatus(String groupId, String messageId, MessageStatus status) async {
     try {
-      final group = _groupCache[groupId] ?? 
-                   _groupChats.firstWhere((g) => g.id == groupId);
-      
-      if (group != null) {
-        final updatedGroup = group.updateMessageStatus(messageId, status);
-        
-        final index = _groupChats.indexWhere((g) => g.id == groupId);
-        if (index >= 0) {
-          _groupChats[index] = updatedGroup;
-          _groupCache[groupId] = updatedGroup;
-          notifyListeners();
-        }
+      final group = _groupCache[groupId] ?? _groupChats.firstWhere((g) => g.id == groupId);
+      final updatedGroup = group.updateMessageStatus(messageId, status);
+
+      final index = _groupChats.indexWhere((g) => g.id == groupId);
+      if (index >= 0) {
+        _groupChats[index] = updatedGroup;
+        _groupCache[groupId] = updatedGroup;
+        notifyListeners();
       }
     } catch (e) {
       if (kDebugMode) {
@@ -565,6 +580,7 @@ class GroupChatProvider extends BaseProvider {
 
   @override
   void dispose() {
+    _activeResponseSubscription?.cancel();
     _messageStreamController?.close();
     super.dispose();
   }

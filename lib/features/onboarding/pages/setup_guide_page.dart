@@ -192,56 +192,28 @@ class SetupGuidePage extends StatelessWidget {
                         ],
                         actionText: l10n.setUpApiKey,
                         onTap: () => _showApiKeyDialog(context),
-                        infoWidget: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: l10n.getFreeApiKeyAt,
-                                    style: TextStyle(
-                                      color: AppTheme.silverMist.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: 'openrouter.ai',
-                                    style: TextStyle(
-                                      color: AppTheme.warmGold,
-                                      fontSize: 12,
-                                      decoration: TextDecoration.underline,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    recognizer:
-                                        TapGestureRecognizer()
-                                          ..onTap =
-                                              () => _openOpenRouterLink(context),
-                                  ),
-                                ],
+                        infoWidget: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Bring your own key: ',
+                                style: TextStyle(
+                                  color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              l10n.addCreditToUseAdvancedModels,
-                              style: TextStyle(
-                                color: AppTheme.warmGold.withValues(alpha: 0.9),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                              TextSpan(
+                                text: 'openrouter.ai/keys',
+                                style: TextStyle(
+                                  color: AppTheme.warmGold,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              l10n.openRouterRequiresCredits,
-                              style: TextStyle(
-                                color: AppTheme.silverMist.withValues(alpha: 0.7),
-                                fontSize: 10,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
 

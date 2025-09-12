@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
 import 'famous_character_service.dart';
 import 'famous_character_prompts.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../chat/widgets/chat_message_bubble.dart';
 
@@ -30,6 +31,8 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   bool _isLoading = false;
+  bool _cancelRequested = false;
+  int _currentRunId = 0;
   List<Map<String, dynamic>> _messages = [];
   late String _selectedModel;
 
@@ -126,11 +129,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         widget.characterName,
       );
       _isLoading = true;
+      _cancelRequested = false;
+      _currentRunId++;
     });
 
     // Scroll to the bottom after adding user message
     _scrollToBottom();
 
+    final int runId = _currentRunId;
     try {
       // Send the message using the simplified service (like regular character chat)
       final response = await FamousCharacterService.sendMessage(
@@ -141,6 +147,9 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       // Add artificial delay to simulate natural conversation flow
       await Future.delayed(const Duration(milliseconds: 800));
 
+      if (_cancelRequested || runId != _currentRunId) {
+        return;
+      }
       // Update messages from service (will include the AI response)
       if (response != null) {
         setState(() {
@@ -200,6 +209,15 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     }
   }
 
+  void _stopGeneration() {
+    if (!_isLoading) return;
+    setState(() {
+      _cancelRequested = true;
+      _isLoading = false;
+      _currentRunId++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
@@ -216,6 +234,28 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
               children: [
                 // Chat messages
                 Expanded(child: _buildChatList(localizations)),
+
+                // Small typing indicator
+                if (_isLoading)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 16, bottom: 6),
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: AppTheme.warmGold.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.warmGold.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 // Input area
                 _buildInputArea(localizations),
@@ -362,22 +402,25 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
         ],
       ),
       actions: [
-        // Clear chat button
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.midnightPurple.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: AppTheme.warmGold.withValues(alpha: 0.3),
-              width: 0.5,
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (value) {
+            if (value == 'export') {
+              _exportChat();
+            } else if (value == 'clear') {
+              _showClearChatDialog();
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'export',
+              child: Text(localizations.exportChat),
             ),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.delete_outline, color: AppTheme.silverMist),
-            tooltip: localizations.clearChatHistory,
-            onPressed: _showClearChatDialog,
-          ),
+            PopupMenuItem(
+              value: 'clear',
+              child: Text(localizations.clearChatHistory),
+            ),
+          ],
         ),
       ],
     );
@@ -495,29 +538,34 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.warmGold,
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: IconButton(
-              icon:
-                  _isLoading
-                      ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.midnightPurple,
-                          ),
-                        ),
-                      )
-                      : const Icon(Icons.send),
-              color: AppTheme.midnightPurple,
-              onPressed: _isLoading ? null : _sendMessage,
-            ),
-          ),
+          _isLoading
+              ? Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: AppTheme.errorColor.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.stop_circle_outlined),
+                    color: AppTheme.errorColor,
+                    onPressed: _stopGeneration,
+                    tooltip: 'Stop',
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.warmGold,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.send),
+                    color: AppTheme.midnightPurple,
+                    onPressed: _sendMessage,
+                  ),
+                ),
         ],
       ),
     );
@@ -583,5 +631,21 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(localizations.chatHistoryCleared)));
+  }
+
+  void _exportChat() {
+    final buffer = StringBuffer();
+    buffer.writeln('Conversation with ${widget.characterName} — Afterlife');
+    buffer.writeln('');
+    for (final msg in _messages) {
+      final isUser = (msg['isUser'] as bool?) ?? false;
+      final content = (msg['content'] as String?) ?? '';
+      final prefix = isUser ? 'You' : widget.characterName;
+      buffer.writeln('$prefix: $content');
+      buffer.writeln('');
+    }
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return;
+    Share.share(text, subject: 'Chat with ${widget.characterName}');
   }
 }

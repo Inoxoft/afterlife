@@ -181,7 +181,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
         ),
       ),
       title: Text(
-        widget.isFromSettings ? localizations.openRouterApiKey : localizations.apiKeyRequired,
+        widget.isFromSettings ? 'Bring your own API key' : localizations.apiKeyRequired,
         style: const TextStyle(color: Colors.white),
       ),
       content: _isLoading
@@ -202,8 +202,8 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                   children: [
                   Text(
                     widget.isFromSettings
-                        ? localizations.updateApiKeyDescription
-                        : localizations.apiKeyRequiredDescription,
+                        ? 'Use your own key from your preferred provider.'
+                        : 'Add your API key to enable cloud AI models.',
                     style: const TextStyle(color: Colors.white70),
                   ),
                   const SizedBox(height: 16),
@@ -344,29 +344,11 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '1. ${localizations.visitOpenRouterAndSignUp}',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
+                        Text('1. Open the key page:', style: TextStyle(color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 4),
-                        Text(
-                          '2. ${localizations.goToKeysSection}',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
+                        Text('2. Create a new API key', style: TextStyle(color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 4),
-                        Text(
-                          '3. ${localizations.createNewApiKey}',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '4. ${localizations.addCreditToUseAdvancedModels}',
-                          style: TextStyle(
-                            color: AppTheme.warmGold.withValues(alpha: 0.9),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        Text('3. Paste it below', style: TextStyle(color: Colors.white70, fontSize: 12)),
                         const SizedBox(height: 8),
                         GestureDetector(
                           onTap: () async {
@@ -382,7 +364,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: '→ ${localizations.getApiKeyHere} ',
+                                  text: '→ Get a key: ',
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 12,
@@ -396,9 +378,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                                     decoration: TextDecoration.underline,
                                     fontWeight: FontWeight.w500,
                                   ),
-                                  recognizer:
-                                      TapGestureRecognizer()
-                                        ..onTap = () async {
+                                  recognizer: TapGestureRecognizer()..onTap = () async {
                                           final uri = Uri.parse(
                                             'https://openrouter.ai/keys',
                                           );

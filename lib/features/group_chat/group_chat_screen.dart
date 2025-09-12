@@ -465,9 +465,34 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           
           SizedBox(width: 12 * fontScale),
           
-          // Send button
+          // Stop/Send button area
           Consumer<GroupChatProvider>(
             builder: (context, provider, child) {
+              final bool isStreaming = provider.isTyping || provider.isStreaming;
+              if (isStreaming) {
+                // Stop button
+                return Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppTheme.errorColor.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: provider.cancelStreamingResponses,
+                    icon: Icon(
+                      Icons.stop_circle_outlined,
+                      color: AppTheme.errorColor,
+                      size: 22 * fontScale,
+                    ),
+                    tooltip: 'Stop',
+                  ),
+                );
+              }
+
+              // Send button
               return Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -489,23 +514,14 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                   ],
                 ),
                 child: IconButton(
-                  onPressed: _messageController.text.trim().isNotEmpty && !provider.isLoading
+                  onPressed: _messageController.text.trim().isNotEmpty
                       ? _sendMessage
                       : null,
-                  icon: provider.isLoading
-                      ? SizedBox(
-                          width: 20 * fontScale,
-                          height: 20 * fontScale,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppTheme.deepNavy,
-                          ),
-                        )
-                      : Icon(
-                          Icons.send,
-                          color: AppTheme.deepNavy,
-                          size: 20 * fontScale,
-                        ),
+                  icon: Icon(
+                    Icons.send,
+                    color: AppTheme.deepNavy,
+                    size: 20 * fontScale,
+                  ),
                 ),
               );
             },
