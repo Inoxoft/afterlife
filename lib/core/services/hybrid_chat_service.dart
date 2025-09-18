@@ -243,9 +243,11 @@ STYLE:
         model != null &&
         (model.startsWith('local/') ||
             model == 'local' ||
-            model.contains('hammer') ||
+            model.contains('gemma-3n') ||
+            model.contains('gemma3n') ||
             model.contains('gemma') ||
-            model.contains('llama'));
+            model.contains('llama') ||
+            model.contains('hammer'));
 
     if (kDebugMode) {
       print('HybridChatService: Model selection debug');
@@ -272,10 +274,10 @@ STYLE:
     // Select the appropriate prompt based on provider
     String promptToUse;
     if (actualProvider == LLMProvider.local) {
-      final base = localPrompt ?? systemPrompt ?? '';
+      final base = localPrompt ?? systemPrompt;
       promptToUse = base.isEmpty ? _localStyleGuide : '$base\n\n$_localStyleGuide';
     } else {
-      promptToUse = systemPrompt ?? '';
+      promptToUse = systemPrompt;
     }
 
     // Append language instruction for local models based on saved app language
