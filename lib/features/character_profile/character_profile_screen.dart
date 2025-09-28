@@ -601,9 +601,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Define the models for user-created twins
     final models = [
       {
-        'id': 'local/llama-3.2-1b-instruct',
-        'name': localizations.localLlama32,
-        'description': localizations.localLlama32Description,
+        'id': 'local/gemma-3n-e2b-it',
+        'name': 'Local Gemma 3n',
+        'description': AppLocalizations.of(context).downloadGemmaModel,
         'provider': 'Local Device',
         'recommended': true,
         'isLocal': true,
@@ -789,7 +789,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                 if (isLocal) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Requires model download • No internet needed',
+                    'Requires Gemma 3n download • No internet needed',
                     style: TextStyle(
                       color: Colors.blue.withValues(alpha: 0.8),
                       fontSize: 12,
@@ -2568,8 +2568,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
-      'local/llama-3.2-1b-instruct': {
-        'name': AppLocalizations.of(context).localLlama32,
+      'local/gemma-3n-e2b-it': {
+        'name': 'Local Gemma 3n',
         'provider': 'Local Device',
       },
       'google/gemini-2.5-pro': {
@@ -2607,8 +2607,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'local/llama-3.2-1b-instruct':
-          AppLocalizations.of(context).localLlama32Description,
+      'local/gemma-3n-e2b-it':
+          AppLocalizations.of(context).downloadGemmaModel,
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',
       'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',

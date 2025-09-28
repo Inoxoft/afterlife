@@ -115,8 +115,8 @@ class _FamousCharacterModelDialogState
                                   Row(
                                     children: [
                                       Text(
-                                        (model['id'] == 'local/llama-3.2-1b-instruct')
-                                            ? AppLocalizations.of(context).localLlama32
+                                        (model['id'] == 'local/gemma-3n-e2b-it')
+                                            ? 'Local Gemma 3n'
                                             : (model['name'] as String),
                                         style: const TextStyle(
                                           color: Colors.white,
@@ -171,8 +171,8 @@ class _FamousCharacterModelDialogState
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    (model['id'] == 'local/llama-3.2-1b-instruct')
-                                        ? AppLocalizations.of(context).localLlama32Description
+                                    (model['id'] == 'local/gemma-3n-e2b-it')
+                                        ? AppLocalizations.of(context).localAiSettingsDescription
                                         : (model['description'] as String),
                                     style: const TextStyle(
                                       color: Colors.white70,

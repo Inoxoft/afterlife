@@ -372,12 +372,19 @@ class GroupChatService {
           enhancedSystemPrompt + (languageInstruction ?? '');
 
       // Get AI response using HybridChatService
+      // Determine per-group model (default local)
+      String? groupModel;
+      final active = _activeGroups[groupId];
+      if (active?.settings != null && active!.settings!['groupModel'] is String) {
+        groupModel = active.settings!['groupModel'] as String;
+      }
+
       final aiResponse = await HybridChatService.sendMessageToCharacter(
         characterId: characterId,
         message: userMessage,
         systemPrompt: systemPromptWithLanguage,
         chatHistory: contextMessages,
-        model: character.model,
+        model: groupModel ?? character.model,
         localPrompt: character.localPrompt,
       );
 
@@ -385,8 +392,17 @@ class GroupChatService {
         // Get character display info
         final displayInfo = await getCharacterDisplayInfo(characterId);
         
+        // Enforce response length limit if configured
+        int? maxChars;
+        if (active?.settings != null && active!.settings!['maxResponseChars'] is int) {
+          maxChars = active.settings!['maxResponseChars'] as int;
+        }
+        final limited = (maxChars != null && aiResponse.length > maxChars)
+            ? aiResponse.substring(0, maxChars)
+            : aiResponse;
+
         return GroupChatMessage.character(
-          content: aiResponse,
+          content: limited,
           characterId: characterId,
           characterName: character.name,
           characterAvatarUrl: character.imageUrl,

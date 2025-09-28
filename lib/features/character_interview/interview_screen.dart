@@ -195,18 +195,61 @@ class _InterviewScreenState extends State<InterviewScreen> {
             ),
           ),
           actions: [
+            // Creation mode selector: Local vs Cloud
             if (!widget.editMode)
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.upload_file, color: Colors.white70),
-                  onPressed: _isProcessingFile ? null : _handleFileUpload,
-                  tooltip: localizations.uploadCharacterFile,
-                ),
+              Consumer<InterviewProvider>(
+                builder: (context, provider, _) {
+                  return Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              provider.useLocalModel
+                                  ? Icons.phone_android
+                                  : Icons.cloud_outlined,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Switch(
+                              value: provider.useLocalModel,
+                              onChanged: (v) {
+                                provider.useLocalModel = v;
+                                // Hide file upload when local; show when cloud
+                                // System prompt will switch automatically
+                                Provider.of<InterviewProvider>(context, listen: false)
+                                    .notifyListeners();
+                              },
+                              activeColor: AppTheme.warmGold,
+                              inactiveThumbColor: Colors.white70,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // File upload (cloud only)
+                      if (!provider.useLocalModel)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.upload_file, color: Colors.white70),
+                            onPressed: _isProcessingFile ? null : _handleFileUpload,
+                            tooltip: localizations.uploadCharacterFile,
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             Consumer<InterviewProvider>(
               builder: (context, provider, _) {

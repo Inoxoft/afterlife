@@ -492,12 +492,12 @@ class _FamousCharacterProfileScreenState
                 context: context,
                 id: model['id'] as String,
                 name: model['name'] as String,
-                description: (model['id'] == 'local/llama-3.2-1b-instruct')
-                    ? AppLocalizations.of(context).localLlama32Description
+                description: (model['id'] == 'local/gemma-3n-e2b-it')
+                    ? AppLocalizations.of(context).downloadGemmaModel
                     : (model['description'] as String),
                 isRecommended: model['recommended'] == true,
                 isLocal: model['isLocal'] == true,
-                isSelected: _selectedModel == model['id'],
+                    isSelected: _selectedModel == model['id'],
               ),
             ),
       ],

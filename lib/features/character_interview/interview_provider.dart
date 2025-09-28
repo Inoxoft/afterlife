@@ -24,6 +24,8 @@ class InterviewProvider with ChangeNotifier {
   bool isSuccess = false;
   bool isEditMode = false;
   bool isAiThinking = false;
+  // Creation mode: local vs cloud
+  bool useLocalModel = false;
 
   // Add a reference to LanguageProvider at the class level
   LanguageProvider? _languageProvider;
@@ -204,7 +206,10 @@ When the user types "agree", format the final prompt as:
 ## END OF CHARACTER CARD ##
 ```$languageInstruction""";
     } else {
-      return InterviewPrompts.interviewSystemPrompt + languageInstruction;
+      final base = useLocalModel
+          ? InterviewPrompts.localInterviewSystemPrompt
+          : InterviewPrompts.interviewSystemPrompt;
+      return base + languageInstruction;
     }
   }
 
@@ -348,6 +353,7 @@ $languageInstruction""";
         final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
+          preferredProvider: useLocalModel ? LLMProvider.local : LLMProvider.openRouter,
         );
 
         // Add artificial delay to simulate natural conversation flow
@@ -395,6 +401,7 @@ $languageInstruction""";
             {"role": "user", "content": text},
           ],
           systemPrompt: characterCardSummary ?? "",
+          preferredProvider: useLocalModel ? LLMProvider.local : LLMProvider.openRouter,
         );
 
         // Add artificial delay to simulate natural conversation flow
@@ -413,6 +420,7 @@ $languageInstruction""";
         final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
+          preferredProvider: useLocalModel ? LLMProvider.local : LLMProvider.openRouter,
         );
 
         // Add artificial delay to simulate natural conversation flow

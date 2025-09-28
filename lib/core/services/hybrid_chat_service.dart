@@ -435,9 +435,20 @@ STYLE:
             await LocalLLMService.enableLocalLLM();
             localStatus = LocalLLMService.getStatus();
           } catch (_) {}
+
+          // Wait briefly for the model to finish initializing (first-call race)
+          if (localStatus['isAvailable'] != true) {
+            for (int i = 0; i < 20; i++) {
+              await Future.delayed(const Duration(milliseconds: 150));
+              localStatus = LocalLLMService.getStatus();
+              if (localStatus['isAvailable'] == true) {
+                break;
+              }
+            }
+          }
         }
         if (localStatus['isAvailable'] != true) {
-          return 'Local model not ready. Please download/enable the local model in Settings.';
+          return "The local AI model (Gemma 3n) isn't ready yet. Please try again in a moment, or switch this character to a cloud model in the profile or settings to continue now.";
         }
       }
 
@@ -496,15 +507,10 @@ STYLE:
       return cleanedResponse;
     } catch (e) {
       if (kDebugMode) {
-        print('Local LLM error, falling back to OpenRouter: $e');
+        print('Local LLM error: $e');
       }
-      // Fallback to OpenRouter on error
-      return await _sendMessageOpenRouter(
-        messages: messages,
-        systemPrompt: systemPrompt,
-        temperature: temperature,
-        maxTokens: maxTokens,
-      );
+      // Inform the user instead of silently switching providers
+      return "I'm having trouble with the local AI model right now. Please try again shortly, or switch this character to a cloud model (uses internet) to continue without delay.";
     }
   }
 

@@ -17,13 +17,13 @@ import '../utils/env_config.dart';
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
-// Model configuration (default: Gemma 3 270M IT, iOS-friendly)
+// Model configuration (Gemma 3n E2B-it LiteRT preview)
 class ModelConfig {
   // Smaller LiteRT .task suitable for iOS memory mapping
   static const String url =
-      'https://huggingface.co/litert-community/Llama-3.2-1B-Instruct/resolve/main/Llama-3.2-1B-Instruct_multi-prefill-seq_q8_ekv1280.task';
-  static const String filename = 'Llama-3.2-1B-Instruct_multi-prefill-seq_q8_ekv1280.task';
-  static const String displayName = 'Llama 3.2 1B Instruct (q8, ekv1280)';
+      'https://huggingface.co/google/gemma-3n-E2B-it-litert-preview/resolve/main/gemma-3n-E2B-it-int4.task';
+  static const String filename = 'gemma-3n-E2B-it-int4.task';
+  static const String displayName = 'Gemma 3n E2B-it (int4, LiteRT preview)';
   // Unknown/large size; relax verification (accept >1GB)
   static const int fileSizeBytes = 0;
   static const int maxTokens = 1024; // safe default for iOS

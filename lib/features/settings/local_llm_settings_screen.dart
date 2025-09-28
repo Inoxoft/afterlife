@@ -270,7 +270,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    modelConfig['displayName'] ?? 'Llama 3.2 1B (Local)',
+                    modelConfig['displayName'] ?? 'Gemma 3n (Local)',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -391,7 +391,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Text('The Llama 3.2 model is ready to use!'),
+              Text(AppLocalizations.of(context).gemmaModelReady),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _deleteModel,
@@ -419,7 +419,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Text('To use local AI, download the Llama 3.2 1B model:', style: const TextStyle(fontSize: 14)),
+            Text(AppLocalizations.of(context).downloadGemmaModel, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 8),
             Text(AppLocalizations.of(context).storageSpaceNeeded),
             Text(AppLocalizations.of(context).runsLocallyPrivacy),
@@ -473,7 +473,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: AdaptiveText(
-                                text: 'Download Llama 3.2 1B Local Model',
+                                text: AppLocalizations.of(context).downloadGemmaModelButton,
                                 baseStyle: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
