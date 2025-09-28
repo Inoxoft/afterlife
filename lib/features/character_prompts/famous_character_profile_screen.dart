@@ -492,7 +492,7 @@ class _FamousCharacterProfileScreenState
                 context: context,
                 id: model['id'] as String,
                 name: model['name'] as String,
-                description: (model['id'] == 'local/gemma-3n-e2b-it')
+                description: (model['id'] == 'local/gemma-3-1b-it')
                     ? AppLocalizations.of(context).downloadGemmaModel
                     : (model['description'] as String),
                 isRecommended: model['recommended'] == true,

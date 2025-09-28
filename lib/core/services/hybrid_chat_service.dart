@@ -49,17 +49,12 @@ class HybridChatService {
     providerChat: false,
   );
 
-  // Style guide to steer local models toward concise, in-character answers
+  // Minimal style guide for tiny local models (keep it very short)
   static const String _localStyleGuide =
       """
-STYLE:
-- Stay strictly in character; use first-person voice and era-appropriate style.
-- Be concise: 2–4 sentences unless the user asks for depth.
-- No generic encyclopedia summaries; answer directly to the user prompt.
-- Warm, conversational tone; ask a clarifying follow-up when helpful.
-- Do not include role labels (Human/Assistant) or restate the question.
-- If uncertain, say so briefly and suggest what is needed to proceed.
-- Target ≈120 words per reply by default.
+Guidelines:
+- Keep replies short (1–3 sentences).
+- Speak naturally; no role labels.
 """;
 
   /// Get current service availability
@@ -436,56 +431,57 @@ STYLE:
             localStatus = LocalLLMService.getStatus();
           } catch (_) {}
 
-          // Wait briefly for the model to finish initializing (first-call race)
+          // Wait longer for first-load initialization
           if (localStatus['isAvailable'] != true) {
-            for (int i = 0; i < 20; i++) {
-              await Future.delayed(const Duration(milliseconds: 150));
+            for (int i = 0; i < 60; i++) { // up to ~15s
+              await Future.delayed(const Duration(milliseconds: 250));
               localStatus = LocalLLMService.getStatus();
               if (localStatus['isAvailable'] == true) {
                 break;
               }
             }
           }
+
+          // As a final nudge, try explicit model init once
+          if (localStatus['isAvailable'] != true &&
+              localStatus['modelStatus'] == 'downloaded') {
+            try {
+              await LocalLLMService.initializeModel();
+              // brief wait
+              for (int i = 0; i < 10; i++) {
+                await Future.delayed(const Duration(milliseconds: 200));
+                localStatus = LocalLLMService.getStatus();
+                if (localStatus['isAvailable'] == true) break;
+              }
+            } catch (_) {}
+          }
         }
         if (localStatus['isAvailable'] != true) {
-          return "The local AI model (Gemma 3n) isn't ready yet. Please try again in a moment, or switch this character to a cloud model in the profile or settings to continue now.";
+          return "The local AI model is still starting up. Please send your message again in a few seconds (first load can take longer).";
         }
       }
 
-      // Build a comprehensive prompt with conversation context for local models
+      // Minimal prompt: system instructions (if any) + latest user message only
       final StringBuffer promptBuffer = StringBuffer();
-
-      // Add system prompt if provided
       if (systemPrompt != null && systemPrompt.isNotEmpty) {
         promptBuffer.writeln(systemPrompt);
         promptBuffer.writeln();
       }
-
-      // Add conversation history in a format local models can understand
-      if (messages.isNotEmpty) {
-        promptBuffer.writeln("Conversation:");
-
-        for (final message in messages) {
-          final role = message['role'] ?? 'user';
-          final content = message['content'] ?? '';
-
-          if (role == 'user') {
-            promptBuffer.writeln("Human: $content");
-          } else if (role == 'assistant') {
-            promptBuffer.writeln("Assistant: $content");
-          }
+      String latestUser = '';
+      for (var i = messages.length - 1; i >= 0; i--) {
+        final m = messages[i];
+        if ((m['role'] ?? 'user') == 'user') {
+          latestUser = (m['content'] ?? '').toString();
+          break;
         }
-
-        // Add the prompt for the assistant to respond
-        promptBuffer.writeln();
-        promptBuffer.write("Assistant:");
-      } else if (messages.isNotEmpty) {
-        // Fallback: just use the last message
-        final userMessage = messages.last['content'] ?? '';
-        promptBuffer.writeln("Human: $userMessage");
-        promptBuffer.writeln();
-        promptBuffer.write("Assistant:");
       }
+      // Fallback to last message content if no explicit user message found
+      if (latestUser.isEmpty && messages.isNotEmpty) {
+        latestUser = (messages.last['content'] ?? '').toString();
+      }
+      promptBuffer.writeln("User: $latestUser");
+      promptBuffer.writeln();
+      promptBuffer.write("Assistant:");
 
       final fullPrompt = promptBuffer.toString();
 

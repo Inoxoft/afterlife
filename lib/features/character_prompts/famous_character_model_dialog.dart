@@ -115,8 +115,8 @@ class _FamousCharacterModelDialogState
                                   Row(
                                     children: [
                                       Text(
-                                        (model['id'] == 'local/gemma-3n-e2b-it')
-                                            ? 'Local Gemma 3n'
+                                        (model['id'] == 'local/gemma-3-1b-it')
+                                            ? 'Local Gemma 3 1B'
                                             : (model['name'] as String),
                                         style: const TextStyle(
                                           color: Colors.white,
@@ -171,7 +171,7 @@ class _FamousCharacterModelDialogState
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    (model['id'] == 'local/gemma-3n-e2b-it')
+                                    (model['id'] == 'local/gemma-3-1b-it')
                                         ? AppLocalizations.of(context).localAiSettingsDescription
                                         : (model['description'] as String),
                                     style: const TextStyle(

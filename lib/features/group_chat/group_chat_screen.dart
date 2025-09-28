@@ -866,7 +866,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     final group = provider.getGroupChatById(widget.groupId);
     if (group == null) return;
 
-    final currentModel = (group.settings?['groupModel'] as String?) ?? 'local/gemma-3n-e2b-it';
+    final currentModel = (group.settings?['groupModel'] as String?) ?? 'local/gemma-3-1b-it';
     final currentMaxInput = (group.settings?['maxInputChars'] as int?) ?? 400;
     final currentMaxResponse = (group.settings?['maxResponseChars'] as int?) ?? 600;
 
@@ -910,10 +910,10 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                       child: Column(
                         children: [
                           RadioListTile<String>(
-                            value: 'local/gemma-3n-e2b-it',
+                            value: 'local/gemma-3-1b-it',
                             groupValue: selectedModel,
                             onChanged: (v) => setState(() => selectedModel = v!),
-                            title: const Text('Local Gemma 3n', style: TextStyle(color: Colors.white)),
+                            title: const Text('Local Gemma 3 1B', style: TextStyle(color: Colors.white)),
                             secondary: const Icon(Icons.phone_android, color: Colors.white70),
                           ),
                           RadioListTile<String>(

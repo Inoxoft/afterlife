@@ -8162,8 +8162,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
   static final Map<String, List<Map<String, dynamic>>> characterModels = {
     'Albert Einstein': [
       {
-        'id': 'local/gemma-3n-e2b-it',
-        'name': 'Local Gemma 3n',
+        'id': 'local/gemma-3-1b-it',
+        'name': 'Local Gemma 3 1B',
         'description': 'On-device local model',
         'isLocal': true,
         'recommended': false,
@@ -9344,11 +9344,11 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     final models = characterModels[characterName] ?? [];
     // Back-compat: migrate legacy Llama entry to Gemma 3n local
     return models.map((model) {
-      if (model['id'] == 'local/llama-3.2-1b-instruct' || model['id'] == 'local/llama-3.2') {
+      if (model['id'] == 'local/llama-3.2-1b-instruct' || model['id'] == 'local/llama-3.2' || model['id'] == 'local/gemma-3n-e2b-it') {
         return {
           ...model,
-          'id': 'local/gemma-3n-e2b-it',
-          'name': 'Local Gemma 3n',
+          'id': 'local/gemma-3-1b-it',
+          'name': 'Local Gemma 3 1B',
         };
       }
       return model;

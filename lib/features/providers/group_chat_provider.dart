@@ -236,7 +236,7 @@ class GroupChatProvider extends BaseProvider {
             characterIds: characterIds,
             description: description,
             settings: {
-              'groupModel': 'local/gemma-3n-e2b-it',
+              'groupModel': 'local/gemma-3-1b-it',
               'maxResponseChars': 600,
               'maxInputChars': 400,
             },

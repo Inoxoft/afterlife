@@ -601,8 +601,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
     // Define the models for user-created twins
     final models = [
       {
-        'id': 'local/gemma-3n-e2b-it',
-        'name': 'Local Gemma 3n',
+        'id': 'local/gemma-3-1b-it',
+        'name': 'Local Gemma 3 1B',
         'description': AppLocalizations.of(context).downloadGemmaModel,
         'provider': 'Local Device',
         'recommended': true,
@@ -2568,8 +2568,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
-      'local/gemma-3n-e2b-it': {
-        'name': 'Local Gemma 3n',
+      'local/gemma-3-1b-it': {
+        'name': 'Local Gemma 3 1B',
         'provider': 'Local Device',
       },
       'google/gemini-2.5-pro': {
@@ -2607,7 +2607,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'local/gemma-3n-e2b-it':
+      'local/gemma-3-1b-it':
           AppLocalizations.of(context).downloadGemmaModel,
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',

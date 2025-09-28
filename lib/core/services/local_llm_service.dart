@@ -17,20 +17,20 @@ import '../utils/env_config.dart';
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
-// Model configuration (Gemma 3n E2B-it LiteRT preview)
+// Model configuration (Gemma 3 1B IT LiteRT)
 class ModelConfig {
   // Smaller LiteRT .task suitable for iOS memory mapping
-  static const String url =
-      'https://huggingface.co/google/gemma-3n-E2B-it-litert-preview/resolve/main/gemma-3n-E2B-it-int4.task';
-  static const String filename = 'gemma-3n-E2B-it-int4.task';
-  static const String displayName = 'Gemma 3n E2B-it (int4, LiteRT preview)';
+    static const String url =
+        'https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/Gemma3-1B-IT_q8_ekv4096.task';
+    static const String filename = 'Gemma3-1B-IT_q8_ekv4096.task';
+    static const String displayName = 'Gemma 3 1B IT (q8, ekv4096 LiteRT)';
   // Unknown/large size; relax verification (accept >1GB)
   static const int fileSizeBytes = 0;
   static const int maxTokens = 1024; // safe default for iOS
   static const double temperature = 0.7;
   static const int topK = 40;
   static const double topP = 0.95;
-  static const PreferredBackend preferredBackend = PreferredBackend.gpu;
+  static const PreferredBackend preferredBackend = PreferredBackend.cpu;
   // Use Gemma instruction type as a generic text-only type for compatibility
   static const ModelType modelType = ModelType.gemmaIt;
 }
@@ -228,24 +228,54 @@ class LocalLLMService {
   // Verify download file size
   static bool _verifyDownload(int actualSize, int expectedSize) {
     // Relaxed verification: allow 10% tolerance; if unknown expected,
-    // accept any file larger than ~1GB as valid .task model
+    // accept any file larger than a conservative threshold as valid .task model.
+    // Many LiteRT tasks are between ~550MB (q4) and ~1.8GB (f32).
     if (expectedSize <= 0) {
-      return actualSize > 1024 * 1024 * 1024;
+      const int conservativeThresholdBytes = 300 * 1024 * 1024; // ~300MB
+      return actualSize > conservativeThresholdBytes;
     }
     final tolerance = (expectedSize * 0.10).toInt();
     final withinTolerance = (actualSize - expectedSize).abs() <= tolerance;
     if (withinTolerance) return true;
-    // Fallback acceptance for repackaged .task files
-    return actualSize > 1024 * 1024 * 1024;
+    // Fallback acceptance for repackaged .task files (still ensure it's substantial)
+    return actualSize > 300 * 1024 * 1024;
   }
 
   // Initialize the model
   static Future<void> _initializeModel() async {
+    // Ensure model path points to an existing .task; try to auto-correct stale paths
     if (_modelPath == null || !await File(_modelPath!).exists()) {
-      if (kDebugMode) {
-        AppLogger.warning('Cannot initialize model: file not found at $_modelPath', tag: 'LocalLLMService');
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final dir = Directory(directory.path);
+        final candidates = await dir
+            .list(recursive: false, followLinks: false)
+            .where((e) => e is File && e.path.toLowerCase().endsWith('.task'))
+            .cast<File>()
+            .toList();
+        // Prefer Gemma task files; otherwise pick the largest
+        File? chosen;
+        for (final f in candidates) {
+          final name = f.path.toLowerCase();
+          if (name.contains('gemma') || name.contains('e2b') || name.contains('gemma-3n')) {
+            chosen = f;
+            break;
+          }
+        }
+        chosen ??= candidates.isEmpty ? null : (await _pickLargestTaskFile(candidates));
+        if (chosen != null && await chosen.exists()) {
+          _modelPath = chosen.path;
+          final prefs = await PreferencesService.getPrefs();
+          await prefs.setString('local_llm_model_path', _modelPath!);
+        }
+      } catch (_) {}
+
+      if (_modelPath == null || !await File(_modelPath!).exists()) {
+        if (kDebugMode) {
+          AppLogger.warning('Cannot initialize model: file not found at $_modelPath', tag: 'LocalLLMService');
+        }
+        return;
       }
-      return;
     }
 
     try {
@@ -290,13 +320,28 @@ class LocalLLMService {
       // Create the model (use iOS-friendly settings to avoid memory issues)
       final bool isIOS = Platform.isIOS;
       final int iosMaxTokens = 1024; // conservative default for iOS
-      final bool iosSupportImage = false; // disable images on iOS initially
-      _model = await _gemmaPlugin.createModel(
-        modelType: ModelConfig.modelType,
-        maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
-        preferredBackend: ModelConfig.preferredBackend,
-        supportImage: isIOS ? iosSupportImage : true,
-      );
+      // Disable image/vision support for all platforms to avoid requiring a vision encoder
+      // The current .task is used in text-only mode
+      final bool supportImage = false;
+      try {
+        _model = await _gemmaPlugin.createModel(
+          modelType: ModelConfig.modelType,
+          maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
+          preferredBackend: ModelConfig.preferredBackend,
+          supportImage: supportImage,
+        );
+      } catch (e) {
+        // Fallback to GPU if CPU init fails for some reason
+        if (kDebugMode) {
+          AppLogger.warning('CPU backend failed, retrying with GPU: $e', tag: 'LocalLLMService');
+        }
+        _model = await _gemmaPlugin.createModel(
+          modelType: ModelConfig.modelType,
+          maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
+          preferredBackend: PreferredBackend.gpu,
+          supportImage: supportImage,
+        );
+      }
 
       // Create chat session
       _chat = await _model!.createChat(
@@ -305,7 +350,7 @@ class LocalLLMService {
         topK: ModelConfig.topK,
         topP: ModelConfig.topP,
         tokenBuffer: isIOS ? 64 : 256,
-        supportImage: isIOS ? iosSupportImage : true,
+        supportImage: supportImage,
       );
 
       if (kDebugMode) {
@@ -349,7 +394,7 @@ class LocalLLMService {
         'filename': ModelConfig.filename,
         'maxTokens': ModelConfig.maxTokens,
         'fileSizeGB': computedSizeGb.toStringAsFixed(1),
-        'supportImage': true,
+        'supportImage': false,
       },
     };
   }
@@ -528,6 +573,12 @@ class LocalLLMService {
         final prefs = await PreferencesService.getPrefs();
         await prefs.setString('local_llm_model_path', modelPath);
 
+        // If a stale Hammer path was saved previously, clear it
+        final stale = prefs.getString('local_llm_model_path');
+        if (stale != null && stale.contains('Hammer2.1')) {
+          await prefs.setString('local_llm_model_path', modelPath);
+        }
+
         _modelStatus = ModelDownloadStatus.downloaded;
         _downloadProgress = 1.0;
         _modelStatusController?.add(_modelStatus);
@@ -576,16 +627,47 @@ class LocalLLMService {
         },
       );
       if (resp.statusCode != 200) return null;
-      final json = resp.body;
-      // Very lightweight parsing to find a .task filename (avoid full JSON decode dependency)
+      final body = resp.body;
+      // Extract all .task filenames from siblings
       final regex = RegExp(r'"rfilename"\s*:\s*"([^"]+\.task)"');
-      final match = regex.firstMatch(json);
-      if (match != null) {
-        final fname = match.group(1)!;
-        final dl = 'https://huggingface.co/$org/$repo/resolve/main/$fname';
-        return (dl, fname);
+      final matches = regex.allMatches(body).map((m) => m.group(1)!).toList();
+      if (matches.isEmpty) return null;
+
+      // Target filename from configured URL
+      final configuredSegments = Uri.parse(configuredUrl).pathSegments;
+      final desiredName = configuredSegments.isNotEmpty
+          ? configuredSegments.last
+          : '';
+
+      String? pick;
+      // 1) Exact match
+      if (desiredName.isNotEmpty) {
+        pick = matches.firstWhere(
+          (f) => f == desiredName,
+          orElse: () => '',
+        );
+        if (pick.isEmpty) pick = null;
       }
-      return null;
+
+      // 2) Prefer q8 with 4096 context
+      pick ??= matches.firstWhere(
+        (f) => f.contains('q8') && (f.contains('4096') || f.contains('ekv4096')),
+        orElse: () => '',
+      );
+      if (pick.isEmpty) pick = null;
+
+      // 3) Prefer any 4096 context
+      pick ??= matches.firstWhere(
+        (f) => f.contains('4096') || f.contains('ekv4096'),
+        orElse: () => '',
+      );
+      if (pick.isEmpty) pick = null;
+
+      // 4) Fallback to first .task
+      pick ??= matches.first;
+
+      final dl = 'https://huggingface.co/$org/$repo/resolve/main/$pick';
+      return (dl, pick);
     } catch (_) {
       return null;
     }
@@ -853,6 +935,34 @@ class LocalLLMService {
       _modelStatusController = null;
     } catch (e) {
       AppLogger.serviceError('LocalLLMService', 'dispose error', e);
+    }
+  }
+
+  // Start a brand-new chat session to avoid context carryover between conversations
+  static Future<void> startNewChatSession() async {
+    try {
+      if (_model == null) {
+        return;
+      }
+      // Close existing chat session if any
+      if (_chat?.session != null) {
+        await _chat!.session.close();
+      }
+      final bool isIOS = Platform.isIOS;
+      final bool supportImage = false;
+      _chat = await _model!.createChat(
+        temperature: ModelConfig.temperature,
+        randomSeed: 1,
+        topK: ModelConfig.topK,
+        topP: ModelConfig.topP,
+        tokenBuffer: isIOS ? 64 : 256,
+        supportImage: supportImage,
+      );
+      if (kDebugMode) {
+        AppLogger.debug('LocalLLMService started a new chat session', tag: 'LocalLLMService');
+      }
+    } catch (e) {
+      AppLogger.serviceError('LocalLLMService', 'start new chat session error', e);
     }
   }
 

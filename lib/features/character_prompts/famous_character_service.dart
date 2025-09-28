@@ -41,8 +41,8 @@ class FamousCharacterService {
       characterName,
     );
     // Back-compat: ensure legacy Llama local id migrates to Gemma 3n local id
-    if (selectedModel == 'local/llama-3.2-1b-instruct' || selectedModel == 'local/llama-3.2') {
-      selectedModel = 'local/gemma-3n-e2b-it';
+    if (selectedModel == 'local/llama-3.2-1b-instruct' || selectedModel == 'local/llama-3.2' || selectedModel == 'local/gemma-3n-e2b-it') {
+      selectedModel = 'local/gemma-3-1b-it';
     }
 
     if (systemPrompt == null) return;
