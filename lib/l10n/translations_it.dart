@@ -1252,7 +1252,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Modello sul dispositivo, solo testo (~1.3GB). Privato e offline.';
 
   @override
-  String get gemmaModelReady => 'Il modello Gemma 3n è pronto per l\'uso!';
+  String get gemmaModelReady => 'Il modello Gemma 3 1B IT è pronto per l\'uso!';
 
   @override
   String get deleteModel => 'Elimina Modello';
@@ -1261,7 +1261,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get downloadModelSection => 'Scarica Modello';
 
   @override
-  String get downloadGemmaModel => 'Per utilizzare l\'IA locale, scarica il modello Gemma 3n (AI Edge):';
+  String get downloadGemmaModel => 'Per utilizzare l\'IA locale, scarica il modello Gemma 3 1B IT (AI Edge):';
 
   @override
   String get modelRequiresLicense => 'Questo modello richiede l\'accettazione della licenza Google e l\'uso di un token di accesso Hugging Face.';
@@ -1270,7 +1270,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get requiresHfLogin => '• Richiede login HF + accettazione licenza';
 
   @override
-  String get storageSpaceNeeded => '• ~2.9GB di spazio di archiviazione libero necessario';
+  String get storageSpaceNeeded => '• ~1.1GB di spazio di archiviazione libero necessario';
 
   @override
   String get runsLocallyPrivacy => '• Funziona localmente sul tuo dispositivo per la privacy';
@@ -1291,7 +1291,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get downloadCancelledByUser => 'Download annullato dall\'utente';
 
   @override
-  String get downloadGemmaModelButton => 'Scarica Modello Gemma 3n (AI Edge) (~2.9GB)';
+  String get downloadGemmaModelButton => 'Scarica Modello Gemma 3 1B IT (AI Edge) (~1.1GB)';
 
   @override
   String get huggingFaceTokenSaved => 'Token Hugging Face salvato';
@@ -1309,7 +1309,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get modelDownloadFailed => 'Download del modello fallito. Riprova.';
 
   @override
-  String get deleteModelConfirmation => 'Sei sicuro di voler eliminare il modello Gemma 3n scaricato? Questo libererà ~2.9GB di archiviazione.';
+  String get deleteModelConfirmation => 'Sei sicuro di voler eliminare il modello Gemma 3 1B IT scaricato? Questo libererà ~1.1GB di archiviazione.';
 
   @override
   String get modelDeletedSuccessfully => 'Modello eliminato con successo';

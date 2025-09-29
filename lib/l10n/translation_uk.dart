@@ -1088,7 +1088,7 @@ class AppLocalizationsUk extends AppLocalizations {
       'На пристрої, лише текст (~1.3ГБ). Приватна та офлайн.';
 
   @override
-  String get gemmaModelReady => 'Модель Gemma 3n готова до використання!';
+  String get gemmaModelReady => 'Модель Gemma 3 1B IT готова до використання!';
 
   @override
   String get deleteModel => 'Видалити Модель';
@@ -1097,7 +1097,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get downloadModelSection => 'Завантажити Модель';
 
   @override
-  String get downloadGemmaModel => 'Для використання локального ШІ завантажте модель Gemma 3n (AI Edge):';
+  String get downloadGemmaModel => 'Для використання локального ШІ завантажте модель Gemma 3 1B IT (AI Edge):';
 
   @override
   String get modelRequiresLicense => 'Ця модель вимагає прийняття ліцензії Google та використання токена доступу Hugging Face.';
@@ -1106,7 +1106,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get requiresHfLogin => '• Вимагає входу в HF + прийняття ліцензії';
 
   @override
-  String get storageSpaceNeeded => '• Потрібно ~2.9ГБ вільного місця для зберігання';
+  String get storageSpaceNeeded => '• Потрібно ~1.1ГБ вільного місця для зберігання';
 
   @override
   String get runsLocallyPrivacy => '• Працює локально на вашому пристрої для конфіденційності';
@@ -1124,10 +1124,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cancelDownload => 'Скасувати Завантаження';
 
   @override
-  String get downloadGemmaModelButton => 'Завантажити Модель Gemma 3n (AI Edge) (~2.9ГБ)';
+  String get downloadGemmaModelButton => 'Завантажити Модель Gemma 3 1B IT (AI Edge) (~1.1ГБ)';
 
   @override
-  String get deleteModelConfirmation => 'Ви впевнені, що хочете видалити завантажену модель Gemma 3n? Це звільнить ~2.9ГБ сховища.';
+  String get deleteModelConfirmation => 'Ви впевнені, що хочете видалити завантажену модель Gemma 3 1B IT? Це звільнить ~1.1ГБ сховища.';
 
   @override
   String get huggingFaceTokenSaved => 'Токен Hugging Face збережено';

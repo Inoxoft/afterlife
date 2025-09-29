@@ -8198,7 +8198,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/gemma-3n-e2b-it',
         'name': 'Local Gemma 3n E2B IT',
-        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.1GB)',
         'isLocal': true,
         'recommended': false,
       },

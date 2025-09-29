@@ -270,7 +270,7 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    modelConfig['displayName'] ?? 'Gemma 3n (Local)',
+                    modelConfig['displayName'] ?? 'Gemma 3 1B IT (Local)',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -1362,7 +1362,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'On-device, text-only model (~1.3GB). Private and offline.';
 
   @override
-  String get gemmaModelReady => 'The Gemma 3n model is ready to use!';
+  String get gemmaModelReady => 'The Gemma 3 1B IT model is ready to use!';
 
   @override
   String get deleteModel => 'Delete Model';
@@ -1371,7 +1371,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadModelSection => 'Download Model';
 
   @override
-  String get downloadGemmaModel => 'To use local AI, download the Gemma 3n (AI Edge) model:';
+  String get downloadGemmaModel => 'To use local AI, download the Gemma 3 1B IT (AI Edge) model:';
 
   @override
   String get modelRequiresLicense => 'This model requires accepting Google\'s license and using a Hugging Face access token.';
@@ -1380,7 +1380,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requiresHfLogin => '• Requires HF login + license acceptance';
 
   @override
-  String get storageSpaceNeeded => '• ~2.9GB of free storage space needed';
+  String get storageSpaceNeeded => '• ~1.1GB of free storage space needed';
 
   @override
   String get runsLocallyPrivacy => '• Runs locally on your device for privacy';
@@ -1398,10 +1398,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelDownload => 'Cancel Download';
 
   @override
-  String get downloadGemmaModelButton => 'Download Gemma 3n (AI Edge) Model (~2.9GB)';
+  String get downloadGemmaModelButton => 'Download Gemma 3 1B IT (AI Edge) Model (~1.1GB)';
 
   @override
-  String get deleteModelConfirmation => 'Are you sure you want to delete the downloaded Gemma 3n model? This will free up ~2.9GB of storage.';
+  String get deleteModelConfirmation => 'Are you sure you want to delete the downloaded Gemma 3 1B IT model? This will free up ~1.1GB of storage.';
 
   @override
   String get huggingFaceTokenSaved => 'Hugging Face token saved';

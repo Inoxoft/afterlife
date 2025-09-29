@@ -1179,7 +1179,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '기기 내 동작, 텍스트 전용 (~1.3GB). 프라이빗, 오프라인.';
 
   @override
-  String get gemmaModelReady => 'Gemma 3n 모델이 사용 준비되었습니다!';
+  String get gemmaModelReady => 'Gemma 3 1B IT 모델이 사용 준비되었습니다!';
 
   @override
   String get deleteModel => '모델 삭제';
@@ -1188,7 +1188,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get downloadModelSection => '모델 다운로드';
 
   @override
-  String get downloadGemmaModel => '로컬 AI를 사용하려면 Gemma 3n (AI Edge) 모델을 다운로드하세요:';
+  String get downloadGemmaModel => '로컬 AI를 사용하려면 Gemma 3 1B IT (AI Edge) 모델을 다운로드하세요:';
 
   @override
   String get modelRequiresLicense => '이 모델은 Google 라이선스 동의와 Hugging Face 액세스 토큰 사용이 필요합니다.';
@@ -1197,7 +1197,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get requiresHfLogin => '• HF 로그인 + 라이선스 동의 필요';
 
   @override
-  String get storageSpaceNeeded => '• 약 2.9GB의 여유 저장 공간 필요';
+  String get storageSpaceNeeded => '• 약 1.1GB의 여유 저장 공간 필요';
 
   @override
   String get runsLocallyPrivacy => '• 개인정보 보호를 위해 기기에서 로컬 실행';
@@ -1218,7 +1218,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get downloadCancelledByUser => '사용자가 다운로드를 취소했습니다';
 
   @override
-  String get downloadGemmaModelButton => 'Gemma 3n (AI Edge) 모델 다운로드 (~2.9GB)';
+  String get downloadGemmaModelButton => 'Gemma 3 1B IT (AI Edge) 모델 다운로드 (~1.1GB)';
 
   @override
   String get huggingFaceTokenSaved => 'Hugging Face 토큰이 저장되었습니다';
@@ -1236,7 +1236,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modelDownloadFailed => '모델 다운로드에 실패했습니다. 다시 시도해주세요.';
 
   @override
-  String get deleteModelConfirmation => '다운로드된 Gemma 3n 모델을 삭제하시겠습니까? 약 2.9GB의 저장 공간이 확보됩니다.';
+  String get deleteModelConfirmation => '다운로드된 Gemma 3 1B IT 모델을 삭제하시겠습니까? 약 1.1GB의 저장 공간이 확보됩니다.';
 
   @override
   String get modelDeletedSuccessfully => '모델이 성공적으로 삭제되었습니다';

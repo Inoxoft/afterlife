@@ -301,7 +301,7 @@ class LocalLLMService {
       }
 
       if (kDebugMode) {
-        AppLogger.debug('Initializing Gemma 3n model at: $_modelPath', tag: 'LocalLLMService');
+        AppLogger.debug('Initializing Gemma 3 1B IT model at: $_modelPath', tag: 'LocalLLMService');
       }
 
       // Close existing instances to prevent memory leaks
@@ -354,7 +354,7 @@ class LocalLLMService {
       );
 
       if (kDebugMode) {
-        AppLogger.debug('Gemma 3n model initialized successfully', tag: 'LocalLLMService');
+        AppLogger.debug('Gemma 3 1B IT model initialized successfully', tag: 'LocalLLMService');
       }
       _isInitialized = true;
     } catch (e) {
