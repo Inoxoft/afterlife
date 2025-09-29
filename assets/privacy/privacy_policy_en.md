@@ -43,13 +43,10 @@ Thank you for using Afterlife. Your privacy matters. This policy explains what d
 - Switch providers or disable cloud usage at any time in Settings.
 - Clear all local data in Settings > Data Management.
 
-10. Children
-Afterlife is not directed to children under 13 (or the minimum age in your jurisdiction). Do not use the app if you do not meet the minimum age requirement.
-
-11. Changes to This Policy
+10. Changes to This Policy
 We may update this policy. We will update the “Last updated” date above and may provide in‑app notice of material changes.
 
-12. Contact
-Questions or requests? Contact: privacy@afterlife.app
+11. Contact
+Questions or requests? Contact: roman.yankovych@inoxoft.com
 
 

@@ -184,6 +184,11 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             return !(msg['isUser'] == true && msg['content'] == message);
           }).toList();
 
+      // Ensure local LLM chat session is fresh per character to avoid context carryover
+      if (_character != null && CharacterModel.isLocalModel(_character!.model)) {
+        await LocalLLMService.startNewChatSession();
+      }
+
       // Send the message to the character
       final response = await HybridChatService.sendMessageToCharacter(
         characterId: widget.characterId,
