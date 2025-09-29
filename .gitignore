@@ -65,6 +65,7 @@ firebase_options.dart
 **/ios/Flutter/flutter_export_environment.sh
 **/android/key.properties
 **/android/*.keystore
+**/android/*.jks
 **/android/app/google-services.json
 **/android/.gradle
 **/android/local.properties
