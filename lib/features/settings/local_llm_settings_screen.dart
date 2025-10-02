@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 // import 'package:url_launcher/url_launcher_string.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/local_llm_service.dart';
+import 'dart:io' show Platform;
+import '../../core/services/native_ios_ai.dart';
+import 'package:afterlife/core/services/hybrid_chat_service.dart';
+import '../../core/utils/app_logger.dart';
 import 'dart:async';
 import '../../core/widgets/adaptive_text.dart';
 import '../../l10n/app_localizations.dart';
@@ -240,11 +244,14 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                         ),
                       ),
                     const SizedBox(height: 16),
-                    _buildModelCard(),
-                    const SizedBox(height: 16),
-                    // Token section removed
-                    const SizedBox(height: 16),
-                    _buildDownloadSection(),
+                    // On iOS show native test card; on Android keep Gemma controls
+                    if (Platform.isIOS)
+                      _buildIOSTestCard()
+                    else ...[
+                      _buildModelCard(),
+                      const SizedBox(height: 16),
+                      _buildDownloadSection(),
+                    ],
                   ],
                 ),
               ),
@@ -487,6 +494,73 @@ class _LocalLLMSettingsScreenState extends State<LocalLLMSettingsScreen> {
                           ],
                         ),
                       ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIOSTestCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'iOS Native Model',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'This button calls the native iOS foundation model via MethodChannel.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final prompt = 'Flutter prompt test';
+                  AppLogger.userAction('Tap iOS Native Test', context: {'prompt_len': prompt.length});
+                  try {
+                    final status = await NativeIOSAI.fmStatus();
+                    final fmAvailable = status['available'] == true;
+                    AppLogger.debug('FM status', tag: 'LocalLLMSettings', context: status);
+
+                    if (!fmAvailable) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('FM unavailable: ${status['reason']}')),
+                      );
+                      return;
+                    }
+
+                    final sw = Stopwatch()..start();
+                    final text = await NativeIOSAI.generateText(prompt);
+                    sw.stop();
+                    AppLogger.performance('NativeIOSAI.generateText', sw.elapsed);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(text.isEmpty ? 'Empty FM response' : text)),
+                    );
+                  } catch (e) {
+                    AppLogger.serviceError('LocalLLMSettingsScreen', 'iOS native test failed', e);
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.bolt),
+                label: const Text('Test iOS Native Model'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.midnightPurple,
+                  foregroundColor: AppTheme.silverMist,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
             ),
           ],
         ),
