@@ -430,6 +430,22 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get deepKnowledge => '深い専門知識';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'プライベート、デバイス上、オフラインで動作';
+  @override
+  String get appleOnDevicePrivacy => 'デバイス上のプライバシー：チャットはiPhoneを離れません';
+  @override
+  String get appleNoCloudCalls => 'クラウド呼び出しなし — インターネット不要';
+  @override
+  String get applePoweredByFoundationModels => 'Apple Foundation Models によって動作（iOS 26+）';
+  @override
+  String get appleInstantSetup => '即時セットアップ — ダウンロードは不要';
+  @override
+  String get applePrivacyNote => 'すべてがデバイス上で実行されます。チャットを当社サーバーに送信することはありません。';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence => '歴史的本質を持つデジタルペルソナ';
@@ -1183,7 +1199,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'デバイス上で動作、テキスト専用（約1.3GB）。プライベートでオフライン。';
 
   @override
-  String get gemmaModelReady => 'Gemma 3nモデルが使用可能です！';
+  String get gemmaModelReady => 'Gemma 3 1B ITモデルが使用可能です！';
 
   @override
   String get deleteModel => 'モデルを削除';
@@ -1192,7 +1208,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get downloadModelSection => 'モデルをダウンロード';
 
   @override
-  String get downloadGemmaModel => 'ローカルAIを使用するには、Gemma 3n (AI Edge)モデルをダウンロードしてください：';
+  String get downloadGemmaModel => 'ローカルAIを使用するには、Gemma 3 1B IT (AI Edge)モデルをダウンロードしてください：';
 
   @override
   String get modelRequiresLicense => 'このモデルはGoogleのライセンス同意とHugging Faceアクセストークンの使用が必要です。';
@@ -1201,7 +1217,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get requiresHfLogin => '• HFログイン + ライセンス同意が必要';
 
   @override
-  String get storageSpaceNeeded => '• 約2.9GBの空きストレージが必要';
+  String get storageSpaceNeeded => '• 約1.1GBの空きストレージが必要';
 
   @override
   String get runsLocallyPrivacy => '• プライバシーのためデバイス上でローカル実行';
@@ -1222,7 +1238,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get downloadCancelledByUser => 'ユーザーによってダウンロードがキャンセルされました';
 
   @override
-  String get downloadGemmaModelButton => 'Gemma 3n (AI Edge)モデルをダウンロード (~2.9GB)';
+  String get downloadGemmaModelButton => 'Gemma 3 1B IT (AI Edge)モデルをダウンロード (~1.1GB)';
 
   @override
   String get huggingFaceTokenSaved => 'Hugging Faceトークンが保存されました';
@@ -1240,7 +1256,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modelDownloadFailed => 'モデルのダウンロードに失敗しました。再試行してください。';
 
   @override
-  String get deleteModelConfirmation => 'ダウンロードしたGemma 3nモデルを削除してもよろしいですか？約2.9GBのストレージが解放されます。';
+  String get deleteModelConfirmation => 'ダウンロードしたGemma 3 1B ITモデルを削除してもよろしいですか？約1.1GBのストレージが解放されます。';
 
   @override
   String get modelDeletedSuccessfully => 'モデルが正常に削除されました';

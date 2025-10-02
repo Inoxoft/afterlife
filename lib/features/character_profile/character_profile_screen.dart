@@ -1,5 +1,6 @@
 // Removed unused import
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
@@ -315,7 +316,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
 
         // Reinterview button
         const SizedBox(height: 24),
-        _buildReinterviewButton(),
+        if (!Platform.isIOS) _buildReinterviewButton(),
       ],
     );
   }
@@ -598,41 +599,52 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         ? mc['fileSizeGB'].toString()
         : '1.3';
 
-    // Define the models for user-created twins
-    final models = [
-      {
-        'id': 'local/llama-3.2-1b-instruct',
-        'name': localizations.localLlama32,
-        'description': localizations.localLlama32Description,
-        'provider': 'Local Device',
-        'recommended': true,
-        'isLocal': true,
-      },
-      {
-        'id': 'google/gemini-2.5-pro',
-        'name': 'Gemini 2.5 Pro',
-        'description': localizations.speedMultimodalSupport,
-        'provider': 'Google Cloud',
-        'recommended': true,
-      },
-      {
-        'id': 'openai/gpt-5-chat',
-        'name': 'GPT-5 Chat',
-        'description':
-            'Superior multilingual and vision capabilities via OpenRouter',
-        'provider': 'OpenRouter',
-        'recommended': false,
-      },
-      {
-        'id': 'qwen/qwen3-235b-a22b-07-25:free',
-        'name': 'Qwen 3 235B (Free)',
-        'description': 'Free model with solid conversational abilities',
-        'provider': 'OpenRouter',
-        'free': true,
-        'recommended': false,
-      },
-      // Keep existing free options as-is
-    ];
+    // Define the models card. On iOS, show only Apple Intelligence option.
+    final bool isiOS = Theme.of(context).platform == TargetPlatform.iOS;
+    final models = isiOS
+        ? [
+            {
+              'id': 'local/apple-intelligence',
+              'name': 'Apple Intelligence',
+              'description': 'On-device Apple Foundation Models',
+              'provider': 'Apple (On‑device)',
+              'recommended': true,
+              'isLocal': true,
+            },
+          ]
+        : [
+            // Android keeps existing options
+            {
+              'id': 'local/gemma-3-1b-it',
+              'name': 'Local Gemma 3 1B',
+              'description': AppLocalizations.of(context).downloadGemmaModel,
+              'provider': 'Local Device',
+              'recommended': true,
+              'isLocal': true,
+            },
+            {
+              'id': 'google/gemini-2.5-pro',
+              'name': 'Gemini 2.5 Pro',
+              'description': localizations.speedMultimodalSupport,
+              'provider': 'Google Cloud',
+              'recommended': true,
+            },
+            {
+              'id': 'openai/gpt-5-chat',
+              'name': 'GPT-5 Chat',
+              'description': 'Advanced cloud capabilities',
+              'provider': 'Cloud',
+              'recommended': false,
+            },
+            {
+              'id': 'qwen/qwen3-235b-a22b-07-25:free',
+              'name': 'Qwen 3 235B (Free)',
+              'description': 'Free model with solid conversational abilities',
+              'provider': 'Cloud',
+              'free': true,
+              'recommended': false,
+            },
+          ];
 
     return Column(
       children: [
@@ -716,31 +728,27 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    // Model icon based on type
                     Icon(
                       isLocal ? Icons.phone_android : Icons.cloud,
                       size: 20,
                       color: isLocal ? Colors.green : AppTheme.warmGold,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (isRecommended)
+                    if (!Platform.isIOS && isRecommended)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppTheme.warmGold.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
@@ -756,10 +764,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       ),
                     if (isFree)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.green.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
@@ -773,7 +778,23 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                           ),
                         ),
                       ),
-                    // Remove the PRIVATE pill for local model as per new UX
+                    // Hide PRIVATE pill on iOS to avoid clutter
+                    if (!Platform.isIOS && isLocal)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'PRIVATE',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -786,10 +807,10 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                   'Provider: $provider',
                   style: const TextStyle(color: Colors.white60, fontSize: 12),
                 ),
-                if (isLocal) ...[
+                if (isLocal && !Platform.isIOS) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Requires model download • No internet needed',
+                    'Requires Gemma 3n download • No internet needed',
                     style: TextStyle(
                       color: Colors.blue.withValues(alpha: 0.8),
                       fontSize: 12,
@@ -2568,8 +2589,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   String _getModelDisplayName(String modelId) {
     // Look up model information from a map similar to the one in ModelSelectionDialog
     final Map<String, Map<String, String>> modelInfo = {
-      'local/llama-3.2-1b-instruct': {
-        'name': AppLocalizations.of(context).localLlama32,
+      'local/gemma-3-1b-it': {
+        'name': 'Local Gemma 3 1B',
         'provider': 'Local Device',
       },
       'google/gemini-2.5-pro': {
@@ -2607,8 +2628,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
   // Get a description for the AI model
   String _getModelDescription(String modelId) {
     final Map<String, String> modelDescriptions = {
-      'local/llama-3.2-1b-instruct':
-          AppLocalizations.of(context).localLlama32Description,
+      'local/gemma-3-1b-it':
+          AppLocalizations.of(context).downloadGemmaModel,
       'google/gemini-2.0-flash-001':
           'Fast responses with multimodal capabilities',
       'anthropic/claude-3-5-sonnet': 'High-quality reasoning and analysis',

@@ -15,10 +15,17 @@
 -keep class **.flutter_gemma.** { *; }
 -keep class **.pigeon.** { *; }
 
+# Keep generated Pigeon classes used by flutter_gemma
+-keep class dev.flutter.pigeon.** { *; }
+
 # Keep AI Edge / MediaPipe / TensorFlow runtimes used by plugin
 -keep class com.google.ai.** { *; }
 -keep class com.google.mediapipe.** { *; }
 -keep class org.tensorflow.** { *; }
+
+# LiteRT / ODML namespaces used by AI Edge Gemma builds
+-keep class com.google.android.odml.** { *; }
+-keep class com.google.ai.edge.litert.** { *; }
 
 # Keep Google Play Core classes
 -keep class com.google.android.play.core.** { *; }

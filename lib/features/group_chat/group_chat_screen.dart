@@ -799,6 +799,12 @@ class _GroupChatScreenState extends State<GroupChatScreen>
             fontScale,
           ),
           _buildMenuOption(
+            Icons.psychology_outlined,
+            'AI Model & Limits',
+            _editGroupModelAndLimits,
+            fontScale,
+          ),
+          _buildMenuOption(
             Icons.delete_outline,
             localizations.deleteGroup,
             _deleteGroup,
@@ -853,6 +859,158 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         _loadGroupChat();
       }
     });
+  }
+
+  void _editGroupModelAndLimits() {
+    final provider = Provider.of<GroupChatProvider>(context, listen: false);
+    final group = provider.getGroupChatById(widget.groupId);
+    if (group == null) return;
+
+    final currentModel = (group.settings?['groupModel'] as String?) ?? 'local/gemma-3-1b-it';
+    final currentMaxInput = (group.settings?['maxInputChars'] as int?) ?? 400;
+    final currentMaxResponse = (group.settings?['maxResponseChars'] as int?) ?? 600;
+
+    final inputController = TextEditingController(text: currentMaxInput.toString());
+    final responseController = TextEditingController(text: currentMaxResponse.toString());
+    String selectedModel = currentModel;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.deepNavy,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3), width: 1),
+          ),
+          title: Text(
+            'AI Model & Limits',
+            style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+              text: 'AI Model & Limits',
+              fontSize: 18,
+              color: AppTheme.warmGold,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Powered AI', style: TextStyle(color: AppTheme.silverMist)),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.midnightPurple.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+                      ),
+                      child: Column(
+                        children: [
+                          RadioListTile<String>(
+                            value: 'local/gemma-3-1b-it',
+                            groupValue: selectedModel,
+                            onChanged: (v) => setState(() => selectedModel = v!),
+                            title: const Text('Local Gemma 3 1B', style: TextStyle(color: Colors.white)),
+                            secondary: const Icon(Icons.phone_android, color: Colors.white70),
+                          ),
+                          RadioListTile<String>(
+                            value: 'google/gemini-2.5-pro',
+                            groupValue: selectedModel,
+                            onChanged: (v) => setState(() => selectedModel = v!),
+                            title: const Text('Gemini 2.5 Pro', style: TextStyle(color: Colors.white)),
+                            secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
+                          ),
+                          RadioListTile<String>(
+                            value: 'openai/gpt-5-chat',
+                            groupValue: selectedModel,
+                            onChanged: (v) => setState(() => selectedModel = v!),
+                            title: const Text('GPT-5 Chat', style: TextStyle(color: Colors.white)),
+                            secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Limits', style: TextStyle(color: AppTheme.silverMist)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: inputController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Max input chars',
+                              labelStyle: TextStyle(color: AppTheme.silverMist.withValues(alpha: 0.7)),
+                              filled: true,
+                              fillColor: AppTheme.midnightPurple.withValues(alpha: 0.4),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: AppTheme.warmGold),
+                              ),
+                            ),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: responseController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Max response chars',
+                              labelStyle: TextStyle(color: AppTheme.silverMist.withValues(alpha: 0.7)),
+                              filled: true,
+                              fillColor: AppTheme.midnightPurple.withValues(alpha: 0.4),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: AppTheme.warmGold.withValues(alpha: 0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: AppTheme.warmGold),
+                              ),
+                            ),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final model = selectedModel;
+                final maxInput = int.tryParse(inputController.text.trim());
+                final maxResp = int.tryParse(responseController.text.trim());
+                await provider.setGroupModel(widget.groupId, model);
+                await provider.setGroupLimits(widget.groupId,
+                    maxInputChars: maxInput, maxResponseChars: maxResp);
+                if (!mounted) return;
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.warmGold, foregroundColor: AppTheme.deepNavy),
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Note: Add/Remove members were removed from the group menu per UX request.

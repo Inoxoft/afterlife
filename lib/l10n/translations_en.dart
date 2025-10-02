@@ -582,6 +582,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deepKnowledge => 'Deep Expertise';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Private, on-device, works offline';
+  @override
+  String get appleOnDevicePrivacy => 'On-device privacy: chats never leave your iPhone';
+  @override
+  String get appleNoCloudCalls => 'No cloud calls — works without internet';
+  @override
+  String get applePoweredByFoundationModels => 'Powered by Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Instant setup — nothing to download';
+  @override
+  String get applePrivacyNote => 'Runs entirely on your device. We never send your chats to our servers.';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence =>
@@ -1173,7 +1189,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get interviewWelcomeMessage =>
-      'Hello! I\'m ready to create a detailed character card for you. You can either:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhich would you prefer?';
+      'Hello! We\'ll create your character card with a short, friendly interview. I\'ll ask three quick questions about you, your personality, and a memorable moment.\n\nLet\'s begin: tell me a bit about yourself — what do you do, and what matters most to you?';
 
   // Group Chat
   @override
@@ -1362,7 +1378,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'On-device, text-only model (~1.3GB). Private and offline.';
 
   @override
-  String get gemmaModelReady => 'The Gemma 3n model is ready to use!';
+  String get gemmaModelReady => 'The Gemma 3 1B IT model is ready to use!';
 
   @override
   String get deleteModel => 'Delete Model';
@@ -1371,7 +1387,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadModelSection => 'Download Model';
 
   @override
-  String get downloadGemmaModel => 'To use local AI, download the Gemma 3n (AI Edge) model:';
+  String get downloadGemmaModel => 'To use local AI, download the Gemma 3 1B IT (AI Edge) model:';
 
   @override
   String get modelRequiresLicense => 'This model requires accepting Google\'s license and using a Hugging Face access token.';
@@ -1380,7 +1396,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requiresHfLogin => '• Requires HF login + license acceptance';
 
   @override
-  String get storageSpaceNeeded => '• ~2.9GB of free storage space needed';
+  String get storageSpaceNeeded => '• ~1.1GB of free storage space needed';
 
   @override
   String get runsLocallyPrivacy => '• Runs locally on your device for privacy';
@@ -1398,10 +1414,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelDownload => 'Cancel Download';
 
   @override
-  String get downloadGemmaModelButton => 'Download Gemma 3n (AI Edge) Model (~2.9GB)';
+  String get downloadGemmaModelButton => 'Download Gemma 3 1B IT (AI Edge) Model (~1.1GB)';
 
   @override
-  String get deleteModelConfirmation => 'Are you sure you want to delete the downloaded Gemma 3n model? This will free up ~2.9GB of storage.';
+  String get deleteModelConfirmation => 'Are you sure you want to delete the downloaded Gemma 3 1B IT model? This will free up ~1.1GB of storage.';
 
   @override
   String get huggingFaceTokenSaved => 'Hugging Face token saved';

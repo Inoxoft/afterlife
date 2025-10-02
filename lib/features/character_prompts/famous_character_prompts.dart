@@ -8162,8 +8162,8 @@ Stay in character at all times. Never break character or admit you are an AI. ''
   static final Map<String, List<Map<String, dynamic>>> characterModels = {
     'Albert Einstein': [
       {
-        'id': 'local/llama-3.2-1b-instruct',
-        'name': 'Local Llama 3.2',
+        'id': 'local/gemma-3-1b-it',
+        'name': 'Local Gemma 3 1B',
         'description': 'On-device local model',
         'isLocal': true,
         'recommended': false,
@@ -8198,7 +8198,7 @@ Stay in character at all times. Never break character or admit you are an AI. ''
       {
         'id': 'local/gemma-3n-e2b-it',
         'name': 'Local Gemma 3n E2B IT',
-        'description': 'Privacy-first local AI with multimodal support (2.9GB)',
+        'description': 'Privacy-first local AI with multimodal support (1.1GB)',
         'isLocal': true,
         'recommended': false,
       },
@@ -9342,8 +9342,19 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     String characterName,
   ) {
     final models = characterModels[characterName] ?? [];
-    // Allow Gemma 3N E2B IT to pass through unchanged
-    return models.toList();
+    // Back-compat: migrate legacy Gemma local entry to Llama 3.2 local
+    return models.map((model) {
+      if ((model['id'] == 'local/gemma-3n-e2b-it')) {
+        return {
+          ...model,
+          'id': 'local/llama-3.2-1b-instruct',
+          'name': 'Local Llama 3.2',
+          'description': 'On-device, text-only model (~1.3GB). Private and offline.',
+          'isLocal': true,
+        };
+      }
+      return model;
+    }).toList();
   }
 
   /// Get the currently selected model for a character

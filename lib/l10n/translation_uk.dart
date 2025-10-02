@@ -901,7 +901,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get interviewWelcomeMessage =>
-      'Привіт! Я готовий створити детальну картку персонажа для вас. Ви можете:\n\n1. Відповісти на мої запитання про вашу особистість та досвід\n2. Завантажити файл (PDF, TXT, DOC або email) з вашою інформацією\n\nЩо б ви воліли?';
+      "Привіт! Ми створимо вашу картку персонажа через коротке інтерв'ю. Я задам три швидкі запитання про вас, вашу особистість і один пам'ятний момент.\n\nПочнімо: розкажіть трохи про себе — чим ви займаєтесь і що для вас найважливіше?";
 
   // Group Chat
   @override
@@ -1088,7 +1088,7 @@ class AppLocalizationsUk extends AppLocalizations {
       'На пристрої, лише текст (~1.3ГБ). Приватна та офлайн.';
 
   @override
-  String get gemmaModelReady => 'Модель Gemma 3n готова до використання!';
+  String get gemmaModelReady => 'Модель Gemma 3 1B IT готова до використання!';
 
   @override
   String get deleteModel => 'Видалити Модель';
@@ -1097,7 +1097,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get downloadModelSection => 'Завантажити Модель';
 
   @override
-  String get downloadGemmaModel => 'Для використання локального ШІ завантажте модель Gemma 3n (AI Edge):';
+  String get downloadGemmaModel => 'Для використання локального ШІ завантажте модель Gemma 3 1B IT (AI Edge):';
 
   @override
   String get modelRequiresLicense => 'Ця модель вимагає прийняття ліцензії Google та використання токена доступу Hugging Face.';
@@ -1106,7 +1106,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get requiresHfLogin => '• Вимагає входу в HF + прийняття ліцензії';
 
   @override
-  String get storageSpaceNeeded => '• Потрібно ~2.9ГБ вільного місця для зберігання';
+  String get storageSpaceNeeded => '• Потрібно ~1.1ГБ вільного місця для зберігання';
 
   @override
   String get runsLocallyPrivacy => '• Працює локально на вашому пристрої для конфіденційності';
@@ -1124,10 +1124,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cancelDownload => 'Скасувати Завантаження';
 
   @override
-  String get downloadGemmaModelButton => 'Завантажити Модель Gemma 3n (AI Edge) (~2.9ГБ)';
+  String get downloadGemmaModelButton => 'Завантажити Модель Gemma 3 1B IT (AI Edge) (~1.1ГБ)';
 
   @override
-  String get deleteModelConfirmation => 'Ви впевнені, що хочете видалити завантажену модель Gemma 3n? Це звільнить ~2.9ГБ сховища.';
+  String get deleteModelConfirmation => 'Ви впевнені, що хочете видалити завантажену модель Gemma 3 1B IT? Це звільнить ~1.1ГБ сховища.';
 
   @override
   String get huggingFaceTokenSaved => 'Токен Hugging Face збережено';
@@ -1167,4 +1167,20 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get exportChat => 'Експортувати чат';
+
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Приватно, на пристрої, працює офлайн';
+  @override
+  String get appleOnDevicePrivacy => 'Конфіденційність на пристрої: чати ніколи не залишають ваш iPhone';
+  @override
+  String get appleNoCloudCalls => 'Без хмарних викликів — працює без інтернету';
+  @override
+  String get applePoweredByFoundationModels => 'Працює на Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Миттєве налаштування — нічого не потрібно завантажувати';
+  @override
+  String get applePrivacyNote => 'Працює повністю на вашому пристрої. Ми ніколи не надсилаємо ваші чати на наші сервери.';
 }

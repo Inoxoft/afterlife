@@ -9,6 +9,7 @@ import '../providers/language_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/env_config.dart';
 import '../../../core/widgets/api_key_input_dialog.dart';
+import 'dart:io' show Platform;
 import 'themed_icon.dart';
 import '../providers/chat_service.dart';
 import '../character_chat/chat_service.dart' as character_chat;
@@ -243,21 +244,22 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
                     const SizedBox(height: 16),
 
-                    // API & Connectivity section
-                    _buildSectionHeader(localizations.apiConnectivity),
-                    _buildSettingCard(
-                      title: 'OpenRouter API Key',
-                      subtitle: localizations.customApiKeyDescription,
-                      icon: Icons.vpn_key,
-                      onTap: () => _showApiKeyDialog(context),
-                    ),
-
-                    _buildSettingCard(
-                      title: localizations.localAiSettings,
-                      subtitle: localizations.localAiSettingsDescription,
-                      icon: Icons.offline_bolt,
-                      onTap: () => _navigateToLocalLLMSettings(context),
-                    ),
+                    // API & Connectivity section (hidden on iOS for Apple Intelligence‑only setup)
+                    if (!Platform.isIOS) ...[
+                      _buildSectionHeader(localizations.apiConnectivity),
+                      _buildSettingCard(
+                        title: 'OpenRouter API Key',
+                        subtitle: localizations.customApiKeyDescription,
+                        icon: Icons.vpn_key,
+                        onTap: () => _showApiKeyDialog(context),
+                      ),
+                      _buildSettingCard(
+                        title: localizations.localAiSettings,
+                        subtitle: localizations.localAiSettingsDescription,
+                        icon: Icons.offline_bolt,
+                        onTap: () => _navigateToLocalLLMSettings(context),
+                      ),
+                    ],
 
                     const SizedBox(height: 16),
                   ],

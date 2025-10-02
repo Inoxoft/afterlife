@@ -1,4 +1,4 @@
-package com.example.afterlife
+package com.inoxoft.afterlife
 
 import io.flutter.embedding.android.FlutterActivity
 

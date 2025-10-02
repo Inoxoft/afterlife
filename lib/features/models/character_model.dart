@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CharacterModel {
   static const String _defaultAccentColor = '0xFF4ECDC4';
   static const String _characterIdPrefix = 'char_';
-  static const String _defaultModel = 'local/llama-3.2-1b-instruct';
+  static const String _defaultModel = 'local/gemma-3-1b-it';
 
   final String id;
   final String name;

@@ -235,6 +235,11 @@ class GroupChatProvider extends BaseProvider {
             name: name,
             characterIds: characterIds,
             description: description,
+            settings: {
+              'groupModel': 'local/gemma-3-1b-it',
+              'maxResponseChars': 600,
+              'maxInputChars': 400,
+            },
           );
           
           print('✅ [GroupChatProvider] GroupChatModel created successfully:');
@@ -274,6 +279,47 @@ class GroupChatProvider extends BaseProvider {
       },
       operationName: 'create group chat',
     );
+  }
+
+  /// Update group's AI model/provider selection
+  Future<void> setGroupModel(String groupId, String modelId) async {
+    final group = getGroupChatById(groupId);
+    if (group == null) return;
+    final newSettings = Map<String, dynamic>.from(group.settings ?? {});
+    newSettings['groupModel'] = modelId;
+    final updated = GroupChatModel(
+      id: group.id,
+      name: group.name,
+      characterIds: group.characterIds,
+      messages: group.messages,
+      createdAt: group.createdAt,
+      lastMessageAt: group.lastMessageAt,
+      description: group.description,
+      settings: newSettings,
+      metadata: group.metadata,
+    );
+    await updateGroupChat(updated);
+  }
+
+  /// Update group's limits (chars)
+  Future<void> setGroupLimits(String groupId, {int? maxInputChars, int? maxResponseChars}) async {
+    final group = getGroupChatById(groupId);
+    if (group == null) return;
+    final newSettings = Map<String, dynamic>.from(group.settings ?? {});
+    if (maxInputChars != null) newSettings['maxInputChars'] = maxInputChars;
+    if (maxResponseChars != null) newSettings['maxResponseChars'] = maxResponseChars;
+    final updated = GroupChatModel(
+      id: group.id,
+      name: group.name,
+      characterIds: group.characterIds,
+      messages: group.messages,
+      createdAt: group.createdAt,
+      lastMessageAt: group.lastMessageAt,
+      description: group.description,
+      settings: newSettings,
+      metadata: group.metadata,
+    );
+    await updateGroupChat(updated);
   }
 
   /// Update an existing group chat
@@ -375,9 +421,17 @@ class GroupChatProvider extends BaseProvider {
     }
 
     try {
+      // Enforce input length limit if configured
+      final maxInput = (group.settings?['maxInputChars'] is int)
+          ? group.settings!['maxInputChars'] as int
+          : null;
+      var trimmedMessage = message;
+      if (maxInput != null && message.length > maxInput) {
+        trimmedMessage = message.substring(0, maxInput);
+      }
       // 1) Optimistic UI: show user message instantly
       final userMsg = GroupChatMessage.user(
-        content: message,
+        content: trimmedMessage,
         timestamp: DateTime.now(),
         status: MessageStatus.sent,
       );
@@ -403,7 +457,7 @@ class GroupChatProvider extends BaseProvider {
       // 2) Use streaming API so responses arrive one-by-one
       final responseStream = await GroupChatService.sendMessageToGroupStream(
         groupId: groupId,
-        userMessage: message,
+        userMessage: trimmedMessage,
         groupChat: group,
       );
       _activeResponseSubscription = responseStream.listen((streamedMessage) async {
@@ -450,7 +504,7 @@ class GroupChatProvider extends BaseProvider {
         notifyListeners();
         logUserAction('sent message to group (streamed)', context: {
           'groupId': groupId,
-          'messageLength': message.length,
+          'messageLength': trimmedMessage.length,
         });
       }, cancelOnError: true);
     } catch (e) {

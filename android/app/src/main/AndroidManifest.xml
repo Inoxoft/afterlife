@@ -38,6 +38,11 @@
         android:preserveLegacyExternalStorage="true"
         android:extractNativeLibs="true">
         
+        <!-- Optional OpenCL native libraries (allow loading when present) -->
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL-car.so" android:required="false" />
+        <uses-native-library android:name="libOpenCL-pixel.so" android:required="false" />
+        
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import '../theme/app_theme.dart';
 
 class ModelSelectionDialog extends StatefulWidget {
@@ -15,6 +16,10 @@ class ModelSelectionDialog extends StatefulWidget {
     BuildContext context, {
     required String currentModel,
   }) async {
+    // iOS: Hide dialog and return Apple Intelligence id directly
+    if (Platform.isIOS) {
+      return 'local/apple-intelligence';
+    }
     return await showDialog<String>(
       context: context,
       builder:
@@ -36,12 +41,23 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
 
   // List of available models
   // You can expand this list as needed
-  final List<Map<String, dynamic>> _availableModels = [
+  final List<Map<String, dynamic>> _availableModels = Platform.isIOS
+      ? [
+          {
+            'id': 'local/apple-intelligence',
+            'name': 'Apple Intelligence',
+            'provider': 'Apple (On‑device)',
+            'description': 'On-device Apple Foundation Models',
+            'recommended': true,
+            'isLocal': true,
+          },
+        ]
+      : [
     {
-      'id': 'local/llama-3.2-1b-instruct',
-      'name': 'Local Llama 3.2',
+      'id': 'local/gemma-3-1b-it',
+      'name': 'Local Gemma 3 1B',
       'provider': 'Local Device',
-      'description': 'On-device, text-only model (~1.3GB). Private and offline.',
+      'description': 'On-device, instruction-tuned Gemma 3n. Private and offline.',
       'recommended': true,
       'isLocal': true,
     },
@@ -82,7 +98,7 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
       'recommended': false,
     },
     // Keep free model(s) separate elsewhere
-  ];
+      ];
 
   @override
   void initState() {

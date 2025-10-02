@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:afterlife/core/services/local_llm_service.dart';
+import 'package:afterlife/core/services/native_ios_ai.dart';
+import 'package:flutter/services.dart';
 import 'preferences_service.dart';
 import '../utils/app_logger.dart';
 import '../../features/character_interview/chat_service.dart' as interview_chat;
@@ -49,18 +52,21 @@ class HybridChatService {
     providerChat: false,
   );
 
-  // Style guide to steer local models toward concise, in-character answers
+  // Minimal style guide for tiny local models (keep it very short)
   static const String _localStyleGuide =
       """
-STYLE:
-- Stay strictly in character; use first-person voice and era-appropriate style.
-- Be concise: 2–4 sentences unless the user asks for depth.
-- No generic encyclopedia summaries; answer directly to the user prompt.
-- Warm, conversational tone; ask a clarifying follow-up when helpful.
-- Do not include role labels (Human/Assistant) or restate the question.
-- If uncertain, say so briefly and suggest what is needed to proceed.
-- Target ≈120 words per reply by default.
+Guidelines:
+- Keep replies short (1–3 sentences).
+- Speak naturally; no role labels.
 """;
+
+  // Clean up occasional wrappers emitted by on-device model
+  static String _cleanIOSResponse(String raw) {
+    String text = raw;
+    // Remove simple highlight wrappers sometimes added by FM
+    text = text.replaceAll('<highlight>', '').replaceAll('</highlight>', '');
+    return text.trim();
+  }
 
   /// Get current service availability
   static ServiceAvailability get serviceAvailability => _serviceAvailability;
@@ -77,14 +83,25 @@ STYLE:
     bool characterChatReady = false;
     bool providerChatReady = false;
 
-    // Initialize LocalLLMService
-    try {
-      await LocalLLMService.initialize();
-      localLLMReady = true;
-      AppLogger.serviceInitialized('LocalLLMService');
-    } catch (e) {
-      AppLogger.serviceError('LocalLLMService', 'initialization failed', e);
-      errors.add('Local LLM service failed: ${e.toString()}');
+    // Initialize local provider: use Native iOS FM on iOS, Gemma-based service on Android
+    if (Platform.isIOS) {
+      try {
+        final fmAvailable = await NativeIOSAI.isFMAvailable();
+        localLLMReady = fmAvailable;
+        AppLogger.debug('iOS Foundation Models available: ' + fmAvailable.toString(), tag: 'HybridChatService');
+      } catch (e) {
+        AppLogger.serviceError('NativeIOSAI', 'availability check failed', e);
+        errors.add('Native iOS FM check failed: ' + e.toString());
+      }
+    } else {
+      try {
+        await LocalLLMService.initialize();
+        localLLMReady = true;
+        AppLogger.serviceInitialized('LocalLLMService');
+      } catch (e) {
+        AppLogger.serviceError('LocalLLMService', 'initialization failed', e);
+        errors.add('Local LLM service failed: ' + e.toString());
+      }
     }
 
     // Initialize chat services through BaseChatService (eliminates duplication)
@@ -167,6 +184,23 @@ STYLE:
     if (!_serviceAvailability.canSendMessages) {
       throw Exception(
         'No chat services available. Please check your configuration.',
+      );
+    }
+
+    // iOS: Force on-device Apple Foundation Models for all chats
+    if (Platform.isIOS) {
+      // Always adapt prompt for local execution: prefer concise style
+      String? adjustedSystemPrompt = systemPrompt;
+      if ((adjustedSystemPrompt ?? '').isNotEmpty) {
+        adjustedSystemPrompt = adjustedSystemPrompt! + "\n\n" + _localStyleGuide;
+      } else {
+        adjustedSystemPrompt = _localStyleGuide;
+      }
+      return await _sendMessageLocal(
+        messages: messages,
+        systemPrompt: adjustedSystemPrompt,
+        temperature: temperature,
+        maxTokens: maxTokens,
       );
     }
 
@@ -258,7 +292,10 @@ STYLE:
 
     // Determine the provider based on the model
     LLMProvider actualProvider;
-    if (isLocalModel) {
+    if (Platform.isIOS) {
+      // On iOS, always use local (Apple FM)
+      actualProvider = LLMProvider.local;
+    } else if (isLocalModel) {
       actualProvider = LLMProvider.local;
     } else if (preferredProvider != null) {
       actualProvider = preferredProvider;
@@ -273,7 +310,11 @@ STYLE:
 
     // Select the appropriate prompt based on provider
     String promptToUse;
-    if (actualProvider == LLMProvider.local) {
+    if (Platform.isIOS) {
+      // Always prefer localPrompt for iOS FM
+      final base = (localPrompt ?? systemPrompt);
+      promptToUse = base.isEmpty ? _localStyleGuide : (base + '\n\n' + _localStyleGuide);
+    } else if (actualProvider == LLMProvider.local) {
       final base = localPrompt ?? systemPrompt;
       promptToUse = base.isEmpty ? _localStyleGuide : '$base\n\n$_localStyleGuide';
     } else {
@@ -429,6 +470,81 @@ STYLE:
     int? maxTokens,
   }) async {
     try {
+      // iOS path: use Apple Foundation Models via native bridge
+      if (Platform.isIOS) {
+        final StringBuffer promptBuffer = StringBuffer();
+
+        // Include system prompt (already adapted by caller with local style guide when available)
+        if (systemPrompt != null && systemPrompt.isNotEmpty) {
+          promptBuffer.writeln(systemPrompt);
+          promptBuffer.writeln();
+        }
+
+        // Add a short rolling window of conversation for context
+        const int maxTurns = 8; // total messages (user+assistant)
+        final int start = messages.length > maxTurns ? messages.length - maxTurns : 0;
+        if (messages.isNotEmpty) {
+          for (int i = start; i < messages.length; i++) {
+            final m = messages[i];
+            final role = (m['role'] ?? 'user') == 'assistant' ? 'Assistant' : 'User';
+            String content = (m['content'] ?? '').toString();
+            if (content.length > 800) {
+              content = content.substring(0, 800);
+            }
+            if (content.trim().isEmpty) continue;
+            promptBuffer.writeln(role + ': ' + content);
+          }
+          promptBuffer.writeln();
+        }
+
+        // Interview gating: enforce 3 questions before card generation
+        // Heuristic detection: presence of interview instructions and card markers in system prompt
+        final bool looksLikeInterview = (systemPrompt ?? '')
+                .toLowerCase()
+                .contains('interview') &&
+            (systemPrompt ?? '').contains('## CHARACTER CARD SUMMARY ##');
+
+        if (looksLikeInterview) {
+          int userTurns = 0;
+          for (final m in messages) {
+            if ((m['role'] ?? 'user') == 'user') userTurns++;
+          }
+          // Provide explicit control instructions based on turn count
+          if (userTurns <= 1) {
+            promptBuffer.writeln(
+                'Do not produce the character card yet. Ask the next short, natural question about personality traits and temperament. Keep it one sentence.');
+          } else if (userTurns == 2) {
+            promptBuffer.writeln(
+                'Do not produce the character card yet. Ask one final short, natural question about a vivid memorable moment or defining anecdote. Exactly one sentence.');
+          } else {
+            promptBuffer.writeln(
+                'You now have enough information. Produce the character card using ONLY the required markers. Do not add any extra headings, labels, or tags.');
+          }
+          promptBuffer.writeln();
+        }
+
+        // Do not add an explicit Assistant cue; let the model continue naturally
+
+        final fullPrompt = promptBuffer.toString();
+
+        final fmAvailable = await NativeIOSAI.isFMAvailable();
+        if (!fmAvailable) {
+          return "On-device Apple Intelligence is unavailable on this device (see Settings).";
+        }
+
+        try {
+          final response = await NativeIOSAI.generateText(fullPrompt);
+          return _cleanIOSResponse(response);
+        } on PlatformException catch (e) {
+          // Surface a clear, user-friendly message for on-device moderation blocks
+          final msg = (e.message ?? '').toLowerCase();
+          if ((e.code == 'GEN_FAIL') && msg.contains('unsafe')) {
+            return "I couldn't respond because the last message was flagged as potentially unsafe on this device. Please rephrase or try a different topic.";
+          }
+          return "I ran into a problem generating a response on-device. Please try again or rephrase.";
+        }
+      }
+
       // Ensure local LLM is ready; attempt on-the-fly enable if possible
       var localStatus = LocalLLMService.getStatus();
       if (localStatus['isAvailable'] != true) {
@@ -437,46 +553,58 @@ STYLE:
             await LocalLLMService.enableLocalLLM();
             localStatus = LocalLLMService.getStatus();
           } catch (_) {}
+
+          // Wait longer for first-load initialization
+          if (localStatus['isAvailable'] != true) {
+            for (int i = 0; i < 60; i++) { // up to ~15s
+              await Future.delayed(const Duration(milliseconds: 250));
+              localStatus = LocalLLMService.getStatus();
+              if (localStatus['isAvailable'] == true) {
+                break;
+              }
+            }
+          }
+
+          // As a final nudge, try explicit model init once
+          if (localStatus['isAvailable'] != true &&
+              localStatus['modelStatus'] == 'downloaded') {
+            try {
+              await LocalLLMService.initializeModel();
+              // brief wait
+              for (int i = 0; i < 10; i++) {
+                await Future.delayed(const Duration(milliseconds: 200));
+                localStatus = LocalLLMService.getStatus();
+                if (localStatus['isAvailable'] == true) break;
+              }
+            } catch (_) {}
+          }
         }
         if (localStatus['isAvailable'] != true) {
-          return 'Local model not ready. Please download/enable the local model in Settings.';
+          return "The local AI model is still starting up. Please send your message again in a few seconds (first load can take longer).";
         }
       }
 
-      // Build a comprehensive prompt with conversation context for local models
+      // Minimal prompt: system instructions (if any) + latest user message only
       final StringBuffer promptBuffer = StringBuffer();
-
-      // Add system prompt if provided
       if (systemPrompt != null && systemPrompt.isNotEmpty) {
         promptBuffer.writeln(systemPrompt);
         promptBuffer.writeln();
       }
-
-      // Add conversation history in a format local models can understand
-      if (messages.isNotEmpty) {
-        promptBuffer.writeln("Conversation:");
-
-        for (final message in messages) {
-          final role = message['role'] ?? 'user';
-          final content = message['content'] ?? '';
-
-          if (role == 'user') {
-            promptBuffer.writeln("Human: $content");
-          } else if (role == 'assistant') {
-            promptBuffer.writeln("Assistant: $content");
-          }
+      String latestUser = '';
+      for (var i = messages.length - 1; i >= 0; i--) {
+        final m = messages[i];
+        if ((m['role'] ?? 'user') == 'user') {
+          latestUser = (m['content'] ?? '').toString();
+          break;
         }
-
-        // Add the prompt for the assistant to respond
-        promptBuffer.writeln();
-        promptBuffer.write("Assistant:");
-      } else if (messages.isNotEmpty) {
-        // Fallback: just use the last message
-        final userMessage = messages.last['content'] ?? '';
-        promptBuffer.writeln("Human: $userMessage");
-        promptBuffer.writeln();
-        promptBuffer.write("Assistant:");
       }
+      // Fallback to last message content if no explicit user message found
+      if (latestUser.isEmpty && messages.isNotEmpty) {
+        latestUser = (messages.last['content'] ?? '').toString();
+      }
+      promptBuffer.writeln("User: $latestUser");
+      promptBuffer.writeln();
+      promptBuffer.write("Assistant:");
 
       final fullPrompt = promptBuffer.toString();
 
@@ -498,15 +626,10 @@ STYLE:
       return cleanedResponse;
     } catch (e) {
       if (kDebugMode) {
-        print('Local LLM error, falling back to OpenRouter: $e');
+        print('Local LLM error: $e');
       }
-      // Fallback to OpenRouter on error
-      return await _sendMessageOpenRouter(
-        messages: messages,
-        systemPrompt: systemPrompt,
-        temperature: temperature,
-        maxTokens: maxTokens,
-      );
+      // Inform the user instead of silently switching providers
+      return "I'm having trouble with the local AI model right now. Please try again shortly, or switch this character to a cloud model (uses internet) to continue without delay.";
     }
   }
 
@@ -549,6 +672,19 @@ STYLE:
   /// Get provider status information
   static Map<String, dynamic> getProviderStatus() {
     final localStatus = LocalLLMService.getStatus();
+    // iOS: Present only Apple Intelligence to the UI
+    if (Platform.isIOS) {
+      return {
+        'local': {
+          'available': true,
+          'enabled': true,
+          'initialized': true,
+          'name': 'Apple Intelligence',
+          'description': 'On‑device AI (private, fast, offline)',
+        },
+      };
+    }
+    // Android: keep both entries
     return {
       'local': {
         'available': localStatus['isAvailable'],
@@ -558,10 +694,9 @@ STYLE:
         'description': 'Privacy-focused offline AI model',
       },
       'cloud': {
-        'available':
-            true, // Assuming cloud is always available if API key is set
+        'available': true,
         'enabled': true,
-        'name': 'Cloud AI (OpenRouter)',
+        'name': 'Cloud AI',
         'description': 'Advanced cloud-based AI models',
       },
     };
@@ -591,11 +726,14 @@ STYLE:
 
   /// Get provider display name
   static String getProviderDisplayName(LLMProvider provider) {
+    if (Platform.isIOS) {
+      return 'Apple Intelligence';
+    }
     switch (provider) {
       case LLMProvider.local:
         return 'Local AI';
       case LLMProvider.openRouter:
-        return 'Cloud AI (OpenRouter)';
+        return 'Cloud AI';
       case LLMProvider.auto:
         return 'Auto (Smart Selection)';
     }
@@ -603,6 +741,9 @@ STYLE:
 
   /// Get provider description
   static String getProviderDescription(LLMProvider provider) {
+    if (Platform.isIOS) {
+      return 'On‑device Apple Foundation Models (private, offline)';
+    }
     switch (provider) {
       case LLMProvider.local:
         return 'Uses your device\'s local AI model for privacy and offline usage';

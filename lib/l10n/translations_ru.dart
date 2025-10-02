@@ -423,6 +423,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get withBasicLLMLabel => 'С базовой LLM';
   @override
   String get deepKnowledge => 'Глубокие знания';
+
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Приватно, на устройстве, работает офлайн';
+  @override
+  String get appleOnDevicePrivacy => 'Конфиденциальность на устройстве: чаты никогда не покидают ваш iPhone';
+  @override
+  String get appleNoCloudCalls => 'Без обращений к облаку — работает без интернета';
+  @override
+  String get applePoweredByFoundationModels => 'Работает на Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Мгновенная настройка — ничего не нужно скачивать';
+  @override
+  String get applePrivacyNote => 'Всё выполняется на вашем устройстве. Мы никогда не отправляем ваши чаты на наши серверы.';
   @override
   String get digitalPersonasWithHistoricalEssence =>
       'Цифровые персоны с исторической сущностью';
@@ -1083,7 +1099,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'На устройстве, только текст (~1.3ГБ). Частный и офлайн.';
 
   @override
-  String get gemmaModelReady => 'Модель Gemma 3n готова к использованию!';
+  String get gemmaModelReady => 'Модель Gemma 3 1B IT готова к использованию!';
 
   @override
   String get deleteModel => 'Удалить Модель';
@@ -1092,7 +1108,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get downloadModelSection => 'Загрузить Модель';
 
   @override
-  String get downloadGemmaModel => 'Для использования локального ИИ загрузите модель Gemma 3n (AI Edge):';
+  String get downloadGemmaModel => 'Для использования локального ИИ загрузите модель Gemma 3 1B IT (AI Edge):';
 
   @override
   String get modelRequiresLicense => 'Эта модель требует принятия лицензии Google и использования токена доступа Hugging Face.';
@@ -1101,7 +1117,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get requiresHfLogin => '• Требуется вход в HF + принятие лицензии';
 
   @override
-  String get storageSpaceNeeded => '• Необходимо ~2.9ГБ свободного места';
+  String get storageSpaceNeeded => '• Необходимо ~1.1ГБ свободного места';
 
   @override
   String get runsLocallyPrivacy => '• Работает локально на вашем устройстве для приватности';
@@ -1122,7 +1138,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get downloadCancelledByUser => 'Загрузка отменена пользователем';
 
   @override
-  String get downloadGemmaModelButton => 'Загрузить Модель Gemma 3n (AI Edge) (~2.9ГБ)';
+  String get downloadGemmaModelButton => 'Загрузить Модель Gemma 3 1B IT (AI Edge) (~1.1ГБ)';
 
   @override
   String get huggingFaceTokenSaved => 'Токен Hugging Face сохранён';
@@ -1140,7 +1156,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get modelDownloadFailed => 'Ошибка загрузки модели. Попробуйте снова.';
 
   @override
-  String get deleteModelConfirmation => 'Вы уверены, что хотите удалить загруженную модель Gemma 3n? Это освободит ~2.9ГБ места.';
+  String get deleteModelConfirmation => 'Вы уверены, что хотите удалить загруженную модель Gemma 3 1B IT? Это освободит ~1.1ГБ места.';
 
   @override
   String get modelDeletedSuccessfully => 'Модель успешно удалена';

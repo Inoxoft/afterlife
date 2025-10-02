@@ -40,9 +40,9 @@ class FamousCharacterService {
     String selectedModel = FamousCharacterPrompts.getSelectedModel(
       characterName,
     );
-    // Back-compat: migrate legacy Gemma local model id to Llama 3.2 local id
-    if (selectedModel == 'local/gemma-3n-e2b-it') {
-      selectedModel = 'local/llama-3.2-1b-instruct';
+    // Back-compat: ensure legacy Llama local id migrates to Gemma 3n local id
+    if (selectedModel == 'local/llama-3.2-1b-instruct' || selectedModel == 'local/llama-3.2' || selectedModel == 'local/gemma-3n-e2b-it') {
+      selectedModel = 'local/gemma-3-1b-it';
     }
 
     if (systemPrompt == null) return;

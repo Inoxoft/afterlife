@@ -42,10 +42,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _navigateToNextPage() {
-    if (_currentPage < 4) {
+    if (_currentPage < _maxPageIndex) {
       _animationController.reset();
       setState(() {
-        _currentPage++;
+        _currentPage = _nextIndex(_currentPage);
         _isForward = true;
       });
       _animationController.forward();
@@ -71,11 +71,30 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     if (_currentPage > 0) {
       _animationController.reset();
       setState(() {
-        _currentPage--;
+        _currentPage = _previousIndex(_currentPage);
         _isForward = false;
       });
       _animationController.forward();
     }
+  }
+
+  // Skip index 2 (LLMPage) on iOS entirely
+  int get _maxPageIndex => 4;
+
+  int _nextIndex(int current) {
+    final next = current + 1;
+    if (next == 2 && Theme.of(context).platform == TargetPlatform.iOS) {
+      return 3; // skip LLMPage
+    }
+    return next;
+  }
+
+  int _previousIndex(int current) {
+    final prev = current - 1;
+    if (current == 3 && Theme.of(context).platform == TargetPlatform.iOS) {
+      return 1; // when going back from after-skip, land on 1
+    }
+    return prev;
   }
 
   Widget _getPage() {
@@ -200,17 +219,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     // Page indicators
                     Row(
                       children: List.generate(
-                        5,
+                        (Theme.of(context).platform == TargetPlatform.iOS) ? 4 : 5,
                         (index) => Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color:
-                                _currentPage == index
+                            color: (
+                              () {
+                                final isiOS = Theme.of(context).platform == TargetPlatform.iOS;
+                                final displayIndex = isiOS && _currentPage >= 3 ? _currentPage - 1 : _currentPage;
+                                return displayIndex == index
                                     ? AppTheme.warmGold
-                                    : AppTheme.warmGold.withValues(alpha: 0.3),
+                                    : AppTheme.warmGold.withValues(alpha: 0.3);
+                              }
+                            )(),
                           ),
                         ),
                       ),

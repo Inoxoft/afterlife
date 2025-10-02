@@ -562,6 +562,22 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get deepKnowledge => 'Expertise Approfondie';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Privé, sur l’appareil, fonctionne hors-ligne';
+  @override
+  String get appleOnDevicePrivacy => 'Confidentialité sur l’appareil : les conversations ne quittent jamais votre iPhone';
+  @override
+  String get appleNoCloudCalls => 'Aucun appel cloud — fonctionne sans internet';
+  @override
+  String get applePoweredByFoundationModels => 'Propulsé par Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Configuration instantanée — rien à télécharger';
+  @override
+  String get applePrivacyNote => 'Fonctionne entièrement sur votre appareil. Nous n’envoyons jamais vos conversations à nos serveurs.';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence =>
@@ -1356,7 +1372,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Modèle sur l’appareil, texte uniquement (~1.3GB). Privé et hors ligne.';
 
   @override
-  String get gemmaModelReady => 'Le modèle Gemma 3n est prêt à utiliser !';
+  String get gemmaModelReady => 'Le modèle Gemma 3 1B IT est prêt à utiliser !';
 
   @override
   String get deleteModel => 'Supprimer le Modèle';
@@ -1365,7 +1381,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get downloadModelSection => 'Télécharger le Modèle';
 
   @override
-  String get downloadGemmaModel => 'Pour utiliser l\'IA locale, téléchargez le modèle Gemma 3n (AI Edge) :';
+  String get downloadGemmaModel => 'Pour utiliser l\'IA locale, téléchargez le modèle Gemma 3 1B IT (AI Edge) :';
 
   @override
   String get modelRequiresLicense => 'Ce modèle nécessite d\'accepter la licence de Google et d\'utiliser un jeton d\'accès Hugging Face.';
@@ -1374,7 +1390,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get requiresHfLogin => '• Nécessite une connexion HF + acceptation de licence';
 
   @override
-  String get storageSpaceNeeded => '• ~2.9GB d\'espace de stockage libre nécessaire';
+  String get storageSpaceNeeded => '• ~1.1GB d\'espace de stockage libre nécessaire';
 
   @override
   String get runsLocallyPrivacy => '• Fonctionne localement sur votre appareil pour la confidentialité';
@@ -1395,7 +1411,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get downloadCancelledByUser => 'Téléchargement annulé par l\'utilisateur';
 
   @override
-  String get downloadGemmaModelButton => 'Télécharger le Modèle Gemma 3n (AI Edge) (~2.9GB)';
+  String get downloadGemmaModelButton => 'Télécharger le Modèle Gemma 3 1B IT (AI Edge) (~1.1GB)';
 
   @override
   String get huggingFaceTokenSaved => 'Jeton Hugging Face enregistré';
@@ -1413,7 +1429,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get modelDownloadFailed => 'Échec du téléchargement du modèle. Veuillez réessayer.';
 
   @override
-  String get deleteModelConfirmation => 'Êtes-vous sûr de vouloir supprimer le modèle Gemma 3n téléchargé ? Cela libérera ~2.9GB de stockage.';
+  String get deleteModelConfirmation => 'Êtes-vous sûr de vouloir supprimer le modèle Gemma 3 1B IT téléchargé ? Cela libérera ~1.1GB de stockage.';
 
   @override
   String get modelDeletedSuccessfully => 'Modèle supprimé avec succès';

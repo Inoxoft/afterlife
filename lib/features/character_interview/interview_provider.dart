@@ -24,6 +24,8 @@ class InterviewProvider with ChangeNotifier {
   bool isSuccess = false;
   bool isEditMode = false;
   bool isAiThinking = false;
+  // Creation mode: local vs cloud
+  bool useLocalModel = false;
 
   // Add a reference to LanguageProvider at the class level
   LanguageProvider? _languageProvider;
@@ -72,12 +74,9 @@ class InterviewProvider with ChangeNotifier {
   Future<void> _addInitialMessage() async {
     // This method is now only used as a fallback if setInitialMessage wasn't called
     if (!isEditMode && !_initialMessageAdded) {
-      final message =
-          _initialMessage ??
-          "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
-              "1. Answer my questions about your personality and experiences\n"
-              "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
-              "Which would you prefer?";
+      final message = _initialMessage ??
+          "Hello! We'll create your character card with a short, friendly interview. I'll ask three quick questions about you, your personality, and a memorable moment.\n\n"
+          "Let's begin: tell me a bit about yourself — what do you do, and what matters most to you?";
       addAIMessage(message);
       _initialMessageAdded = true;
     }
@@ -204,7 +203,10 @@ When the user types "agree", format the final prompt as:
 ## END OF CHARACTER CARD ##
 ```$languageInstruction""";
     } else {
-      return InterviewPrompts.interviewSystemPrompt + languageInstruction;
+      final base = useLocalModel
+          ? InterviewPrompts.localInterviewSystemPrompt
+          : InterviewPrompts.interviewSystemPrompt;
+      return base + languageInstruction;
     }
   }
 
@@ -348,6 +350,7 @@ $languageInstruction""";
         final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
+          preferredProvider: useLocalModel ? LLMProvider.local : LLMProvider.openRouter,
         );
 
         // Add artificial delay to simulate natural conversation flow
@@ -395,6 +398,7 @@ $languageInstruction""";
             {"role": "user", "content": text},
           ],
           systemPrompt: characterCardSummary ?? "",
+          preferredProvider: useLocalModel ? LLMProvider.local : LLMProvider.openRouter,
         );
 
         // Add artificial delay to simulate natural conversation flow
@@ -413,6 +417,7 @@ $languageInstruction""";
         final response = await HybridChatService.sendMessage(
           messages: _convertMessagesToAPI(), // Convert all messages for context
           systemPrompt: systemPrompt,
+          preferredProvider: useLocalModel ? LLMProvider.local : LLMProvider.openRouter,
         );
 
         // Add artificial delay to simulate natural conversation flow
