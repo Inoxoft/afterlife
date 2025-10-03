@@ -1,44 +1,31 @@
 Afterlife Privacy Policy (EN)
 
-Last updated: 2025-10-02
+Last updated: 2025-10-03
 
-Thank you for using Afterlife. Your privacy matters. This policy explains what data we process, how we use it, and the choices you have.
+Thank you for using Afterlife. Your privacy matters. This policy explains what we (don’t) collect and how your data is handled.
 
-1. What We Process
-- Usage data: in‑app interactions, basic diagnostics and crash logs (if enabled by the OS).
-- Content you provide: messages, character profiles, uploaded files for processing.
-- Settings: language and basic app preferences.
+1. No accounts, no tracking, no ads
+- We do not collect, store, sell, or monetize your personal data.
+- We do not use analytics/advertising SDKs.
 
-2. Where Your Data Lives
-- On‑device only: chat history, settings, and generated character data are stored on your device using secure app storage.
-- We do not run our own cloud back end for user content and we do not transmit your chats to external AI services.
+2. On‑device only processing
+- All chats, character data, settings, and any imported files are processed and stored locally on your device.
+- On iOS, processing uses Apple Foundation Models on device (iOS 26+). Nothing is sent to any external AI service.
 
-3. Apple Intelligence (On‑device)
-- Processing happens entirely on your iPhone using Apple Foundation Models (iOS 26+). Your conversations are not sent to a server.
+3. Open source
+- Afterlife is open source. You can review the code here: https://github.com/Inoxoft/afterlife
 
-4. API Keys
-- Not applicable in the current iOS release. The app does not require third‑party API keys.
+4. Data retention
+- Local data remains on your device until you clear it in Settings or uninstall the app.
 
-5. Files You Upload
-- You may import files (e.g., PDF/TXT/DOC/DOCX/EML) to generate character cards. Files are processed on‑device; we do not upload your files to our servers.
-
-6. Data Retention
-- On‑device data persists until you delete it from Settings or uninstall the app.
-
-7. Sharing
-- We do not sell your personal data.
+5. Sharing
 - We do not share your conversations or files with third parties.
 
-8. Security
-- We use platform storage and recommended practices to protect local data.
+6. Security
+- We rely on platform‑provided storage and OS protections to safeguard local data.
 
-9. Your Choices
-- Clear all local data in Settings > Data Management.
+7. Changes to this policy
+We may update this policy and will adjust the “Last updated” date above. Material changes may be announced in‑app.
 
-10. Changes to This Policy
-We may update this policy. We will update the “Last updated” date above and may provide in‑app notice of material changes.
-
-11. Contact
+8. Contact
 Questions or requests? Contact: roman.yankovych@inoxoft.com
-
-

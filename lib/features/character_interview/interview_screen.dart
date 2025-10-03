@@ -100,10 +100,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
         _interviewProvider.addAIMessage(localizations.processingFiles);
         _isProcessingFile = true;
       });
-      print(localizations.processingFiles);
       final files = await FileProcessorService.pickFile();
-      print('LOSHARA');
-      print(files);
       if (files == null || files.isEmpty) {
         setState(() {
           _interviewProvider.addAIMessage(localizations.noFilesSelected);
@@ -224,8 +221,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                                 provider.useLocalModel = v;
                                 // Hide file upload when local; show when cloud
                                 // System prompt will switch automatically
-                                Provider.of<InterviewProvider>(context, listen: false)
-                                    .notifyListeners();
+                                setState(() {});
                               },
                               activeColor: AppTheme.warmGold,
                               inactiveThumbColor: Colors.white70,

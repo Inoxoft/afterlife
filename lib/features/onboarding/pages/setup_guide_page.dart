@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
@@ -26,6 +28,141 @@ class SetupGuidePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.35),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        text,
+        style: UkrainianFontUtils.latoWithUkrainianSupport(
+          text: text,
+          color: AppTheme.silverMist,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppleHero(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.midnightPurple.withValues(alpha: 0.45),
+            AppTheme.deepIndigo.withValues(alpha: 0.35),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.35),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.warmGold.withValues(alpha: 0.08),
+            blurRadius: 20,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.midnightPurple.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.etherealCyan.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
+            child: SvgPicture.asset(
+              'assets/images/apple_logo.svg',
+              width: 26,
+              height: 26,
+              colorFilter: const ColorFilter.mode(AppTheme.warmGold, BlendMode.srcIn),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.appleIntelligenceTitle,
+                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                    text: l10n.appleIntelligenceTitle,
+                    color: AppTheme.silverMist,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 8.0,
+                        color: AppTheme.warmGold.withValues(alpha: 0.5),
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.appleIntelligenceSubtitle,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: l10n.appleIntelligenceSubtitle,
+                    color: AppTheme.silverMist.withValues(alpha: 0.9),
+                    fontSize: 14,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildBadge(l10n.appleOnDevicePrivacy),
+                    _buildBadge(l10n.appleNoCloudCalls),
+                    _buildBadge(l10n.applePoweredByFoundationModels),
+                    _buildBadge(l10n.appleInstantSetup),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                                  GestureDetector(
+                  onTap: () => _openAppleIntelligenceLink(context),
+                  child: Text(
+                                      l10n.learnMoreAboutAppleIntelligence,
+                    style: TextStyle(
+                      color: AppTheme.warmGold,
+                      fontSize: 12,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -58,6 +195,11 @@ class SetupGuidePage extends StatelessWidget {
         ),
       );
     }
+  }
+
+  Future<void> _openAppleIntelligenceLink(BuildContext context) async {
+    final uri = Uri.parse('https://www.apple.com/apple-intelligence/');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -140,6 +282,8 @@ class SetupGuidePage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              if (Platform.isIOS) _buildAppleHero(context),
+
               // Content cards
               SlideTransition(
                 position: contentAnimation,
@@ -150,52 +294,33 @@ class SetupGuidePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Local/On-device option (iOS shows Apple Intelligence marketing)
-                      _buildOptionCard(
-                        context,
-                        title: Platform.isIOS ? l10n.appleIntelligenceTitle : l10n.localAiModel,
-                        subtitle: Platform.isIOS ? l10n.appleIntelligenceSubtitle : l10n.privateWorksOffline,
-                        icon: Icons.offline_bolt,
-                        isHighlighted: true,
-                        features: Platform.isIOS
-                            ? [
-                                l10n.appleOnDevicePrivacy,
-                                l10n.appleNoCloudCalls,
-                                l10n.applePoweredByFoundationModels,
-                                l10n.appleInstantSetup,
-                              ]
-                            : [
-                                l10n.completePrivacyDataStaysLocal,
-                                l10n.worksWithoutInternet,
-                                l10n.hammerModelSize,
-                                l10n.optimizedForMobileDevices,
-                              ],
-                        actionText: Platform.isIOS ? l10n.getStarted : l10n.downloadModel,
-                        onTap: () {
-                          if (Platform.isIOS) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.applePrivacyNote),
-                                backgroundColor: AppTheme.warmGold,
-                                behavior: SnackBarBehavior.floating,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          } else {
+                      // Local/On-device option: show only on Android to avoid iOS duplication
+                      if (!Platform.isIOS)
+                        _buildOptionCard(
+                          context,
+                          title: l10n.localAiModel,
+                          subtitle: l10n.privateWorksOffline,
+                          icon: Icons.offline_bolt,
+                          isHighlighted: true,
+                          features: [
+                            l10n.completePrivacyDataStaysLocal,
+                            l10n.worksWithoutInternet,
+                            l10n.hammerModelSize,
+                            l10n.optimizedForMobileDevices,
+                          ],
+                          actionText: l10n.downloadModel,
+                          onTap: () {
                             _navigateToLocalLLMSettings(context);
-                          }
-                        },
-                        infoWidget: Text(
-                          Platform.isIOS
-                              ? l10n.applePrivacyNote
-                              : l10n.freeDownloadNoAccountRequired,
-                          style: TextStyle(
-                            color: AppTheme.silverMist.withValues(alpha: 0.8),
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
+                          },
+                          infoWidget: Text(
+                            l10n.freeDownloadNoAccountRequired,
+                            style: TextStyle(
+                              color: AppTheme.silverMist.withValues(alpha: 0.8),
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         ),
-                      ),
 
                       const SizedBox(height: 16),
 

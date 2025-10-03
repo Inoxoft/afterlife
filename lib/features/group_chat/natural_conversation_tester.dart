@@ -15,7 +15,7 @@ class NaturalConversationTester {
   /// Test personality dynamics analysis
   static void testPersonalityDynamics() {
     if (kDebugMode) {
-      print('=== Testing Personality Dynamics ===');
+      
       
       // Create test characters
       final einstein = _createTestCharacter(
@@ -36,38 +36,38 @@ class NaturalConversationTester {
         'Last pharaoh of Egypt. Intelligent, charismatic, and politically astute with diplomatic skills.',
       );
       
-      // Test personality compatibility
-      final einsteinNapoleonAnalysis = PersonalityDynamicsAnalyzer.analyzePersonalityCompatibility(einstein, napoleon);
-      print('Einstein-Napoleon Analysis:');
-      print('  Compatibility: ${einsteinNapoleonAnalysis['compatibility']}');
-      print('  Conflict Potential: ${einsteinNapoleonAnalysis['conflictPotential']}');
-      print('  Interaction Style: ${einsteinNapoleonAnalysis['interactionStyle']}');
+      // Test personality compatibility (call without verbose logs in release)
+      PersonalityDynamicsAnalyzer.analyzePersonalityCompatibility(einstein, napoleon);
       
-      final einsteinCleopatraAnalysis = PersonalityDynamicsAnalyzer.analyzePersonalityCompatibility(einstein, cleopatra);
-      print('Einstein-Cleopatra Analysis:');
-      print('  Compatibility: ${einsteinCleopatraAnalysis['compatibility']}');
-      print('  Agreement Potential: ${einsteinCleopatraAnalysis['agreementPotential']}');
-      print('  Debate Likelihood: ${einsteinCleopatraAnalysis['debateLikelihood']}');
+      
+      
+      
+      
+      PersonalityDynamicsAnalyzer.analyzePersonalityCompatibility(einstein, cleopatra);
+      
+      
+      
+      
       
       // Test group dynamics
-      final groupDynamics = PersonalityDynamicsAnalyzer.analyzeGroupDynamics({
+      PersonalityDynamicsAnalyzer.analyzeGroupDynamics({
         'test_einstein': einstein,
         'test_napoleon': napoleon,
         'test_cleopatra': cleopatra,
       });
-      print('Group Dynamics:');
-      print('  Type: ${groupDynamics['groupDynamicsType']}');
-      print('  Avg Conflict: ${groupDynamics['groupAverages']['conflictPotential']}');
-      print('  Avg Debate: ${groupDynamics['groupAverages']['debateLikelihood']}');
       
-      print('✅ Personality Dynamics Test Completed\n');
+      
+      
+      
+      
+      
     }
   }
 
   /// Test conversation memory system
   static void testConversationMemory() {
     if (kDebugMode) {
-      print('=== Testing Conversation Memory ===');
+      
       
       // Create test group and messages
       final groupId = 'test_group_001';
@@ -81,33 +81,31 @@ class NaturalConversationTester {
         characterModels: characterModels,
       );
       
-      print('Memory Analysis:');
-      print('  Active Topics: ${memory.activeTopics.length}');
-      for (final topic in memory.activeTopics) {
-        print('    - ${topic.topic}: ${topic.intensity.toStringAsFixed(2)} intensity, ${topic.sentiment} sentiment');
-      }
       
-      print('  Character States: ${memory.characterStates.length}');
+      
+      for (final _ in memory.activeTopics) {}
+      
+      
       memory.characterStates.forEach((id, state) {
-        print('    - $id: ${state.mood} (${state.intensity.toStringAsFixed(2)})');
+        
       });
       
-      print('  Overall Tension: ${memory.overallTension.toStringAsFixed(2)}');
-      print('  Dominant Mood: ${memory.dominantMood}');
-      print('  Conversation Flow: ${memory.conversationFlow}');
+      
+      
+      
       
       // Test suggestions
-      final suggestions = ConversationMemorySystem.getSuggestions(memory);
-      print('  Suggestions: $suggestions');
+      ConversationMemorySystem.getSuggestions(memory);
       
-      print('✅ Conversation Memory Test Completed\n');
+      
+      
     }
   }
 
   /// Test enhanced conversation coordinator
   static Future<void> testEnhancedCoordinator() async {
     if (kDebugMode) {
-      print('=== Testing Enhanced Conversation Coordinator ===');
+      
       
       final characterModels = _createTestCharacterModels();
       final groupChat = _createTestGroupChat();
@@ -121,7 +119,7 @@ class NaturalConversationTester {
       ];
       
       for (final userMessage in testMessages) {
-        print('User Message: "$userMessage"');
+        
         
         final responseSchedule = await EnhancedConversationCoordinator.determineRespondingCharactersAdvanced(
           groupChat: groupChat,
@@ -129,22 +127,19 @@ class NaturalConversationTester {
           characterModels: characterModels,
         );
         
-        print('  Response Schedule:');
-        for (final response in responseSchedule) {
-          final character = characterModels[response['characterId']]!;
-          print('    - ${character.name}: ${response['delay']}ms delay, ${response['urgency'].toStringAsFixed(2)} urgency');
-        }
-        print('');
+        
+        for (final _ in responseSchedule) {}
+        
       }
       
-      print('✅ Enhanced Coordinator Test Completed\n');
+      
     }
   }
 
   /// Test dynamic timing system
   static void testDynamicTiming() {
     if (kDebugMode) {
-      print('=== Testing Dynamic Timing System ===');
+      
       
       final characterModels = _createTestCharacterModels();
       final conversationHistory = _createTestConversationHistory();
@@ -187,39 +182,39 @@ class NaturalConversationTester {
         lastUpdate: DateTime.now(),
       );
       
-      print('Timing Analysis:');
+      
       for (int i = 0; i < characterModels.length; i++) {
         final character = characterModels.values.elementAt(i);
-        final timing = DynamicTimingController.calculateResponseTiming(
+        DynamicTimingController.calculateResponseTiming(
           character: character,
           responseOrder: i,
           conversationHistory: conversationHistory,
           conversationMemory: memory,
         );
         
-        print('  ${character.name}:');
-        print('    - Total Delay: ${timing['totalDelay']}ms');
-        print('    - Base Delay: ${timing['baseDelay']}ms');
-        print('    - Urgency: ${timing['urgency'].toStringAsFixed(2)}');
-        print('    - Thinking Time: ${timing['thinkingTime']}ms');
-        print('    - Traits: ${timing['traits']}');
+        
+        
+        
+        
+        
+        
       }
       
-      print('✅ Dynamic Timing Test Completed\n');
+      
     }
   }
 
   /// Test complete natural conversation flow
   static Future<void> testCompleteConversationFlow() async {
     if (kDebugMode) {
-      print('=== Testing Complete Natural Conversation Flow ===');
+      
       
       // This test simulates the full conversation flow
       final characterModels = _createTestCharacterModels();
       final groupChat = _createTestGroupChat();
       final userMessage = 'What do you think about war, Napoleon?';
       
-      print('Simulating conversation: "$userMessage"');
+      
       
       // Step 1: Update conversation memory
       final memory = ConversationMemorySystem.updateMemory(
@@ -256,18 +251,22 @@ class NaturalConversationTester {
       // Step 4: Create response schedule
       final schedule = DynamicTimingController.createResponseSchedule(timedResponses);
       
-      print('Complete Response Schedule:');
+      // Minimal final prints kept for debug mode
       for (final scheduledResponse in schedule) {
         final character = scheduledResponse['character'] as CharacterModel;
-        print('  ${character.name}:');
-        print('    - Delay: ${scheduledResponse['delay']}ms');
-        print('    - Show Thinking: ${scheduledResponse['showThinking']}');
-        print('    - Thinking Duration: ${scheduledResponse['thinkingDuration']}ms');
-        print('    - Urgency: ${scheduledResponse['urgency'].toStringAsFixed(2)}');
+        if (kDebugMode) {
+          print('  ${character.name}:');
+          print('    - Delay: ${scheduledResponse['delay']}ms');
+          print('    - Show Thinking: ${scheduledResponse['showThinking']}');
+          print('    - Thinking Duration: ${scheduledResponse['thinkingDuration']}ms');
+          print('    - Urgency: ${scheduledResponse['urgency'].toStringAsFixed(2)}');
+        }
       }
       
       // Step 5: Simulate conversation evolution
-      print('\nConversation Evolution Simulation:');
+      if (kDebugMode) {
+        print('\nConversation Evolution Simulation:');
+      }
       final simulatedResponses = [
         'War is the ultimate test of leadership and strategy. A necessary tool for achieving great ends.',
         'I must respectfully disagree, Napoleon. War brings suffering that outweighs any strategic gains.',
@@ -280,8 +279,10 @@ class NaturalConversationTester {
         final character = scheduledResponse['character'] as CharacterModel;
         final response = simulatedResponses[i];
         
-        print('  Step ${i + 1}: ${character.name} responds (after ${scheduledResponse['delay']}ms)');
-        print('    "${response}"');
+        if (kDebugMode) {
+          print('  Step ${i + 1}: ${character.name} responds (after ${scheduledResponse['delay']}ms)');
+          print('    "${response}"');
+        }
         
         // Update memory with new response
         final newMessage = GroupChatMessage.character(
@@ -299,10 +300,12 @@ class NaturalConversationTester {
           existingMemory: currentMemory,
         );
         
-        print('    Memory Update:');
-        print('      - Tension: ${currentMemory.overallTension.toStringAsFixed(2)}');
-        print('      - Mood: ${currentMemory.dominantMood}');
-        print('      - Flow: ${currentMemory.conversationFlow.last}');
+        if (kDebugMode) {
+          print('    Memory Update:');
+          print('      - Tension: ${currentMemory.overallTension.toStringAsFixed(2)}');
+          print('      - Mood: ${currentMemory.dominantMood}');
+          print('      - Flow: ${currentMemory.conversationFlow.last}');
+        }
       }
       
       print('✅ Complete Conversation Flow Test Completed\n');

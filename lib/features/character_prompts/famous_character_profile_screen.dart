@@ -375,38 +375,37 @@ class _FamousCharacterProfileScreenState
 
               const SizedBox(height: 20),
 
-              // AI Model section styled like Biography
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withValues(alpha: 0.3),
-                    width: 1,
+              // AI Model section (hidden on iOS)
+              if (!Platform.isIOS)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        localizations.aiModel,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text: localizations.aiModel,
+                          color: AppTheme.warmGold,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildModelDropdown(),
+                    ],
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      localizations.aiModel,
-                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                        text: localizations.aiModel,
-                        color: AppTheme.warmGold,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildModelDropdown(),
-
-                    // Removed: view-all models row to minimize scrolling
-                  ],
-                ),
-              ),
 
               // Removed: bottom Start Conversation (moved near the top)
             ],

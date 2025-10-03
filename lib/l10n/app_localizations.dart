@@ -259,6 +259,9 @@ abstract class AppLocalizations {
   String get appleInstantSetup;
   String get applePrivacyNote;
 
+  // Link text
+  String get learnMoreAboutAppleIntelligence;
+
   // Mask page strings
   String get digitalPersonasWithHistoricalEssence;
   String get einsteinWithMaskAndLLMArmor;

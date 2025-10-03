@@ -661,7 +661,20 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       buffer.writeln('');
     }
     final text = buffer.toString().trim();
-    if (text.isEmpty) return;
-    Share.share(text, subject: 'Chat with $characterName');
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nothing to export yet')),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    final box = context.findRenderObject() as RenderBox?;
+    Share.share(
+      text,
+      subject: 'Chat with $characterName',
+      sharePositionOrigin:
+          box != null ? box.localToGlobal(Offset.zero) & box.size : const Rect.fromLTWH(0, 0, 0, 0),
+    );
   }
 }

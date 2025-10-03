@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
 import 'package:afterlife/core/services/local_llm_service.dart';
 import 'package:afterlife/core/services/native_ios_ai.dart';
 import 'package:flutter/services.dart';
@@ -225,11 +224,9 @@ Guidelines:
       actualProvider = await _determineProvider(provider);
     }
 
-    if (kDebugMode) {
-      print('Requested provider: $provider, Using provider: $actualProvider');
-      if (model != null) {
-        print('Model: $model');
-      }
+    AppLogger.debug('Requested provider: $provider, Using provider: $actualProvider', tag: 'HybridChatService');
+    if (model != null) {
+      AppLogger.debug('Model: $model', tag: 'HybridChatService');
     }
 
     switch (actualProvider) {
@@ -283,12 +280,10 @@ Guidelines:
             model.contains('llama') ||
             model.contains('hammer'));
 
-    if (kDebugMode) {
-      print('HybridChatService: Model selection debug');
-      print('  - Model: $model');
-      print('  - Is local model: $isLocalModel');
-      print('  - Preferred provider: $preferredProvider');
-    }
+    AppLogger.debug('HybridChatService: Model selection', tag: 'HybridChatService');
+    AppLogger.debug('  - Model: $model', tag: 'HybridChatService');
+    AppLogger.debug('  - Is local model: $isLocalModel', tag: 'HybridChatService');
+    AppLogger.debug('  - Preferred provider: $preferredProvider', tag: 'HybridChatService');
 
     // Determine the provider based on the model
     LLMProvider actualProvider;
@@ -304,9 +299,7 @@ Guidelines:
       actualProvider = LLMProvider.openRouter;
     }
 
-    if (kDebugMode) {
-      print('  - Actual provider: $actualProvider');
-    }
+    AppLogger.debug('  - Actual provider: $actualProvider', tag: 'HybridChatService');
 
     // Select the appropriate prompt based on provider
     String promptToUse;
@@ -443,9 +436,7 @@ Guidelines:
           return LLMProvider.local;
         } else {
           // Fallback to OpenRouter if local is not available
-          if (kDebugMode) {
-            print('Local LLM not available, falling back to OpenRouter');
-          }
+          AppLogger.debug('Local model unavailable; falling back to cloud provider', tag: 'HybridChatService');
           return LLMProvider.openRouter;
         }
 
@@ -608,12 +599,8 @@ Guidelines:
 
       final fullPrompt = promptBuffer.toString();
 
-      if (kDebugMode) {
-        print('Local LLM prompt length: ${fullPrompt.length}');
-        print(
-          'Local LLM prompt preview: ${fullPrompt.substring(0, min(200, fullPrompt.length))}...',
-        );
-      }
+      AppLogger.debug('Local prompt length: ${fullPrompt.length}', tag: 'HybridChatService');
+      AppLogger.debug('Local prompt preview: ${fullPrompt.substring(0, min(200, fullPrompt.length))}...', tag: 'HybridChatService');
 
       final response = await LocalLLMService.sendMessage(
         '', // Empty message since we're using the full prompt
@@ -625,9 +612,7 @@ Guidelines:
 
       return cleanedResponse;
     } catch (e) {
-      if (kDebugMode) {
-        print('Local LLM error: $e');
-      }
+      AppLogger.error('Local model error', tag: 'HybridChatService', error: e);
       // Inform the user instead of silently switching providers
       return "I'm having trouble with the local AI model right now. Please try again shortly, or switch this character to a cloud model (uses internet) to continue without delay.";
     }
@@ -650,9 +635,7 @@ Guidelines:
         maxTokens: maxTokens,
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('OpenRouter API error: $e');
-      }
+      AppLogger.error('Cloud provider API error', tag: 'HybridChatService', error: e);
       return 'I apologize, but I\'m having trouble connecting to my AI services. Please try again later.';
     }
   }
@@ -661,9 +644,7 @@ Guidelines:
   static void setPreferredProvider(LLMProvider provider) {
     // Provider selection is fixed to Auto (smart selection)
     _preferredProvider = LLMProvider.auto;
-    if (kDebugMode) {
-      print('Preferred provider set to: LLMProvider.auto');
-    }
+    AppLogger.debug('Preferred provider set to Auto', tag: 'HybridChatService');
   }
 
   /// Get current preferred provider
@@ -762,13 +743,9 @@ Guidelines:
       await character_chat.ChatService.refreshApiKey();
       await provider_chat.ChatService.refreshApiKey();
 
-      if (kDebugMode) {
-        print('All services refreshed successfully');
-      }
+      AppLogger.debug('All services refreshed successfully', tag: 'HybridChatService');
     } catch (e) {
-      if (kDebugMode) {
-        print('Error refreshing services: $e');
-      }
+      AppLogger.error('Error refreshing services', tag: 'HybridChatService', error: e);
     }
   }
 }

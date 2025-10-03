@@ -446,6 +446,9 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get applePrivacyNote => '모든 처리는 기기에서 실행됩니다. 채팅을 서버로 전송하지 않습니다.';
 
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Apple Intelligence 자세히 알아보기';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence => '역사적 본질을 가진 디지털 페르소나';

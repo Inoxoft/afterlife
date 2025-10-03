@@ -34,7 +34,7 @@ class GroupChatStorage {
       return jsonList.map((json) => GroupChatModel.fromJson(json)).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('Error loading group chats: $e');
+        
       }
       // Try to load from backup
       return await _loadFromBackup();
@@ -43,43 +43,42 @@ class GroupChatStorage {
   
   /// Save all group chats to storage
   static Future<void> saveGroupChats(List<GroupChatModel> groupChats) async {
-    print('🔧 [GroupChatStorage] saveGroupChats called with ${groupChats.length} groups');
+    
     
     try {
-      print('🔧 [GroupChatStorage] Converting groups to JSON...');
+      
       final jsonList = groupChats.map((group) {
-        print('🔧 [GroupChatStorage] Converting group: ${group.id} (${group.name})');
+        
         return group.toJson();
       }).toList();
-      print('✅ [GroupChatStorage] JSON conversion completed');
       
-      print('🔧 [GroupChatStorage] Encoding JSON string...');
+      
+      
       final jsonString = jsonEncode(jsonList);
-      print('🔧 [GroupChatStorage] JSON string size: ${jsonString.length} bytes');
+      
       
       // Check size limit
       if (jsonString.length > _maxStorageSize) {
-        print('❌ [GroupChatStorage] Data size exceeds limit: ${jsonString.length} > $_maxStorageSize');
+        
         throw Exception('Group chats data exceeds storage limit');
       }
       
-      print('🔧 [GroupChatStorage] Getting SharedPreferences instance...');
-      final prefs = await SharedPreferences.getInstance();
-      print('✅ [GroupChatStorage] SharedPreferences obtained');
       
-      print('🔧 [GroupChatStorage] Saving to key: $_storageKey');
+      final prefs = await SharedPreferences.getInstance();
+      
+      
+      
       await prefs.setString(_storageKey, jsonString);
-      print('✅ [GroupChatStorage] Data saved to SharedPreferences');
+      
       
       // Create backup periodically
-      print('🔧 [GroupChatStorage] Creating backup if needed...');
-      await _createBackupIfNeeded(jsonString);
-      print('✅ [GroupChatStorage] Backup process completed');
       
-      print('✅ [GroupChatStorage] Successfully saved ${groupChats.length} group chats');
-    } catch (e, stackTrace) {
-      print('❌ [GroupChatStorage] Error saving group chats: $e');
-      print('❌ [GroupChatStorage] Stack trace: $stackTrace');
+      await _createBackupIfNeeded(jsonString);
+      
+      
+      
+    } catch (e) {
+      
       rethrow;
     }
   }
@@ -92,11 +91,11 @@ class GroupChatStorage {
       await saveGroupChats(updatedChats);
       
       if (kDebugMode) {
-        print('GroupChatStorage: Deleted group $groupId');
+        
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error deleting group chat: $e');
+        
       }
       rethrow;
     }
@@ -110,11 +109,11 @@ class GroupChatStorage {
       await prefs.remove(_backupKey);
       
       if (kDebugMode) {
-        print('GroupChatStorage: Cleared all group chats');
+        
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error clearing group chats: $e');
+        
       }
       rethrow;
     }
@@ -155,7 +154,7 @@ class GroupChatStorage {
       return result;
     } catch (e) {
       if (kDebugMode) {
-        print('Error parsing JSON in isolate: $e');
+        
       }
       // Fallback to main thread
       final List<dynamic> jsonList = jsonDecode(jsonString);
@@ -176,7 +175,7 @@ class GroupChatStorage {
       return jsonList.map((json) => GroupChatModel.fromJson(json)).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('Error loading from backup: $e');
+        
       }
       return [];
     }
@@ -193,12 +192,12 @@ class GroupChatStorage {
         await prefs.setInt(_lastBackupKey, now);
         
         if (kDebugMode) {
-          print('GroupChatStorage: Created backup');
+          
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error creating backup: $e');
+        
       }
       // Don't rethrow - backup failure shouldn't fail main operation
     }

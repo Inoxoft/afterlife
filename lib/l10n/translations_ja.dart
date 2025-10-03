@@ -446,6 +446,9 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get applePrivacyNote => 'すべてがデバイス上で実行されます。チャットを当社サーバーに送信することはありません。';
 
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Apple Intelligence について詳しく見る';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence => '歴史的本質を持つデジタルペルソナ';

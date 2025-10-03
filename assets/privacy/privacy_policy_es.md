@@ -1,44 +1,31 @@
 Política de Privacidad de Afterlife (ES)
 
-Última actualización: 2025-10-02
+Última actualización: 2025-10-03
 
-Gracias por usar Afterlife. Esta política explica qué datos procesamos, cómo los usamos y tus opciones.
+Gracias por usar Afterlife. Esta política resume nuestro enfoque minimalista de privacidad.
 
-1. Qué procesamos
-- Datos de uso y diagnósticos básicos (si el SO lo permite).
-- Contenido que proporcionas: mensajes, perfiles de personajes, archivos subidos.
-- Ajustes: idioma y preferencias básicas de la app.
+1. Sin cuentas, sin rastreo, sin anuncios
+- No recopilamos, almacenamos ni vendemos tus datos personales.
+- No usamos SDKs de analítica o publicidad.
 
-2. Dónde vive tu información
-- Solo en el dispositivo: el historial de chat, los ajustes y los datos generados se guardan localmente en un almacenamiento seguro.
-- No transmitimos tus chats a servicios de IA externos ni mantenemos un backend en la nube para tu contenido.
+2. Procesamiento solo en el dispositivo
+- Todos los chats, datos de personajes, ajustes y archivos importados se procesan y almacenan localmente en tu dispositivo.
+- En iOS, el procesamiento usa Apple Foundation Models en el dispositivo (iOS 26+). No enviamos nada a servicios externos de IA.
 
-3. Apple Intelligence (en el dispositivo)
-- El procesamiento ocurre íntegramente en tu iPhone con Apple Foundation Models (iOS 26+). Tus conversaciones no se envían a servidores.
+3. Código abierto
+- Afterlife es de código abierto. Puedes revisar el código aquí: https://github.com/Inoxoft/afterlife
 
-4. Claves API
-- No aplica en esta versión para iOS. La app no requiere claves API de terceros.
-
-5. Archivos que subes
-- Los archivos importados (p. ej., PDF/TXT/DOC/DOCX/EML) se procesan en el dispositivo; no los subimos a nuestros servidores.
-
-6. Retención
+4. Retención de datos
 - Los datos locales permanecen hasta que los borres en Ajustes o desinstales la app.
 
-7. Compartir
-- No vendemos tus datos personales.
+5. Compartir
 - No compartimos tus conversaciones ni archivos con terceros.
 
-8. Seguridad
-- Usamos el almacenamiento del sistema y prácticas recomendadas para proteger los datos locales.
+6. Seguridad
+- Usamos el almacenamiento y las protecciones del sistema operativo para resguardar los datos locales.
 
-9. Tus opciones
-- Puedes borrar todos los datos locales en Ajustes > Gestión de datos.
+7. Cambios en esta política
+Podemos actualizar esta política y ajustaremos la fecha de “Última actualización” arriba. Los cambios materiales podrán anunciarse en la app.
 
-10. Cambios
-Podemos actualizar esta política; actualizaremos la fecha de “Última actualización” de arriba y podremos notificar cambios materiales en la app.
-
-11. Contacto
-Preguntas o solicitudes: privacy@afterlife.app
-
-
+8. Contacto
+Preguntas o solicitudes: roman.yankovych@inoxoft.com

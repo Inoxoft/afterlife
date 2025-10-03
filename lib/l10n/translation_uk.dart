@@ -1183,4 +1183,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get appleInstantSetup => 'Миттєве налаштування — нічого не потрібно завантажувати';
   @override
   String get applePrivacyNote => 'Працює повністю на вашому пристрої. Ми ніколи не надсилаємо ваші чати на наші сервери.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Дізнатися більше про Apple Intelligence';
 }

@@ -479,6 +479,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get applePrivacyNote => 'Läuft vollständig auf deinem Gerät. Wir senden deine Chats niemals an unsere Server.';
 
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Mehr über Apple Intelligence erfahren';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence =>

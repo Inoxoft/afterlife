@@ -1,44 +1,31 @@
 Afterlife Datenschutzerklärung (DE)
 
-Zuletzt aktualisiert: 02.10.2025
+Zuletzt aktualisiert: 03.10.2025
 
-Diese Richtlinie erklärt, welche Daten wir verarbeiten, wie wir sie nutzen und welche Optionen Sie haben.
+Vielen Dank für die Nutzung von Afterlife. Wir verfolgen einen datensparsamen, lokalen Ansatz.
 
-1. Welche Daten
-- Nutzungsdaten und einfache Diagnosen (wenn vom OS erlaubt).
-- Von Ihnen bereitgestellte Inhalte: Nachrichten, Charakterprofile, hochgeladene Dateien.
-- Einstellungen: Sprache und grundlegende App‑Präferenzen.
+1. Keine Konten, kein Tracking, keine Werbung
+- Wir erheben, speichern oder verkaufen keine personenbezogenen Daten.
+- Wir verwenden keine Analytics‑ oder Werbe‑SDKs.
 
-2. Speicherort
-- Ausschließlich auf dem Gerät: Chatverlauf, Einstellungen und generierte Daten werden lokal in einem sicheren Speicher gehalten.
-- Wir übertragen Ihre Chats nicht an externe KI‑Dienste und betreiben kein Cloud‑Backend für Ihren Inhalt.
+2. Verarbeitung ausschließlich auf dem Gerät
+- Alle Chats, Charakterdaten, Einstellungen und importierten Dateien werden lokal auf Ihrem Gerät verarbeitet und gespeichert.
+- Unter iOS erfolgt die Verarbeitung mit Apple Foundation Models auf dem Gerät (iOS 26+). Es werden keine Daten an externe KI‑Dienste gesendet.
 
-3. Apple Intelligence (auf dem Gerät)
-- Verarbeitung erfolgt vollständig auf Ihrem iPhone mittels Apple Foundation Models (iOS 26+). Ihre Gespräche werden nicht an Server gesendet.
+3. Open Source
+- Afterlife ist Open Source. Quellcode: https://github.com/Inoxoft/afterlife
 
-4. API‑Schlüssel
-- Nicht anwendbar in dieser iOS‑Version. Die App benötigt keine Drittanbieter‑API‑Schlüssel.
+4. Aufbewahrung
+- Lokale Daten bleiben auf Ihrem Gerät, bis Sie sie in den Einstellungen löschen oder die App deinstallieren.
 
-5. Dateien
-- Importierte Dateien (z. B. PDF/TXT/DOC/DOCX/EML) werden lokal verarbeitet; wir laden sie nicht auf unsere Server hoch.
-
-6. Aufbewahrung
-- Lokale Daten bleiben bis zur Löschung in den Einstellungen oder der Deinstallation der App.
-
-7. Weitergabe
-- Wir verkaufen Ihre personenbezogenen Daten nicht.
+5. Weitergabe
 - Wir geben Ihre Gespräche oder Dateien nicht an Dritte weiter.
 
-8. Sicherheit
-- Wir nutzen den Systemspeicher und empfohlene Best Practices zum Schutz lokaler Daten.
+6. Sicherheit
+- Wir nutzen vom Betriebssystem bereitgestellten Speicher und Schutzmechanismen.
 
-9. Ihre Wahlmöglichkeiten
-- Sie können alle lokalen Daten in Einstellungen > Datenverwaltung löschen.
+7. Änderungen an dieser Richtlinie
+Wir können diese Richtlinie aktualisieren und das Datum „Zuletzt aktualisiert“ anpassen. Wesentliche Änderungen können in der App bekanntgegeben werden.
 
-10. Änderungen
-Wir können diese Richtlinie aktualisieren; das Datum „Zuletzt aktualisiert“ oben wird angepasst und wir können bei wichtigen Änderungen in der App informieren.
-
-11. Kontakt
-Fragen oder Anliegen: privacy@afterlife.app
-
-
+8. Kontakt
+Fragen oder Anliegen: roman.yankovych@inoxoft.com

@@ -7,6 +7,14 @@ class AppLogger {
   static bool _isEnabled = kDebugMode;
   static LogLevel _minLevel = kDebugMode ? LogLevel.debug : LogLevel.error;
 
+  // In release, silence all logs except critical errors
+  static void enableReleaseSilence() {
+    if (!kDebugMode) {
+      _isEnabled = true;
+      _minLevel = LogLevel.critical;
+    }
+  }
+
   // Configure logging behavior
   static void configure({bool? enabled, LogLevel? minLevel}) {
     if (enabled != null) _isEnabled = enabled;

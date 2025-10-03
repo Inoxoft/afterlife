@@ -1,44 +1,31 @@
 Informativa sulla Privacy di Afterlife (IT)
 
-Ultimo aggiornamento: 02/10/2025
+Ultimo aggiornamento: 03/10/2025
 
-Questa informativa descrive i dati trattati, l’uso e le tue scelte.
+Grazie per usare Afterlife. Seguiamo un approccio locale e minimale alla privacy.
 
-1. Dati trattati
-- Dati di utilizzo e diagnostica di base (se consentiti dal SO).
-- Contenuti forniti: messaggi, profili dei personaggi, file caricati.
-- Impostazioni: lingua e preferenze di base dell’app.
+1. Nessun account, nessun tracciamento, nessuna pubblicità
+- Non raccogliamo, conserviamo o vendiamo i tuoi dati personali.
+- Non usiamo SDK di analitica o pubblicità.
 
-2. Dove risiedono i dati
-- Solo sul dispositivo: cronologia chat, impostazioni e dati generati vengono conservati localmente in archiviazione sicura.
-- Non inviamo le tue conversazioni a servizi IA esterni e non gestiamo un backend cloud per i tuoi contenuti.
+2. Elaborazione solo sul dispositivo
+- Tutte le chat, i dati dei personaggi, le impostazioni e i file importati sono elaborati e archiviati localmente sul tuo dispositivo.
+- Su iOS, l’elaborazione usa Apple Foundation Models sul dispositivo (iOS 26+). Nulla viene inviato a servizi IA esterni.
 
-3. Apple Intelligence (sul dispositivo)
-- L’elaborazione avviene interamente sul tuo iPhone tramite Apple Foundation Models (iOS 26+). Le conversazioni non vengono inviate ai server.
+3. Open source
+- Afterlife è open source. Codice: https://github.com/Inoxoft/afterlife
 
-4. Chiavi API
-- Non applicabile in questa versione iOS. L’app non richiede chiavi API di terze parti.
+4. Conservazione dei dati
+- I dati locali rimangono finché non li elimini nelle Impostazioni o disinstalli l’app.
 
-5. File caricati
-- I file importati (es. PDF/TXT/DOC/DOCX/EML) sono elaborati localmente; non li carichiamo sui nostri server.
+5. Condivisione
+- Non condividiamo le tue conversazioni o i tuoi file con terze parti.
 
-6. Conservazione
-- I dati locali persistono finché non li elimini nelle Impostazioni o disinstalli l’app.
+6. Sicurezza
+- Ci affidiamo all’archiviazione e alle protezioni fornite dal sistema operativo.
 
-7. Condivisione
-- Non vendiamo i tuoi dati personali.
-- Non condividiamo conversazioni o file con terze parti.
+7. Modifiche alla presente informativa
+Potremmo aggiornare questa informativa e modificare la data “Ultimo aggiornamento” sopra. Le modifiche rilevanti potranno essere comunicate in app.
 
-8. Sicurezza
-- Usiamo archiviazione di sistema e buone pratiche raccomandate per proteggere i dati locali.
-
-9. Scelte
-- Puoi eliminare tutti i dati locali in Impostazioni > Gestione dati.
-
-10. Modifiche
-Potremmo aggiornare questa informativa; aggiorneremo la data “Ultimo aggiornamento” e potremmo avvisare in app per modifiche rilevanti.
-
-11. Contatto
-Domande o richieste: privacy@afterlife.app
-
-
+8. Contatto
+Domande o richieste: roman.yankovych@inoxoft.com

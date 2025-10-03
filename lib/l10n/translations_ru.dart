@@ -439,6 +439,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appleInstantSetup => 'Мгновенная настройка — ничего не нужно скачивать';
   @override
   String get applePrivacyNote => 'Всё выполняется на вашем устройстве. Мы никогда не отправляем ваши чаты на наши серверы.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Подробнее об Apple Intelligence';
   @override
   String get digitalPersonasWithHistoricalEssence =>
       'Цифровые персоны с исторической сущностью';
