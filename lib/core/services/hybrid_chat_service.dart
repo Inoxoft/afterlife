@@ -186,6 +186,27 @@ Guidelines:
       );
     }
 
+    // iOS: language gate for Apple Intelligence (manual exception for Ukrainian/Russian)
+    if (Platform.isIOS) {
+      try {
+        final prefs = await PreferencesService.getPrefs();
+        final code = (prefs.getString('user_language') ?? 'en').toLowerCase();
+        // Apple-supported language codes per Apple docs (coarse mapping)
+        const supported = {
+          'en', // English (various regions)
+          'zh', 'zh-hans', 'zh-hant',
+          'fr', 'de', 'it', 'ja', 'ko',
+          'pt', 'pt-br', 'pt-pt', 'es',
+          'da', 'nl', 'no', 'sv', 'tr', 'vi',
+          'en-us', 'en-gb', 'en-au', 'en-ca', 'en-nz', 'en-za', 'en-in', 'en-sg',
+        };
+        final isUnsupported = code.startsWith('uk') || code.startsWith('ru');
+        if (isUnsupported && !supported.contains(code)) {
+          return "Apple Intelligence currently doesn't support your selected language. Please switch app language to a supported one (e.g., English, Spanish, German, French, Italian, Japanese, Korean, Portuguese, Chinese, Danish, Dutch, Norwegian, Swedish, Turkish, Vietnamese).";
+        }
+      } catch (_) {}
+    }
+
     // iOS: Force on-device Apple Foundation Models for all chats
     if (Platform.isIOS) {
       // Always adapt prompt for local execution: prefer concise style
@@ -269,6 +290,21 @@ Guidelines:
     LLMProvider? preferredProvider,
     String? localPrompt,
   }) async {
+    // iOS: language gate for Apple Intelligence (manual exception for Ukrainian/Russian)
+    if (Platform.isIOS) {
+      try {
+        final prefs = await PreferencesService.getPrefs();
+        final code = (prefs.getString('user_language') ?? 'en').toLowerCase();
+        const supported = {
+          'en','zh','zh-hans','zh-hant','fr','de','it','ja','ko','pt','pt-br','pt-pt','es','da','nl','no','sv','tr','vi',
+          'en-us','en-gb','en-au','en-ca','en-nz','en-za','en-in','en-sg',
+        };
+        final isUnsupported = code.startsWith('uk') || code.startsWith('ru');
+        if (isUnsupported && !supported.contains(code)) {
+          return "Apple Intelligence currently doesn't support your selected language. Please switch app language to a supported one (e.g., English, Spanish, German, French, Italian, Japanese, Korean, Portuguese, Chinese, Danish, Dutch, Norwegian, Swedish, Turkish, Vietnamese).";
+        }
+      } catch (_) {}
+    }
     // Check if the model is a local model - be more specific about local model patterns
     bool isLocalModel =
         model != null &&

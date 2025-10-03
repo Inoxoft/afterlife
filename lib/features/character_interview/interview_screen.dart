@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:io' show Platform;
 import 'package:path/path.dart' as path;
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
@@ -193,7 +194,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
           ),
           actions: [
             // Creation mode selector: Local vs Cloud
-            if (!widget.editMode)
+            if (!widget.editMode && !Platform.isIOS)
               Consumer<InterviewProvider>(
                 builder: (context, provider, _) {
                   return Row(
@@ -309,7 +310,8 @@ class _InterviewScreenState extends State<InterviewScreen> {
         ),
         body: Container(
           decoration: const BoxDecoration(gradient: AppTheme.mainGradient),
-          child: Stack(
+          child: RepaintBoundary(
+            child: Stack(
             children: [
               // Background particles with reduced opacity
               const Opacity(
@@ -517,6 +519,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -1,5 +1,7 @@
+import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -566,7 +568,10 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
 
     // Handle "Create" tab action
     if (index == 3) {
-      _onAddCharacter(context);
+      // Defer navigation to next frame to avoid jank on tab tap
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _onAddCharacter(context);
+      });
     }
     // Handle "Settings" tab action
     else if (index == 4) {
@@ -1256,10 +1261,11 @@ class _CharacterGalleryScreenState extends State<CharacterGalleryScreen>
   }
 
   void _onAddCharacter(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const InterviewScreen()),
-    );
+    final route = Platform.isIOS
+        ? CupertinoPageRoute(builder: (context) => const InterviewScreen())
+        : MaterialPageRoute(builder: (context) => const InterviewScreen());
+
+    final result = await Navigator.push(context, route);
 
     // Always return to Explore tab after closing Interview
     _pageController.jumpToPage(0);

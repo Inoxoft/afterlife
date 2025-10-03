@@ -1,6 +1,7 @@
 // removed unused import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import '../../core/utils/app_logger.dart';
 import 'message_model.dart';
 import 'prompts.dart';
@@ -24,8 +25,8 @@ class InterviewProvider with ChangeNotifier {
   bool isSuccess = false;
   bool isEditMode = false;
   bool isAiThinking = false;
-  // Creation mode: local vs cloud
-  bool useLocalModel = false;
+  // Creation mode: local vs cloud (default to local on iOS)
+  bool useLocalModel = Platform.isIOS ? true : false;
 
   // Add a reference to LanguageProvider at the class level
   LanguageProvider? _languageProvider;
