@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/utils/ukrainian_font_utils.dart';
 import '../../../core/widgets/api_key_input_dialog.dart';
+import 'dart:io' show Platform;
 import '../../settings/local_llm_settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,6 +28,141 @@ class SetupGuidePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTheme.midnightPurple.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.35),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        text,
+        style: UkrainianFontUtils.latoWithUkrainianSupport(
+          text: text,
+          color: AppTheme.silverMist,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppleHero(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.midnightPurple.withValues(alpha: 0.45),
+            AppTheme.deepIndigo.withValues(alpha: 0.35),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppTheme.warmGold.withValues(alpha: 0.35),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.warmGold.withValues(alpha: 0.08),
+            blurRadius: 20,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.midnightPurple.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.etherealCyan.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
+            child: SvgPicture.asset(
+              'assets/images/apple_logo.svg',
+              width: 26,
+              height: 26,
+              colorFilter: const ColorFilter.mode(AppTheme.warmGold, BlendMode.srcIn),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.appleIntelligenceTitle,
+                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                    text: l10n.appleIntelligenceTitle,
+                    color: AppTheme.silverMist,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 8.0,
+                        color: AppTheme.warmGold.withValues(alpha: 0.5),
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.appleIntelligenceSubtitle,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: l10n.appleIntelligenceSubtitle,
+                    color: AppTheme.silverMist.withValues(alpha: 0.9),
+                    fontSize: 14,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildBadge(l10n.appleOnDevicePrivacy),
+                    _buildBadge(l10n.appleNoCloudCalls),
+                    _buildBadge(l10n.applePoweredByFoundationModels),
+                    _buildBadge(l10n.appleInstantSetup),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                                  GestureDetector(
+                  onTap: () => _openAppleIntelligenceLink(context),
+                  child: Text(
+                                      l10n.learnMoreAboutAppleIntelligence,
+                    style: TextStyle(
+                      color: AppTheme.warmGold,
+                      fontSize: 12,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -57,6 +195,11 @@ class SetupGuidePage extends StatelessWidget {
         ),
       );
     }
+  }
+
+  Future<void> _openAppleIntelligenceLink(BuildContext context) async {
+    final uri = Uri.parse('https://www.apple.com/apple-intelligence/');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -139,6 +282,8 @@ class SetupGuidePage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              if (Platform.isIOS) _buildAppleHero(context),
+
               // Content cards
               SlideTransition(
                 position: contentAnimation,
@@ -149,76 +294,80 @@ class SetupGuidePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Local AI Option (moved to top and highlighted by default)
-                      _buildOptionCard(
-                        context,
-                        title: l10n.localAiModel,
-                        subtitle: l10n.privateWorksOffline,
-                        icon: Icons.offline_bolt,
-                        isHighlighted: true,
-                        features: [
-                          l10n.completePrivacyDataStaysLocal,
-                          l10n.worksWithoutInternet,
-                          l10n.hammerModelSize,
-                          l10n.optimizedForMobileDevices,
-                        ],
-                        actionText: l10n.downloadModel,
-                        onTap: () => _navigateToLocalLLMSettings(context),
-                        infoWidget: Text(
-                          l10n.freeDownloadNoAccountRequired,
-                          style: TextStyle(
-                            color: AppTheme.silverMist.withValues(alpha: 0.8),
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
+                      // Local/On-device option: show only on Android to avoid iOS duplication
+                      if (!Platform.isIOS)
+                        _buildOptionCard(
+                          context,
+                          title: l10n.localAiModel,
+                          subtitle: l10n.privateWorksOffline,
+                          icon: Icons.offline_bolt,
+                          isHighlighted: true,
+                          features: [
+                            l10n.completePrivacyDataStaysLocal,
+                            l10n.worksWithoutInternet,
+                            l10n.hammerModelSize,
+                            l10n.optimizedForMobileDevices,
+                          ],
+                          actionText: l10n.downloadModel,
+                          onTap: () {
+                            _navigateToLocalLLMSettings(context);
+                          },
+                          infoWidget: Text(
+                            l10n.freeDownloadNoAccountRequired,
+                            style: TextStyle(
+                              color: AppTheme.silverMist.withValues(alpha: 0.8),
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         ),
-                      ),
 
                       const SizedBox(height: 16),
 
-                      // Cloud AI Option (now second)
-                      _buildOptionCard(
-                        context,
-                        title: l10n.cloudAiModels,
-                        subtitle: l10n.bestQualityRequiresInternet,
-                        icon: Icons.cloud,
-                        isHighlighted: false,
-                        features: [
-                          // Reference GPT-5 as example cloud model
-                          'Access to GPT-5, Claude, and more',
-                          l10n.advancedReasoningAndKnowledge,
-                          l10n.alwaysUpToDateInformation,
-                          l10n.fastResponses,
-                        ],
-                        actionText: l10n.setUpApiKey,
-                        onTap: () => _showApiKeyDialog(context),
-                        infoWidget: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Bring your own key: ',
-                                style: TextStyle(
-                                  color: AppTheme.silverMist.withValues(alpha: 0.8),
-                                  fontSize: 12,
+                      // Cloud AI Option hidden on iOS
+                      if (!Platform.isIOS)
+                        _buildOptionCard(
+                          context,
+                          title: l10n.cloudAiModels,
+                          subtitle: l10n.bestQualityRequiresInternet,
+                          icon: Icons.cloud,
+                          isHighlighted: false,
+                          features: [
+                            'Access to GPT-5, Claude, and more',
+                            l10n.advancedReasoningAndKnowledge,
+                            l10n.alwaysUpToDateInformation,
+                            l10n.fastResponses,
+                          ],
+                          actionText: l10n.setUpApiKey,
+                          onTap: () => _showApiKeyDialog(context),
+                          infoWidget: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Bring your own key: ',
+                                  style: TextStyle(
+                                    color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                              TextSpan(
-                                text: 'openrouter.ai/keys',
-                                style: TextStyle(
-                                  color: AppTheme.warmGold,
-                                  fontSize: 12,
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.w500,
+                                TextSpan(
+                                  text: 'openrouter.ai/keys',
+                                  style: TextStyle(
+                                    color: AppTheme.warmGold,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
                                 ),
-                                recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
 
-                      // Both options info
-                      Container(
+                      // Both options info (hide on iOS where only Apple Intelligence is shown)
+                      if (!Platform.isIOS)
+                        Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppTheme.deepIndigo.withValues(alpha: 0.3),
@@ -269,8 +418,9 @@ class SetupGuidePage extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
-                      // Skip for now info
-                      Container(
+                      // Skip for now info (hide on iOS)
+                      if (!Platform.isIOS)
+                        Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppTheme.midnightPurple.withValues(alpha: 0.2),
@@ -290,7 +440,7 @@ class SetupGuidePage extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                l10n.canSetupLaterInSettings,
+                                  l10n.canSetupLaterInSettings,
                                 style:
                                     UkrainianFontUtils.latoWithUkrainianSupport(
                                       text: l10n.canSetupLaterInSettings,
@@ -304,7 +454,7 @@ class SetupGuidePage extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ),
+                        ),
                     ],
                   ),
                 ),
@@ -455,36 +605,37 @@ class SetupGuidePage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Action button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isHighlighted ? AppTheme.warmGold : AppTheme.etherealCyan,
-                foregroundColor: AppTheme.midnightPurple,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          // On iOS, we don't need an action button (Apple Intelligence is default)
+          if (!Platform.isIOS)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      isHighlighted ? AppTheme.warmGold : AppTheme.etherealCyan,
+                  foregroundColor: AppTheme.midnightPurple,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                  shadowColor: (isHighlighted
+                          ? AppTheme.warmGold
+                          : AppTheme.etherealCyan)
+                      .withValues(alpha: 0.3),
                 ),
-                elevation: 3,
-                shadowColor: (isHighlighted
-                        ? AppTheme.warmGold
-                        : AppTheme.etherealCyan)
-                    .withValues(alpha: 0.3),
-              ),
-              child: Text(
-                actionText,
-                style: UkrainianFontUtils.latoWithUkrainianSupport(
-                  text: actionText,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
+                child: Text(
+                  actionText,
+                  style: UkrainianFontUtils.latoWithUkrainianSupport(
+                    text: actionText,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
-import 'dart:math';
+// removed unused import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import '../../core/utils/app_logger.dart';
 import 'message_model.dart';
 import 'prompts.dart';
@@ -24,8 +25,8 @@ class InterviewProvider with ChangeNotifier {
   bool isSuccess = false;
   bool isEditMode = false;
   bool isAiThinking = false;
-  // Creation mode: local vs cloud
-  bool useLocalModel = false;
+  // Creation mode: local vs cloud (default to local on iOS)
+  bool useLocalModel = Platform.isIOS ? true : false;
 
   // Add a reference to LanguageProvider at the class level
   LanguageProvider? _languageProvider;
@@ -74,12 +75,9 @@ class InterviewProvider with ChangeNotifier {
   Future<void> _addInitialMessage() async {
     // This method is now only used as a fallback if setInitialMessage wasn't called
     if (!isEditMode && !_initialMessageAdded) {
-      final message =
-          _initialMessage ??
-          "Hello! I'm ready to create a detailed character card for you. You can either:\n\n"
-              "1. Answer my questions about your personality and experiences\n"
-              "2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\n"
-              "Which would you prefer?";
+      final message = _initialMessage ??
+          "Hello! We'll create your character card with a short, friendly interview. I'll ask three quick questions about you, your personality, and a memorable moment.\n\n"
+          "Let's begin: tell me a bit about yourself — what do you do, and what matters most to you?";
       addAIMessage(message);
       _initialMessageAdded = true;
     }
@@ -95,13 +93,7 @@ class InterviewProvider with ChangeNotifier {
     // Store the existing system prompt - vital for continuing the edit flow
     characterCardSummary = existingSystemPrompt;
 
-    // Debug the system prompt to ensure it's being loaded properly
-    print(
-      'First 200 chars: ${existingSystemPrompt.substring(0, min(200, existingSystemPrompt.length))}...',
-    );
-    print(
-      'Last 200 chars: ...${existingSystemPrompt.substring(max(0, existingSystemPrompt.length - 200))}',
-    );
+    // Debug the system prompt to ensure it's being loaded properly (removed in release)
 
     // Add loading message to indicate AI is thinking
     _addLoadingMessage();
@@ -115,13 +107,7 @@ class InterviewProvider with ChangeNotifier {
 
     final systemPrompt = _getSystemPrompt();
 
-    print(
-      'Character card summary length: ${characterCardSummary?.length ?? 0}',
-    );
     if (characterCardSummary != null && characterCardSummary!.isNotEmpty) {
-      print(
-        'First 200 chars of card summary: ${characterCardSummary!.substring(0, min(200, characterCardSummary!.length))}...',
-      );
     } else {
               AppLogger.warning('Character card summary is null or empty', tag: 'InterviewProvider');
     }
@@ -261,14 +247,7 @@ $languageInstruction""";
     _addLoadingMessage();
 
     try {
-      // Debug logging
-      print('🔍 DEBUG: User typed: "${text.trim()}"');
-      print('🔍 DEBUG: Lowercased: "${text.trim().toLowerCase()}"');
-      print(
-        '🔍 DEBUG: characterCardSummary is null: ${characterCardSummary == null}',
-      );
-      print('🔍 DEBUG: characterName is null: ${characterName == null}');
-      print('🔍 DEBUG: isComplete: $isComplete');
+      // Debug logging removed for release
 
       // Check if user typed "agree" and character card is ready
       if (text.trim().toLowerCase() == 'agree' &&
@@ -569,34 +548,28 @@ $languageInstruction""";
 
   // New method to save character to device
   Future<void> _saveCharacterToDevice() async {
-    print('🔍 DEBUG: _saveCharacterToDevice called');
+    // debug removed
     if (characterCardSummary == null || characterName == null) {
-      print(
-        '🔍 DEBUG: Character data is incomplete - summary: ${characterCardSummary != null}, name: ${characterName != null}',
-      );
       throw Exception('Character data is incomplete');
     }
 
     try {
-      print('🔍 DEBUG: Creating CharacterModel with name: $characterName');
+      // debug removed
       // Create character model from interview data
       final character = CharacterModel.fromInterviewData(
         name: characterName!,
         cardContent: characterCardSummary!,
       );
 
-      print('🔍 DEBUG: Character created with ID: ${character.id}');
+      // debug removed
       // Call the callback to save the character if provided
       if (_onCharacterSaved != null) {
-        print('🔍 DEBUG: Calling save callback...');
         await _onCharacterSaved!(character);
-        print('🔍 DEBUG: Save callback completed successfully');
       } else {
-        print('🔍 DEBUG: No character save callback provided');
         throw Exception('No character save callback provided');
       }
     } catch (e) {
-      print('🔍 DEBUG: Error in _saveCharacterToDevice: $e');
+      // debug removed
       _removeLoadingMessage();
       addAIMessage(
         "Sorry, there was an error saving your character: $e\n\n"

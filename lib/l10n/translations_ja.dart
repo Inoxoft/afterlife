@@ -430,6 +430,25 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get deepKnowledge => '深い専門知識';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'プライベート、デバイス上、オフラインで動作';
+  @override
+  String get appleOnDevicePrivacy => 'デバイス上のプライバシー：チャットはiPhoneを離れません';
+  @override
+  String get appleNoCloudCalls => 'クラウド呼び出しなし — インターネット不要';
+  @override
+  String get applePoweredByFoundationModels => 'Apple Foundation Models によって動作（iOS 26+）';
+  @override
+  String get appleInstantSetup => '即時セットアップ — ダウンロードは不要';
+  @override
+  String get applePrivacyNote => 'すべてがデバイス上で実行されます。チャットを当社サーバーに送信することはありません。';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Apple Intelligence について詳しく見る';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence => '歴史的本質を持つデジタルペルソナ';

@@ -17,20 +17,20 @@ import '../utils/env_config.dart';
 // Model download status
 enum ModelDownloadStatus { notDownloaded, downloading, downloaded, error }
 
-// Model configuration (Gemma 3 1B IT LiteRT)
+// Model configuration (default: Gemma 3 270M IT, iOS-friendly)
 class ModelConfig {
   // Smaller LiteRT .task suitable for iOS memory mapping
-    static const String url =
-        'https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/Gemma3-1B-IT_q8_ekv4096.task';
-    static const String filename = 'Gemma3-1B-IT_q8_ekv4096.task';
-    static const String displayName = 'Gemma 3 1B IT (q8, ekv4096 LiteRT)';
+  static const String url =
+      'https://huggingface.co/litert-community/Llama-3.2-1B-Instruct/resolve/main/Llama-3.2-1B-Instruct_multi-prefill-seq_q8_ekv1280.task';
+  static const String filename = 'Llama-3.2-1B-Instruct_multi-prefill-seq_q8_ekv1280.task';
+  static const String displayName = 'Llama 3.2 1B Instruct (q8, ekv1280)';
   // Unknown/large size; relax verification (accept >1GB)
   static const int fileSizeBytes = 0;
   static const int maxTokens = 1024; // safe default for iOS
   static const double temperature = 0.7;
   static const int topK = 40;
   static const double topP = 0.95;
-  static const PreferredBackend preferredBackend = PreferredBackend.cpu;
+  static const PreferredBackend preferredBackend = PreferredBackend.gpu;
   // Use Gemma instruction type as a generic text-only type for compatibility
   static const ModelType modelType = ModelType.gemmaIt;
 }
@@ -153,18 +153,26 @@ class LocalLLMService {
   static Future<void> _checkModelStatus() async {
     // If we don't have a stored path, try the expected filename first
     if (_modelPath == null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final candidatePath = '${directory.path}/' + ModelConfig.filename;
+      // Prefer Application Support on iOS for large mmap stability
+      Directory baseDir;
+      if (Platform.isIOS) {
+        baseDir = await getApplicationSupportDirectory();
+      } else {
+        baseDir = await getApplicationDocumentsDirectory();
+      }
+      final candidatePath = '${baseDir.path}/' + ModelConfig.filename;
       if (await File(candidatePath).exists()) {
         _modelPath = candidatePath;
       }
     }
 
-    // If the stored path points to a missing file, attempt to rediscover any .task model in Documents
+    // If the stored path points to a missing file, attempt to rediscover any .task model in preferred directory
     if (_modelPath != null && !await File(_modelPath!).exists()) {
       try {
-        final directory = await getApplicationDocumentsDirectory();
-        final dir = Directory(directory.path);
+        final Directory baseDir = Platform.isIOS
+            ? await getApplicationSupportDirectory()
+            : await getApplicationDocumentsDirectory();
+        final dir = Directory(baseDir.path);
         final candidates = await dir
             .list(recursive: false, followLinks: false)
             .where((e) => e is File && e.path.toLowerCase().endsWith('.task'))
@@ -279,25 +287,19 @@ class LocalLLMService {
     }
 
     try {
-      // On iOS, very large .task files may fail to memory-map (ODML LiteRT) with
-      // "Cannot allocate memory". Proactively guard and provide a clear error.
+      // Match reference app behavior: do not proactively block initialization
+      // based on file size; let the runtime surface errors if any.
       if (Platform.isIOS) {
-        final int fileSizeBytes = await File(_modelPath!).length();
-        // Empirical safe threshold for iOS devices. Recommend <= ~2.0GB.
-        const int iosRecommendedMaxBytes = 2200 * 1024 * 1024; // ~2.2 GB
-        if (fileSizeBytes > iosRecommendedMaxBytes) {
+        try {
+          final int fileSizeBytes = await File(_modelPath!).length();
           final double sizeGb = fileSizeBytes / (1024 * 1024 * 1024);
-          _downloadError =
-              'The selected local model is too large for iOS memory mapping (size: ' +
-              sizeGb.toStringAsFixed(2) +
-              ' GB). Please download and use a smaller iOS .task variant (<= ~2.0 GB).';
-          AppLogger.serviceError(
-            'LocalLLMService',
-            'iOS model too large for memory mapping',
-            _downloadError,
-          );
-          throw Exception(_downloadError);
-        }
+          if (kDebugMode) {
+            AppLogger.debug(
+              'iOS model file size: ' + sizeGb.toStringAsFixed(2) + ' GB (attempting init)',
+              tag: 'LocalLLMService',
+            );
+          }
+        } catch (_) {}
       }
 
       if (kDebugMode) {
@@ -320,28 +322,13 @@ class LocalLLMService {
       // Create the model (use iOS-friendly settings to avoid memory issues)
       final bool isIOS = Platform.isIOS;
       final int iosMaxTokens = 1024; // conservative default for iOS
-      // Disable image/vision support for all platforms to avoid requiring a vision encoder
-      // The current .task is used in text-only mode
-      final bool supportImage = false;
-      try {
-        _model = await _gemmaPlugin.createModel(
-          modelType: ModelConfig.modelType,
-          maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
-          preferredBackend: ModelConfig.preferredBackend,
-          supportImage: supportImage,
-        );
-      } catch (e) {
-        // Fallback to GPU if CPU init fails for some reason
-        if (kDebugMode) {
-          AppLogger.warning('CPU backend failed, retrying with GPU: $e', tag: 'LocalLLMService');
-        }
-        _model = await _gemmaPlugin.createModel(
-          modelType: ModelConfig.modelType,
-          maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
-          preferredBackend: PreferredBackend.gpu,
-          supportImage: supportImage,
-        );
-      }
+      final bool iosSupportImage = false; // disable images on iOS initially
+      _model = await _gemmaPlugin.createModel(
+        modelType: ModelConfig.modelType,
+        maxTokens: isIOS ? iosMaxTokens : ModelConfig.maxTokens,
+        preferredBackend: ModelConfig.preferredBackend,
+        supportImage: isIOS ? iosSupportImage : true,
+      );
 
       // Create chat session
       _chat = await _model!.createChat(
@@ -350,7 +337,7 @@ class LocalLLMService {
         topK: ModelConfig.topK,
         topP: ModelConfig.topP,
         tokenBuffer: isIOS ? 64 : 256,
-        supportImage: supportImage,
+        supportImage: isIOS ? iosSupportImage : true,
       );
 
       if (kDebugMode) {
@@ -435,8 +422,10 @@ class LocalLLMService {
       _downloadError = null;
       _modelStatusController?.add(_modelStatus);
 
-              // Get download directory
-        final directory = await getApplicationDocumentsDirectory();
+      // Get download directory
+        final directory = Platform.isIOS
+            ? await getApplicationSupportDirectory()
+            : await getApplicationDocumentsDirectory();
         String dynamicFilename = ModelConfig.filename;
         String modelPath = '${directory.path}/' + dynamicFilename;
         String tempPath = '${modelPath}.part';

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 import 'package:afterlife/core/services/local_llm_service.dart';
+import 'package:afterlife/core/services/native_ios_ai.dart';
+import 'package:flutter/services.dart';
 import 'preferences_service.dart';
 import '../utils/app_logger.dart';
 import '../../features/character_interview/chat_service.dart' as interview_chat;
@@ -57,6 +59,14 @@ Guidelines:
 - Speak naturally; no role labels.
 """;
 
+  // Clean up occasional wrappers emitted by on-device model
+  static String _cleanIOSResponse(String raw) {
+    String text = raw;
+    // Remove simple highlight wrappers sometimes added by FM
+    text = text.replaceAll('<highlight>', '').replaceAll('</highlight>', '');
+    return text.trim();
+  }
+
   /// Get current service availability
   static ServiceAvailability get serviceAvailability => _serviceAvailability;
 
@@ -72,14 +82,25 @@ Guidelines:
     bool characterChatReady = false;
     bool providerChatReady = false;
 
-    // Initialize LocalLLMService
-    try {
-      await LocalLLMService.initialize();
-      localLLMReady = true;
-      AppLogger.serviceInitialized('LocalLLMService');
-    } catch (e) {
-      AppLogger.serviceError('LocalLLMService', 'initialization failed', e);
-      errors.add('Local LLM service failed: ${e.toString()}');
+    // Initialize local provider: use Native iOS FM on iOS, Gemma-based service on Android
+    if (Platform.isIOS) {
+      try {
+        final fmAvailable = await NativeIOSAI.isFMAvailable();
+        localLLMReady = fmAvailable;
+        AppLogger.debug('iOS Foundation Models available: ' + fmAvailable.toString(), tag: 'HybridChatService');
+      } catch (e) {
+        AppLogger.serviceError('NativeIOSAI', 'availability check failed', e);
+        errors.add('Native iOS FM check failed: ' + e.toString());
+      }
+    } else {
+      try {
+        await LocalLLMService.initialize();
+        localLLMReady = true;
+        AppLogger.serviceInitialized('LocalLLMService');
+      } catch (e) {
+        AppLogger.serviceError('LocalLLMService', 'initialization failed', e);
+        errors.add('Local LLM service failed: ' + e.toString());
+      }
     }
 
     // Initialize chat services through BaseChatService (eliminates duplication)
@@ -165,6 +186,44 @@ Guidelines:
       );
     }
 
+    // iOS: language gate for Apple Intelligence (manual exception for Ukrainian/Russian)
+    if (Platform.isIOS) {
+      try {
+        final prefs = await PreferencesService.getPrefs();
+        final code = (prefs.getString('user_language') ?? 'en').toLowerCase();
+        // Apple-supported language codes per Apple docs (coarse mapping)
+        const supported = {
+          'en', // English (various regions)
+          'zh', 'zh-hans', 'zh-hant',
+          'fr', 'de', 'it', 'ja', 'ko',
+          'pt', 'pt-br', 'pt-pt', 'es',
+          'da', 'nl', 'no', 'sv', 'tr', 'vi',
+          'en-us', 'en-gb', 'en-au', 'en-ca', 'en-nz', 'en-za', 'en-in', 'en-sg',
+        };
+        final isUnsupported = code.startsWith('uk') || code.startsWith('ru');
+        if (isUnsupported && !supported.contains(code)) {
+          return "Apple Intelligence currently doesn't support your selected language. Please switch app language to a supported one (e.g., English, Spanish, German, French, Italian, Japanese, Korean, Portuguese, Chinese, Danish, Dutch, Norwegian, Swedish, Turkish, Vietnamese).";
+        }
+      } catch (_) {}
+    }
+
+    // iOS: Force on-device Apple Foundation Models for all chats
+    if (Platform.isIOS) {
+      // Always adapt prompt for local execution: prefer concise style
+      String? adjustedSystemPrompt = systemPrompt;
+      if ((adjustedSystemPrompt ?? '').isNotEmpty) {
+        adjustedSystemPrompt = adjustedSystemPrompt! + "\n\n" + _localStyleGuide;
+      } else {
+        adjustedSystemPrompt = _localStyleGuide;
+      }
+      return await _sendMessageLocal(
+        messages: messages,
+        systemPrompt: adjustedSystemPrompt,
+        temperature: temperature,
+        maxTokens: maxTokens,
+      );
+    }
+
     // Use the explicitly provided provider when set; otherwise auto-determine
     final provider = preferredProvider ?? _preferredProvider;
 
@@ -186,11 +245,9 @@ Guidelines:
       actualProvider = await _determineProvider(provider);
     }
 
-    if (kDebugMode) {
-      print('Requested provider: $provider, Using provider: $actualProvider');
-      if (model != null) {
-        print('Model: $model');
-      }
+    AppLogger.debug('Requested provider: $provider, Using provider: $actualProvider', tag: 'HybridChatService');
+    if (model != null) {
+      AppLogger.debug('Model: $model', tag: 'HybridChatService');
     }
 
     switch (actualProvider) {
@@ -233,25 +290,43 @@ Guidelines:
     LLMProvider? preferredProvider,
     String? localPrompt,
   }) async {
+    // iOS: language gate for Apple Intelligence (manual exception for Ukrainian/Russian)
+    if (Platform.isIOS) {
+      try {
+        final prefs = await PreferencesService.getPrefs();
+        final code = (prefs.getString('user_language') ?? 'en').toLowerCase();
+        const supported = {
+          'en','zh','zh-hans','zh-hant','fr','de','it','ja','ko','pt','pt-br','pt-pt','es','da','nl','no','sv','tr','vi',
+          'en-us','en-gb','en-au','en-ca','en-nz','en-za','en-in','en-sg',
+        };
+        final isUnsupported = code.startsWith('uk') || code.startsWith('ru');
+        if (isUnsupported && !supported.contains(code)) {
+          return "Apple Intelligence currently doesn't support your selected language. Please switch app language to a supported one (e.g., English, Spanish, German, French, Italian, Japanese, Korean, Portuguese, Chinese, Danish, Dutch, Norwegian, Swedish, Turkish, Vietnamese).";
+        }
+      } catch (_) {}
+    }
     // Check if the model is a local model - be more specific about local model patterns
     bool isLocalModel =
         model != null &&
         (model.startsWith('local/') ||
             model == 'local' ||
-            model.contains('hammer') ||
+            model.contains('gemma-3n') ||
+            model.contains('gemma3n') ||
             model.contains('gemma') ||
-            model.contains('llama'));
+            model.contains('llama') ||
+            model.contains('hammer'));
 
-    if (kDebugMode) {
-      print('HybridChatService: Model selection debug');
-      print('  - Model: $model');
-      print('  - Is local model: $isLocalModel');
-      print('  - Preferred provider: $preferredProvider');
-    }
+    AppLogger.debug('HybridChatService: Model selection', tag: 'HybridChatService');
+    AppLogger.debug('  - Model: $model', tag: 'HybridChatService');
+    AppLogger.debug('  - Is local model: $isLocalModel', tag: 'HybridChatService');
+    AppLogger.debug('  - Preferred provider: $preferredProvider', tag: 'HybridChatService');
 
     // Determine the provider based on the model
     LLMProvider actualProvider;
-    if (isLocalModel) {
+    if (Platform.isIOS) {
+      // On iOS, always use local (Apple FM)
+      actualProvider = LLMProvider.local;
+    } else if (isLocalModel) {
       actualProvider = LLMProvider.local;
     } else if (preferredProvider != null) {
       actualProvider = preferredProvider;
@@ -260,17 +335,19 @@ Guidelines:
       actualProvider = LLMProvider.openRouter;
     }
 
-    if (kDebugMode) {
-      print('  - Actual provider: $actualProvider');
-    }
+    AppLogger.debug('  - Actual provider: $actualProvider', tag: 'HybridChatService');
 
     // Select the appropriate prompt based on provider
     String promptToUse;
-    if (actualProvider == LLMProvider.local) {
-      final base = localPrompt ?? systemPrompt ?? '';
+    if (Platform.isIOS) {
+      // Always prefer localPrompt for iOS FM
+      final base = (localPrompt ?? systemPrompt);
+      promptToUse = base.isEmpty ? _localStyleGuide : (base + '\n\n' + _localStyleGuide);
+    } else if (actualProvider == LLMProvider.local) {
+      final base = localPrompt ?? systemPrompt;
       promptToUse = base.isEmpty ? _localStyleGuide : '$base\n\n$_localStyleGuide';
     } else {
-      promptToUse = systemPrompt ?? '';
+      promptToUse = systemPrompt;
     }
 
     // Append language instruction for local models based on saved app language
@@ -395,9 +472,7 @@ Guidelines:
           return LLMProvider.local;
         } else {
           // Fallback to OpenRouter if local is not available
-          if (kDebugMode) {
-            print('Local LLM not available, falling back to OpenRouter');
-          }
+          AppLogger.debug('Local model unavailable; falling back to cloud provider', tag: 'HybridChatService');
           return LLMProvider.openRouter;
         }
 
@@ -422,6 +497,81 @@ Guidelines:
     int? maxTokens,
   }) async {
     try {
+      // iOS path: use Apple Foundation Models via native bridge
+      if (Platform.isIOS) {
+        final StringBuffer promptBuffer = StringBuffer();
+
+        // Include system prompt (already adapted by caller with local style guide when available)
+        if (systemPrompt != null && systemPrompt.isNotEmpty) {
+          promptBuffer.writeln(systemPrompt);
+          promptBuffer.writeln();
+        }
+
+        // Add a short rolling window of conversation for context
+        const int maxTurns = 8; // total messages (user+assistant)
+        final int start = messages.length > maxTurns ? messages.length - maxTurns : 0;
+        if (messages.isNotEmpty) {
+          for (int i = start; i < messages.length; i++) {
+            final m = messages[i];
+            final role = (m['role'] ?? 'user') == 'assistant' ? 'Assistant' : 'User';
+            String content = (m['content'] ?? '').toString();
+            if (content.length > 800) {
+              content = content.substring(0, 800);
+            }
+            if (content.trim().isEmpty) continue;
+            promptBuffer.writeln(role + ': ' + content);
+          }
+          promptBuffer.writeln();
+        }
+
+        // Interview gating: enforce 3 questions before card generation
+        // Heuristic detection: presence of interview instructions and card markers in system prompt
+        final bool looksLikeInterview = (systemPrompt ?? '')
+                .toLowerCase()
+                .contains('interview') &&
+            (systemPrompt ?? '').contains('## CHARACTER CARD SUMMARY ##');
+
+        if (looksLikeInterview) {
+          int userTurns = 0;
+          for (final m in messages) {
+            if ((m['role'] ?? 'user') == 'user') userTurns++;
+          }
+          // Provide explicit control instructions based on turn count
+          if (userTurns <= 1) {
+            promptBuffer.writeln(
+                'Do not produce the character card yet. Ask the next short, natural question about personality traits and temperament. Keep it one sentence.');
+          } else if (userTurns == 2) {
+            promptBuffer.writeln(
+                'Do not produce the character card yet. Ask one final short, natural question about a vivid memorable moment or defining anecdote. Exactly one sentence.');
+          } else {
+            promptBuffer.writeln(
+                'You now have enough information. Produce the character card using ONLY the required markers. Do not add any extra headings, labels, or tags.');
+          }
+          promptBuffer.writeln();
+        }
+
+        // Do not add an explicit Assistant cue; let the model continue naturally
+
+        final fullPrompt = promptBuffer.toString();
+
+        final fmAvailable = await NativeIOSAI.isFMAvailable();
+        if (!fmAvailable) {
+          return "On-device Apple Intelligence is unavailable on this device (see Settings).";
+        }
+
+        try {
+          final response = await NativeIOSAI.generateText(fullPrompt);
+          return _cleanIOSResponse(response);
+        } on PlatformException catch (e) {
+          // Surface a clear, user-friendly message for on-device moderation blocks
+          final msg = (e.message ?? '').toLowerCase();
+          if ((e.code == 'GEN_FAIL') && msg.contains('unsafe')) {
+            return "I couldn't respond because the last message was flagged as potentially unsafe on this device. Please rephrase or try a different topic.";
+          }
+          return "I ran into a problem generating a response on-device. Please try again or rephrase.";
+        }
+      }
+
       // Ensure local LLM is ready; attempt on-the-fly enable if possible
       var localStatus = LocalLLMService.getStatus();
       if (localStatus['isAvailable'] != true) {
@@ -485,12 +635,8 @@ Guidelines:
 
       final fullPrompt = promptBuffer.toString();
 
-      if (kDebugMode) {
-        print('Local LLM prompt length: ${fullPrompt.length}');
-        print(
-          'Local LLM prompt preview: ${fullPrompt.substring(0, min(200, fullPrompt.length))}...',
-        );
-      }
+      AppLogger.debug('Local prompt length: ${fullPrompt.length}', tag: 'HybridChatService');
+      AppLogger.debug('Local prompt preview: ${fullPrompt.substring(0, min(200, fullPrompt.length))}...', tag: 'HybridChatService');
 
       final response = await LocalLLMService.sendMessage(
         '', // Empty message since we're using the full prompt
@@ -502,9 +648,7 @@ Guidelines:
 
       return cleanedResponse;
     } catch (e) {
-      if (kDebugMode) {
-        print('Local LLM error: $e');
-      }
+      AppLogger.error('Local model error', tag: 'HybridChatService', error: e);
       // Inform the user instead of silently switching providers
       return "I'm having trouble with the local AI model right now. Please try again shortly, or switch this character to a cloud model (uses internet) to continue without delay.";
     }
@@ -527,9 +671,7 @@ Guidelines:
         maxTokens: maxTokens,
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('OpenRouter API error: $e');
-      }
+      AppLogger.error('Cloud provider API error', tag: 'HybridChatService', error: e);
       return 'I apologize, but I\'m having trouble connecting to my AI services. Please try again later.';
     }
   }
@@ -538,9 +680,7 @@ Guidelines:
   static void setPreferredProvider(LLMProvider provider) {
     // Provider selection is fixed to Auto (smart selection)
     _preferredProvider = LLMProvider.auto;
-    if (kDebugMode) {
-      print('Preferred provider set to: LLMProvider.auto');
-    }
+    AppLogger.debug('Preferred provider set to Auto', tag: 'HybridChatService');
   }
 
   /// Get current preferred provider
@@ -549,6 +689,19 @@ Guidelines:
   /// Get provider status information
   static Map<String, dynamic> getProviderStatus() {
     final localStatus = LocalLLMService.getStatus();
+    // iOS: Present only Apple Intelligence to the UI
+    if (Platform.isIOS) {
+      return {
+        'local': {
+          'available': true,
+          'enabled': true,
+          'initialized': true,
+          'name': 'Apple Intelligence',
+          'description': 'On‑device AI (private, fast, offline)',
+        },
+      };
+    }
+    // Android: keep both entries
     return {
       'local': {
         'available': localStatus['isAvailable'],
@@ -558,10 +711,9 @@ Guidelines:
         'description': 'Privacy-focused offline AI model',
       },
       'cloud': {
-        'available':
-            true, // Assuming cloud is always available if API key is set
+        'available': true,
         'enabled': true,
-        'name': 'Cloud AI (OpenRouter)',
+        'name': 'Cloud AI',
         'description': 'Advanced cloud-based AI models',
       },
     };
@@ -591,11 +743,14 @@ Guidelines:
 
   /// Get provider display name
   static String getProviderDisplayName(LLMProvider provider) {
+    if (Platform.isIOS) {
+      return 'Apple Intelligence';
+    }
     switch (provider) {
       case LLMProvider.local:
         return 'Local AI';
       case LLMProvider.openRouter:
-        return 'Cloud AI (OpenRouter)';
+        return 'Cloud AI';
       case LLMProvider.auto:
         return 'Auto (Smart Selection)';
     }
@@ -603,6 +758,9 @@ Guidelines:
 
   /// Get provider description
   static String getProviderDescription(LLMProvider provider) {
+    if (Platform.isIOS) {
+      return 'On‑device Apple Foundation Models (private, offline)';
+    }
     switch (provider) {
       case LLMProvider.local:
         return 'Uses your device\'s local AI model for privacy and offline usage';
@@ -621,13 +779,9 @@ Guidelines:
       await character_chat.ChatService.refreshApiKey();
       await provider_chat.ChatService.refreshApiKey();
 
-      if (kDebugMode) {
-        print('All services refreshed successfully');
-      }
+      AppLogger.debug('All services refreshed successfully', tag: 'HybridChatService');
     } catch (e) {
-      if (kDebugMode) {
-        print('Error refreshing services: $e');
-      }
+      AppLogger.error('Error refreshing services', tag: 'HybridChatService', error: e);
     }
   }
 }

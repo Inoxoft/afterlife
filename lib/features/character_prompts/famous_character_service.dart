@@ -202,7 +202,7 @@ class FamousCharacterService {
       return response;
     } catch (e) {
       if (kDebugMode) {
-        print('Error in FamousCharacterService.sendMessage: $e');
+        
       }
       return 'I apologize, but I encountered an issue. Please try again.';
     }
@@ -281,13 +281,7 @@ class FamousCharacterService {
   /// Method for logging diagnostic info
   static void logDiagnostics() {
     if (kDebugMode) {
-      print('=== Famous Character Service Diagnostics ===');
-      print('Loaded characters: ${_virtualCharacters.keys.toList()}');
-      print('Chat histories: ${_chatHistories.keys.toList()}');
-      print(
-        'Language provider: ${_languageProvider?.currentLanguageCode ?? 'not set'}',
-      );
-      print('=============================');
+      // diagnostics removed in release; keep method for API compatibility
     }
   }
 }

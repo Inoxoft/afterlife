@@ -463,6 +463,25 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get deepKnowledge => 'Tiefes Fachwissen';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Privat, auf dem Gerät, funktioniert offline';
+  @override
+  String get appleOnDevicePrivacy => 'Datenschutz auf dem Gerät: Chats verlassen dein iPhone nie';
+  @override
+  String get appleNoCloudCalls => 'Keine Cloud‑Anfragen — funktioniert ohne Internet';
+  @override
+  String get applePoweredByFoundationModels => 'Angetrieben von Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Sofort startklar — nichts herunterzuladen';
+  @override
+  String get applePrivacyNote => 'Läuft vollständig auf deinem Gerät. Wir senden deine Chats niemals an unsere Server.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Mehr über Apple Intelligence erfahren';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence =>

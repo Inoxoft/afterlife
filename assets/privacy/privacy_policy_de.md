@@ -1,47 +1,31 @@
 Afterlife Datenschutzerklärung (DE)
 
-Zuletzt aktualisiert: 27.08.2025
+Zuletzt aktualisiert: 03.10.2025
 
-Diese Richtlinie erklärt, welche Daten wir verarbeiten, wie wir sie nutzen und welche Optionen Sie haben.
+Vielen Dank für die Nutzung von Afterlife. Wir verfolgen einen datensparsamen, lokalen Ansatz.
 
-1. Welche Daten
-- Nutzungsdaten und einfache Diagnosen (wenn vom OS erlaubt).
-- Von Ihnen bereitgestellte Inhalte: Nachrichten, Charakterprofile, hochgeladene Dateien.
-- Einstellungen: Sprache, KI‑Anbieter, lokale/Cloud‑Präferenzen, API‑Schlüssel.
+1. Keine Konten, kein Tracking, keine Werbung
+- Wir erheben, speichern oder verkaufen keine personenbezogenen Daten.
+- Wir verwenden keine Analytics‑ oder Werbe‑SDKs.
 
-2. Speicherort
-- Auf dem Gerät: Chatverlauf, Einstellungen, lokal generierte Daten.
-- Cloud (nur bei Opt‑in): Inhalte werden an den gewählten Anbieter gesendet.
+2. Verarbeitung ausschließlich auf dem Gerät
+- Alle Chats, Charakterdaten, Einstellungen und importierten Dateien werden lokal auf Ihrem Gerät verarbeitet und gespeichert.
+- Unter iOS erfolgt die Verarbeitung mit Apple Foundation Models auf dem Gerät (iOS 26+). Es werden keine Daten an externe KI‑Dienste gesendet.
 
-3. Lokale KI vs. Cloud‑KI
-- Lokal: Verarbeitung ausschließlich auf dem Gerät.
-- Cloud: Nachrichten + Kontext werden an den Anbieter übermittelt.
+3. Open Source
+- Afterlife ist Open Source. Quellcode: https://github.com/Inoxoft/afterlife
 
-4. API‑Schlüssel
-- Lokal gespeichert und nur für Ihre Anfragen verwendet.
+4. Aufbewahrung
+- Lokale Daten bleiben auf Ihrem Gerät, bis Sie sie in den Einstellungen löschen oder die App deinstallieren.
 
-5. Dateien
-- Lokal verarbeitet; bei Cloud‑Modellen kann extrahierter Text an den Anbieter gehen.
+5. Weitergabe
+- Wir geben Ihre Gespräche oder Dateien nicht an Dritte weiter.
 
-6. Aufbewahrung
-- Lokale Daten bleiben bis zur Löschung/Deinstallation.
+6. Sicherheit
+- Wir nutzen vom Betriebssystem bereitgestellten Speicher und Schutzmechanismen.
 
-7. Weitergabe
-- Keine Datenverkäufe; Weitergabe nur an den von Ihnen gewählten KI‑Anbieter.
+7. Änderungen an dieser Richtlinie
+Wir können diese Richtlinie aktualisieren und das Datum „Zuletzt aktualisiert“ anpassen. Wesentliche Änderungen können in der App bekanntgegeben werden.
 
-8. Sicherheit
-- Systemspeicher; Übertragungen via HTTPS.
-
-9. Ihre Wahlmöglichkeiten
-- Lokale Modelle wählen, Anbieter wechseln, Daten löschen.
-
-10. Kinder
-Nicht für unter 13 (bzw. lokales Mindestalter) bestimmt.
-
-11. Änderungen
-Wir können aktualisieren und bei wesentlichen Änderungen informieren.
-
-12. Kontakt
-privacy@afterlife.app
-
-
+8. Kontakt
+Fragen oder Anliegen: roman.yankovych@inoxoft.com

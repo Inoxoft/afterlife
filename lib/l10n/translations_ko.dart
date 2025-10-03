@@ -430,6 +430,25 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get deepKnowledge => '깊은 전문 지식';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => '프라이빗, 온디바이스, 오프라인 동작';
+  @override
+  String get appleOnDevicePrivacy => '온디바이스 프라이버시: 채팅은 iPhone을 떠나지 않습니다';
+  @override
+  String get appleNoCloudCalls => '클라우드 호출 없음 — 인터넷 없이 동작';
+  @override
+  String get applePoweredByFoundationModels => 'Apple Foundation Models 기반 (iOS 26+)';
+  @override
+  String get appleInstantSetup => '즉시 설정 — 다운로드 불필요';
+  @override
+  String get applePrivacyNote => '모든 처리는 기기에서 실행됩니다. 채팅을 서버로 전송하지 않습니다.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Apple Intelligence 자세히 알아보기';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence => '역사적 본질을 가진 디지털 페르소나';

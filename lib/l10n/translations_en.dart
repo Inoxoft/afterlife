@@ -582,6 +582,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deepKnowledge => 'Deep Expertise';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Private, on-device, works offline';
+  @override
+  String get appleOnDevicePrivacy => 'On-device privacy: chats never leave your iPhone';
+  @override
+  String get appleNoCloudCalls => 'No cloud calls — works without internet';
+  @override
+  String get applePoweredByFoundationModels => 'Powered by Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Instant setup — nothing to download';
+  @override
+  String get applePrivacyNote => 'Runs entirely on your device. We never send your chats to our servers.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Learn more about Apple Intelligence';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence =>
@@ -1173,7 +1192,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get interviewWelcomeMessage =>
-      'Hello! I\'m ready to create a detailed character card for you. You can either:\n\n1. Answer my questions about your personality and experiences\n2. Upload a file (PDF, TXT, DOC, or email) containing your information\n\nWhich would you prefer?';
+      'Hello! We\'ll create your character card with a short, friendly interview. I\'ll ask three quick questions about you, your personality, and a memorable moment.\n\nLet\'s begin: tell me a bit about yourself — what do you do, and what matters most to you?';
 
   // Group Chat
   @override

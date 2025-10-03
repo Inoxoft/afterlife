@@ -47,7 +47,7 @@ class GroupChatService {
       AppLogger.serviceInitialized('GroupChatService');
       
       if (kDebugMode) {
-        print('GroupChatService initialized successfully');
+        
       }
     } catch (e) {
       AppLogger.serviceError('GroupChatService', 'initialization failed', e);
@@ -166,9 +166,9 @@ class GroupChatService {
       );
 
       if (kDebugMode) {
-        print('GroupChatService: $groupId - Enhanced response schedule created');
+        
         for (final response in responseSchedule) {
-          print('  ${characterModels[response['characterId']]?.name}: ${response['delay']}ms');
+          
         }
       }
 
@@ -289,7 +289,7 @@ class GroupChatService {
           }
         } catch (e) {
           if (kDebugMode) {
-            print('Error getting enhanced response from character $characterId: $e');
+            
           }
           
           // Add error message
@@ -302,7 +302,7 @@ class GroupChatService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error executing response schedule: $e');
+        
       }
     } finally {
       controller.close();
@@ -345,7 +345,7 @@ class GroupChatService {
     final character = await _getCharacterById(characterId);
     if (character == null) {
       if (kDebugMode) {
-        print('Character not found: $characterId');
+        
       }
       return null;
     }
@@ -423,7 +423,7 @@ class GroupChatService {
       return null;
     } catch (e) {
       if (kDebugMode) {
-        print('Error generating enhanced response for character ${character.name}: $e');
+        
       }
       return null;
     }
@@ -790,12 +790,12 @@ Remember: This is a natural conversation between historical figures. Be authenti
   /// Log diagnostic information
   static void logDiagnostics() {
     if (kDebugMode) {
-      print('=== GroupChatService Diagnostics ===');
+      // diagnostics removed in release
       final diagnostics = getDiagnostics();
       diagnostics.forEach((key, value) {
-        print('$key: $value');
+        
       });
-      print('=====================================');
+      
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
@@ -20,6 +21,10 @@ class _LLMPageState extends State<LLMPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Hide this page on iOS for now (we don't show the advanced/basics comparison)
+    if (Platform.isIOS) {
+      return const SizedBox.shrink();
+    }
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),

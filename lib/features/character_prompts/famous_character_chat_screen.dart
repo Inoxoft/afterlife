@@ -322,22 +322,36 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedModel,
-                          icon: const Icon(
-                            Icons.arrow_drop_down,
-                            color: AppTheme.warmGold,
-                            size: 16,
-                          ),
-                          isDense: true,
-                          dropdownColor: AppTheme.deepIndigo,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
-                          items:
-                              models.map<DropdownMenuItem<String>>((model) {
+                      child: Builder(
+                        builder: (context) {
+                          // On iOS, hide the dropdown and display a static label
+                          if (Theme.of(context).platform == TargetPlatform.iOS) {
+                            // Force Apple Intelligence
+                            if (_selectedModel != 'local/apple-intelligence') {
+                              _selectedModel = 'local/apple-intelligence';
+                            }
+                            return Text(
+                              'Apple Intelligence',
+                              style: const TextStyle(color: Colors.white70, fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          }
+                          // Android: keep dropdown
+                          return DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedModel,
+                              icon: const Icon(
+                                Icons.arrow_drop_down,
+                                color: AppTheme.warmGold,
+                                size: 16,
+                              ),
+                              isDense: true,
+                              dropdownColor: AppTheme.deepIndigo,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                              items: models.map<DropdownMenuItem<String>>((model) {
                                 return DropdownMenuItem<String>(
                                   value: model['id'] as String,
                                   child: Row(
@@ -358,20 +372,11 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                                       ),
                                       if (model['recommended'] == true)
                                         Container(
-                                          margin: const EdgeInsets.only(
-                                            left: 4,
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 2,
-                                            vertical: 1,
-                                          ),
+                                          margin: const EdgeInsets.only(left: 4),
+                                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.warmGold.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              2,
-                                            ),
+                                            color: AppTheme.warmGold.withValues(alpha: 0.2),
+                                            borderRadius: BorderRadius.circular(2),
                                           ),
                                           child: const Text(
                                             'RECOMMENDED',
@@ -386,12 +391,14 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                                   ),
                                 );
                               }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              _changeModel(newValue);
-                            }
-                          },
-                        ),
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  _changeModel(newValue);
+                                }
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -645,7 +652,20 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
       buffer.writeln('');
     }
     final text = buffer.toString().trim();
-    if (text.isEmpty) return;
-    Share.share(text, subject: 'Chat with ${widget.characterName}');
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nothing to export yet')),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    final box = context.findRenderObject() as RenderBox?;
+    Share.share(
+      text,
+      subject: 'Chat with ${widget.characterName}',
+      sharePositionOrigin:
+          box != null ? box.localToGlobal(Offset.zero) & box.size : const Rect.fromLTWH(0, 0, 0, 0),
+    );
   }
 }

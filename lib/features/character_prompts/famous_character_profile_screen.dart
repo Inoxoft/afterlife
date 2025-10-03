@@ -1,5 +1,6 @@
 // Removed unused import
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
 import 'famous_character_prompts.dart';
@@ -374,38 +375,37 @@ class _FamousCharacterProfileScreenState
 
               const SizedBox(height: 20),
 
-              // AI Model section styled like Biography
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppTheme.warmGold.withValues(alpha: 0.3),
-                    width: 1,
+              // AI Model section (hidden on iOS)
+              if (!Platform.isIOS)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppTheme.warmGold.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        localizations.aiModel,
+                        style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                          text: localizations.aiModel,
+                          color: AppTheme.warmGold,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildModelDropdown(),
+                    ],
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      localizations.aiModel,
-                      style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                        text: localizations.aiModel,
-                        color: AppTheme.warmGold,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildModelDropdown(),
-
-                    // Removed: view-all models row to minimize scrolling
-                  ],
-                ),
-              ),
 
               // Removed: bottom Start Conversation (moved near the top)
             ],
@@ -481,7 +481,19 @@ class _FamousCharacterProfileScreenState
   }
 
   Widget _buildModelDropdown() {
-    // Get available models for this character
+    // On iOS show only Apple Intelligence
+    if (Platform.isIOS) {
+      return _buildModelOption(
+        context: context,
+        id: 'local/apple-intelligence',
+        name: 'Apple Intelligence',
+        description: 'On-device Apple Foundation Models',
+        isRecommended: true,
+        isLocal: true,
+        isSelected: true,
+      );
+    }
+    // Get available models for this character (Android)
     final models = FamousCharacterPrompts.getModelsForCharacter(widget.name);
 
     return Column(
@@ -549,102 +561,86 @@ class _FamousCharacterProfileScreenState
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color:
-                        isSelected
-                            ? AppTheme.warmGold.withValues(alpha: 0.2)
-                            : Colors.black26,
-                    border: Border.all(
-                      color:
-                          isSelected
-                              ? AppTheme.warmGold
-                              : AppTheme.warmGold.withValues(alpha: 0.3),
-                      width: 1.5,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color:
+                            isSelected
+                                ? AppTheme.warmGold.withValues(alpha: 0.2)
+                                : Colors.black26,
+                        border: Border.all(
+                          color:
+                              isSelected
+                                  ? AppTheme.warmGold
+                                  : AppTheme.warmGold.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        isSelected ? Icons.check : (isLocal ? Icons.phone_android : Icons.psychology_outlined),
+                        color: isLocal ? Colors.blue : AppTheme.warmGold,
+                        size: 16,
+                      ),
                     ),
-                  ),
-                  child: Icon(
-                    isSelected ? Icons.check : (isLocal ? Icons.phone_android : Icons.psychology_outlined),
-                    color: isLocal ? Colors.blue : AppTheme.warmGold,
-                    size: 16,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                    Text(
+                      name,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (!Platform.isIOS && isRecommended)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.warmGold.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          localizations.recommended,
+                          style: TextStyle(
+                            color: AppTheme.warmGold,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
-                          const SizedBox(width: 8),
-                          if (isRecommended)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.warmGold.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                localizations.recommended,
-                                style: TextStyle(
-                                  color: AppTheme.warmGold,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          if (isLocal)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              margin: const EdgeInsets.only(left: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                localizations.private,
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                    // Hide PRIVATE pill on iOS
+                    if (!Platform.isIOS && isLocal)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          localizations.private,
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-                Icon(
-                  Icons.radio_button_checked,
-                  color: isSelected ? AppTheme.warmGold : Colors.transparent,
-                  size: 18,
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ],
             ),

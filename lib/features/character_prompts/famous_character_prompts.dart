@@ -9342,13 +9342,15 @@ Stay in character at all times. Never break character or admit you are an AI. ''
     String characterName,
   ) {
     final models = characterModels[characterName] ?? [];
-    // Back-compat: migrate legacy Llama entry to Gemma 3n local
+    // Back-compat: migrate legacy Gemma local entry to Llama 3.2 local
     return models.map((model) {
-      if (model['id'] == 'local/llama-3.2-1b-instruct' || model['id'] == 'local/llama-3.2' || model['id'] == 'local/gemma-3n-e2b-it') {
+      if ((model['id'] == 'local/gemma-3n-e2b-it')) {
         return {
           ...model,
-          'id': 'local/gemma-3-1b-it',
-          'name': 'Local Gemma 3 1B',
+          'id': 'local/llama-3.2-1b-instruct',
+          'name': 'Local Llama 3.2',
+          'description': 'On-device, text-only model (~1.3GB). Private and offline.',
+          'isLocal': true,
         };
       }
       return model;

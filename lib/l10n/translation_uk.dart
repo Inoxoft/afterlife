@@ -901,7 +901,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get interviewWelcomeMessage =>
-      'Привіт! Я готовий створити детальну картку персонажа для вас. Ви можете:\n\n1. Відповісти на мої запитання про вашу особистість та досвід\n2. Завантажити файл (PDF, TXT, DOC або email) з вашою інформацією\n\nЩо б ви воліли?';
+      "Привіт! Ми створимо вашу картку персонажа через коротке інтерв'ю. Я задам три швидкі запитання про вас, вашу особистість і один пам'ятний момент.\n\nПочнімо: розкажіть трохи про себе — чим ви займаєтесь і що для вас найважливіше?";
 
   // Group Chat
   @override
@@ -1167,4 +1167,23 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get exportChat => 'Експортувати чат';
+
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Приватно, на пристрої, працює офлайн';
+  @override
+  String get appleOnDevicePrivacy => 'Конфіденційність на пристрої: чати ніколи не залишають ваш iPhone';
+  @override
+  String get appleNoCloudCalls => 'Без хмарних викликів — працює без інтернету';
+  @override
+  String get applePoweredByFoundationModels => 'Працює на Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Миттєве налаштування — нічого не потрібно завантажувати';
+  @override
+  String get applePrivacyNote => 'Працює повністю на вашому пристрої. Ми ніколи не надсилаємо ваші чати на наші сервери.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Дізнатися більше про Apple Intelligence';
 }

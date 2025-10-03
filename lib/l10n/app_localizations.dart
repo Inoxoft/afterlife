@@ -250,6 +250,18 @@ abstract class AppLocalizations {
   String get withBasicLLMLabel;
   String get deepKnowledge;
 
+  // Apple Intelligence (iOS) onboarding strings
+  String get appleIntelligenceTitle;
+  String get appleIntelligenceSubtitle;
+  String get appleOnDevicePrivacy;
+  String get appleNoCloudCalls;
+  String get applePoweredByFoundationModels;
+  String get appleInstantSetup;
+  String get applePrivacyNote;
+
+  // Link text
+  String get learnMoreAboutAppleIntelligence;
+
   // Mask page strings
   String get digitalPersonasWithHistoricalEssence;
   String get einsteinWithMaskAndLLMArmor;

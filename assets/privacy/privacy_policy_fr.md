@@ -1,47 +1,31 @@
 Politique de Confidentialité d’Afterlife (FR)
 
-Dernière mise à jour : 27/08/2025
+Dernière mise à jour : 03/10/2025
 
-Merci d’utiliser Afterlife. Cette politique décrit les données traitées, leur usage et vos choix.
+Merci d’utiliser Afterlife. Voici notre politique simple et claire.
 
-1. Données traitées
-- Données d’utilisation et diagnostics basiques (si activés par l’OS).
-- Contenu fourni : messages, profils de personnages, fichiers importés.
-- Réglages : langue, fournisseur d’IA, préférences local/nube, clés API.
+1. Pas de compte, pas de suivi, pas de pub
+- Nous ne collectons, ne stockons, ni ne vendons vos données personnelles.
+- Nous n’utilisons pas de SDK d’analytique ou de publicité.
 
-2. Où sont stockées les données
-- Sur l’appareil : historique, réglages et données générées localement.
-- Cloud (si vous l’activez) : messages et contexte envoyés au fournisseur choisi.
+2. Traitement uniquement sur l’appareil
+- Tous les chats, données de personnages, réglages et fichiers importés sont traités et stockés localement sur votre appareil.
+- Sur iOS, le traitement utilise les Apple Foundation Models sur l’appareil (iOS 26+). Rien n’est envoyé vers des services d’IA externes.
 
-3. IA locale vs IA cloud
-- Locale : traitement sur l’appareil.
-- Cloud : envoi au fournisseur pour générer les réponses.
+3. Open source
+- Afterlife est open source. Consultez le code ici : https://github.com/Inoxoft/afterlife
 
-4. Clés API
-- Stockées localement et utilisées uniquement pour vos requêtes.
+4. Conservation des données
+- Les données locales restent sur votre appareil jusqu’à leur suppression dans Réglages ou la désinstallation de l’app.
 
-5. Fichiers importés
-- Traitement local avec modèles locaux ; pour le cloud, du texte extrait peut être envoyé au fournisseur.
+5. Partage
+- Nous ne partageons pas vos conversations ni vos fichiers avec des tiers.
 
-6. Conservation
-- Les données locales persistent jusqu’à suppression ou désinstallation.
+6. Sécurité
+- Nous nous appuyons sur le stockage et les protections fournis par l’OS pour sécuriser les données locales.
 
-7. Partage
-- Nous ne vendons pas vos données et ne les partageons qu’avec le fournisseur IA choisi.
+7. Modifications de cette politique
+Nous pouvons mettre à jour cette politique et ajuster la date « Dernière mise à jour » ci‑dessus. Les changements importants pourront être annoncés dans l’app.
 
-8. Sécurité
-- Stockage système et HTTPS pour les transmissions.
-
-9. Vos choix
-- Utiliser des modèles locaux, changer de fournisseur, effacer les données.
-
-10. Mineurs
-Non destiné aux moins de 13 ans (ou âge minimum local).
-
-11. Modifications
-Mises à jour possibles avec notification en cas de changement important.
-
-12. Contact
-privacy@afterlife.app
-
-
+8. Contact
+Questions ou demandes : roman.yankovych@inoxoft.com

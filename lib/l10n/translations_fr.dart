@@ -562,6 +562,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get deepKnowledge => 'Expertise Approfondie';
 
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Privé, sur l’appareil, fonctionne hors-ligne';
+  @override
+  String get appleOnDevicePrivacy => 'Confidentialité sur l’appareil : les conversations ne quittent jamais votre iPhone';
+  @override
+  String get appleNoCloudCalls => 'Aucun appel cloud — fonctionne sans internet';
+  @override
+  String get applePoweredByFoundationModels => 'Propulsé par Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Configuration instantanée — rien à télécharger';
+  @override
+  String get applePrivacyNote => 'Fonctionne entièrement sur votre appareil. Nous n’envoyons jamais vos conversations à nos serveurs.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'En savoir plus sur Apple Intelligence';
+
   // Mask page strings
   @override
   String get digitalPersonasWithHistoricalEssence =>

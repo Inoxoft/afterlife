@@ -1,4 +1,4 @@
-import 'dart:convert';
+// removed unused convert import for release cleanliness
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,8 +29,7 @@ class GroupChatProvider extends BaseProvider {
   StreamController<List<GroupChatMessage>>? _messageStreamController;
   StreamSubscription<GroupChatMessage>? _activeResponseSubscription;
 
-  // Performance tracking
-  final Map<String, DateTime> _lastLoadTimes = {};
+  // (removed unused) Performance tracking placeholder for future telemetry
 
   /// Public getters
   List<GroupChatModel> get groupChats => List.unmodifiable(_groupChats);
@@ -109,24 +108,24 @@ class GroupChatProvider extends BaseProvider {
   Future<void> _loadGroupChats() async {
     await executeWithState(
       operation: () async {
-        print('🔧 [GroupChatProvider] _loadGroupChats called');
+        // Debug logs removed for release cleanliness
         try {
           // Use the comprehensive storage class with logging
           _groupChats = await GroupChatStorage.loadGroupChats();
-          print('🔧 [GroupChatProvider] Loaded ${_groupChats.length} groups from storage');
+          
           
           // Update cache
           _groupCache.clear();
           for (var group in _groupChats) {
             _groupCache[group.id] = group;
           }
-          print('🔧 [GroupChatProvider] Updated cache with ${_groupCache.length} groups');
+          
 
           _sortGroupChats();
           _updateSelectedGroup();
-          print('✅ [GroupChatProvider] _loadGroupChats completed successfully');
+          
         } catch (e) {
-          print('❌ [GroupChatProvider] Error in _loadGroupChats: $e');
+          
           setError('Error loading group chats: $e', error: e);
           _groupChats = [];
         }
@@ -136,14 +135,7 @@ class GroupChatProvider extends BaseProvider {
   }
 
   /// Parse group chat JSON in isolate for performance
-  static List<GroupChatModel> _parseGroupChatsJson(List<String> groupChatsJson) {
-    return groupChatsJson.map((json) {
-      final jsonBytes = utf8.encode(json);
-      final decodedJson = utf8.decode(jsonBytes);
-      final decoded = jsonDecode(decodedJson);
-      return GroupChatModel.fromJson(decoded);
-    }).toList();
-  }
+  // Removed unused isolate parser in release build
 
   /// Sort group chats by last message time
   void _sortGroupChats() {
@@ -165,35 +157,26 @@ class GroupChatProvider extends BaseProvider {
       final prefs = await _getPrefs();
       _selectedGroupId = prefs.getString(_selectedGroupKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading selected group: $e');
-      }
+      
     }
   }
 
   /// Save group chats to storage
   Future<void> _saveGroupChats() async {
     try {
-      print('🔧 [GroupChatProvider] _saveGroupChats called with ${_groupChats.length} groups');
       // Use the comprehensive storage class with logging
       await GroupChatStorage.saveGroupChats(_groupChats);
-      print('✅ [GroupChatProvider] _saveGroupChats completed successfully');
+      
       clearError();
     } catch (e) {
-      print('❌ [GroupChatProvider] Error in _saveGroupChats: $e');
+      
       setError('Error saving group chats: $e', error: e);
       rethrow;
     }
   }
 
   /// Encode group chat JSON in isolate
-  static List<String> _encodeGroupChatsJson(List<GroupChatModel> groupChats) {
-    return groupChats.map((group) {
-      final jsonString = jsonEncode(group.toJson());
-      final jsonBytes = utf8.encode(jsonString);
-      return utf8.decode(jsonBytes);
-    }).toList();
-  }
+  // Removed unused isolate encoder in release build
 
   /// Save selected group to preferences
   Future<void> _saveSelectedGroup() async {
@@ -217,20 +200,14 @@ class GroupChatProvider extends BaseProvider {
     required List<String> characterIds,
     String? description,
   }) async {
-    print('🔧 [GroupChatProvider] createGroupChat called with:');
-    print('🔧 [GroupChatProvider] - name: "$name"');
-    print('🔧 [GroupChatProvider] - characterIds: $characterIds (count: ${characterIds.length})');
-    print('🔧 [GroupChatProvider] - description: "$description"');
-    print('🔧 [GroupChatProvider] - Current group count: ${_groupChats.length}');
-    print('🔧 [GroupChatProvider] - Provider loading state: $isLoading');
-    print('🔧 [GroupChatProvider] - Provider error state: $lastError');
+    
     
     return await executeWithState(
       operation: () async {
-        print('🔧 [GroupChatProvider] Starting createGroupChat operation...');
+        
         
         try {
-          print('🔧 [GroupChatProvider] Creating GroupChatModel instance...');
+          
           final groupChat = GroupChatModel(
             name: name,
             characterIds: characterIds,
@@ -242,38 +219,32 @@ class GroupChatProvider extends BaseProvider {
             },
           );
           
-          print('✅ [GroupChatProvider] GroupChatModel created successfully:');
-          print('🔧 [GroupChatProvider] - ID: ${groupChat.id}');
-          print('🔧 [GroupChatProvider] - Name: ${groupChat.name}');
-          print('🔧 [GroupChatProvider] - Character count: ${groupChat.characterCount}');
-          print('🔧 [GroupChatProvider] - Created at: ${groupChat.createdAt}');
+          
 
-          print('🔧 [GroupChatProvider] Adding group to list and cache...');
+          
           _groupChats.insert(0, groupChat); // Add to top
           _groupCache[groupChat.id] = groupChat;
-          print('🔧 [GroupChatProvider] Group added to collections. New total: ${_groupChats.length}');
           
-          print('🔧 [GroupChatProvider] Saving group chats to storage...');
+          
+          
           await _saveGroupChats();
-          print('✅ [GroupChatProvider] Group chats saved to storage');
+          
           
           // Select the new group
-          print('🔧 [GroupChatProvider] Setting as selected group...');
+          
           _selectedGroupId = groupChat.id;
           await _saveSelectedGroup();
-          print('✅ [GroupChatProvider] Selected group saved');
+          
           
           logUserAction('created group chat', context: {
             'groupId': groupChat.id,
             'characterCount': characterIds.length,
           });
-          print('🔧 [GroupChatProvider] Action logged');
+          
 
-          print('✅ [GroupChatProvider] Group creation completed successfully');
+          
           return groupChat;
-        } catch (e, stackTrace) {
-          print('❌ [GroupChatProvider] Error in createGroupChat operation: $e');
-          print('❌ [GroupChatProvider] Stack trace: $stackTrace');
+        } catch (e) {
           rethrow;
         }
       },

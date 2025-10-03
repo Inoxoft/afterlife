@@ -1,47 +1,31 @@
 Política de Privacidad de Afterlife (ES)
 
-Última actualización: 2025-08-27
+Última actualización: 2025-10-03
 
-Gracias por usar Afterlife. Esta política explica qué datos procesamos, cómo los usamos y tus opciones.
+Gracias por usar Afterlife. Esta política resume nuestro enfoque minimalista de privacidad.
 
-1. Qué procesamos
-- Datos de uso y diagnósticos básicos (si el SO lo permite).
-- Contenido que proporcionas: mensajes, perfiles de personajes, archivos subidos.
-- Ajustes: idioma, proveedor de IA, preferencias de modelo local/nube, claves API.
+1. Sin cuentas, sin rastreo, sin anuncios
+- No recopilamos, almacenamos ni vendemos tus datos personales.
+- No usamos SDKs de analítica o publicidad.
 
-2. Dónde vive tu información
-- En el dispositivo: historial de chat, ajustes y datos locales.
-- Nube (solo si lo eliges): se envían mensajes y contexto al proveedor seleccionado para generar respuestas.
+2. Procesamiento solo en el dispositivo
+- Todos los chats, datos de personajes, ajustes y archivos importados se procesan y almacenan localmente en tu dispositivo.
+- En iOS, el procesamiento usa Apple Foundation Models en el dispositivo (iOS 26+). No enviamos nada a servicios externos de IA.
 
-3. IA local vs IA en la nube
-- Local: todo el procesamiento ocurre en tu dispositivo.
-- Nube: los mensajes y el contexto necesario se envían al proveedor elegido.
+3. Código abierto
+- Afterlife es de código abierto. Puedes revisar el código aquí: https://github.com/Inoxoft/afterlife
 
-4. Claves API
-- Se guardan localmente y se usan solo para tus solicitudes.
+4. Retención de datos
+- Los datos locales permanecen hasta que los borres en Ajustes o desinstales la app.
 
-5. Archivos que subes
-- Se procesan localmente con modelos locales; con modelos en la nube puede enviarse texto extraído al proveedor para generar resultados.
+5. Compartir
+- No compartimos tus conversaciones ni archivos con terceros.
 
-6. Retención
-- Los datos locales permanecen hasta que los borres o desinstales la app.
+6. Seguridad
+- Usamos el almacenamiento y las protecciones del sistema operativo para resguardar los datos locales.
 
-7. Compartir
-- No vendemos tus datos ni los compartimos salvo con el proveedor de IA que elijas.
+7. Cambios en esta política
+Podemos actualizar esta política y ajustaremos la fecha de “Última actualización” arriba. Los cambios materiales podrán anunciarse en la app.
 
-8. Seguridad
-- Almacenamiento del sistema y HTTPS para las transmisiones.
-
-9. Tus opciones
-- Elige modelos locales, cambia de proveedor o borra datos en Ajustes.
-
-10. Menores
-No dirigida a menores de 13 años (o la edad mínima de tu jurisdicción).
-
-11. Cambios
-Podemos actualizar esta política y notificaremos cambios materiales en la app.
-
-12. Contacto
-privacy@afterlife.app
-
-
+8. Contacto
+Preguntas o solicitudes: roman.yankovych@inoxoft.com

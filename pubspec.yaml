@@ -49,6 +49,7 @@ dependencies:
   wakelock_plus: ^1.2.1
   image_picker: ^1.0.7
   share_plus: ^10.0.2
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,7 @@ flutter:
     - assets/images/afterlife_icon.png
     - assets/images/einstein_mask.png  # Einstein with LLM armor illustration
     - assets/images/perspective_mask.png
+    - assets/images/apple_logo.svg
     
     # Character portraits (alphabetically organized for easier maintenance)
     - assets/images/abraham_lincoln.png

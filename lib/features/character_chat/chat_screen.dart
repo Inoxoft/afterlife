@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/animated_particles.dart';
@@ -115,39 +116,42 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
     );
     final localizations = AppLocalizations.of(context);
 
-    // If using a local model, ensure it's downloaded before sending
-    try {
-      if (_character != null && CharacterModel.isLocalModel(_character!.model)) {
-        if (!LocalLLMService.isInitialized) {
-          await LocalLLMService.initialize();
-        }
-
-        if (LocalLLMService.modelStatus != ModelDownloadStatus.downloaded) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${localizations.localModel} • ${localizations.notDownloaded}',
-                ),
-                action: SnackBarAction(
-                  label: localizations.downloadModel,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LocalLLMSettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            );
+    // If using a local model on Android, ensure it's downloaded before sending
+    // On iOS, we always use Apple Foundation Models and skip Gemma checks entirely
+    if (!Platform.isIOS) {
+      try {
+        if (_character != null && CharacterModel.isLocalModel(_character!.model)) {
+          if (!LocalLLMService.isInitialized) {
+            await LocalLLMService.initialize();
           }
-          return;
+
+          if (LocalLLMService.modelStatus != ModelDownloadStatus.downloaded) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${localizations.localModel} • ${localizations.notDownloaded}',
+                  ),
+                  action: SnackBarAction(
+                    label: localizations.downloadModel,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LocalLLMSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            }
+            return;
+          }
         }
+      } catch (_) {
+        // If status check fails, fall through to normal error handling later
       }
-    } catch (_) {
-      // If status check fails, fall through to normal error handling later
     }
 
     // Clear the input field
@@ -184,8 +188,8 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
             return !(msg['isUser'] == true && msg['content'] == message);
           }).toList();
 
-      // Ensure local LLM chat session is fresh per character to avoid context carryover
-      if (_character != null && CharacterModel.isLocalModel(_character!.model)) {
+      // Ensure local LLM chat session is fresh per character on Android only
+      if (!Platform.isIOS && _character != null && CharacterModel.isLocalModel(_character!.model)) {
         await LocalLLMService.startNewChatSession();
       }
 
@@ -657,7 +661,20 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
       buffer.writeln('');
     }
     final text = buffer.toString().trim();
-    if (text.isEmpty) return;
-    Share.share(text, subject: 'Chat with $characterName');
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nothing to export yet')),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    final box = context.findRenderObject() as RenderBox?;
+    Share.share(
+      text,
+      subject: 'Chat with $characterName',
+      sharePositionOrigin:
+          box != null ? box.localToGlobal(Offset.zero) & box.size : const Rect.fromLTWH(0, 0, 0, 0),
+    );
   }
 }

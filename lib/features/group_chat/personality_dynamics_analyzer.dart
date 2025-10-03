@@ -277,8 +277,7 @@ class PersonalityDynamicsAnalyzer {
     final character = characters[characterId];
     if (character == null) return {};
 
-    final otherCharacters = Map<String, CharacterModel>.from(characters)
-      ..remove(characterId);
+    // Removed unused variable in release build
 
     // Find characters who recently spoke
     final recentSpeakers = recentMessages
@@ -400,12 +399,7 @@ class PersonalityDynamicsAnalyzer {
     Map<String, dynamic> analysis,
   ) {
     if (kDebugMode) {
-      print('=== Personality Analysis: ${character.name} ===');
-      print('Character ID: $characterId');
-      print('Dominant Traits: ${analysis['characterTraits']}');
-      print('Current Mood: ${analysis['overallMood']}');
-      print('Response Patterns: ${analysis['responsePatterns']}');
-      print('============================================');
+      
     }
   }
 }

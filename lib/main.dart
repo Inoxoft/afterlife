@@ -132,9 +132,7 @@ Future<InitializationResult> _initializeServices() async {
         await providers_chat.ChatService.initialize();
         providers_chat.ChatService.logDiagnostics();
       } catch (e) {
-        if (kDebugMode) {
-          print('Provider chat service initialization failed: $e');
-        }
+        AppLogger.serviceError('ProviderChatService', 'initialization failed', e);
         warnings.add('Provider chat service failed');
         // Not critical
       }
@@ -144,9 +142,7 @@ Future<InitializationResult> _initializeServices() async {
     try {
       FamousCharacterPrompts.initialize();
     } catch (e) {
-      if (kDebugMode) {
-        print('Famous character prompts initialization failed: $e');
-      }
+      AppLogger.serviceError('FamousCharacterPrompts', 'initialization failed', e);
       warnings.add('Character prompts failed to load');
       // Not critical - can work without famous characters
     }
@@ -169,6 +165,8 @@ Future<InitializationResult> _initializeServices() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Silence non-critical logs in release builds
+  AppLogger.enableReleaseSilence();
 
   runZonedGuarded(
     () async {

@@ -423,6 +423,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get withBasicLLMLabel => 'С базовой LLM';
   @override
   String get deepKnowledge => 'Глубокие знания';
+
+  // Apple Intelligence (iOS) onboarding strings
+  @override
+  String get appleIntelligenceTitle => 'Apple Intelligence';
+  @override
+  String get appleIntelligenceSubtitle => 'Приватно, на устройстве, работает офлайн';
+  @override
+  String get appleOnDevicePrivacy => 'Конфиденциальность на устройстве: чаты никогда не покидают ваш iPhone';
+  @override
+  String get appleNoCloudCalls => 'Без обращений к облаку — работает без интернета';
+  @override
+  String get applePoweredByFoundationModels => 'Работает на Apple Foundation Models (iOS 26+)';
+  @override
+  String get appleInstantSetup => 'Мгновенная настройка — ничего не нужно скачивать';
+  @override
+  String get applePrivacyNote => 'Всё выполняется на вашем устройстве. Мы никогда не отправляем ваши чаты на наши серверы.';
+
+  @override
+  String get learnMoreAboutAppleIntelligence => 'Подробнее об Apple Intelligence';
   @override
   String get digitalPersonasWithHistoricalEssence =>
       'Цифровые персоны с исторической сущностью';
